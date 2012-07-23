@@ -1,4 +1,4 @@
 adslabs
 =======
 
-Flask for ADS, ADS for Flask, ADS for all
+This is a skeleton of a Flask application.
