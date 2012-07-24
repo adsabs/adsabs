@@ -18,5 +18,5 @@
 #
 # Afterwards it is easy to build and activate the development environment:
 #
-#     $ mkvirtualenv -r scripts/requirements.txt -p /usr/bin/python2.6 adslabs 
+#     $ mkvirtualenv -r requirements.txt -p /usr/bin/python2.6 adslabs 
 #     $ workon adslabs
