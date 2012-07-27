@@ -1,20 +1,23 @@
 import os
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
-DEBUG = False
+APP_NAME = "adslabs"
 
-ADMINS = frozenset(['youremail@yourdomain.com'])
-SECRET_KEY = 'SecretKeyForSessionSigning'
+class DefaultConfig(object):
+    DEBUG = False
 
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
-DATABASE_CONNECT_OPTIONS = {}
+    ADMINS = frozenset(['youremail@yourdomain.com'])
+    SECRET_KEY = 'SecretKeyForSessionSigning'
 
-THREADS_PER_PAGE = 8
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
+    DATABASE_CONNECT_OPTIONS = {}
 
-CSRF_ENABLED=True
-CSRF_SESSION_KEY="somethingimpossibletoguess"
+    THREADS_PER_PAGE = 8
 
-RECAPTCHA_USE_SSL = False
-RECAPTCHA_PUBLIC_KEY = 'blahblahblahblahblahblahblahblahblah'
-RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
-RECAPTCHA_OPTIONS = {'theme': 'white'}
+    CSRF_ENABLED=True
+    CSRF_SESSION_KEY="somethingimpossibletoguess"
+
+    RECAPTCHA_USE_SSL = False
+    RECAPTCHA_PUBLIC_KEY = 'blahblahblahblahblahblahblahblahblah'
+    RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
+    RECAPTCHA_OPTIONS = {'theme': 'white'}

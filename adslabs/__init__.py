@@ -1,0 +1,1 @@
+from adslabs.app import create_app

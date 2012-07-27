@@ -1,3 +1,4 @@
-import config
-from adslabs import app
-app.run(debug=config.DEBUG)
+from config import DefaultConfig
+from adslabs import *
+app = create_app(DefaultConfig)
+app.run()

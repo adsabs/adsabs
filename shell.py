@@ -8,10 +8,10 @@ from app import *
 
 os.environ['PYTHONINSPECT'] = 'True'
 
-from adslabs import app
-from adslabs import model
+from adslabs import create_app
+from adslabs import models
 
-app = app()
+app = create_app()
 ctx = app.test_request_context()
 ctx.push()
-ses = model.session
+ses = models.session
