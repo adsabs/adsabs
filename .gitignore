@@ -30,3 +30,7 @@ pip-log.txt
 include
 lib
 man
+
+#eclipse files
+.project
+.pydevproject
