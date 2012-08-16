@@ -5,22 +5,19 @@ from config import DefaultConfig, APP_NAME
 # For import *
 __all__ = ['create_app']
 
-DEFAULT_BLUEPRINTS = []#get_blueprints_from_confile()
 
-def create_app(config=None, app_name=None, blueprints=None):
+def create_app(config=None, app_name=None):
     """Create a Flask app."""
 
     if config is None:
         config = DefaultConfig
     if app_name is None:
         app_name = APP_NAME
-    if blueprints is None:
-        blueprints = DEFAULT_BLUEPRINTS
 
     app = Flask(app_name)
     configure_app(app, config)
 #    configure_hook(app)
-    configure_blueprints(app, blueprints)
+    configure_blueprints(app)
 #    configure_extensions(app)
 #    configure_logging(app)
 #    configure_template_filters(app)
@@ -32,17 +29,17 @@ def configure_app(app, config):
     pass
 
 
-def configure_blueprints(app, blueprints):
+def configure_blueprints(app):
     """
     Function that registers the blueprints
     """
-    from conf import BLUEPRINTS
+    from blueprint_conf import BLUEPRINTS
     
     for blueprint in BLUEPRINTS:
-        globals()[blueprint[0]] = __import__(blueprint[0])
-
-
-"""
-http://stackoverflow.com/questions/3061/calling-a-function-from-a-string-with-the-functions-name-in-python
-http://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
-"""
+        #I import the module
+        globals()[blueprint[0]] = __import__(blueprint[0], fromlist=['__init__'])
+        #I extract the blueprint
+        cur_blueprint = getattr(globals()[blueprint[0]], blueprint[1])
+        #register the blueprint
+        app.register_blueprint(cur_blueprint, url_prefix=blueprint[2])
+    return
