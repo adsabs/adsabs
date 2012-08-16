@@ -8,6 +8,7 @@ each tuple contains
 """
 
 _BLUEPRINTS_CORE = [
+    ('adslabs.core.index', 'index_blueprint', '/'),
     ('adslabs.core.auth', 'auth_blueprint', '/auth'),
     
 ]
