@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 #I define the blueprint
 index_blueprint = Blueprint('index', __name__)
@@ -8,4 +8,4 @@ def index():
     """
     
     """
-    return 'Global index'
+    return render_template('index/main_page.html')
