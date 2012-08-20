@@ -26,7 +26,10 @@ def create_app(config=None, app_name=None):
     return app
 
 def configure_app(app, config):
-    pass
+    """
+    
+    """
+    app.config.from_object(config)
 
 
 def configure_blueprints(app):
