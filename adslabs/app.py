@@ -1,5 +1,6 @@
+import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 from config import DefaultConfig, APP_NAME
 from blueprint_conf import BLUEPRINTS
 
@@ -21,6 +22,7 @@ def create_app(config=None, app_name=None):
 #    configure_logging(app)
 #    configure_template_filters(app)
     configure_error_handlers(app)
+    configure_misc_handlers(app)
 
     return app
 
@@ -64,3 +66,8 @@ def configure_error_handlers(app):
     @app.errorhandler(500)
     def server_error_page(error):
         return render_template("errors/500.html"), 500
+    
+def configure_misc_handlers(app):
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static', 'images'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
