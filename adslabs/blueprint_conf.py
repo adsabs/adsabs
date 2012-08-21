@@ -8,20 +8,18 @@ each tuple contains
 """
 
 #blueprints from core module
-from adslabs.core import index, auth
+from adslabs.core import index
 
 _BLUEPRINTS_CORE = [
-    (index, 'index_blueprint', '/'),
-    (auth, 'auth_blueprint', '/auth'),
-    
+    (index, 'index_blueprint', '/'),    
 ]
 
 #blueprints from all other modules
-from adslabs.modules import search
+from adslabs.modules import auth, search
 
 _BLUEPRINTS_MODULES = [
+    (auth, 'auth_blueprint', '/auth'),
     (search, 'search_blueprint', '/search'),
-    
 ]
 
 BLUEPRINTS = _BLUEPRINTS_CORE + _BLUEPRINTS_MODULES

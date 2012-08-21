@@ -15,18 +15,18 @@ def create_app(config=None, app_name=None):
         app_name = APP_NAME
 
     app = Flask(app_name)
-    configure_app(app, config)
+    _configure_app(app, config)
 #    configure_hook(app)
-    configure_blueprints(app)
+    _configure_blueprints(app)
 #    configure_extensions(app)
 #    configure_logging(app)
 #    configure_template_filters(app)
-    configure_error_handlers(app)
-    configure_misc_handlers(app)
+    _configure_error_handlers(app)
+    _configure_misc_handlers(app)
 
     return app
 
-def configure_app(app, config):
+def _configure_app(app, config):
     """
     configuration of the flask application
     """
@@ -37,7 +37,7 @@ def configure_app(app, config):
     app.config.from_envvar('ADSLABS_APP_CONFIG', silent=True)
 
 
-def configure_blueprints(app):
+def _configure_blueprints(app):
     """
     Function that registers the blueprints
     """
@@ -49,7 +49,7 @@ def configure_blueprints(app):
     return
 
 
-def configure_error_handlers(app):
+def _configure_error_handlers(app):
 
     @app.errorhandler(403)
     def forbidden_page(error):
@@ -67,7 +67,10 @@ def configure_error_handlers(app):
     def server_error_page(error):
         return render_template("errors/500.html"), 500
     
-def configure_misc_handlers(app):
+def _configure_misc_handlers(app):
     @app.route('/favicon.ico')
     def favicon():
         return send_from_directory(os.path.join(app.root_path, 'static', 'images'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    @app.route('/robots.txt')
+    def robots():
+        return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
