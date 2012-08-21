@@ -1,5 +1,5 @@
 
-from flask import Flask
+from flask import Flask, render_template
 from config import DefaultConfig, APP_NAME
 from blueprint_conf import BLUEPRINTS
 
@@ -20,7 +20,7 @@ def create_app(config=None, app_name=None):
 #    configure_extensions(app)
 #    configure_logging(app)
 #    configure_template_filters(app)
-#    configure_error_handlers(app)
+    configure_error_handlers(app)
 
     return app
 
@@ -45,3 +45,22 @@ def configure_blueprints(app):
         #register the blueprint
         app.register_blueprint(cur_blueprint, url_prefix=blueprint[2])
     return
+
+
+def configure_error_handlers(app):
+
+    @app.errorhandler(403)
+    def forbidden_page(error):
+        return render_template("errors/403.html"), 403
+
+    @app.errorhandler(404)
+    def page_not_found(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed_page(error):
+        return render_template("errors/405.html"), 405
+
+    @app.errorhandler(500)
+    def server_error_page(error):
+        return render_template("errors/500.html"), 500

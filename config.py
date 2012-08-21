@@ -21,6 +21,8 @@ class DefaultConfig(object):
     RECAPTCHA_PUBLIC_KEY = 'blahblahblahblahblahblahblahblahblah'
     RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
     RECAPTCHA_OPTIONS = {'theme': 'white'}
+    
+    APP_VERSION = '2012-08-21'
 
 
 class DebugConfig(object):
