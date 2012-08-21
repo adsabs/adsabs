@@ -34,3 +34,4 @@ man
 #eclipse files
 .project
 .pydevproject
+.settings

@@ -1,17 +1,24 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
-import readline
-from pprint import pprint
 
-from flask import *
-from app import *
-
-os.environ['PYTHONINSPECT'] = 'True'
+from flask.ext.script import Manager, prompt, prompt_pass, prompt_bool #@UnresolvedImport
 
 from adslabs import create_app
-from adslabs import models
+from config import DebugConfig
 
-app = create_app()
-ctx = app.test_request_context()
-ctx.push()
-ses = models.session
+manager = Manager(create_app())
+
+from adslabs import create_app
+app = create_app(DebugConfig)
+project_root_path = os.path.join(os.path.dirname(app.root_path))
+
+
+@manager.command
+def run():
+    """Run server that can be reached from anywhere."""
+    app.run(host='0.0.0.0')
+
+
+if __name__ == "__main__":
+    manager.run()

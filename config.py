@@ -23,5 +23,5 @@ class DefaultConfig(object):
     RECAPTCHA_OPTIONS = {'theme': 'white'}
 
 
-class DebugConfig(DefaultConfig):
+class DebugConfig(object):
     DEBUG = True
