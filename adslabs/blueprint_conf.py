@@ -15,10 +15,10 @@ _BLUEPRINTS_CORE = [
 ]
 
 #blueprints from all other modules
-from adslabs.modules import auth, search
+from adslabs.modules import search, user
 
 _BLUEPRINTS_MODULES = [
-    (auth, 'auth_blueprint', '/auth'),
+    (user, 'user_blueprint', '/user'),
     (search, 'search_blueprint', '/search'),
 ]
 

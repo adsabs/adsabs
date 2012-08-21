@@ -7,15 +7,11 @@
 {% block body %}
 Here there will be a lot of divs
 <br><br>
-This is a link to a module "core" using a registered blueprint
+This is a link to a module "non core" using a registered blueprint
 <br>
-<a href="{{ url_for('auth.index') }}">auth</a>
+<a href="{{ url_for('user.index') }}">user</a>
 <br><br>
-This is a link to a module "not core" using a registered blueprint
-<br>
-<a href="{{ url_for('search.index') }}">search</a>
-<br>
-<br>
+
 This is the content of variable coming from the configuration.
 <br>
 {{ config.APP_VERSION }}
