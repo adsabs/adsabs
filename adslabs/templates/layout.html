@@ -7,6 +7,15 @@
 {% block head%}{% endblock %}
 </head>
 <body>
+
+{% if current_user.is_authenticated() %} 
+Logged user: <a href="{{ url_for('user.index') }}">{{ current_user.name }}</a>
+{% else %}
+<a href="{{ url_for('user.login') }}">Login</a>
+{% endif %}
+
+<br><br>
+
 <div>
 {% from 'macros/misc.html' import render_flash_message %}
 {{ render_flash_message() }}

@@ -9,6 +9,8 @@ class adsUser(object):
     _ACTIVE = True
     _ANONYMOUS = False
     
+    name = _USERNAME
+    
     def __repr__(self):
         return '<User %r>' % self._USERNAME
     
