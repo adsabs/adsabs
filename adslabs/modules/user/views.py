@@ -26,8 +26,7 @@ def index():
 def login():
     """
     """
-    form = LoginForm(login=request.args.get('login', None),
-                     next=request.args.get('next', None))
+    form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
 
     if form.validate_on_submit():
         user, authenticated = authenticate(form.login.data, form.password.data)

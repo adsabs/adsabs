@@ -11,7 +11,7 @@
 {% if current_user.is_authenticated() %} 
 Logged user: <a href="{{ url_for('user.index') }}">{{ current_user.name }}</a>
 {% else %}
-<a href="{{ url_for('user.login') }}">Login</a>
+<a href="{{ url_for('user.login') }}?next={{ url_for('index.index') }}">Login</a>
 {% endif %}
 
 <br><br>
