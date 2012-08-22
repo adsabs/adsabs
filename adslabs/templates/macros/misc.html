@@ -1,0 +1,41 @@
+{% macro render_input(field, cls='') %}
+<div class='clearfix {% if field.errors %}error{% endif %}'>
+    {{ field.label }}
+    <div class='input'>
+        {% if field.errors %}
+        {{ field(class_=cls~' error') }}
+        {% else %}
+        {{ field(class_=cls) }}
+        {% endif %}
+        <span class="help-inline">
+            {% for error in field.errors %}
+            <span>{{ error }}</span>
+            {% endfor %}
+        </span>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_action(field) %}
+    <div class='actions'>
+        {{ field(class_='btn primary') }}&nbsp;&nbsp;&nbsp;&nbsp;<a href='{{ url_for("index.index") }}'>Cancel</a>
+    </div>
+{% endmacro %}
+
+
+
+{% macro render_flash_message() %}
+    {% block flash_message %}
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            <div id='flash_message_container'>
+                {% for category, msg in messages %}
+                    <div class="alert-message {{ category }}" data-alert>
+                      <p>{{ msg }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+    {% endblock %}
+{% endmacro %}

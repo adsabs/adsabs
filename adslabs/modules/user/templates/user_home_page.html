@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block titlehead %}User Home Page{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div>
+    <h2>User home page with a lot of settings and personal infos</h2>
+    <span><a href="{{ url_for('user.logout') }}">Logout</a></span>
+</div>
+
+{% endblock %}

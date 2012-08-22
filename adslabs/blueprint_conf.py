@@ -11,7 +11,7 @@ each tuple contains
 from adslabs.core import index
 
 _BLUEPRINTS_CORE = [
-    (index, 'index_blueprint', '/'),    
+    (index, 'index_blueprint', '/'),
 ]
 
 #blueprints from all other modules

@@ -7,6 +7,10 @@
 {% block head%}{% endblock %}
 </head>
 <body>
+<div>
+{% from 'macros/misc.html' import render_flash_message %}
+{{ render_flash_message() }}
+</div>
 
 {% block body %}{% endblock %}
 

@@ -1,0 +1,30 @@
+{% from "macros/misc.html" import render_input, render_action %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}User Login{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div>
+    <form method="POST" action="{{ url_for('user.login') }}">
+        {{ form.hidden_tag() }}
+        {{ form.next }}
+        <fieldset>
+            <legend>Not a member? <a href="{{ url_for('user.signup') }}">Sign up</a> please.</legend>
+            {{ render_input(form.login, 'xlarge') }}
+            {{ render_input(form.password, 'xlarge') }}
+            <div class='clearfix'>
+                <label></label>
+                <div class="input">
+                    {{ form.remember() }}<span class='remember_me'>Remember me</span>
+                </div>
+            </div>
+            {{ render_action(form.submit) }}
+        </fieldset>
+    </form>
+</div>
+
+{% endblock %}
