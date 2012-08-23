@@ -45,9 +45,9 @@ def _configure_blueprints(app):
     """
     for blueprint in BLUEPRINTS:
         #I extract the blueprint
-        cur_blueprint = getattr(blueprint[0], blueprint[1])
+        cur_blueprint = getattr(blueprint['module'], blueprint['blueprint'])
         #register the blueprint
-        app.register_blueprint(cur_blueprint, url_prefix=blueprint[2])
+        app.register_blueprint(cur_blueprint, url_prefix=blueprint['prefix'])
     return
 
 def _configure_extensions(app):
