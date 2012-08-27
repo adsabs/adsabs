@@ -2,9 +2,9 @@ import os
 
 from flask import Flask, render_template, send_from_directory
 from config import DefaultConfig, APP_NAME
-from blueprint_conf import BLUEPRINTS
-from extensions import login_manager
-from modules.user.backend_interface import get_user_by_id
+from adslabs.blueprint_conf import BLUEPRINTS
+from adslabs.extensions import login_manager
+from adslabs.modules.user.backend_interface import get_user_by_id
 
 # For import *
 __all__ = ['create_app']
@@ -67,6 +67,10 @@ def _configure_error_handlers(app):
     """
     function that configures some basic handlers for errors
     """
+    @app.errorhandler(400)
+    def bad_request_page(error):
+        return render_template("errors/400.html"), 400
+    
     @app.errorhandler(403)
     def forbidden_page(error):
         return render_template("errors/403.html"), 403

@@ -3,11 +3,14 @@ Module to interface with the back-end authentication system
 '''
 
 class adsUser(object):
-    _ID = u'7r23yrhfn4dmosi230984hfbndmsoki23d'
+    _ID = u'7r23yrhfn4dmosi230984hfbndmsoki23d' #must be unicode
     _USERNAME = 'my@email.com'
     _PASSWORD = 'mypasswd'
     _ACTIVE = True
     _ANONYMOUS = False
+    _DEVELOPER = True
+    _DEVELOPER_KEY = '996171a9-56c8-493d-9c26-b64c9229801a'
+    _DEVELOPER_LEVEL = 0 #zero is the highest level
     
     name = _USERNAME
     
@@ -25,6 +28,9 @@ class adsUser(object):
 
     def get_id(self):
         return self._ID
+    
+    def get_dev_key(self):
+        return self._DEVELOPER_KEY
     
         
     
@@ -51,3 +57,13 @@ def authenticate(login, password):
         return adsUser(), True
     else:
         return None, False
+    
+def get_user_from_developer_key(dev_key):
+    """
+    function that will check if the developer key is a valid one and returns the 
+    """
+    #for now I simply work with the fake user in this module
+    if dev_key == adsUser._DEVELOPER_KEY:
+        return adsUser()
+    else:
+        return None
