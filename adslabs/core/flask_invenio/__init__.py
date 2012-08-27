@@ -1,0 +1,1 @@
+from invenio_flask_interface import invenioInterface
