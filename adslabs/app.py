@@ -3,7 +3,7 @@ import os
 from flask import Flask, render_template, send_from_directory
 from config import DefaultConfig, APP_NAME
 from adslabs.blueprint_conf import BLUEPRINTS
-from adslabs.extensions import login_manager
+from adslabs.extensions import login_manager, mongodb
 from adslabs.modules.user.backend_interface import get_user_by_id
 
 # For import *
@@ -62,6 +62,9 @@ def _configure_extensions(app):
     def load_user(id):
         return get_user_by_id(id)
     login_manager.init_app(app) #@UndefinedVariable
+    
+    #mongo db
+    mongodb.init_app(app) #@UndefinedVariable
 
 def _configure_error_handlers(app):
     """

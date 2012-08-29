@@ -17,5 +17,8 @@ __all__ = ['login_manager', 'invenio_flk']
 from flask.ext.login import LoginManager #@UnresolvedImport
 login_manager = LoginManager()
 
+from flask.ext.mongoalchemy import MongoAlchemy #@UnresolvedImport
+mongodb = MongoAlchemy()
+
 from core.flask_invenio import invenioInterface
 invenio_flk = invenioInterface()
