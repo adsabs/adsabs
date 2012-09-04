@@ -1,16 +1,16 @@
 import os
 
+from logging import getLogger
+import logging.config
 from flask import Flask, render_template, send_from_directory
 from config import DefaultConfig, APP_NAME
-from adslabs.blueprint_conf import BLUEPRINTS
-from adslabs.extensions import login_manager, mongodb
-from adslabs.modules.user.backend_interface import get_user_by_id
 
 # For import *
 __all__ = ['create_app']
 
+logger = None
 
-def create_app(config=None, app_name=None):
+def create_app(config=DefaultConfig, app_name=None):
     """Create a Flask app."""
 
     if app_name is None:
@@ -18,6 +18,7 @@ def create_app(config=None, app_name=None):
 
     app = Flask(app_name)
     _configure_app(app, config)
+    _configure_logging(app)
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
@@ -32,18 +33,26 @@ def _configure_app(app, config):
     """
     configuration of the flask application
     """
-    app.config.from_object(DefaultConfig)
+    app.config.from_object(config)
     if config is not None:
         app.config.from_object(config)
-    # Override setting by env var without touching codes.
-    app.config.from_envvar('ADSLABS_APP_CONFIG', silent=True)
+    # Override setting by env var without touch_import)
+    pass
 
+def _configure_logging(app):
+    if 'LOGGING' in app.config:
+        logging.config.dictConfig(app.config['LOGGING'])
+    global logger
+    logger = getLogger()
 
 def _configure_blueprints(app):
     """
     Function that registers the blueprints
     """
+    from adslabs.blueprint_conf import BLUEPRINTS
+    
     for blueprint in BLUEPRINTS:
+        logger.debug("registering blueprint: %s" % blueprint['blueprint'])
         #I extract the blueprint
         cur_blueprint = getattr(blueprint['module'], blueprint['blueprint'])
         #register the blueprint
@@ -55,15 +64,20 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
+    from adslabs.extensions import login_manager, mongodb
+    from adslabs.modules.user.backend_interface import get_user_by_id
+    
     # login.
     login_manager.login_view = 'user.login'
     login_manager.refresh_view = 'user.reauth'
     @login_manager.user_loader
     def load_user(id):
         return get_user_by_id(id)
+    logger.debug("initializing login_manager")
     login_manager.init_app(app) #@UndefinedVariable
     
     #mongo db
+    logger.debug("initializing mongodb")
     mongodb.init_app(app) #@UndefinedVariable
 
 def _configure_error_handlers(app):

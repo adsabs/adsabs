@@ -1,9 +1,11 @@
 import os
+
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
 APP_NAME = "adslabs"
 
 class DefaultConfig(object):
+    
     DEBUG = False
 
     ADMINS = frozenset(['youremail@yourdomain.com'])
@@ -24,9 +26,47 @@ class DefaultConfig(object):
     RECAPTCHA_OPTIONS = {'theme': 'white'}
     
     MONGOALCHEMY_DATABASE = 'adsabs_mongo'
+    MONGOALCHEMY_SERVER = "localhost"
     
     APP_VERSION = '2012-08-21'
+    
+    SOLR_URL = 'http://adsate:8987/solr/collection1'
+    
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+                       'verbose': {
+                           'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+                       },
+                       'simple': {
+                           'format': '%(levelname)s %(message)s'
+                       },
+                    },
+        'handlers': {
+                     'console': {
+                            'level': 'DEBUG',
+                            'class': 'logging.StreamHandler',
+                            'formatter': 'simple'
+                            },
+                     'file': {
+                             'level': 'DEBUG',
+                             'class': 'logging.FileHandler',
+                             'formatter': 'simple',
+                             'filename' : os.path.join(_basedir, 'logs/') + APP_NAME + '.log'
+                             }
+                     },
+        'loggers': {
+                    'adsabs': {
+                        'handlers': ['console','file'],
+                        }
+                    },
+        'root': {
+                 'level': 'DEBUG',
+                 'handlers': ['console','file'],
+                 }
+           }
 
-
-class DebugConfig(object):
+class DebugConfig(DefaultConfig):
     DEBUG = True
+    
