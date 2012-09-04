@@ -32,41 +32,9 @@ class DefaultConfig(object):
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-                       'verbose': {
-                           'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-                       },
-                       'simple': {
-                           'format': '%(levelname)s %(message)s'
-                       },
-                    },
-        'handlers': {
-                     'console': {
-                            'level': 'DEBUG',
-                            'class': 'logging.StreamHandler',
-                            'formatter': 'simple'
-                            },
-                     'file': {
-                             'level': 'DEBUG',
-                             'class': 'logging.FileHandler',
-                             'formatter': 'simple',
-                             'filename' : os.path.join(_basedir, 'logs/') + APP_NAME + '.log'
-                             }
-                     },
-        'loggers': {
-                    'adsabs.core.solr': {
-                        'handlers': ['console','file'],
-                        }
-                    },
-        'root': {
-                 'level': 'DEBUG',
-                 'handlers': ['console','file'],
-                 }
-           }
-
+    # copy logging.conf.dist -> logging.conf and uncomment
+    #LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
+    
 class DebugConfig(DefaultConfig):
     DEBUG = True
     

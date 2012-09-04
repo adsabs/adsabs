@@ -40,8 +40,8 @@ def _configure_app(app, config):
     pass
 
 def _configure_logging(app):
-    if 'LOGGING' in app.config:
-        logging.config.dictConfig(app.config['LOGGING'])
+    if 'LOGGING_CONFIG' in app.config:
+        logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
 
