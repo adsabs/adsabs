@@ -33,7 +33,7 @@ class DefaultConfig(object):
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     
     # copy logging.conf.dist -> logging.conf and uncomment
-    #LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
+    LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
     
 class DebugConfig(DefaultConfig):
     DEBUG = True

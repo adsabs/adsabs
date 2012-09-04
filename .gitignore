@@ -35,3 +35,6 @@ man
 .project
 .pydevproject
 .settings
+
+#logging local configuration
+logging.conf
