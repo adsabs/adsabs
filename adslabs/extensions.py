@@ -20,5 +20,10 @@ login_manager = LoginManager()
 from flask.ext.mongoalchemy import MongoAlchemy #@UnresolvedImport
 mongodb = MongoAlchemy()
 
-from core.flask_invenio import invenioInterface
-invenio_flk = invenioInterface()
+invenio_flk = None
+try:
+    import invenio #@UnresolvedImport
+    from core.flask_invenio import invenioInterface
+    invenio_flk = invenioInterface()
+except:
+    pass

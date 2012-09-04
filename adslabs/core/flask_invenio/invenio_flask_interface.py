@@ -1,8 +1,8 @@
 
 #invenio imports for the different methods of the interface class
-from invenio.search_engine import get_record
-from invenio.bibrecord import record_xml_output
-from invenio.dbquery import run_sql
+from invenio.search_engine import get_record #@UnresolvedImport
+from invenio.bibrecord import record_xml_output #@UnresolvedImport
+from invenio.dbquery import run_sql #@UnresolvedImport
 
 class invenioInterface(object):
     """

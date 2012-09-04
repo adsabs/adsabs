@@ -1,0 +1,31 @@
+[loggers]
+keys=root
+
+[handlers]
+keys=console,file
+
+[formatters]
+keys=simple,verbose
+
+[logger_root]
+level=DEBUG
+handlers=console,file
+
+[handler_console]
+class=StreamHandler
+level=DEBUG
+formatter=simple
+args=(sys.stdout,)
+
+[handler_file]
+level=DEBUG
+class=FileHandler
+formatter=simple
+args=("logs/adslabs.log",)
+
+[formatter_simple]
+format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+datefmt=
+
+[formatter_verbose]
+format=%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s

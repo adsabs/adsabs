@@ -1,9 +1,11 @@
 import os
+
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
 APP_NAME = "adslabs"
 
 class DefaultConfig(object):
+    
     DEBUG = False
 
     ADMINS = frozenset(['youremail@yourdomain.com'])
@@ -24,9 +26,15 @@ class DefaultConfig(object):
     RECAPTCHA_OPTIONS = {'theme': 'white'}
     
     MONGOALCHEMY_DATABASE = 'adsabs_mongo'
+    MONGOALCHEMY_SERVER = "localhost"
     
     APP_VERSION = '2012-08-21'
-
-
-class DebugConfig(object):
+    
+    SOLR_URL = 'http://adsate:8987/solr/collection1'
+    
+    # copy logging.conf.dist -> logging.conf and uncomment
+    #LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
+    
+class DebugConfig(DefaultConfig):
     DEBUG = True
+    
