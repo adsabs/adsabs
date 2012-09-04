@@ -64,7 +64,7 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
-    from adslabs.extensions import login_manager, mongodb
+    from adslabs.extensions import login_manager, mongodb, solr
     from adslabs.modules.user.backend_interface import get_user_by_id
     
     # login.
@@ -79,6 +79,9 @@ def _configure_extensions(app):
     #mongo db
     logger.debug("initializing mongodb")
     mongodb.init_app(app) #@UndefinedVariable
+    
+    logger.debug("initializing solr connection")
+    solr.init_app(app) #@UndefinedVariable
 
 def _configure_error_handlers(app):
     """
