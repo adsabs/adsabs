@@ -57,7 +57,7 @@ class DefaultConfig(object):
                              }
                      },
         'loggers': {
-                    'adsabs': {
+                    'adsabs.core.solr': {
                         'handlers': ['console','file'],
                         }
                     },
