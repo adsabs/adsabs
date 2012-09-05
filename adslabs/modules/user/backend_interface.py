@@ -9,7 +9,7 @@ except ImportError:
     import json
 
 from adslabs.core.dbmodels.mongo import adsUser
-
+#from adslabs.extensions import mongodb
 
 class localAdsUser():
     """
@@ -98,9 +98,27 @@ def _get_local_user_info(user_obj):
                                     lastname=user_obj.get('lastname'), 
                                     active=True, 
                                     anonymous=False)
-        new_user_local_info.save()
+        new_user_local_info.save(safe=True)
         #then I re-extract the user object
         user_local_info = adsUser.query.filter(adsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable
+    
+    ##################
+    #If I want to insert the user or update the values always with the values from ads_classic, I can do the following 
+    #I simply upsert the user inside the mongo database
+    #I extract the session from the mongo connection
+    #s = mongodb.session #@UndefinedVariable
+    #ins_update_query = s.query(adsUser).filter(adsUser.cookie_id==user_obj.get('cookie')).set(myads_id=user_obj.get('myadsid'), 
+    #                                username=user_obj.get('email'), 
+    #                                firstname=user_obj.get('firstname'), 
+    #                                lastname=user_obj.get('lastname'), 
+    #                                active=True, 
+    #                                anonymous=False).safe().upsert()
+    #s.execute()
+    #and then extract the user with a query like before
+    #
+    #I'm not sure which one is the best approach, but I spent time ti find out how to do it and I saved the code here :-)
+    ###################
+    
     #then I return an instance of a local style User object
     return localAdsUser(user_local_info)
 

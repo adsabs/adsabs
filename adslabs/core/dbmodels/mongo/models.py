@@ -22,4 +22,4 @@ class adsUser(mongodb.Document): #@UndefinedVariable
     developer_key = mongodb.StringField(default='', required=False) #@UndefinedVariable
     developer_level = mongodb.IntField(default=-1) #@UndefinedVariable
     
-    #cookie_id_index = document.Index().descending('cookie_id').unique()
+    cookie_id_index = document.Index().descending('cookie_id').unique()
