@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, g
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", static_folder="static")
@@ -8,4 +8,5 @@ def index():
     """
     
     """
-    return 'Search index'
+    r = g.solr.query("bibcode:1904Natur..71R..46.")
+    return str(r.results)
