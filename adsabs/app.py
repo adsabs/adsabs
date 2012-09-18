@@ -22,7 +22,6 @@ def create_app(config=DefaultConfig, app_name=None):
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
-#    configure_logging(app)
 #    configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
@@ -49,7 +48,7 @@ def _configure_blueprints(app):
     """
     Function that registers the blueprints
     """
-    from adslabs.blueprint_conf import BLUEPRINTS
+    from adsabs.blueprint_conf import BLUEPRINTS
     
     for blueprint in BLUEPRINTS:
         logger.debug("registering blueprint: %s" % blueprint['blueprint'])
@@ -64,8 +63,8 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
-    from adslabs.extensions import login_manager, mongodb, solr
-    from adslabs.modules.user.backend_interface import get_user_by_id
+    from adsabs.extensions import login_manager, mongodb, solr
+    from adsabs.modules.user.backend_interface import get_user_by_id
     
     # login.
     login_manager.login_view = 'user.login'

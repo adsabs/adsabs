@@ -1,4 +1,4 @@
-from adslabs.extensions import mongodb
+from adsabs.extensions import mongodb
 
 from flask.ext.mongoalchemy import document #@UnresolvedImport
 

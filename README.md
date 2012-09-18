@@ -1,4 +1,4 @@
-adslabs
+ADSAbs 2.0
 =======
 
-This is a skeleton of a Flask application.
+This is the Flask application for the new ADS website.

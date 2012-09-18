@@ -2,7 +2,7 @@ import os
 
 _basedir = os.path.abspath(os.path.dirname(__file__))
 
-APP_NAME = "adslabs"
+APP_NAME = "adsabs"
 
 class DefaultConfig(object):
     

@@ -2,8 +2,8 @@ import sys
 sys.path.append('..')
 
 from flask import Blueprint, request, render_template
-from adslabs.modules.user.backend_interface import get_user_from_developer_key
-from adslabs.extensions import invenio_flk
+from adsabs.modules.user.backend_interface import get_user_from_developer_key
+from adsabs.extensions import invenio_flk
 
 from ret_functions import ret_xml
 

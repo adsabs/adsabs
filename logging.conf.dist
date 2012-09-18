@@ -21,7 +21,7 @@ args=(sys.stdout,)
 level=DEBUG
 class=FileHandler
 formatter=simple
-args=("logs/adslabs.log",)
+args=("logs/adsabs.log",)
 
 [formatter_simple]
 format=%(asctime)s - %(name)s - %(levelname)s - %(message)s

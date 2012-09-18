@@ -8,14 +8,14 @@ each tuple contains
 """
 
 #blueprints from core module
-from adslabs.core import index
+from adsabs.core import index
 
 _BLUEPRINTS_CORE = [
     {'module':index, 'blueprint':'index_blueprint', 'prefix':''},
 ]
 
 #blueprints from all other modules
-from adslabs.modules import search, user, api
+from adsabs.modules import search, user, api
 
 _BLUEPRINTS_MODULES = [
     {'module':user, 'blueprint':'user_blueprint', 'prefix':'/user'},

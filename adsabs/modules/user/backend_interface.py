@@ -8,8 +8,8 @@ try:
 except ImportError:
     import json
 
-from adslabs.core.dbmodels.mongo import adsUser
-#from adslabs.extensions import mongodb
+from adsabs.core.dbmodels.mongo import adsUser
+#from adsabs.extensions import mongodb
 
 class localAdsUser():
     """
@@ -62,7 +62,7 @@ def _authenticate_against_ads(login, password):
     #I create the request object
     req = urllib2.Request(ads_login_url, parameters)
     #I set an user agent
-    req.add_header('User-Agent', 'ADSLabs Request Agent')
+    req.add_header('User-Agent', 'ADS Script Request Agent')
     #I perform the request
     try:
         r = urllib2.urlopen(req)
