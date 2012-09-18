@@ -8,8 +8,7 @@ try:
 except ImportError:
     import json
 
-from adsabs.core.dbmodels.mongo import adsUser
-#from adsabs.extensions import mongodb
+from adsabs.core.data.mongo import AdsUser
 
 class localAdsUser():
     """
@@ -88,10 +87,10 @@ def _get_local_user_info(user_obj):
     if there is no trace of the user in the current database and it is just logged in, I create one entry
     """
     #I try to extract the data
-    user_local_info = adsUser.query.filter(adsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable
+    user_local_info = AdsUser.query.filter(AdsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable
     #if it is empty I insert the data
     if not user_local_info and user_obj.get('loggedin')=='1':
-        new_user_local_info = adsUser(cookie_id=user_obj.get('cookie'),
+        new_user_local_info = AdsUser(cookie_id=user_obj.get('cookie'),
                                     myads_id=user_obj.get('myadsid'), 
                                     username=user_obj.get('email'), 
                                     firstname=user_obj.get('firstname'), 
@@ -100,14 +99,14 @@ def _get_local_user_info(user_obj):
                                     anonymous=False)
         new_user_local_info.save(safe=True)
         #then I re-extract the user object
-        user_local_info = adsUser.query.filter(adsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable
+        user_local_info = AdsUser.query.filter(AdsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable
     
     ##################
     #If I want to insert the user or update the values always with the values from ads_classic, I can do the following 
     #I simply upsert the user inside the mongo database
     #I extract the session from the mongo connection
     #s = mongodb.session #@UndefinedVariable
-    #ins_update_query = s.query(adsUser).filter(adsUser.cookie_id==user_obj.get('cookie')).set(myads_id=user_obj.get('myadsid'), 
+    #ins_update_query = s.query(AdsUser).filter(AdsUser.cookie_id==user_obj.get('cookie')).set(myads_id=user_obj.get('myadsid'), 
     #                                username=user_obj.get('email'), 
     #                                firstname=user_obj.get('firstname'), 
     #                                lastname=user_obj.get('lastname'), 
@@ -143,7 +142,7 @@ def get_user_by_id(id_):
     """
     
     #I retrieve the user from the local database
-    user_local_info = adsUser.query.filter(adsUser.cookie_id==id_).first() #@UndefinedVariable
+    user_local_info = AdsUser.query.filter(AdsUser.cookie_id==id_).first() #@UndefinedVariable
     if user_local_info:
         return localAdsUser(user_local_info)
     else:
@@ -154,7 +153,7 @@ def get_user_from_developer_key(dev_key):
     function that will check if the developer key is a valid one and returns the 
     """
     #I retrieve the user from the local database
-    user_local_info = adsUser.query.filter(adsUser.developer_key==dev_key).first() #@UndefinedVariable
+    user_local_info = AdsUser.query.filter(AdsUser.developer_key==dev_key).first() #@UndefinedVariable
     if user_local_info:
         return localAdsUser(user_local_info)
     else:
