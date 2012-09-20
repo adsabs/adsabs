@@ -5,11 +5,7 @@ Flask-Script>=0.3.1
 Flask-WTF>=0.5.4
 Flask-Login>=0.1
 Flask-Mail>=0.6
-itsdangerous
-Jinja2>=2.6
 SQLAlchemy>=0.7.3
 WTForms>=1.0
-Werkzeug>=0.8
-unicodecsv
--e git+https://github.com/lbjay/flask-solrpy.git#egg=Flask-Solrpy
+-e git+https://github.com/adsabs/flask-solrpy.git#egg=Flask-Solrpy
 
