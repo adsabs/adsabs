@@ -7,7 +7,6 @@ import os
 from stat import ST_MTIME
 from datetime import datetime
 
-from adslabs.core.data.mongo.utils import DataLoadTime
 from adsabs.extensions import mongodb
 from flask.ext.mongoalchemy import document #@UnresolvedImport
 
@@ -29,6 +28,10 @@ class AdsUser(mongodb.Document): #@UndefinedVariable
     developer_level = mongodb.IntField(default=-1) #@UndefinedVariable
     
     cookie_id_index = document.Index().descending('cookie_id').unique()
+    
+class DataLoadTime(mongodb.Document):
+    collection = mongodb.StringField()
+    last_loaded = mongodb.DateTimeField()
     
 class DataCollection(mongodb.Document):
     

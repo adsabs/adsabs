@@ -28,13 +28,25 @@ class DefaultConfig(object):
     MONGOALCHEMY_DATABASE = 'adsabs_mongo'
     MONGOALCHEMY_SERVER = "localhost"
     
+    MONGOALCHEMY_COLLECTIONS = {
+        'bibstem.Bibstem':         '/proj/ads/abstracts/config/bibstems.dat',
+        'fulltext.FulltextItem': '/proj/ads/abstracts/config/links/fulltext/all.links',
+        'refereed.RefereedItem': '/proj/ads/abstracts/config/links/refereed/all.links',
+        'readers.Readers':         '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
+        }
+    
     APP_VERSION = '2012-08-21'
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
+    SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
+    SOLR_DEFAULT_ROWS = '20'
+    SOLR_DEFAULT_FIELDS_SEARCH = ['id','bibcode','title','author','pub','score','property']
+    SOLR_DEFAULT_SORT = 'pubdate_sort desc'
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
     
+               
 class DebugConfig(DefaultConfig):
     DEBUG = True
     

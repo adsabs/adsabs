@@ -1,0 +1,24 @@
+{% from "macros.html" import render_result %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}Search{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div>
+    <form method="GET" action="{{ url_for('search.search') }}">
+        {{ form.hidden_tag() }}
+        {{ form.next }}
+        {{ form.rows }}
+        <fieldset>
+            <legend>ADS 2.0 Basic Search | <a href="{{ url_for('search.search_advanced') }}">Advanced Search</a></legend>
+            {{ form.q.label }} {{ form.q(size=40) }}
+            {{ form.submit }}
+        </fieldset>
+    </form>
+</div>
+
+{% endblock %}
