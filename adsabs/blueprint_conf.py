@@ -15,12 +15,13 @@ _BLUEPRINTS_CORE = [
 ]
 
 #blueprints from all other modules
-from adsabs.modules import search, user, api
+from adsabs.modules import search, user, api, abs
 
 _BLUEPRINTS_MODULES = [
     {'module':user, 'blueprint':'user_blueprint', 'prefix':'/user'},
     {'module':search, 'blueprint':'search_blueprint', 'prefix':'/search'},
     {'module':api, 'blueprint':'api_blueprint', 'prefix':'/api'},
+    {'module':abs, 'blueprint':'abs_blueprint', 'prefix':'/abs' }
 ]
 
 BLUEPRINTS = _BLUEPRINTS_CORE + _BLUEPRINTS_MODULES

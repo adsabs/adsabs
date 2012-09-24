@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block titlehead %}ADS 2.0: {{ doc.title }}{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+<div class="row">
+    <div class="span2">Bibcode:</div>
+    <div class="span5">{{ doc.bibcode }}</div>
+</div>
+    
+<div class="row">
+    <div class="span2">Title:</div>
+    <div class="span5">{{ doc.title }}</div>
+</div>
+    
+<div class="row">
+    <div class="span2">Authors:</div>
+    <div class="span5">{{ '; '.join(doc.author) }}</div>
+</div>
+
+<div class="row">
+    <div class="span2">Publication:</div>
+    <div class="span5">{{ doc.pub }}</div>
+</div>
+
+<div class="row">
+    <div class="span2">Publication Date:</div>
+    <div class="span5">{{ doc.pubdate }}</div>
+</div>
+
+<div class="row">
+    <div class="span2">Keywords:</div>
+    {% if doc.keyword %}
+    <div class="span5">{{ '; '.join(doc.keyword) }}</div>
+    {% else %}
+    <div class="span5"><em>none</em></div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="span2">Affiliations:</div>
+    {% if doc.aff %}
+	    <div class="span5">
+        {% for a in doc.aff %}
+	        {{ a }}<br/>
+        {% endfor %}
+        </div>
+    {% else %}
+    <div class="span5"><em>none</em></div>
+    {% endif %}
+</div>
+
+</div>
+
+{% endblock %}

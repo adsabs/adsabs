@@ -1,0 +1,12 @@
+
+div.searchresult {
+	margin-bottom: 10px;
+}
+
+div.searchresult div.bibcode {
+	font-size: .9em;
+}
+
+div.searchresult div.title {
+	font-weight: bold;
+}

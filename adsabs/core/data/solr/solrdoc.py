@@ -5,19 +5,27 @@ Created on Sep 19, 2012
 '''
 
 class SolrDocument(object):
+        
     def __init__(self, data):
         self.data = data
-
-class SolrDocumentSet(object):
-    
-    @classmethod
-    def from_dict_list(cls, dict_list):
-        doclist = [SolrDocument(x) for x in dict_list]
-        return cls(doclist)
-    
-    def __init(self, doclist=[]):
-        self.doclist = doclist
         
+    def __getattr__(self, attr):
+        if attr in self.data:
+            return self.data[attr]
 
 class SolrFacets(object):
-    pass
+    
+    @staticmethod
+    def from_dict(facet_data):
+        queries = facet_data['facet_queries']
+        fields = facet_data['facet_fields']
+        dates = facet_data['facet_dates']
+        ranges = facet_data['facet_ranges']
+        return SolrFacets(fields, queries, dates, ranges)
+        
+    def __init__(self, fields, queries={}, dates={}, ranges={}):
+        self.queries = queries
+        self.fields = fields
+        self.dates = dates
+        self.ranges = ranges
+        

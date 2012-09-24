@@ -15,7 +15,7 @@ def search():
     form = QueryForm(request.values)
     if form.validate():
         resp = solr.query(form.q.data, rows=form.rows.data)
-        return render_template('search_results.html', resp=resp)
+        return render_template('search_results.html', resp=resp, form=form)
     
     return render_template('search.html', form=form)
 

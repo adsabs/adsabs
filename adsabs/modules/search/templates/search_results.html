@@ -1,0 +1,20 @@
+{% from "macros.html" import render_search_result, render_search_form %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}Search Results: {{ resp.get_query() }}{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+{{ render_search_form(form) }}
+
+<h3>Total Hits: {{ resp.get_count() }}</h3>
+<ol class="searchresults">
+{% for doc in resp.get_docset() %}
+    {{ render_search_result(doc) }}
+{% endfor %}
+</ol>
+
+{% endblock %}

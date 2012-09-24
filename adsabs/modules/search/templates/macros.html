@@ -1,0 +1,25 @@
+{% macro render_search_result(doc, cls='') %}
+<li>
+<div class='searchresult {{ cls }}'>
+    <div class='bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
+    <div class='title'>{{ doc.title }}</div>
+    <div class='author'>{{ '; '.join(doc.author) }}</div>
+    <div class='pub'>{{ doc.pub }}</div>
+</div>
+</li>
+{% endmacro %}
+
+{% macro render_search_form(form, cls='') %}
+<div class="{{ cls }}">
+    <form method="GET" action="{{ url_for('search.search') }}">
+        {{ form.hidden_tag() }}
+        {{ form.next }}
+        {{ form.rows }}
+        <fieldset>
+            <legend>ADS 2.0 Basic Search | <a href="{{ url_for('search.search_advanced') }}">Advanced Search</a></legend>
+            {{ form.q.label }} {{ form.q(size=40) }}
+            {{ form.submit }}
+        </fieldset>
+    </form>
+</div>
+{% endmacro %}
