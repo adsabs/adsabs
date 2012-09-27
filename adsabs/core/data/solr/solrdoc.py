@@ -4,7 +4,7 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
-from config import DefaultConfig as config
+from config import config
 from urllib2 import quote
 from urllib import urlencode
 
