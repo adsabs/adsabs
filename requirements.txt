@@ -8,4 +8,4 @@ Flask-Mail>=0.6
 SQLAlchemy>=0.7.3
 WTForms>=1.0
 -e git+https://github.com/adsabs/flask-solrpy.git#egg=Flask-Solrpy
-
+simplejson
