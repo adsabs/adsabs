@@ -14,7 +14,6 @@ class DefaultConfig(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
     DATABASE_CONNECT_OPTIONS = {}
     
-
     THREADS_PER_PAGE = 8
 
     CSRF_ENABLED=True
@@ -48,6 +47,9 @@ class DefaultConfig(object):
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
     
+    INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
+    ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
+
                
 class DebugConfig(DefaultConfig):
     DEBUG = True

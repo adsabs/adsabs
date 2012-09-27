@@ -59,6 +59,16 @@
     <div class="span5">{{ doc.abstract }}</div>
 </div>
 
+<div class="row">
+    <div class="span2"><label>Links</label></div>
+    <div class="span5">
+        <a href="{{ doc.classic_url() }}">Classic</a><br/>
+        <a href="{{ doc.invenio_url() }}">Invenio</a><br/>
+        <a href="{{ doc.invenio_marcxml_url() }}">Invenio MARCXML</a><br/>
+        <a href="{{ doc.solr_url() }}">Solr</a><br/>
+    </div>
+</div>
+
 </div>
 
 {% endblock %}
