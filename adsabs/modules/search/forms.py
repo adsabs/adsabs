@@ -11,9 +11,7 @@ from flask.ext.wtf import (Form, SubmitField, TextField, SelectField, HiddenFiel
 from config import DefaultConfig as config
 
 class QueryForm(Form):
-    next = HiddenField()
     q = TextField('Query', [required(), length(min=2, max=2048)])
-    rows = HiddenField(default=config.SOLR_DEFAULT_ROWS)
     submit = SubmitField('Search')
     
 class ResultsQueryForm(QueryForm):

@@ -10,3 +10,15 @@ div.searchresult div.bibcode {
 div.searchresult div.title {
 	font-weight: bold;
 }
+
+div.absview {
+	margin-top: 20px;
+}
+
+div.absview div.row {
+	margin-bottom: 5px;
+}
+
+div.absview div.row label {
+	font-weight: bold;
+}
