@@ -8,7 +8,7 @@ from flask.ext.wtf import (Form, SubmitField, TextField, SelectField, HiddenFiel
                           ValidationError, validators, required, equal_to, email, #@UnresolvedImport
                           length) #@UnresolvedImport
 
-from config import DefaultConfig as config
+from config import config
 
 class QueryForm(Form):
     q = TextField('Query', [required(), length(min=2, max=2048)])

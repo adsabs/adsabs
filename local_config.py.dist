@@ -1,0 +1,3 @@
+
+class LocalConfig(object):
+    pass

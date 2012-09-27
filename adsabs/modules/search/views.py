@@ -1,6 +1,6 @@
 from flask import Blueprint, request, g, render_template
 from .forms import QueryForm
-from adsabs.core.data import solr
+from adsabs.core.data.solr import query
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", static_folder="static")
@@ -14,7 +14,7 @@ def search():
     """
     form = QueryForm(request.values, csrf_enabled=False)
     if form.validate():
-        resp = solr.query(form.q.data)
+        resp = query(form.q.data)
         return render_template('search_results.html', resp=resp, form=form)
     
     return render_template('search.html', form=form)

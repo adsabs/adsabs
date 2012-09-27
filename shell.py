@@ -5,12 +5,12 @@ import os
 from flask.ext.script import Manager, prompt, prompt_pass, prompt_bool #@UnresolvedImport
 
 from adsabs import create_app
-from config import DebugConfig
+from config import config
 
 manager = Manager(create_app())
 
 from adsabs import create_app
-app = create_app(DebugConfig)
+app = create_app(config)
 project_root_path = os.path.join(os.path.dirname(app.root_path))
 
 

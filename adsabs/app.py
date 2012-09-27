@@ -3,14 +3,14 @@ import os
 from logging import getLogger
 import logging.config
 from flask import Flask, render_template, send_from_directory
-from config import DefaultConfig, APP_NAME
+from config import config, APP_NAME
 
 # For import *
 __all__ = ['create_app']
 
 logger = None
 
-def create_app(config=DefaultConfig, app_name=None):
+def create_app(config=config, app_name=None):
     """Create a Flask app."""
 
     if app_name is None:

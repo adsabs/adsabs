@@ -1,5 +1,5 @@
 
-from config import DefaultConfig as config
+from config import config
 from urllib2 import quote
 from urllib import urlencode
 

@@ -5,7 +5,7 @@ Created on Sep 19, 2012
 '''
 
 from flask import g
-from config import DefaultConfig as config
+from config import config
 from .response import SolrResponse
 
 class SolrParams(dict):

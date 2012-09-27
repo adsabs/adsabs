@@ -4,7 +4,7 @@ _basedir = os.path.abspath(os.path.dirname(__file__))
 
 APP_NAME = "adsabs"
 
-class DefaultConfig(object):
+class AppConfig(object):
     
     DEBUG = False
 
@@ -50,7 +50,13 @@ class DefaultConfig(object):
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
-               
-class DebugConfig(DefaultConfig):
-    DEBUG = True
+
+try:
+    from local_config import LocalConfig
+except ImportError:
+    LocalConfig = type('LocalConfig', (object,), dict())
     
+for attr in filter(lambda x: not x.startswith('__'), dir(LocalConfig)):
+    setattr(AppConfig, attr, LocalConfig.__dict__[attr])
+    
+config = AppConfig
