@@ -76,9 +76,12 @@ def _configure_extensions(app):
     login_manager.init_app(app) #@UndefinedVariable
     
     #mongo db
-    logger.debug("initializing mongodb")
-    mongodb.init_app(app) #@UndefinedVariable
-    
+    try:
+        logger.debug("initializing mongodb")
+        mongodb.init_app(app) #@UndefinedVariable
+    except:
+        pass
+        
     logger.debug("initializing solr connection")
     solr.init_app(app) #@UndefinedVariable
 

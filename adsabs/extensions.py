@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # For import *
-__all__ = ['login_manager', 'invenio_flk', 'mongodb', 'solr']
+__all__ = ['login_manager', 'mongodb', 'solr']
 
 #from flask.ext.sqlalchemy import SQLAlchemy #@UnresolvedImport
 #db = SQLAlchemy()
@@ -23,10 +23,3 @@ mongodb = MongoAlchemy()
 from flask.ext.solrpy import FlaskSolrpy #@UnresolvedImport
 solr = FlaskSolrpy()
 
-invenio_flk = None
-try:
-    import invenio #@UnresolvedImport
-    from core.flask_invenio import invenioInterface
-    invenio_flk = invenioInterface()
-except:
-    pass

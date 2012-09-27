@@ -3,7 +3,7 @@ sys.path.append('..')
 
 from flask import Blueprint, request, render_template
 from adsabs.modules.user.backend_interface import get_user_from_developer_key
-from adsabs.extensions import invenio_flk
+from adsabs.core.data.invenio import get_abstract_xml_from_ads_id
 
 from ret_functions import ret_xml
 
@@ -37,7 +37,7 @@ def get_abstract(data_format):
             return ret_xml('<error>Authentication error.</error>')
         
         #I get the record from invenio
-        record_abstract = invenio_flk.get_abstract_xml_from_ads_id(ads_id)
+        record_abstract = get_abstract_xml_from_ads_id(ads_id)
         
         if not record_abstract:
             return ret_xml('<error>No record found.</error>')
