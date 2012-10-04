@@ -29,6 +29,12 @@ class SolrDocument(object):
     def invenio_marcxml_url(self):
         return record_url(self.recid, of='xm')
     
+    def joined(self, field, sep=','):
+        val = self.__getattr__(field)
+        if type(val) is list:
+            return sep.join(val)
+        return val
+    
     def solr_url(self, wt=None):
         if wt is None:
             return config.SOLR_URL + '/select?q=id:' + quote(str(self.id))

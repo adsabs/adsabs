@@ -19,9 +19,7 @@
     
 <div class="row">
     <div class="span2"><label>Authors</label></div>
-    {% if doc.author %}
-    <div class="span5">{{ '; '.join(doc.author) }}</div>
-    {% endif %}
+    <div class="span5">{{ doc.joined('author', ';') }}</div>
 </div>
 
 <div class="row">
@@ -41,11 +39,8 @@
 
 <div class="row">
     <div class="span2"><label>Keywords</label></div>
-    {% if doc.keyword %}
-    <div class="span5">{{ '; '.join(doc.keyword) }}</div>
-    {% else %}
+    <div class="span5">{{ doc.joined('keyword') }}</div>
     <div class="span5"><em>none</em></div>
-    {% endif %}
 </div>
 
 <div class="row">
