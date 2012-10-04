@@ -28,10 +28,10 @@ class AppConfig(object):
     MONGOALCHEMY_SERVER = "localhost"
     
     MONGOALCHEMY_COLLECTIONS = {
-        'bibstem.Bibstem':         '/proj/ads/abstracts/config/bibstems.dat',
-        'fulltext.FulltextItem': '/proj/ads/abstracts/config/links/fulltext/all.links',
-        'refereed.RefereedItem': '/proj/ads/abstracts/config/links/refereed/all.links',
-        'readers.Readers':         '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
+        'bibstem': '/proj/ads/abstracts/config/bibstems.dat',
+        'fulltext': '/proj/ads/abstracts/config/links/fulltext/all.links',
+        'refereed': '/proj/ads/abstracts/config/links/refereed/all.links',
+        'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
         }
     
     APP_VERSION = '2012-08-21'

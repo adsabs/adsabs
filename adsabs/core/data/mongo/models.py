@@ -4,11 +4,15 @@ Created on Sep 18, 2012
 @author: jluker
 '''
 import os
+from config import config
 from stat import ST_MTIME
 from datetime import datetime
 
 from adsabs.extensions import mongodb
 from flask.ext.mongoalchemy import document #@UnresolvedImport
+
+import logging
+log = logging.getLogger(__name__)
 
 class AdsUser(mongodb.Document): #@UndefinedVariable
     """
@@ -48,12 +52,19 @@ class DataCollection(mongodb.Document):
         ordered_fields.extend(fields.items())
         return ordered_fields
         
-    def needs_update(self, source_file):
+    @classmethod
+    def needs_update(cls):
+        collection_name = cls.config_collection_name
+        source_file = config.MONGOALCHEMY_COLLECTIONS[collection_name]
+        log.info("checking freshness of %s collection vs %s" % (collection_name, source_file))
         last_modified = datetime.fromtimestamp(os.stat(source_file)[ST_MTIME])
-        dlt = DataLoadTime(collection=self.get_collection_name())
+        log.debug("%s last updated: %s" % (collection_name, last_modified))
+        dlt = DataLoadTime.query.filter(DataLoadTime.collection == collection_name).first()
         if not dlt:
             return True
+        log.debug("%s last updated: %s" % (collection_name, dlt))
         
+    @classmethod
     def load_data(self, source_file):
         pass
     

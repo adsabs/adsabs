@@ -1,7 +1,13 @@
 
-from adsdata import collections 
+from adsabs.core.data import mongo
 from optparse import OptionParser
 
+def main(opts):
+    
+    for model_class in mongo.data_models():
+        collection_name = model_class.collection_name
+        
+    
 if __name__ == '__main__':
     op = OptionParser()
     op.set_usage("usage: load_data_sources.py [options] ")
@@ -15,3 +21,7 @@ if __name__ == '__main__':
         help='just check status of data freshness', default=False)
     op.add_option('--collection', dest='collection', action='store',
         help='load only this collection') 
+    
+    (opts, args) = op.parse_args()
+    
+    main(opts)
