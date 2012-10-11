@@ -33,6 +33,7 @@ class AppConfig(object):
         'refereed': '/proj/ads/abstracts/config/links/refereed/all.links',
         'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
         }
+    MONGO_DATA_LOAD_BATCH_SIZE = 100000
     
     APP_VERSION = '2012-08-21'
     

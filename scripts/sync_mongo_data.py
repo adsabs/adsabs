@@ -1,27 +1,54 @@
 
-from adsabs.core.data import mongo
-from optparse import OptionParser
+import os
+import site
+site.addsitedir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from flask.ext.script import Manager, Command, Option #@UnresolvedImport
 
-def main(opts):
+from adsabs import create_app
+from config import config
+manager = Manager(create_app(config))
+
+from adsabs.core.data import mongo
+
+class Sync(Command):
+    """
+    updates the mongo data collections from their data source files
+    """
     
-    for model_class in mongo.data_models():
-        collection_name = model_class.collection_name
+    def run(self, collection=None, force=False, debug=False):
+        for model_class in mongo.data_models():
+            if collection and collection != model_class.config_collection_name:
+                print "skipping %s" % model_class.config_collection_name
+                continue
+            if model_class.needs_sync() or force:
+                model_class.load_data(batch_size=config.MONGO_DATA_LOAD_BATCH_SIZE)
+            else:
+                print "%s does not need syncing" % model_class.config_collection_name
         
+    def get_options(self):
+        return [
+            Option('-f','--force', dest="force", type=bool, default=False),
+            Option('-d','--debug', dest="debug", type=bool, default=False),
+            Option('-c','--collection', dest="collection", type=str),
+            ]
+        
+class Status(Command):
+    """
+    reports on update status of mongo data collections
+    """
     
-if __name__ == '__main__':
-    op = OptionParser()
-    op.set_usage("usage: load_data_sources.py [options] ")
-    op.add_option('--verbose', dest='verbose', action='store_true',
-        help='write log output to stdout', default=False)
-    op.add_option('--debug', dest='debug', action='store_true',
-        help='include debugging info in log output', default=False)
-    op.add_option('--force', dest='force', action='store_true',
-        help='ignore modtimes', default=False)
-    op.add_option('--status', dest='status', action='store_true',
-        help='just check status of data freshness', default=False)
-    op.add_option('--collection', dest='collection', action='store',
-        help='load only this collection') 
+    def run(self, collection=None, debug=False):
+        for model_class in mongo.data_models():
+            print "%s needs sync? : %s" % (model_class.config_collection_name, model_class.needs_sync())
     
-    (opts, args) = op.parse_args()
-    
-    main(opts)
+    def get_options(self):
+        return [
+            Option('-d','--debug', dest="debug", type=bool, default=False),
+            ]
+        
+manager.add_command('sync', Sync())
+manager.add_command('status', Status())
+
+if __name__ == "__main__":
+    manager.run()
+
