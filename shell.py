@@ -9,7 +9,6 @@ from config import config
 
 manager = Manager(create_app())
 
-from adsabs import create_app
 app = create_app(config)
 project_root_path = os.path.join(os.path.dirname(app.root_path))
 
