@@ -48,17 +48,6 @@ class DataCollection(mongodb.Document):
     field_order = []
     aggregated = False
     
-    def get_fields_ordered(self):
-        fields = self.get_fields()
-        if not self.field_order:
-            return fields
-        ordered_fields = []
-        for field_name in self.field_order:
-            ordered_fields.append(fields[field_name])
-            del fields[field_name]
-        ordered_fields.extend(fields.items())
-        return ordered_fields
-        
     @classmethod
     def last_synced(cls):
         collection_name = cls.config_collection_name
@@ -81,7 +70,7 @@ class DataCollection(mongodb.Document):
     def needs_sync(cls):
         """
         compare the modification time of a data source
-        to it's last_synced time in the data_load_time collection
+        to its last_synced time in the data_load_time collection
         """
         collection_name = cls.config_collection_name
         last_modified = cls.last_modified()
@@ -120,7 +109,7 @@ class DataCollection(mongodb.Document):
         if not source_file:
             source_file = cls.get_source_file()
         
-        fields = cls.field_order
+        fields = [x.db_field for x in cls.field_order]
         try:
             fh = open(source_file, 'r')
         except IOError, e:
@@ -150,7 +139,7 @@ class DataCollection(mongodb.Document):
 
         log.info("done loading %d records into %s" % (collection.count(), load_collection_name))
 
-        cls.post_load_data()
+        cls.post_load_data(collection)
         
         dlt = DataLoadTime(collection=collection_name, last_synced=datetime.now())
         dlt.save()
@@ -166,67 +155,68 @@ class DataCollection(mongodb.Document):
         pass
     
 class Bibstem(DataCollection):
-    bibstem = mongodb.StringField(_id=True)
-    dunno = mongodb.EnumField(mongodb.StringField(), "R", "J", "C")
+    bibstem = mongodb.StringField()
+    type_code = mongodb.EnumField(mongodb.StringField(), "R", "J", "C")
     journal_name = mongodb.StringField()
     
-    config_collection_name = 'bibstem'
-    field_order = ['bibstem','dunno','journal_name']
+    config_collection_name = 'bibstems'
+    field_order = [bibstem,type_code,journal_name]
     
     def __str__(self):
         return "%s (%s): %s" % (self.bibstem, self.dunno, self.journal_name)
     
-class FulltextItem(DataCollection):
+class FulltextLink(DataCollection):
     bibcode = mongodb.StringField(_id=True)
     fulltext_source = mongodb.ListField(mongodb.StringField())
     database = mongodb.SetField(mongodb.StringField())
     provider = mongodb.StringField()
     
-    config_collection_name = 'fulltext'
-    field_order = ['bibcode','fulltext_source','database','provider']
+    config_collection_name = 'fulltext_links'
+    field_order = [bibcode,fulltext_source,database,provider]
     
     def __str__(self):
         return "%s: %s" % (self.bibcode, self.fulltext_source)
 
 class Readers(DataCollection):
     
-    bibcode = mongodb.StringField(_id=True)
+    bibcode = mongodb.StringField()
     readers = mongodb.SetField(mongodb.StringField())
     
     aggregated = True
     config_collection_name = 'readers'
-    field_order = ['bibcode', 'readers']
+    field_order = [bibcode, readers]
     
     def __str__(self):
         return "%s: [%s]" % (self.bibcode, self.readers)
     
     @classmethod
-    def post_load_data(cls, collection):
-        collection_name = cls.config_collection_name
-        map_reduce_listify(collection, collection_name, 'bibcode', 'readers')
+    def post_load_data(cls, source_collection):
+        target_collection_name = cls.config_collection_name
+        map_reduce_listify(source_collection, target_collection_name, 'bibcode', 'readers')
     
 class References(DataCollection):
     
-    bibcode = mongodb.StringField(_id=True)
+    bibcode = mongodb.StringField()
     references = mongodb.SetField(mongodb.StringField())
     
+    aggregated = True
     config_collection_name = 'references'
-    field_order = ['bibcode', 'references']
+    field_order = [bibcode, references]
     
     def __str__(self):
         return "%s: [%s]" % (self.bibcode, self.references)
     
     @classmethod
-    def post_load_data(cls, collection):
-        collection_name = cls.config_collection_name
-        map_reduce_listify(collection, collection_name, 'bibcode', 'references')
+    def post_load_data(cls, source_collection):
+        target_collection_name = cls.config_collection_name
+        map_reduce_listify(source_collection, target_collection_name, 'bibcode', 'references')
     
 class Refereed(DataCollection):
 
     bibcode = mongodb.StringField(_id=True)
     
     config_collection_name = 'refereed'
-    field_order = ['bibcode']
+    field_order = [bibcode]
     
     def __str__(self):
         return self.bibcode
@@ -238,7 +228,7 @@ class DocMetrics(DataCollection):
     reads = mongodb.IntField()
     
     config_collection_name = 'docmetrics'
-    field_order = ['bibcode','boost','citations','reads']
+    field_order = [bibcode,boost,citations,reads]
     
     def __str__(self):
         return "%s: %s, %s, %s" % (self.bibcode, self.boost, self.citations, self.reads)
@@ -248,8 +238,8 @@ class Accno(DataCollection):
     bibcode = mongodb.StringField(_id=True)
     accno = mongodb.StringField()
 
-    config_collection_name = 'accno'
-    field_order = ['bibcode','accno']
+    config_collection_name = 'accnos'
+    field_order = [bibcode,accno]
 
     def __str__(self):
         return "%s: %s" % (self.bibcode, self.accno)

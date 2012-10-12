@@ -23,4 +23,5 @@ def map_reduce_listify(source, target_collection_name, key_field, value_field):
 
     log.info("running map-reduce on %s" % source.name)
     source.map_reduce(map_func, reduce_func, target_collection_name)
-    source.update({}, {'$rename', {'value.%s' % value_field : value_field}}, safe=True, multi=True)
+    source.update({}, {'$rename': {('value.%s' % value_field) : value_field}}, safe=True, multi=True)
+    

@@ -28,10 +28,12 @@ class AppConfig(object):
     MONGOALCHEMY_SERVER = "localhost"
     
     MONGOALCHEMY_COLLECTIONS = {
-        'bibstem': '/proj/ads/abstracts/config/bibstems.dat',
-        'fulltext': '/proj/ads/abstracts/config/links/fulltext/all.links',
+        'bibstems': '/proj/ads/abstracts/config/bibstems.dat',
+        'fulltext_links': '/proj/ads/abstracts/config/links/fulltext/all.links',
         'refereed': '/proj/ads/abstracts/config/links/refereed/all.links',
         'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
+        'references': '/proj/ads_abstracts/config/links/reference/all.links',
+        'accnos': '/proj/ads/abstracts/config/bib2accno.dat',
         }
     MONGO_DATA_LOAD_BATCH_SIZE = 100000
     
