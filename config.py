@@ -34,6 +34,7 @@ class AppConfig(object):
         'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
         'references': '/proj/ads_abstracts/config/links/reference/all.links',
         'accnos': '/proj/ads/abstracts/config/bib2accno.dat',
+        'docmetrics': '/proj/adsduo/abstracts/config/links/relevance/docmetrics.tab',
         }
     MONGO_DATA_LOAD_BATCH_SIZE = 100000
     
