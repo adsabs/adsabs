@@ -22,3 +22,27 @@ div.absview div.row {
 div.absview div.row label {
 	font-weight: bold;
 }
+
+
+/*CSS for global Layout*/
+html,
+body {
+    height: 100%;
+}
+ 
+#wrap {
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    margin: 0 auto -200px;
+}
+#push,
+#footer {
+    height: 200px;
+    
+    font-size:12px;
+	line-height:13px;
+}
+#global_body_container {
+	margin-top:10px;	
+}

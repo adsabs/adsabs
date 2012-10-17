@@ -7,25 +7,34 @@ from forms import (SignupForm, LoginForm, RecoverPasswordForm,
                    ChangePasswordForm, ReauthForm)
 from backend_interface import authenticate
 
+import logging
+
 # For import *
 __all__ = ['user_blueprint', 'index', 'login', 'reauth', 'logout', 'signup', 'change_password',]
 
 #definition of the blueprint for the user part
 user_blueprint = Blueprint('user', __name__, template_folder="templates", static_folder="static")
 
+log = logging.getLogger(__name__)
+
 @user_blueprint.route('/', methods=['GET'])
 def index():
     """
     Index page of the User
     """
+    log.debug('Index of user page.')
     if current_user.is_authenticated():
+        log.debug('User already authenticated')
         return render_template('user_home_page.html')
+    
+    log.debug('User not authenticated: redirect to authentication page.')
     return redirect(url_for('user.login'))
 
 @user_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     """
     """
+    log.debug('Login form')
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
 
     if form.validate_on_submit():

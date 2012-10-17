@@ -28,7 +28,12 @@ class localAdsUser():
         self.developer_level = user_local_info.developer_level
         
         #for the templates
-        self.name = self.username
+        if self.firstname != '' and self.lastname != '':
+            self.name ='%s %s' % (self.firstname , self.lastname)
+        elif self.lastname != '':
+            self.name = self.lastname
+        else:
+            self.name = self.username
     
     AUTHENTICATED = True
     #all this part is needed by flask-login to work

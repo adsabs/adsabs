@@ -1,38 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
+	<meta charset="UTF-8">
+	<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
+	
+	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+	
+	<!-- bootstrap stuff -->
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}" rel="stylesheet">
 
+	<!-- IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
-
-<!-- bootstrap stuff -->
-<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
-
-<link href="/static/css/styles.css" rel="stylesheet">
-
-{% block head%}{% endblock %}
+	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
+	
+	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+	
+	{% block head%}{% endblock %}
 </head>
 <body>
 
-<div id="topnav" class="span9">
-{% if current_user.is_authenticated() %} 
-Logged user: <a href="{{ url_for('user.index') }}">{{ current_user.name }}</a>
-{% else %}
-<a href="{{ url_for('user.login') }}?next={{ url_for('index.index') }}">Login</a>
-{% endif %}
-</div>
+<div id="wrap">
+	<div class="navbar navbar-inverse navbar-static-top navbar-small">
+		<div class="navbar-inner">
+			<div class="container">
+				<ul class="nav">
+					<li class="active"><a href="{{ url_for('index.index') }}">ADS 2</a></li>
+              		<li><a href="http://adsabs.harvard.edu">ADS Classic</a></li>
+              		<li><a href="#mirrors">Mirrors</a></li>
+              		<li><a href="#help">Help</a></li>
+              	</ul>
+			</div>
+		</div>
+	</div>
+	<div class="navbar navbar-static-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</a>
+				<a class="brand" href="{{ url_for('index.index') }}"></a>
+				<div class="nav-collapse collapse">
+					<ul class="nav">
+						<li class="divider-vertical"></li>
+						<li><a href="{{ url_for('index.index') }}">Home</a></li>
+						<li><a href="#about">About</a></li>
+						<li><a href="#contact">Contact</a></li>
+					</ul>
+					<ul class="nav pull-right">
+						<li class="dropdown">
+							{% if current_user.is_authenticated() %}
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown">Logged in as {{ current_user.name }} <b class="caret"></b></a>
+							<ul class="dropdown-menu">
+					    		<li class="nav-header">Options</li>
+					            <li><a href="#">Action</a></li>
+					            <li><a href="#">Another action</a></li>
+					            <li class="divider"></li>
+					            <li class="nav-header">Settings</li>
+					            <li><a href="#">Separated link</a></li>
+					            <li class="divider"></li>
+					            <li><a href="{{ url_for('user.logout') }}?next={{ url_for('index.index') }}">Sign off</a></li>
+				            </ul>
+				            {% else %}
+							<li><a href="{{ url_for('user.login') }}?next={{ url_for('index.index') }}">Log in</a></li>
+							{% endif %}
+						</li>
+					</ul>
+				</div><!--/.nav-collapse -->
+			</div>
+		</div>
+	</div> <!-- Navbar -->
+ 
+	<div id="global_body_container" class="container">
+		
+		<div id="flashmsg">
+		{% from 'macros/misc.html' import render_flash_message %}
+		{{ render_flash_message() }}
+		</div>
+		
+		<div id="pagebody">
+		{% block body %}{% endblock %}
+		</div>
+	
+	</div> <!-- Container -->
+	<div id="push"></div>
+</div><!-- Wrap -->
 
-<div id="flashmsg" class="span9">
-{% from 'macros/misc.html' import render_flash_message %}
-{{ render_flash_message() }}
-</div>
-
-<div id="pagebody" class="span9">
-{% block body %}{% endblock %}
-</div>
+<div id="footer">
+	<div class="container">
+		<footer>
+			<hr>
+			{% block footer %}
+			<div class="row">
+				<div class="span1">
+					<a href="http://www.nasa.gov"><img src="{{ url_for('static', filename='images/nasa.png') }}" title="NASA"/></a>
+				</div>
+				<div class="span3">
+					<p>&copy; The SAO/NASA Astrophysics Data System</p>
+					<p>The ADS is operated by the Smithsonian Astrophysical Observatory under NASA Grant NNX12AG54G</p>
+					<p><a href="#terms_and_conditions">Terms and Conditions</a></p>
+				</div>
+				<div class="span1">
+					<a href="#mirrors">Mirrors</a><br/>
+					<a href="#contacts">Contacts</a><br/>
+					<a href="#faq">FAQ</a><br/>
+					<a href="#sitemap">Site Map</a><br/>
+					<a href="#careers">Careers</a><br/>
+				</div>
+				<div class="span2">
+					<a href="http://www.si.edu">Smithsonian Institution</a><br/>
+					<a href="http://www.si.edu/Privacy">Smithsonian Privacy Notice</a><br/>
+					<a href="http://www.si.edu/Termsofuse">Smithsonian Terms of Use</a><br/>
+					<a href="http://www.nasa.gov">Nasa</a><br/>
+					<a href="http://www.cfa.harvard.edu/sao">Smithsonian Astrophysical Observatory</a><br/>
+					<a href="http://www.harvard.edu">Harvard University</a><br/>
+				</div>
+				<div class="span4">
+				
+				</div>
+				<div class="span1">
+					<a href="http://www.cfa.harvard.edu/sao"><img src="{{ url_for('static', filename='images/si_logo.png') }}" title="Smithsonian Astrophysical Observatory"/></a>
+				</div>
+			</div>
+			{% endblock %}
+		</footer>
+	</div>
+</div><!-- Footer -->
 
 </body>
 </html>
