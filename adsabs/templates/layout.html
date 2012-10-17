@@ -36,7 +36,7 @@
               	</ul>
 			</div>
 		</div>
-	</div>
+	</div> <!-- Small navbar -->
 	<div class="navbar navbar-static-top">
 		<div class="navbar-inner">
 			<div class="container">
@@ -59,11 +59,7 @@
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown">Logged in as {{ current_user.name }} <b class="caret"></b></a>
 							<ul class="dropdown-menu">
 					    		<li class="nav-header">Options</li>
-					            <li><a href="#">Action</a></li>
-					            <li><a href="#">Another action</a></li>
-					            <li class="divider"></li>
-					            <li class="nav-header">Settings</li>
-					            <li><a href="#">Separated link</a></li>
+					            <li><a href="{{ url_for('user.index') }}">Settings</a></li>
 					            <li class="divider"></li>
 					            <li><a href="{{ url_for('user.logout') }}?next={{ url_for('index.index') }}">Sign off</a></li>
 				            </ul>
@@ -75,8 +71,7 @@
 				</div><!--/.nav-collapse -->
 			</div>
 		</div>
-	</div> <!-- Navbar -->
- 
+	</div> <!-- Navbar --> 
 	<div id="global_body_container" class="container">
 		
 		<div id="flashmsg">
@@ -97,37 +92,7 @@
 		<footer>
 			<hr>
 			{% block footer %}
-			<div class="row">
-				<div class="span1">
-					<a href="http://www.nasa.gov"><img src="{{ url_for('static', filename='images/nasa.png') }}" title="NASA"/></a>
-				</div>
-				<div class="span3">
-					<p>&copy; The SAO/NASA Astrophysics Data System</p>
-					<p>The ADS is operated by the Smithsonian Astrophysical Observatory under NASA Grant NNX12AG54G</p>
-					<p><a href="#terms_and_conditions">Terms and Conditions</a></p>
-				</div>
-				<div class="span1">
-					<a href="#mirrors">Mirrors</a><br/>
-					<a href="#contacts">Contacts</a><br/>
-					<a href="#faq">FAQ</a><br/>
-					<a href="#sitemap">Site Map</a><br/>
-					<a href="#careers">Careers</a><br/>
-				</div>
-				<div class="span2">
-					<a href="http://www.si.edu">Smithsonian Institution</a><br/>
-					<a href="http://www.si.edu/Privacy">Smithsonian Privacy Notice</a><br/>
-					<a href="http://www.si.edu/Termsofuse">Smithsonian Terms of Use</a><br/>
-					<a href="http://www.nasa.gov">Nasa</a><br/>
-					<a href="http://www.cfa.harvard.edu/sao">Smithsonian Astrophysical Observatory</a><br/>
-					<a href="http://www.harvard.edu">Harvard University</a><br/>
-				</div>
-				<div class="span4">
-				
-				</div>
-				<div class="span1">
-					<a href="http://www.cfa.harvard.edu/sao"><img src="{{ url_for('static', filename='images/si_logo.png') }}" title="Smithsonian Astrophysical Observatory"/></a>
-				</div>
-			</div>
+			{% include 'footer.html' %}
 			{% endblock %}
 		</footer>
 	</div>
