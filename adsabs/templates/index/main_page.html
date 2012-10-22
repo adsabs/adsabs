@@ -6,13 +6,31 @@
 
 {% block body %}
 
-<a href="{{ url_for('search.search') }}">SEARCH</a>
+<h3>The SAO/NASA Astrophysics Data System</h3>
+
+<div class="tabbable">
+	<ul class="nav nav-tabs">
+		<li class="active"><a href="#tab1" data-toggle="tab"> Search the ADS </a></li>
+		<li><a href="#tab2" data-toggle="tab"> Dashboard </a></li>
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active" id="tab1">
+    		{% include 'search/search_form.html' %}
+			<a href="{{ url_for('search.search') }}">SEARCH</a>
+		</div>
+    	<div class="tab-pane" id="tab2">
+      		<p>All the personalized info</p>
+    	</div>
+  	</div>
+</div>
+
+<!-- 
 
 <br>
 
 This is the content of variable coming from the configuration.
 <br>
 {{ config.APP_VERSION }}
-
+-->
 {% endblock %}
 

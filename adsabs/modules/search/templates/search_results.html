@@ -1,4 +1,5 @@
-{% from "macros.html" import render_search_result, render_search_form %}
+{% from "macros.html" import render_search_result %} {# Local import #}
+{% from "macros/search_macros.html" import render_search_form %} {# Global import #}
 
 {% extends "layout.html" %}
 

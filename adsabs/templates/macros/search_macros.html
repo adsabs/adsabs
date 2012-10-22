@@ -1,0 +1,12 @@
+{% macro render_search_form(form, cls='') %}
+<div class="{{ cls }}">
+    <form method="GET" action="{{ url_for('search.search') }}">
+        {{ form.rows }}
+        <fieldset>
+            <legend>ADS 2.0 Basic Search <!--  | <a href="{{ url_for('search.search_advanced') }}">Advanced Search</a>--></legend>
+            {{ form.q.label }} {{ form.q(size=40) }}
+            {{ form.submit }}
+        </fieldset>
+    </form>
+</div>
+{% endmacro %}

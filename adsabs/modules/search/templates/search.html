@@ -1,5 +1,3 @@
-{% from "macros.html" import render_search_form %}
-
 {% extends "layout.html" %}
 
 {% block titlehead %}Search{% endblock %}
@@ -8,6 +6,7 @@
 
 {% block body %}
 
-{{ render_search_form(form) }}
+{# The search form is rendered in a global template, because in this way I can have it global #}
+{% include 'search/search_form.html' %}
 
 {% endblock %}
