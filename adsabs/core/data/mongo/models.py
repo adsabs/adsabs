@@ -116,7 +116,7 @@ class DataCollection(mongodb.Document):
             log.error(str(e))
             return
         
-        reader = csv.DictReader(fh, fields, delimiter="\t", restkey='the_rest')
+        reader = csv.DictReader(fh, fields, delimiter="\t", restkey='unwanted')
         log.info("inserting records into %s..." % load_collection_name)
         
         batch = []
@@ -124,6 +124,8 @@ class DataCollection(mongodb.Document):
         while True:
             try:
                 record = reader.next()
+                if record.has_key('unwanted'):
+                    del record['unwanted']
             except StopIteration:
                 break
             batch.append(record)
