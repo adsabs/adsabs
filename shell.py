@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 import tempfile
 import subprocess
@@ -44,9 +45,9 @@ def tools():
     cd mongoadmin
     cp mongoadmin_project/settings.py.dist mongoadmin_project/settings.py
     perl -p -i -e 's/django\.db\.backends\.mysql/django.db.backends.sqlite3/' mongoadmin_project/settings.py
-    python manage.py syncdb --noinput
+    %s manage.py syncdb --noinput
     
-    """ % (activate, tools_dir)
+    """ % (activate, tools_dir, sys.executable)
     
     temp.close()
     subprocess.call(["chmod", "755", temp.name])
