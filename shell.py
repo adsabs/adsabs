@@ -41,7 +41,7 @@ def tools():
     %s
     cd %s
     pip install django
-    git clone https://github.com/thomasst/mongoadmin.git
+    git clone https://github.com/adsabs/mongoadmin.git
     cd mongoadmin
     cp mongoadmin_project/settings.py.dist mongoadmin_project/settings.py
     perl -p -i -e 's/django\.db\.backends\.mysql/django.db.backends.sqlite3/' mongoadmin_project/settings.py
