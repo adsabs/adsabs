@@ -130,13 +130,13 @@ class DataCollection(mongodb.Document):
                 break
             batch.append(record)
             if len(batch) >= batch_size:
-                log.info("inserting batch %d" % batch_num)
+                log.info("inserting batch %d into %s" % (batch_num, load_collection_name))
                 collection.insert(batch, safe=True)
                 batch = []
                 batch_num += 1
 
         if len(batch):
-            log.info("inserting final batch")
+            log.info("inserting final batch into %s" % load_collection_name)
             collection.insert(batch, safe=True)
 
         log.info("done loading %d records into %s" % (collection.count(), load_collection_name))
