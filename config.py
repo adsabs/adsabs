@@ -24,20 +24,6 @@ class AppConfig(object):
     RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
     RECAPTCHA_OPTIONS = {'theme': 'white'}
     
-    MONGOALCHEMY_DATABASE = 'adsabs_mongo'
-    MONGOALCHEMY_SERVER = "localhost"
-    
-    MONGOALCHEMY_COLLECTIONS = {
-        'bibstems': '/proj/ads/abstracts/config/bibstems.dat',
-        'fulltext_links': '/proj/ads/abstracts/config/links/fulltext/all.links',
-        'refereed': '/proj/ads/abstracts/config/links/refereed/all.links',
-        'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
-        'references': '/proj/ads_abstracts/config/links/reference/all.links',
-        'accnos': '/proj/ads/abstracts/config/bib2accno.dat',
-        'docmetrics': '/proj/adsduo/abstracts/config/links/relevance/docmetrics.tab',
-        }
-    MONGO_DATA_LOAD_BATCH_SIZE = 100000
-    
     APP_VERSION = '2012-08-21'
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'

@@ -3,7 +3,7 @@ sys.path.append('..')
 
 from flask import Blueprint, request, render_template
 from adsabs.modules.user.backend_interface import get_user_from_developer_key
-from adsabs.core.data.invenio import get_abstract_xml_from_ads_id
+from adsabs.core.invenio import get_abstract_xml_from_ads_id
 
 from ret_functions import ret_xml
 

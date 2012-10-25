@@ -8,7 +8,7 @@ try:
 except ImportError:
     import json
 
-from adsabs.core.data.mongo import AdsUser
+from .models import AdsUser
 
 class localAdsUser():
     """

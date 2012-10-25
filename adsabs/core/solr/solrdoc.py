@@ -8,8 +8,8 @@ from config import config
 from urllib2 import quote
 from urllib import urlencode
 
-from adsabs.core.data.invenio import record_url
-from adsabs.core.data.classic import abstract_url
+from adsabs.core.invenio import record_url
+from adsabs.core.classic import abstract_url
 
 class SolrDocument(object):
         
