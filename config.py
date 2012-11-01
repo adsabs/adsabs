@@ -26,6 +26,11 @@ class AppConfig(object):
     
     APP_VERSION = '2012-08-21'
     
+    MONGOALCHEMY_DATABASE = 'adsabs'
+    MONGOALCHEMY_SERVER = 'localhost'
+    MONGOALCHEMY_PORT = 27017
+    MONGOALCHEMY_OPTIONS = "safe=true"
+    
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
     SOLR_DEFAULT_ROWS = '20'
