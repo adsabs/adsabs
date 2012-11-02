@@ -157,9 +157,9 @@ def get_user_from_developer_key(dev_key):
     """
     function that will check if the developer key is a valid one and returns the 
     """
-    #I retrieve the user from the local database
-    user_local_info = AdsUser.query.filter(AdsUser.developer_key==dev_key).first() #@UndefinedVariable
-    if user_local_info:
-        return localAdsUser(user_local_info)
-    else:
-        return None
+    if dev_key:
+        #I retrieve the user from the local database
+        user_local_info = AdsUser.query.filter(AdsUser.developer_key==dev_key).first() #@UndefinedVariable
+        if user_local_info:
+            return localAdsUser(user_local_info)
+    return None

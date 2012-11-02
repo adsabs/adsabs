@@ -4,7 +4,7 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
-from simplejson import loads
+from simplejson import loads,dumps
 from .solrdoc import SolrDocument, SolrFacets
 
 class SolrResponse(object):
@@ -39,6 +39,9 @@ class SolrResponse(object):
         
     def get_docset(self):
         return self.docset
+    
+    def get_docset_data(self):
+        return [x.data for x in self.docset]
 
     def get_query(self):
         return self.data['responseHeader']['params']['q']
@@ -49,4 +52,7 @@ class SolrResponse(object):
     def get_qtime(self):
         return self.data['responseHeader']['QTime']
         
+    def as_json(self):
+        return dumps(self.data)
+    
         

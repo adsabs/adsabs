@@ -45,6 +45,7 @@ class AppConfig(object):
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
+    API_DEFAULT_RESPONSE_FORMAT = 'json'
 
 try:
     from local_config import LocalConfig
