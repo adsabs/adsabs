@@ -7,6 +7,7 @@ APP_NAME = "adsabs"
 class AppConfig(object):
     
     DEBUG = False
+    TESTING = False
 
     ADMINS = frozenset(['youremail@yourdomain.com'])
     SECRET_KEY = 'SecretKeyForSessionSigning'
