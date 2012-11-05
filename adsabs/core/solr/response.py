@@ -12,7 +12,7 @@ class SolrResponse(object):
     @staticmethod
     def from_json(json, request=None):
         data = loads(json)
-        docset = [SolrDocument(x) for x in data['response']['docs']]
+        docset = data['response']['docs']
         if 'facet_counts' in data['response']:
             facets = SolrFacets.from_dict(data['response']['facet_counts'])
         else:
@@ -37,11 +37,11 @@ class SolrResponse(object):
         else:
             raise StopIteration
         
-    def get_docset(self):
+    def get_docs(self):
         return self.docset
     
-    def get_docset_data(self):
-        return [x.data for x in self.docset]
+    def get_doc_objects(self):
+        return [SolrDocument(x) for x in self.docset]
 
     def get_query(self):
         return self.data['responseHeader']['params']['q']

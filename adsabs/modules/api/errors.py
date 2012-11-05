@@ -13,17 +13,24 @@ class ApiNotAuthenticatedError(Exception):
 class ApiInvalidRequest(Exception):
     pass
 
+class ApiRecordNotFound(Exception):
+    pass
+
 def init_error_handlers(app):
     @app.errorhandler(ApiNotAuthenticatedError)
-    @pushrod_view()
+    @pushrod_view(xml_template="error.xml")
     def not_authenticated(error):
-        resp = ApiResponse()
-        resp.error("API authentication failed: %s" % error.message, 401)
-        return resp.data(),401,None
+        msg = "API authentication failed: %s" % error.message
+        return {'error': msg},401,None
     
     @app.errorhandler(ApiInvalidRequest)
-    @pushrod_view()
+    @pushrod_view(xml_template="error.xml")
     def invalid_request(error):
-        resp = ApiResponse()
-        resp.error("API request invalid: %s" % error.message, 400)
-        return resp.data(),400,None
+        msg = "API request invalid: %s" % error.message
+        return {'error': msg},401,None
+
+    @app.errorhandler(ApiRecordNotFound)
+    @pushrod_view(xml_template="error.xml")
+    def record_not_found(error):
+        msg = "No record found with identifier %s" % error.message
+        return {'error': msg},404,None

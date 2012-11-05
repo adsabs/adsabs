@@ -3,7 +3,7 @@
 from config import config
 
 # For import *
-__all__ = ['login_manager', 'mongodb', 'solr' ]
+__all__ = ['login_manager', 'mongodb', 'solr', 'pushrod']
 
 #from flask.ext.sqlalchemy import SQLAlchemy #@UnresolvedImport
 #db = SQLAlchemy()

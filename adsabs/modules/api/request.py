@@ -6,7 +6,7 @@ Created on Nov 2, 2012
 
 from adsabs.modules.search.forms import QueryForm
 
-class ApiRequest(object):
+class ApiSearchRequest(object):
     
     def __init__(self, flask_request):
         self.flask_request = flask_request
@@ -20,3 +20,15 @@ class ApiRequest(object):
     
     def errors(self):
         pass
+    
+class ApiRecordRequest(object):
+    
+    def __init__(self, identifier, field=None):
+        self.query_id = identifier
+        self.query_field = field
+        
+    def query(self):
+        return "identifier:%s" % self.query_id
+    
+    def validate(self):
+        return True

@@ -6,18 +6,21 @@ Created on Nov 1, 2012
 from simplejson import dumps
 
 class ApiResponse(object):
+    pass
+
+class ApiSearchResponse(ApiResponse):
     
     @staticmethod
     def from_solr_response(solr_resp):
         results = {
             'count': solr_resp.get_count(),
-            'docs': solr_resp.get_docset_data(),
+            'docs': solr_resp.get_docs(),
             }
         #TODO: is this a good assumption?
         meta = {
-            'http_status': 200,
+            'error': None,
             }
-        return ApiResponse(results, meta)
+        return ApiSearchResponse(results, meta)
         
     def __init__(self, results={}, meta={}, error=None):
         self.results = results
@@ -29,12 +32,27 @@ class ApiResponse(object):
     def set_results(self, results):
         self.results = results
         
-    def error(self, msg, status=400):
+    def set_error(self, msg):
         self.meta['error'] = msg
-        self.http_status = status
         
     def data(self):
         return {
             'meta': self.meta,
             'results': self.results
             }
+        
+class ApiRecordResponse(ApiResponse):
+    
+    @staticmethod
+    def from_solr_response(solr_response):
+        doc = solr_response.next()
+        return ApiRecordResponse(doc)
+        
+    def __init__(self, doc):
+        self.doc = doc
+        
+    def data(self):
+        return self.doc
+    
+        
+    pass
