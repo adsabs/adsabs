@@ -64,14 +64,15 @@ def _configure_extensions(app):
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
     from adsabs.extensions import login_manager, mongodb, solr, pushrod
-    from adsabs.modules.user.backend_interface import get_user_by_id
+    from adsabs.modules.user import AdsUser
     
     # login.
     login_manager.login_view = 'user.login'
     login_manager.refresh_view = 'user.reauth'
+    
     @login_manager.user_loader
     def load_user(id):
-        return get_user_by_id(id)
+        return AdsUser.from_id(id)
     logger.debug("initializing login_manager")
     login_manager.init_app(app) #@UndefinedVariable
     

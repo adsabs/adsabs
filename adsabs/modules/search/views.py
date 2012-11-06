@@ -1,4 +1,5 @@
 from flask import Blueprint, request, g, render_template
+from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm
 from adsabs.core.solr import query
 

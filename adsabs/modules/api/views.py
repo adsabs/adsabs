@@ -7,7 +7,7 @@ from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 from functools import wraps
 
 import errors
-from adsabs.modules.user.backend_interface import get_user_from_developer_key
+from adsabs.modules.user import AdsUser
 from adsabs.core import solr
 from .request import ApiSearchRequest, ApiRecordRequest
 from .response import ApiSearchResponse, ApiRecordResponse
@@ -24,7 +24,7 @@ def api_user_required(func):
     def decorator(*args, **kwargs):
         if 'dev_key' not in request.args:
             raise errors.ApiNotAuthenticatedError("no developer token provided")
-        user = get_user_from_developer_key(request.args.get('dev_key'))
+        user = AdsUser.from_dev_key(request.args.get('dev_key'))
         if not user:
             raise errors.ApiNotAuthenticatedError("unknown user")
         return func(*args, **kwargs)
@@ -56,3 +56,8 @@ def record(identifier, field=None):
         return resp.data()
         
 
+#@api_blueprint.route('/mlt/', methods=['GET'])
+#@api_user_required
+#@pushrod_view(xml_template="mlt.xml")
+#def mlt():
+#    pass
