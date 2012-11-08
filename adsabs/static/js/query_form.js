@@ -1,6 +1,19 @@
 /**
  * 
  */
+function search_form_drawer_manager(obj_drower, obj_drawer_handler)
+/*function to open and close the drawer*/
+{
+	//I open the drawer
+	$(obj_drower).slideToggle('fast', function(){
+		//I check if the drawer is visible or not
+		if ($(obj_drower).is(":visible"))
+			$(obj_drawer_handler).html('less options');
+		else
+			$(obj_drawer_handler).html('more options');
+	});
+};
+
 //Remove all the disabled input
 $(':input').removeAttr("disabled");
 
@@ -18,7 +31,7 @@ for (var x=0; x<advanced_params_text.length; x++)
 {
 	if ($(advanced_params_text[x]).val() != '')
 	{
-		$("#advanced_options").show();
+		search_form_drawer_manager($("#advanced_options"), $("#drawer_handler"));
 		break;
 	}
 }
@@ -26,24 +39,10 @@ for (var x=0; x<advanced_params_check.length; x++)
 {
 	if ($(advanced_params_check[x]).attr('checked') == 'checked')
 	{
-		$("#advanced_options").show();
+		search_form_drawer_manager($("#advanced_options"), $("#drawer_handler"));
 		break;
 	}
 }
-
-
-function search_form_drawer_manager(obj_drower, obj_drawer_handler)
-/*function to open and close the drawer*/
-{
-	//I open the drawer
-	$(obj_drower).slideToggle('fast', function(){
-		//I check if the drawer is visible or not
-		if ($(obj_drower).is(":visible"))
-			$(obj_drawer_handler).html('less options');
-		else
-			$(obj_drawer_handler).html('more options');
-	});
-};
 
 
 //function search_form_second_order(sort_menu, obj_drower, obj_drawer_handler)
