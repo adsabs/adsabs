@@ -16,6 +16,7 @@ def search():
     if form.validate():
         resp = query(form.q.data)
         return render_template('search_results.html', resp=resp, form=form)
+
     
     return render_template('search.html', form=form)
 

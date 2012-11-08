@@ -22,3 +22,13 @@
 .navbar-small .nav > li > a {
 	padding: 2px 10px;	
 }
+
+.drower-handle {
+	line-height:4px;
+	color:#AAA;
+	margin-bottom:10px;
+}
+
+.form-search-cust {
+	margin-bottom:5px;
+}
