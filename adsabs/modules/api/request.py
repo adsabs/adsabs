@@ -4,13 +4,13 @@ Created on Nov 2, 2012
 @author: jluker
 '''
 
-from adsabs.modules.search.forms import QueryForm
+from .forms import ApiQueryForm
 
 class ApiSearchRequest(object):
     
     def __init__(self, flask_request):
         self.flask_request = flask_request
-        self.form = QueryForm(flask_request.values, csrf_enabled=False)
+        self.form = ApiQueryForm(flask_request.values, csrf_enabled=False)
         
     def validate(self):
         return self.form.validate()

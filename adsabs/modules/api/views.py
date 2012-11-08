@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 
-from flask import Blueprint, request, render_template, abort
+from flask import Blueprint, request, g
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 
 from functools import wraps
@@ -27,6 +27,7 @@ def api_user_required(func):
         user = AdsUser.from_dev_key(request.args.get('dev_key'))
         if not user:
             raise errors.ApiNotAuthenticatedError("unknown user")
+        g.api_user = user
         return func(*args, **kwargs)
     return decorator
         
