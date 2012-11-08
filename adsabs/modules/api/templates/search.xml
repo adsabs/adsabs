@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response>
+    <meta>
+    </meta>
+    <results count="{{ results.count }} ">
+    </results>
+</response>

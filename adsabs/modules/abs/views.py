@@ -4,7 +4,7 @@ Created on Sep 24, 2012
 @author: jluker
 '''
 from flask import Blueprint, request, g, render_template, abort
-from adsabs.core.data import solr
+from adsabs.core import solr
 
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", static_folder="static")
 

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from config import config
+
 # For import *
-__all__ = ['login_manager', 'mongodb', 'solr']
+__all__ = ['login_manager', 'mongodb', 'solr', 'pushrod']
 
 #from flask.ext.sqlalchemy import SQLAlchemy #@UnresolvedImport
 #db = SQLAlchemy()
@@ -23,3 +25,5 @@ mongodb = MongoAlchemy()
 from flask.ext.solrpy import FlaskSolrpy #@UnresolvedImport
 solr = FlaskSolrpy()
 
+from flask.ext.pushrod import Pushrod #@UnresolvedImport
+pushrod = Pushrod(default_renderer=config.API_DEFAULT_RESPONSE_FORMAT)

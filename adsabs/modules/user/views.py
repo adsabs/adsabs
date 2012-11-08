@@ -5,7 +5,7 @@ from flask.ext.login import (login_required, login_user,    #@UnresolvedImport
                 fresh_login_required, login_fresh)          #@UnresolvedImport
 from forms import (SignupForm, LoginForm, RecoverPasswordForm, 
                    ChangePasswordForm, ReauthForm)
-from backend_interface import authenticate
+from .user import authenticate
 
 import logging
 
