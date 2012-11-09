@@ -13,6 +13,7 @@ def api_defaults(*args, **kwargs):
 
 class ApiQueryForm(Form):
     q = fields.TextField('query', validators=[validators.required(), validators.length(min=2, max=2048)])
+    dev_key = fields.TextField('dev_key', default=None)
     rows = fields.IntegerField('rows', default=api_defaults)
     start = fields.IntegerField('start', default=api_defaults)
     sort = fields.TextField('sort', default=api_defaults)

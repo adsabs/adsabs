@@ -21,7 +21,13 @@ _BLUEPRINTS_MODULES = [
     {'module':user, 'blueprint':'user_blueprint', 'prefix':'/user'},
     {'module':search, 'blueprint':'search_blueprint', 'prefix':'/search'},
     {'module':api, 'blueprint':'api_blueprint', 'prefix':'/api'},
-    {'module':abs, 'blueprint':'abs_blueprint', 'prefix':'/abs' }
+    {'module':abs, 'blueprint':'abs_blueprint', 'prefix':'/abs' },
 ]
+
+try:
+    from adsabs.modules import searchcompare
+    _BLUEPRINTS_MODULES.append({'module':searchcompare, 'blueprint':'searchcompare_blueprint', 'prefix':'/searchcompare' })
+except ImportError:
+    pass
 
 BLUEPRINTS = _BLUEPRINTS_CORE + _BLUEPRINTS_MODULES
