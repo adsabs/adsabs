@@ -7,6 +7,7 @@ APP_NAME = "adsabs"
 class AppConfig(object):
     
     DEBUG = False
+    TESTING = False
 
     ADMINS = frozenset(['youremail@yourdomain.com'])
     SECRET_KEY = 'SecretKeyForSessionSigning'
@@ -24,28 +25,19 @@ class AppConfig(object):
     RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
     RECAPTCHA_OPTIONS = {'theme': 'white'}
     
-    MONGOALCHEMY_DATABASE = 'adsabs_mongo'
-    MONGOALCHEMY_SERVER = "localhost"
-    
-    MONGOALCHEMY_COLLECTIONS = {
-        'bibstems': '/proj/ads/abstracts/config/bibstems.dat',
-        'fulltext_links': '/proj/ads/abstracts/config/links/fulltext/all.links',
-        'refereed': '/proj/ads/abstracts/config/links/refereed/all.links',
-        'readers': '/proj/ads/abstracts/config/links/alsoread_bib/all.links',
-        'references': '/proj/ads_abstracts/config/links/reference/all.links',
-        'accnos': '/proj/ads/abstracts/config/bib2accno.dat',
-        'docmetrics': '/proj/adsduo/abstracts/config/links/relevance/docmetrics.tab',
-        }
-    MONGO_DATA_LOAD_BATCH_SIZE = 100000
-    
     APP_VERSION = '2012-08-21'
+    
+    MONGOALCHEMY_DATABASE = 'adsabs'
+    MONGOALCHEMY_SERVER = 'localhost'
+    MONGOALCHEMY_PORT = 27017
+    MONGOALCHEMY_OPTIONS = "safe=true"
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
     SOLR_DEFAULT_ROWS = '20'
     SOLR_DEFAULT_FIELDS_SEARCH = ['id','bibcode','title','author','pub','score','property','pubdate_sort']
     SOLR_DEFAULT_SORT = 'pubdate_sort desc'
-    SOLR_DEFAULT_PARAMS = [('fq', 'pubdate_sort:[* TO 20130000]')]
+    SOLR_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
     SOLR_DEFAULT_FORMAT = 'json'
     
     # copy logging.conf.dist -> logging.conf and uncomment
@@ -54,6 +46,7 @@ class AppConfig(object):
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
+    API_DEFAULT_RESPONSE_FORMAT = 'json'
 
 try:
     from local_config import LocalConfig

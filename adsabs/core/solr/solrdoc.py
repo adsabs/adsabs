@@ -7,9 +7,10 @@ Created on Sep 19, 2012
 from config import config
 from urllib2 import quote
 from urllib import urlencode
+from simplejson import dumps
 
-from adsabs.core.data.invenio import record_url
-from adsabs.core.data.classic import abstract_url
+from adsabs.core.invenio import record_url
+from adsabs.core.classic import abstract_url
 
 class SolrDocument(object):
         
@@ -41,6 +42,9 @@ class SolrDocument(object):
         else:
             return self.document_url() + urlencode({'wt': wt})
         
+    def to_json(self):
+        return dumps(self.data)
+    
 class SolrFacets(object):
     
     @staticmethod

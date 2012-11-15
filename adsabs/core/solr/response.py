@@ -4,7 +4,7 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
-from simplejson import loads
+from simplejson import loads,dumps
 from .solrdoc import SolrDocument, SolrFacets
 
 class SolrResponse(object):
@@ -12,7 +12,7 @@ class SolrResponse(object):
     @staticmethod
     def from_json(json, request=None):
         data = loads(json)
-        docset = [SolrDocument(x) for x in data['response']['docs']]
+        docset = data['response']['docs']
         if 'facet_counts' in data['response']:
             facets = SolrFacets.from_dict(data['response']['facet_counts'])
         else:
@@ -37,8 +37,11 @@ class SolrResponse(object):
         else:
             raise StopIteration
         
-    def get_docset(self):
+    def get_docs(self):
         return self.docset
+    
+    def get_doc_objects(self):
+        return [SolrDocument(x) for x in self.docset]
 
     def get_query(self):
         return self.data['responseHeader']['params']['q']
@@ -49,4 +52,7 @@ class SolrResponse(object):
     def get_qtime(self):
         return self.data['responseHeader']['QTime']
         
+    def as_json(self):
+        return dumps(self.data)
+    
         

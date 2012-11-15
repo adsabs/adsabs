@@ -1,6 +1,8 @@
 from flask import Blueprint, request, g, render_template
-from .forms import get_defaults_if_missing, QueryForm
-from adsabs.core.data.solr import query
+
+from flask.ext.login import current_user #@UnresolvedImport
+from .forms import QueryForm, get_defaults_if_missing
+from adsabs.core.solr import query
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", static_folder="static")

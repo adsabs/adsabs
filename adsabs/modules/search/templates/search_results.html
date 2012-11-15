@@ -13,7 +13,7 @@
 
 <h3>Total Hits: {{ resp.get_count() }}</h3>
 <ol class="searchresults">
-{% for doc in resp.get_docset() %}
+{% for doc in resp.get_doc_objects() %}
     {{ render_search_result(doc) }}
 {% endfor %}
 </ol>

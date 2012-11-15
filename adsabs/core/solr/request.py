@@ -35,6 +35,10 @@ class SolrParams(dict):
     def update(self, *args, **kwargs):
         for k, v in dict(*args, **kwargs).iteritems():
             self[k] = v
+            
+    def append(self, key, val):
+        self.setdefault(key, [])
+        self[key].append(val)
         
 class SolrRequest(object):
     
@@ -45,5 +49,31 @@ class SolrRequest(object):
     def get_response(self):
         json = g.solr.raw_query(**self.params)
         return SolrResponse.from_json(json, request=self)
+    
+    def set_format(self, format):
+        self.format = format
+        self.params.wt = format
+        
+    def set_rows(self, rows):
+        self.rows = rows
+        self.params.rows = rows
+        
+    def set_fields(self, fields):
+        self.fields = fields
+        self.params.fl = ','.join(fields)
+        
+    def set_sort(self, sort, direction="asc"):
+        self.sort = sort
+        self.sort_direction = direction
+        self.params.sort = "%s %s" % (sort, direction)
+        
+    def add_filter(self, field, value):
+        if not hasattr(self, 'filters'):
+            self.filters = {} 
+        self.filters.setdefault('field', [])
+        self.filters['field'].append(value)
+        self.params.append('fq', '%s:%s' % (field, value))
+        
+        
         
                                 
