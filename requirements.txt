@@ -11,3 +11,5 @@ WTForms>=1.0
 -e git+https://github.com/adsabs/flask-solrpy.git#egg=Flask-Solrpy
 simplejson
 lxml>=2.3.5
+unittest2
+fixtures

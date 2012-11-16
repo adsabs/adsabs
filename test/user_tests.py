@@ -1,51 +1,57 @@
 
 import os
 import site
-site.addsitedir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+site.addsitedir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #@UndefinedVariable
 
-import unittest
+import unittest2
 
 from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
 from config import config
 
-class UserTests(unittest.TestCase):
+class UserTests(unittest2.TestCase):
 
     def setUp(self):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
         app = create_app(config)
         
-        # insert fake api user
         from adsabs.extensions import mongodb
-        mongodb.session.db.connection.drop_database('test')
-        self.users = mongodb.session.db.ads_users
+        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
+        
+        from test.utils import *
+        self.insert_user = user_creator()
         
         self.app = app.test_client()
         
-    def insert_user(self, username, developer=False, perms={}):
-        self.users.insert({
-            "username": username + "_name",
-            "myads_id": username + "_myads_id",
-            "developer_key": + "_dev_key",
-            "cookie_id": username + "_cookie_id",
-            "developer": developer,
-            "developer_perm_data" : perms
-        })
-
     def test_ads_user(self):
         
-        user = AdsUser.from_id("a")
+        user = AdsUser.from_id("a_cookie_id")
         self.assertIsNone(user)
         
         self.insert_user("a")
-        user = AdsUser.from_id("a")
+        user = AdsUser.from_id("a_cookie_id")
         self.assertIsNotNone(user)
+        self.assertEqual("a_name", user.name)
         
-        user = AdsUser.from_dev_key("b")
+        user = AdsUser.from_dev_key("b_dev_key")
         self.assertIsNone(user)
         
-        self.insert_user("foo")
+        self.insert_user("b")
+        user = AdsUser.from_dev_key("b_dev_key")
+        self.assertIsNone(user)
+        
+        self.insert_user("c", developer=True)
+        user = AdsUser.from_dev_key("c_dev_key")
+        self.assertIsNotNone(user)
+        self.assertTrue(user.is_developer())
+        self.assertEqual("c_name", user.name)
+        
+        self.insert_user("d", developer=True, dev_perms={"foo": 1})
+        user = AdsUser.from_dev_key("d_dev_key")
+        self.assertIsNotNone(user)
+        self.assertIn("foo", user.get_dev_perms())
+        
         
 if __name__ == '__main__':
-    unittest.main()
+    unittest2.main()

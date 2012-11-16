@@ -9,21 +9,8 @@ from .solrdoc import SolrDocument, SolrFacets
 
 class SolrResponse(object):
     
-    @staticmethod
-    def from_json(json, request=None):
-        data = loads(json)
-        docset = data['response']['docs']
-        if 'facet_counts' in data['response']:
-            facets = SolrFacets.from_dict(data['response']['facet_counts'])
-        else:
-            facets = None
-        
-        return SolrResponse(docset, data, facets, request)
-        
-    def __init__(self, docset=[], data={}, facets=None, request=None):
-        self.docset = docset
-        self.data = data
-        self.facets = facets
+    def __init__(self, raw):
+        self.raw = raw
         self.iter_idx = -1
         
     def __iter__(self):
@@ -37,22 +24,42 @@ class SolrResponse(object):
         else:
             raise StopIteration
         
-    def get_docs(self):
-        return self.docset
+    def search_response(self):
+        resp = {
+            'meta': { 'errors': None },
+            'results': {
+                'count': self.get_count(),
+                'docs': self.get_docset(),
+                'facets': self.get_facets(),
+            }
+        }
+        return resp
     
-    def get_doc_objects(self):
-        return [SolrDocument(x) for x in self.docset]
+    def record_response(self, idx=0):
+        try:
+            return self.get_docset()[idx]
+        except IndexError:
+            return None
+        
+    def get_docset(self):
+        return self.raw['response'].get('docs', [])
+    
+    def get_docset_objects(self):
+        return [SolrDocument(x) for x in self.get_docset()]
 
+    def get_facets(self):
+        return self.raw['response'].get('facet_counts', {})
+    
     def get_query(self):
-        return self.data['responseHeader']['params']['q']
+        return self.raw['responseHeader']['params']['q']
     
     def get_count(self):
-        return int(self.data['response']['numFound'])
+        return int(self.raw['response']['numFound'])
     
     def get_qtime(self):
-        return self.data['responseHeader']['QTime']
+        return self.raw['responseHeader']['QTime']
         
     def as_json(self):
-        return dumps(self.data)
+        return dumps(self.raw)
     
         
