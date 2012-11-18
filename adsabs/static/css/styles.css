@@ -46,3 +46,31 @@ body {
 #global_body_container {
 	margin-top:10px;	
 }
+
+div.centered {
+	text-align:center;	
+}
+
+#advanced_options {
+	display: none;
+	margin-top:2px;
+}
+
+/*css for query forms*/
+.link_only_js {
+	cursor: pointer;
+}
+
+.adv_opt_box {
+	margin-bottom: 5px;
+	padding: 5px;
+}
+.adv_opt_box,  .label_adv_opt_box {
+	font-size: .9em;
+}
+
+.adv_opt_box_foll {
+	margin-left:10px;
+}
+
+

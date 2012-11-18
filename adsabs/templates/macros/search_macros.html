@@ -1,12 +1,64 @@
-{% macro render_search_form(form, cls='') %}
-<div class="{{ cls }}">
-    <form method="GET" action="{{ url_for('search.search') }}">
+{# ###### Macro for the basic search form ###### #}
+{% macro render_search_form(form) %}
+<div id="search_form">
+    <form class="form-search form-search-cust" method="GET" action="{{ url_for('search.search') }}">
         {{ form.rows }}
         <fieldset>
-            <legend>ADS 2.0 Basic Search <!--  | <a href="{{ url_for('search.search_advanced') }}">Advanced Search</a>--></legend>
-            {{ form.q.label }} {{ form.q(size=40) }}
-            {{ form.submit }}
-        </fieldset>
+            <!-- legend>ADS metadata and fulltext integrated search</legend-->
+            <div class="row">
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;', '&quot;');">Author</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;^', '&quot;');">First Author</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' intitle:&quot;', '&quot;');">Title</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' object:&quot;', '&quot;');">Object</a></small></div>
+            </div>
+	        {{ form.q(class="span6", placeholder=form.q.description, autofocus="autofocus") }}
+	        {{ form.db_key(class="span2") }}
+	        {{ form.sort_type() }}
+	        <button class="btn btn-primary">Search</button>
+	        <div id="advanced_options" class="row">
+	        	{# { form.sort_dir() } #}
+
+	        		<div class="span4 well adv_opt_box">
+	        			<div class="row">
+	        				<div class="span4">Publication date between</div>
+	        			</div>
+	        			<div class="row">
+	        				<div class="span4">
+	        				{{ form.month_from(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_from(placeholder='YYYY', maxlength="4", class="span1") }} and 
+	        				{{ form.month_to(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_to(placeholder='YYYY', maxlength="4", class="span1") }}
+	        				</div>
+	        			</div>
+	        		</div>
+	        		<div class="span2 well adv_opt_box adv_opt_box_foll">
+	        			<div class="row">
+	        				<div class="span2">{{ form.journal_abbr.description }}</div>
+	        			</div>
+	        			<div class="row">
+	        				<div class="span2">{{ form.journal_abbr(class="span2") }}</div>
+	        			</div>
+	        		</div>
+	        		<div class="span2 well adv_opt_box adv_opt_box_foll">
+	        			<div class="row">
+	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.refereed }} {{ form.refereed.description }}</label></div>
+	        			</div>
+	        			<div class="row">
+	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.article }} {{ form.article.description }}</label></div>
+	        			</div>
+	        		</div>
+	        	
+	        	{# ####COMMENTED### 
+	        	{% for radio in form.second_order_type %}
+	        		{% if loop.index == 1 %}
+	        			{{ radio(checked="checked", onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }} <br/>
+	        		{% else %}
+	        			{{ radio(onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }} <br/>
+	        		{% endif %} 
+	        	{% endfor %}####END COMMENTED### #}
+	        </div>
+        </fieldset>     
     </form>
+    <button class="btn btn-mini" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler">more options</button>
 </div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/query_form.js') }}"></script>
+
 {% endmacro %}
