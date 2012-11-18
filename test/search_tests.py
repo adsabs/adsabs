@@ -27,7 +27,7 @@ class SearchTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
 
     def test_search_page(self):
         rv = self.app.get('/search/')
-        assert 'ADS 2.0 Basic Search' in rv.data
+        assert 'Query the ADS database' in rv.data
         
     def test_search_results(self):
         fixture = self.useFixture(SolrRawQueryFixture())
