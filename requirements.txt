@@ -13,3 +13,4 @@ simplejson
 lxml>=2.3.5
 unittest2
 fixtures
+testtools
