@@ -36,9 +36,9 @@ class AppConfig(object):
     SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
     SOLR_DEFAULT_ROWS = '20'
     SOLR_DEFAULT_SORT = 'pubdate_sort desc'
+    SOLR_SORT_OPTIONS = ['DATE','RELEVANCE','CITED','POPULARITY']
     SOLR_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
     SOLR_DEFAULT_FORMAT = 'json'
-    SOLR_ALLOWED_FIELDS = ['id','bibcode','title','author','pub','score','property','pubdate_sort']
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
@@ -47,6 +47,17 @@ class AppConfig(object):
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
     API_DEFAULT_RESPONSE_FORMAT = 'json'
+    # this is the full list of fields available
+    # Note that most api accounts will not have access to the full list of fields
+    API_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','full','ack','identifier']
+    API_SOLR_FACET_FIELDS = {
+        'bibstem': 'bibstem_facet',
+        'author': 'author_facet',
+        'property': 'property',
+        'keyword': 'keyword_facet',
+        'pubdate': 'pubdate',
+        'pub': 'pub',
+    }
 
 try:
     from local_config import LocalConfig

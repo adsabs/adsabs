@@ -14,19 +14,20 @@ class ApiSearchRequest(object):
     
     def __init__(self, request_vals, user=None):
         self.form = ApiQueryForm(request_vals, csrf_enabled=False)
-        if user:
-            perms = user.get_dev_perms()
-        else:
-            perms = g.api_user.get_dev_perms()
+        if not user:
+            user = g.api_user
+        perms = user.get_dev_perms()
         self.perms = DevPermissions(perms)
         
     def validate(self):
-        return self.form.validate() and self.perms.check_permissions(self.form)
+        valid = self.form.validate()
+        perms_ok = self.perms.check_permissions(self.form)
+        return valid and perms_ok
     
     def execute(self):
         solr_req = SolrRequest(
             self.form.q.data,
-            facets=self.form.facets.data
+            facets=self.form.facet.data
             )
         self.resp = solr_req.get_response()
         return self.resp

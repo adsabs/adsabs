@@ -42,11 +42,11 @@ def search():
         
         
 @api_blueprint.route('/record/<identifier>', methods=['GET'])
-@api_blueprint.route('/record/<identifier>/<field>', methods=['GET'])
+@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
 @api_user_required
 @pushrod_view(xml_template="record.xml")
-def record(identifier, field=None):
-    record_req = ApiRecordRequest(identifier, field=field)
+def record(identifier, operator=None):
+    record_req = ApiRecordRequest(identifier, operator=operator)
     if record_req.validate():
         resp = solr.query(record_req.query())
         if not resp.get_count() > 0:
