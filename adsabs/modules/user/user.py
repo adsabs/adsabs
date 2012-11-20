@@ -121,9 +121,14 @@ class AdsUser():
     def get_id(self):
         return self.user_rec.cookie_id
     
+    def is_developer(self):
+        return self.user_rec.developer_key and True
+    
     def get_dev_key(self):
         return self.user_rec.developer_key
     
+    def get_dev_perms(self):
+        return self.user_rec.developer_perms
 
 def get_classic_user(login, password):
     """

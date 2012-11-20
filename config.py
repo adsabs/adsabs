@@ -35,10 +35,10 @@ class AppConfig(object):
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
     SOLR_DEFAULT_ROWS = '20'
-    SOLR_DEFAULT_FIELDS_SEARCH = ['id','bibcode','title','author','pub','score','property','pubdate_sort']
     SOLR_DEFAULT_SORT = 'pubdate_sort desc'
-    SOLR_DEFAULT_PARAMS = [('fq', 'pubdate_sort:[* TO 20130000]')]
+    SOLR_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
     SOLR_DEFAULT_FORMAT = 'json'
+    SOLR_ALLOWED_FIELDS = ['id','bibcode','title','author','pub','score','property','pubdate_sort']
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')

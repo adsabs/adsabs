@@ -80,14 +80,15 @@ def _configure_extensions(app):
     try:
         logger.debug("initializing mongodb")
         mongodb.init_app(app) #@UndefinedVariable
-    except:
-        pass
+    except Exception, e:
+        logger.error("Failed to initialize mongoalchemy session: %s" % e.message)
+        raise
         
     logger.debug("initializing solr connection")
     solr.init_app(app) #@UndefinedVariable
     
     logger.debug("initializing pushrod")
-    pushrod.init_app(app)
+    pushrod.init_app(app)  #@UndefinedVariable
 
 def _configure_error_handlers(app):
     """

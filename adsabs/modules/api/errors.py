@@ -5,12 +5,14 @@ Created on Nov 2, 2012
 '''
 
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
-from .response import ApiResponse
 
 class ApiNotAuthenticatedError(Exception):
     pass
 
 class ApiInvalidRequest(Exception):
+    pass
+
+class ApiPermissionError(Exception):
     pass
 
 class ApiRecordNotFound(Exception):
@@ -27,6 +29,12 @@ def init_error_handlers(app):
     @pushrod_view(xml_template="error.xml")
     def invalid_request(error):
         msg = "API request invalid: %s" % error.message
+        return {'error': msg},401,None
+    
+    @app.errorhandler(ApiPermissionError)
+    @pushrod_view(xml_template="error.xml")
+    def permission_error(error):
+        msg = "Permission error: %s " % error.message
         return {'error': msg},401,None
 
     @app.errorhandler(ApiRecordNotFound)

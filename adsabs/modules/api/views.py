@@ -10,7 +10,6 @@ import errors
 from adsabs.modules.user import AdsUser
 from adsabs.core import solr
 from .request import ApiSearchRequest, ApiRecordRequest
-from .response import ApiSearchResponse, ApiRecordResponse
 
 # For import *
 __all__ = ['api_blueprint']
@@ -35,11 +34,10 @@ def api_user_required(func):
 @api_user_required
 @pushrod_view(xml_template="search.xml")
 def search():
-    search_req = ApiSearchRequest(request)
+    search_req = ApiSearchRequest(request.values)
     if search_req.validate():
-        solr_resp = solr.query(search_req.query())
-        resp = ApiSearchResponse.from_solr_response(solr_resp)
-        return resp.data()
+        resp = search_req.execute()
+        return resp.search_response()
     raise errors.ApiInvalidRequest(search_req.errors())
         
         
@@ -50,11 +48,11 @@ def search():
 def record(identifier, field=None):
     record_req = ApiRecordRequest(identifier, field=field)
     if record_req.validate():
-        solr_resp = solr.query(record_req.query())
-        if not solr_resp.get_count() > 0:
+        resp = solr.query(record_req.query())
+        if not resp.get_count() > 0:
             raise errors.ApiRecordNotFound(identifier)
-        resp = ApiRecordResponse.from_solr_response(solr_resp)
-        return resp.data()
+        return resp.record_response()
+    raise errors.ApiInvalidRequest(record_req.errors())
         
 
 #@api_blueprint.route('/mlt/', methods=['GET'])
