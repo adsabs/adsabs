@@ -5,12 +5,19 @@ Created on Nov 15, 2012
 '''
 
 import re
+from flask import g
 from flask.ext.login import current_user #@UnresolvedImport
 
 from config import config
 from .errors import ApiPermissionError
 
 class DevPermissions(object):
+    
+    @staticmethod
+    def current_user_perms():
+        user = g.api_user
+        perms = user.get_dev_perms()
+        return DevPermissions(perms)
     
     def __init__(self, perms):
         self.perms = perms

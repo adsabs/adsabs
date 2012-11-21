@@ -14,19 +14,21 @@ from simplejson import loads
 from werkzeug import Headers #@UnresolvedImport
 from simplejson import loads
 
+from flask import request, g
 from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
+from adsabs.modules.api import ApiSearchRequest
 from adsabs.modules.api.permissions import DevPermissions as DP
 from adsabs.core.solr import SolrResponse
 from config import config
-from test.utils import SolrRawQueryFixture
+from test.utils import *
         
-class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
+class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
 
     def setUp(self):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
-        app = create_app(config)
+        self.app = create_app(config)
         
         from adsabs.extensions import mongodb
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
@@ -34,7 +36,7 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         from test.utils import user_creator
         self.insert_user = user_creator()
             
-        self.client = app.test_client()
+        self.client = self.app.test_client()
         
         
     def test_empty_requests(self):
@@ -74,8 +76,8 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
         self.assertEqual(rv.status_code, 200)
         
-#        rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
-#        self.assertEqual(rv.status_code, 404)
+        rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
+        self.assertEqual(rv.status_code, 200)
         
     def test_search_output(self):
         
@@ -93,12 +95,13 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         resp_data = loads(rv.data)
         self.assertIn('facets', resp_data['results'])
     
-#    def test_record_output(self):
-#        
-#        self.insert_user("foo", "baz")
-#        
-#        rv = self.client.get('/api/record/2012ApJ...759...36R?dev_key=baz')
-#        resp_data = loads(rv.data)
+    def test_record_output(self):
+        
+        self.insert_user("foo", developer=True)
+        
+        rv = self.client.get('/api/record/2012ApJ...759...36R?dev_key=foo_dev_key')
+        resp_data = loads(rv.data)
+        self.assertIn("Radiation", resp_data['title'])
     
     def test_content_types(self):
         
@@ -123,13 +126,17 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(rv.status_code, 406)
         self.assertIn('renderer does not exist', rv.data)
     
-    def test_user_permissions(self):
-        self.insert_user("a", "1")
-        self.insert_user("b", "2")
-        self.insert_user("c", "3")
-        self.insert_user("d", "4")
-        self.insert_user("e", "5")
-        self.insert_user("f", "6")
+    def test_request_creation(self):
+        
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(GlobalApiUserFixture("foo_dev_key"))
+        
+        with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&q=black+holes'):
+            self.app.preprocess_request()
+            fixture.set_api_user()
+            req = ApiSearchRequest(request.values)
+            solr_req = req.create_solr_request()
+            self.assertEquals(solr_req.params.q, 'black holes')
         
 class PermissionsTest(unittest2.TestCase):
     

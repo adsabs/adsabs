@@ -17,29 +17,31 @@ MIN_QUERY_LENGTH = 2
 MAX_QUERY_LENGTH = 2048
 SORT_DIRECTIONS = ['asc','desc']
 
-
+def validate_q(form, field):
+    """
+    just checks for min/max length so far
+    TODO: maybe do closer inspection of the query syntax?
+    """
+    if not len(field.data):
+        return
+    if len(field.data) < MIN_QUERY_LENGTH:
+        raise ValidationError("'q' input must be at least %s characters" % MIN_QUERY_LENGTH)
+    if len(field.data) > MAX_QUERY_LENGTH:
+        raise ValidationError("'q' input must be at no more than %s characters" % MAX_QUERY_LENGTH)
+        
 class ApiQueryForm(Form):
-    q = fields_.TextField('query', [validators.Required()])
     dev_key = fields_.TextField('dev_key', [validators.Required()])
+    flds = fields_.TextField('fields')
+    fmt = fields_.TextField('format')
+    hl = fields_.FieldList(fields_.TextField('hl'))
+    q = fields_.TextField('query', [validate_q])
     rows = fields_.IntegerField('rows')
     start = fields_.IntegerField('start')
     sort = fields_.TextField('sort')
-    flds = fields_.TextField('fields')
     facet = fields_.FieldList(fields_.TextField('facet'))
-    fmt = fields_.TextField('format')
     filter = fields_.FieldList(fields_.TextField('filter'))
-    hl = fields_.FieldList(fields_.TextField('hl'))
-    
-    def validate_q(self, field):
-        """
-        just checks for min/max length so far
-        TODO: maybe do closer inspection of the query syntax?
-        """
-        if len(field.data) < MIN_QUERY_LENGTH:
-            raise ValidationError("'q' input must be at least %s characters" % MIN_QUERY_LENGTH)
-        if len(field.data) > MAX_QUERY_LENGTH:
-            raise ValidationError("'q' input must be at no more than %s characters" % MAX_QUERY_LENGTH)
-        
+    hlq = fields_.TextField('hlq', [validate_q])
+
     def validate_flds(self, field):
         """
         checks that input is a comma separated list of field names
@@ -51,6 +53,25 @@ class ApiQueryForm(Form):
         for field in field.data.split(','):
             if field not in config.API_SOLR_FIELDS:
                 raise ValidationError("Invalid field selection: %s is not a selectable field" % field)
+    
+    def validate_fmt(self, field):
+        if not len(field.data):
+            return
+        if field.data not in VALID_FORMATS:
+            raise ValidationError("Invalid format: %s. Valid options are %s" % (field.data, ','.join(VALID_FORMATS)))
+    
+    def validate_hl(self, field):
+        for hl in field.data:
+            if not len(hl):
+                continue
+            if re.search('[^a-z\_\:', hl, re.I):
+                raise ValidationError("Invalid highlight input: %s. Format is field[:count].")
+            hl = hl.split(':')
+            if hl[0] not in config.API_SOLR_FIELDS:
+                raise ValidationError("Invalid highlight selection: %s is not a selectable field" % hl[0])
+            if len(hl) > 1:
+                if re.search('[^\d]', hl[1]):
+                    raise ValidationError("Invalid highlight option: %s. Value for count must be integer." % hl[1])
     
     def validate_sort(self, field):
         """
@@ -81,26 +102,6 @@ class ApiQueryForm(Form):
                 for opt in facet[1:]:
                     if re.search('[^\d]', opt):
                         raise ValidationError("Invalid facet options: %s. Values for limit and min must be integers." % opt)
-            
-    
-    def validate_fmt(self, field):
-        if not len(field.data):
-            return
-        if field.data not in VALID_FORMATS:
-            raise ValidationError("Invalid format: %s. Valid options are %s" % (field.data, ','.join(VALID_FORMATS)))
-    
-    def validate_hl(self, field):
-        for hl in field.data:
-            if not len(hl):
-                continue
-            if re.search('[^a-z\_\:', hl, re.I):
-                raise ValidationError("Invalid highlight input: %s. Format is field[:count].")
-            hl = hl.split(':')
-            if hl[0] not in config.API_SOLR_FIELDS:
-                raise ValidationError("Invalid highlight selection: %s is not a selectable field" % hl[0])
-            if len(hl) > 1:
-                if re.search('[^\d]', hl[1]):
-                    raise ValidationError("Invalid highlight option: %s. Value for count must be integer." % hl[1])
     
     def validate_filter(self, field):
         for filter in field.data:
@@ -113,3 +114,4 @@ class ApiQueryForm(Form):
             if field not in config.API_SOLR_FIELDS:
                 raise ValidationError("Invalid filter field selection: %s is not a queryable field" % field)
             
+    

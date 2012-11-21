@@ -37,7 +37,7 @@ class AppConfig(object):
     SOLR_DEFAULT_ROWS = '20'
     SOLR_DEFAULT_SORT = 'pubdate_sort desc'
     SOLR_SORT_OPTIONS = ['DATE','RELEVANCE','CITED','POPULARITY']
-    SOLR_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
+    SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
     SOLR_DEFAULT_FORMAT = 'json'
     
     # copy logging.conf.dist -> logging.conf and uncomment

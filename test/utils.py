@@ -7,6 +7,9 @@ Created on Nov 12, 2012
 import fixtures
 from simplejson import dumps
 
+from flask import g
+from adsabs.modules.user import AdsUser
+
 def user_creator():
     def func(username, developer=False, dev_perms=None):
         from adsabs.extensions import mongodb
@@ -26,6 +29,14 @@ def user_creator():
         user_collection.insert(user_data)
     return func
     
+class GlobalApiUserFixture(fixtures.Fixture):
+    
+    def __init__(self, dev_key):
+        self.dev_key = dev_key
+        
+    def set_api_user(self):
+        g.api_user = AdsUser.from_dev_key(self.dev_key)
+        
 class SolrRawQueryFixture(fixtures.MonkeyPatch):
     
     DEFAULT_RESPONSE = {
