@@ -10,6 +10,12 @@ import flask
 from flask.ext.pushrod.renderers import renderer #@UnresolvedImport
 from adsabs.extensions import pushrod
 
+VALID_FORMATS = []
+
+def _register(renderer):
+    VALID_FORMATS.extend(renderer.renderer_names)
+    pushrod.register_renderer(renderer)
+    
 # json is the default rendering method
 @renderer(name='json', mime_type=('application/json','text/html'))
 def json_renderer(unrendered, **kwargs):
@@ -26,5 +32,5 @@ def xml_renderer(unrendered, xml_template=None, **kwargs):
     else:
         return NotImplemented
     
-pushrod.register_renderer(json_renderer)
-pushrod.register_renderer(xml_renderer)
+_register(json_renderer)
+_register(xml_renderer)

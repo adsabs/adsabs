@@ -15,36 +15,45 @@ log = logging.getLogger(__name__)
         
 class SolrRequest(object):
     
-    @staticmethod
-    def parse_query_fields(q):
-        fields = []
-        p = re.compile('(?P<field>[a-z]+):\S') 
-        return [match.group('field') for match in p.finditer(q)]
-        
     def __init__(self, q, **kwargs):
         self.q = q
         self.params = SolrParams(q=q, **kwargs)
         
     def set_rows(self, rows):
-        self.rows = rows
         self.params.rows = rows
         
+    def set_start(self, start):
+        self.params.start = start
+        
     def set_fields(self, fields):
-        self.fields = fields
-        self.params.fl = ','.join(fields)
+        self.params.fl = fields
         
-    def set_sort(self, sort, direction="asc"):
-        self.sort = sort
-        self.sort_direction = direction
-        self.params.sort = "%s %s" % (sort, direction)
+    def set_sort(self, sort):
+        self.params.sort = sort
         
-    def add_filter(self, field, value):
-        if not hasattr(self, 'filters'):
-            self.filters = {} 
-        self.filters.setdefault('field', [])
-        self.filters['field'].append(value)
-        self.params.append('fq', '%s:%s' % (field, value))
+    def set_hlq(self, hlq):
+        self.params['hl.q'] = hlq
         
+    def add_filter(self, filter):
+        self.params.append('fq', filter)
+        
+    def add_facet(self, field, limit=None, mincount=None):
+        self.params['facet'] = "true"
+        self.params.append('facet.field', field)
+        if limit:
+            self.params['f.%s.limit' % field] = limit
+        if mincount:
+            self.params['f.%s.mincount' % field] = mincount
+            
+    def add_highlight(self, field, count=None):
+        self.params['hl'] = "true"
+        if not self.params.has_key('hl.fl'):
+            self.params['hl.fl'] = field
+        else:
+            self.params['hl.fl'] += ',' + field
+        if count:
+            self.params['hl.%s.snippets' % field] = count
+            
     def get_response(self):
         try:
             json = g.solr.raw_query(**self.params)
@@ -61,18 +70,18 @@ class SolrParams(dict):
     def __init__(self, *args, **kwargs):
         # set default values
         self.update(
-                    config.SOLR_DEFAULT_PARAMS,
+                    config.SOLR_MISC_DEFAULT_PARAMS,
                     sort=config.SOLR_DEFAULT_SORT,
                     rows=config.SOLR_DEFAULT_ROWS,
                     wt=config.SOLR_DEFAULT_FORMAT
                     )
         self.update(*args, **kwargs)
 
-    def __getitem__(self, key):
+    def __getattr__(self, key):
         val = dict.__getitem__(self, key)
         return val
 
-    def __setitem__(self, key, val):
+    def __setattr__(self, key, val):
         dict.__setitem__(self, key, val)
 
     def __repr__(self):
@@ -85,5 +94,6 @@ class SolrParams(dict):
             
     def append(self, key, val):
         self.setdefault(key, [])
-        self[key].append(val)
+        if val not in self[key]:
+            self[key].append(val)
                                 

@@ -14,18 +14,21 @@ from simplejson import loads
 from werkzeug import Headers #@UnresolvedImport
 from simplejson import loads
 
+from flask import request, g
 from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
+from adsabs.modules.api import ApiSearchRequest
+from adsabs.modules.api.permissions import DevPermissions as DP
 from adsabs.core.solr import SolrResponse
 from config import config
-from test.utils import SolrRawQueryFixture
+from test.utils import *
         
-class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
+class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
 
     def setUp(self):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
-        app = create_app(config)
+        self.app = create_app(config)
         
         from adsabs.extensions import mongodb
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
@@ -33,7 +36,7 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         from test.utils import user_creator
         self.insert_user = user_creator()
             
-        self.client = app.test_client()
+        self.client = self.app.test_client()
         
         
     def test_empty_requests(self):
@@ -73,31 +76,32 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
         self.assertEqual(rv.status_code, 200)
         
-#        rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
-#        self.assertEqual(rv.status_code, 404)
+        rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
+        self.assertEqual(rv.status_code, 200)
         
-#    def test_search_output(self):
-#        
-#        self.insert_dev_user("foo", "baz")
-#        self.solr.set_data({
-#            'response': {
-#                'numFound': 1,
-#                'docs': [],
-#            }
-#        })
-#        rv = self.client.get('/api/search/?q=black+holes&dev_key=baz')
-#        resp_data = loads(rv.data)
-#        self.assertIn('meta', resp_data)
-#        self.assertIn('results', resp_data)
-#        self.assertTrue(resp_data['results']['count'] >= 1)
-#        self.assertIsInstance(resp_data['results']['docs'], list)
+    def test_search_output(self):
+        
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(SolrRawQueryFixture())
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
+        resp_data = loads(rv.data)
+        self.assertIn('meta', resp_data)
+        self.assertIn('results', resp_data)
+        self.assertTrue(resp_data['results']['count'] >= 1)
+        self.assertIsInstance(resp_data['results']['docs'], list)
+        
+        self.insert_user("bar", developer=True, dev_perms={'facets': True})
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=bar_dev_key')
+        resp_data = loads(rv.data)
+        self.assertIn('facets', resp_data['results'])
     
-#    def test_record_output(self):
-#        
-#        self.insert_user("foo", "baz")
-#        
-#        rv = self.client.get('/api/record/2012ApJ...759...36R?dev_key=baz')
-#        resp_data = loads(rv.data)
+    def test_record_output(self):
+        
+        self.insert_user("foo", developer=True)
+        
+        rv = self.client.get('/api/record/2012ApJ...759...36R?dev_key=foo_dev_key')
+        resp_data = loads(rv.data)
+        self.assertIn("Radiation", resp_data['title'])
     
     def test_content_types(self):
         
@@ -122,31 +126,71 @@ class APIBasicTests(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(rv.status_code, 406)
         self.assertIn('renderer does not exist', rv.data)
     
-#    def test_facet_output(self):
-#        
-#        perms = {'facets': False}
-#        self.insert_user("facets_off", "foo", perms)
-#        self.solr.set_data({
-#            'response': {
-#                'numFound': 1,
-#                'docs': [],
-#                'facets': [ ('bar', 1) ]
-#            }
-#        })
-#        
-#        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo&facets=true')
-#        resp_data = loads(rv.data)
-#        self.assertIn('facets', resp_data)
+    def test_request_creation(self):
         
-    def test_permissions(self):
-        self.insert_user("a", "1")
-        self.insert_user("b", "2")
-        self.insert_user("c", "3")
-        self.insert_user("d", "4")
-        self.insert_user("e", "5")
-        self.insert_user("f", "6")
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(GlobalApiUserFixture("foo_dev_key"))
         
+        with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&q=black+holes'):
+            self.app.preprocess_request()
+            fixture.set_api_user()
+            req = ApiSearchRequest(request.values)
+            solr_req = req.create_solr_request()
+            self.assertEquals(solr_req.params.q, 'black holes')
+        
+class PermissionsTest(unittest2.TestCase):
     
+    def test_permissions(self):
         
+        p = DP({})
+        self.assertRaises(AssertionError, p._facets_ok, ["author"])
+        p = DP({'facets': True})
+        self.assertIsNone(p._facets_ok(["author"]))
+        p = DP({'ex_fields': ['author']})
+        self.assertRaisesRegexp(AssertionError, 'facets disabled', p._facets_ok, ["author"])
+        p = DP({'facets': True, 'ex_fields': ['author']})
+        self.assertRaisesRegexp(AssertionError, 'disallowed facet', p._facets_ok, ["author"])
+        p = DP({'facets': True, 'facet_limit_max': 10})
+        self.assertIsNone(p._facets_ok(["author:9"]))
+        self.assertIsNone(p._facets_ok(["author:10"]))
+        self.assertIsNone(p._facets_ok(["author:10:100"]))
+        self.assertRaisesRegexp(AssertionError, 'facet limit value 11 exceeds max', p._facets_ok, ["author:11"])
+        
+        p = DP({})
+        self.assertRaises(AssertionError, p._max_rows_ok, 10)
+        p = DP({'max_rows': 10})
+        self.assertIsNone(p._max_rows_ok(9))
+        self.assertIsNone(p._max_rows_ok(10))
+        self.assertRaises(AssertionError, p._max_rows_ok, 11)
+        self.assertRaisesRegexp(AssertionError, 'rows=11 exceeds max allowed value: 10', p._max_rows_ok, 11)
+        
+        p = DP({})
+        self.assertRaises(AssertionError, p._max_start_ok, 100)
+        p = DP({'max_start': 200})
+        self.assertIsNone(p._max_start_ok(100))
+        self.assertIsNone(p._max_start_ok(200))
+        self.assertRaises(AssertionError, p._max_start_ok, 300)
+        self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', p._max_start_ok, 300)
+        
+        p = DP({})
+        self.assertIsNone(p._fields_ok('bibcode,title'))
+        p = DP({'ex_fields': ['full']})
+        self.assertIsNone(p._fields_ok('bibcode,title'))
+        self.assertRaises(AssertionError, p._fields_ok, 'bibcode,title,full')
+        self.assertRaisesRegexp(AssertionError, 'disallowed fields: full', p._fields_ok, 'bibcode,title,full')
+        
+        p = DP({})
+        self.assertRaises(AssertionError, p._highlight_ok, ["abstract"])
+        p = DP({'highlight': True})
+        self.assertIsNone(p._highlight_ok(['abstract']))
+        p = DP({'ex_highlight_fields': ['abstract']})
+        self.assertRaisesRegexp(AssertionError, 'highlighting disabled', p._highlight_ok, ["abstract"])
+        p = DP({'ex_highlight_fields': ['abstract'], 'highlight': True})
+        self.assertRaisesRegexp(AssertionError, 'disallowed highlight field: abstract', p._highlight_ok, ["abstract"])
+        p = DP({'highlight': True, 'highlight_max': 3})
+        self.assertIsNone(p._highlight_ok(["abstract:2"]))
+        self.assertIsNone(p._highlight_ok(["abstract:3"]))
+        self.assertRaisesRegexp(AssertionError, 'highlight count 4 exceeds max allowed value: 3', p._highlight_ok, ["abstract:4"])
+    
 if __name__ == '__main__':
     unittest2.main()
