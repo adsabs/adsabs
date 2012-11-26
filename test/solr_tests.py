@@ -43,7 +43,9 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params.rows, 100)
         req.set_start(10)
         self.assertEqual(req.params.start, 10)
-        req.set_sort("DATE desc")
+        req.set_sort("DATE")
+        self.assertEqual(req.params.sort, "DATE asc")
+        req.set_sort("DATE", "desc")
         self.assertEqual(req.params.sort, "DATE desc")
         
     def test_solr_request_add_facet(self):

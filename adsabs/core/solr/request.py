@@ -19,6 +19,9 @@ class SolrRequest(object):
         self.q = q
         self.params = SolrParams(q=q, **kwargs)
         
+    def set_format(self, fmt):
+        self.params.wt = fmt
+        
     def set_rows(self, rows):
         self.params.rows = rows
         
@@ -26,10 +29,15 @@ class SolrRequest(object):
         self.params.start = start
         
     def set_fields(self, fields):
-        self.params.fl = fields
+        if isinstance(fields, list):
+            self.params.fl = ','.join(fields)
+        elif isinstance(fields, basestring):
+            self.params.fl = fields
+        else:
+            raise Exception("fields must be expressed as a list or comma-separated string")
         
-    def set_sort(self, sort):
-        self.params.sort = sort
+    def set_sort(self, sort_field, direction="asc"):
+        self.params.sort = "%s %s" % (sort_field, direction)
         
     def set_hlq(self, hlq):
         self.params['hl.q'] = hlq

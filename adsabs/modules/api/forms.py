@@ -83,9 +83,9 @@ class ApiQueryForm(Form):
             sort, direction = field.data.split()
         except:
             raise ValidationError("Invalid sort option: you must specify a type (%s) and direction (%s)" % \
-                                  (','.join(config.SOLR_SORT_OPTIONS, ','.join(SORT_DIRECTIONS))))
+                                  (','.join(config.SOLR_SORT_OPTIONS.keys(), ','.join(SORT_DIRECTIONS))))
         if sort not in config.SOLR_SORT_OPTIONS:
-            raise ValidationError("Invalid sort type. Valid options are %s" % ','.join(config.SOLR_SORT_OPTIONS))
+            raise ValidationError("Invalid sort type. Valid options are %s" % ','.join(config.SOLR_SORT_OPTIONS.keys()))
         if direction not in SORT_DIRECTIONS:
             raise ValidationError("Invalid sort direction. Valid options are %s" % ','.join(SORT_DIRECTIONS))
     

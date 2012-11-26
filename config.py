@@ -36,7 +36,11 @@ class AppConfig(object):
     SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
     SOLR_DEFAULT_ROWS = '20'
     SOLR_DEFAULT_SORT = 'pubdate_sort desc'
-    SOLR_SORT_OPTIONS = ['DATE','RELEVANCE','CITED','POPULARITY']
+    SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
+                         'RELEVANCE': 'score',
+                         'CITED': 'citation_count',
+                         'POPULARITY': 'read_count'
+                        }
     SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
     SOLR_DEFAULT_FORMAT = 'json'
     

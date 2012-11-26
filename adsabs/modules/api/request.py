@@ -3,15 +3,18 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
-
+import logging
 from flask import g #@UnresolvedImport
 from adsabs.core.solr import SolrRequest
+from config import config
 from .forms import ApiQueryForm
 from .permissions import DevPermissions
 from .errors import ApiPermissionError
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
 
+log = logging.getLogger(__name__)
+            
 class ApiSearchRequest(object):
     
     def __init__(self, request_vals):
@@ -39,7 +42,9 @@ class ApiSearchRequest(object):
             req.set_start(self.form.start.data)
             
         if self.form.sort.data:
-            req.set_sort(self.form.sort.data)
+            (sort, direction) = self.form.sort.data.split()
+            sort_field = config.SOLR_SORT_OPTIONS[sort]
+            req.set_sort(sort_field, direction)
             
         if len(self.form.facet.data):
             for facet in self.form.facet.data:
