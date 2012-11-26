@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 function search_form_drawer_manager(obj_drower, obj_drawer_handler)
 /*function to open and close the drawer*/
 {
