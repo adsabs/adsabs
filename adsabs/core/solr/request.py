@@ -49,8 +49,8 @@ class SolrRequest(object):
     def set_hlq(self, hlq):
         self.params['hl.q'] = hlq
         
-    def add_filter(self, filter):
-        self.params.append('fq', filter)
+    def add_filter(self, filter_):
+        self.params.append('fq', filter_)
         
     def add_facet(self, field, limit=None, mincount=None):
         self.params['facet'] = "true"
