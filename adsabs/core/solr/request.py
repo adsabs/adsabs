@@ -7,6 +7,7 @@ import re
 import logging
 
 from flask import g
+from urllib import urlencode
 from simplejson import loads
 from config import config
 from .response import SolrResponse
@@ -38,6 +39,12 @@ class SolrRequest(object):
         
     def set_sort(self, sort_field, direction="asc"):
         self.params.sort = "%s %s" % (sort_field, direction)
+        
+    def add_sort(self, sort_field, direction="asc"):
+        if not self.params.has_key('sort'):
+            self.set_sort(sort_field, direction)
+        else:
+            self.params.sort += ',%s %s' % (sort_field, direction)
         
     def set_hlq(self, hlq):
         self.params['hl.q'] = hlq
@@ -72,6 +79,17 @@ class SolrRequest(object):
         data = loads(json)
         return SolrResponse(data)
     
+    def get_raw_request_url(self):
+        qstring = []
+        to_str = lambda s: s.encode('utf-8') if isinstance(s, unicode) else s
+        for key, value in self.params.items():
+#            key = key.replace(self.arg_separator, '.')
+            if isinstance(value, (list, tuple)):
+                qstring.extend([(key, to_str(v)) for v in value])
+            else:
+                qstring.append((key, to_str(value)))
+        qstring = urlencode(qstring, doseq=True)
+        return "%s/select?%s" % (g.solr.url, qstring)
         
 class SolrParams(dict):
     

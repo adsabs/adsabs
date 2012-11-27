@@ -41,6 +41,9 @@ class SolrResponse(object):
         except IndexError:
             return None
         
+    def raw_response(self):
+        return self.raw
+    
     def get_docset(self):
         return self.raw['response'].get('docs', [])
     
@@ -59,7 +62,4 @@ class SolrResponse(object):
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
         
-    def as_json(self):
-        return dumps(self.raw)
-    
         
