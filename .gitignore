@@ -39,5 +39,3 @@ man
 #logging local configuration
 logging.conf
 
-#searchcompare module
-adsabs/modules/searchcompare

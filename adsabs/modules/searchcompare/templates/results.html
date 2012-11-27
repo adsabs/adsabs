@@ -1,0 +1,14 @@
+
+<div id="meta-{{ type }}">
+<div><label>Total Hits:</label> {{ results['count'] }}</div>
+<div><label>Search URL:</label> <a href="{{ search_url }}">link</a></div>
+</div>
+
+<ol class="resultsList">
+{% for result in results['docs'] %}
+    <li id="{{result['bibcode']}}">
+        <div class="bibcode"><a href="#">{{result['bibcode']}}</a></div>
+        <div class="title">{{result['title']}}</div>
+    </li>
+{% endfor %}
+</ol>
