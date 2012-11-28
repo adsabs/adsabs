@@ -33,16 +33,23 @@ class AppConfig(object):
     MONGOALCHEMY_OPTIONS = "safe=true"
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
-    SOLR_ROW_OPTIONS = [('20','20'),('50','50'),('100','100')]
-    SOLR_DEFAULT_ROWS = '20'
-    SOLR_DEFAULT_SORT = 'pubdate_sort desc'
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
                          'CITED': 'citation_count',
                          'POPULARITY': 'read_count'
                         }
-    SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]'])]
+    SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]']),('indent', 'true')]
     SOLR_DEFAULT_FORMAT = 'json'
+    
+    SEARCH_DEFAULT_ROWS = '20'
+    SEARCH_DEFAULT_SORT = 'DATE'
+    SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
+    SEARCH_DEFAULT_FACET_LIMIT = 100
+    SEARCH_DEFAULT_FACET_MINCOUNT = 1
+    SEARCH_DEFAULT_HIGHLIGHT_COUNT = 5
+    SEARCH_DEFAULT_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi', 'aff']
+    SEARCH_DEFAULT_SOLR_FACETS = ['bibstem_facet','author_facet','property','keyword','pub','year']
+    SEARCH_DEFAULT_HIGHLIGHT_FIELDS = ['full','abstract','ack']
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
@@ -53,7 +60,7 @@ class AppConfig(object):
     API_DEFAULT_RESPONSE_FORMAT = 'json'
     # this is the full list of fields available
     # Note that most api accounts will not have access to the full list of fields
-    API_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','full','ack','identifier']
+    API_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','aff','full','ack','identifier']
     API_SOLR_FACET_FIELDS = {
         'bibstem': 'bibstem_facet',
         'author': 'author_facet',
@@ -61,6 +68,7 @@ class AppConfig(object):
         'keyword': 'keyword_facet',
         'pubdate': 'pubdate',
         'pub': 'pub',
+        'year': 'year'
     }
 
 try:

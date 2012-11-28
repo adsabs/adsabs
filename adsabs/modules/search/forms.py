@@ -13,7 +13,7 @@ from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from config import config
 #from custom_wtform import SelectFieldCssClass
 
-__all__ = ["get_defaults_if_missing", "QueryForm", "ResultsQueryForm", "AdvancedQueryForm"]
+__all__ = ["get_defaults_if_missing", "QueryForm", "AdvancedQueryForm"]
 
 def get_defaults_if_missing(req_val_lists, form):
     """Function that given a form object and a set of parameters coming from the request
@@ -59,10 +59,5 @@ class QueryForm(Form):
     #author = TextField('Author', [length(min=1, max=2048)], description="Author field search")
     #submit = SubmitField('Search', description="Search")
     
-class ResultsQueryForm(QueryForm):
-    rows = SelectField(u'Results Per Page', 
-                       default=config.SOLR_DEFAULT_ROWS, 
-                       choices=config.SOLR_ROW_OPTIONS)
-    
-class AdvancedQueryForm(ResultsQueryForm):
+class AdvancedQueryForm(QueryForm):
     pass

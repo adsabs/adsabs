@@ -28,7 +28,6 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertIn('q', req.params)
         self.assertEqual(req.params['q'], "foo")
         self.assertEqual(req.params['wt'], config.SOLR_DEFAULT_FORMAT)
-        self.assertEqual(req.params['sort'], config.SOLR_DEFAULT_SORT)
         
     def test_solr_request_constructor_overrides(self):
         req = solr.SolrRequest("foo", wt='xml', bar="baz")
@@ -58,14 +57,14 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem'])
         req.add_facet('keyword', 10)
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem', 'keyword'])
-        self.assertIn('f.keyword.limit', req.params)
-        self.assertEqual(req.params['f.keyword.limit'], 10)
+        self.assertIn('f.keyword.facet.limit', req.params)
+        self.assertEqual(req.params['f.keyword.facet.limit'], 10)
         req.add_facet('author', 10, 5)
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem', 'keyword'])
-        self.assertIn('f.author.limit', req.params)
-        self.assertIn('f.author.mincount', req.params)
-        self.assertEqual(req.params['f.author.limit'], 10)
-        self.assertEqual(req.params['f.author.mincount'], 5)
+        self.assertIn('f.author.facet.limit', req.params)
+        self.assertIn('f.author.facet.mincount', req.params)
+        self.assertEqual(req.params['f.author.facet.limit'], 10)
+        self.assertEqual(req.params['f.author.facet.mincount'], 5)
         
     def test_solr_request_add_filter(self):
         req = solr.SolrRequest("foo")   

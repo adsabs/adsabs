@@ -9,8 +9,9 @@ from .solrdoc import SolrDocument, SolrFacets
 
 class SolrResponse(object):
     
-    def __init__(self, raw):
+    def __init__(self, raw, request=None):
         self.raw = raw
+        self.request = request
         self.iter_idx = -1
         
     def __iter__(self):
@@ -51,7 +52,7 @@ class SolrResponse(object):
         return [SolrDocument(x) for x in self.get_docset()]
 
     def get_facets(self):
-        return self.raw['response'].get('facet_counts', {})
+        return self.raw.get('facet_counts', {})
     
     def get_query(self):
         return self.raw['responseHeader']['params']['q']

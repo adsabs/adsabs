@@ -8,6 +8,7 @@ import logging
 
 from flask import g
 from urllib import urlencode
+from copy import deepcopy
 from simplejson import loads
 from config import config
 from .response import SolrResponse
@@ -19,6 +20,9 @@ class SolrRequest(object):
     def __init__(self, q, **kwargs):
         self.q = q
         self.params = SolrParams(q=q, **kwargs)
+        
+    def set_params(self, **kwargs):
+        self.params.update(**kwargs)
         
     def set_format(self, fmt):
         self.params.wt = fmt
@@ -52,13 +56,16 @@ class SolrRequest(object):
     def add_filter(self, filter_):
         self.params.append('fq', filter_)
         
-    def add_facet(self, field, limit=None, mincount=None):
+    def add_facet(self, fields, limit=None, mincount=None):
         self.params['facet'] = "true"
-        self.params.append('facet.field', field)
-        if limit:
-            self.params['f.%s.limit' % field] = limit
-        if mincount:
-            self.params['f.%s.mincount' % field] = mincount
+        if isinstance(fields, basestring):
+            fields = [fields]
+        for field in fields:
+            self.params.append('facet.field', field)
+            if limit:
+                self.params['f.%s.facet.limit' % field] = limit
+            if mincount:
+                self.params['f.%s.facet.mincount' % field] = mincount
             
     def add_highlight(self, field, count=None):
         self.params['hl'] = "true"
@@ -77,7 +84,7 @@ class SolrRequest(object):
             raise
         
         data = loads(json)
-        return SolrResponse(data)
+        return SolrResponse(data, self)
     
     def get_raw_request_url(self):
         qstring = []
@@ -95,12 +102,11 @@ class SolrParams(dict):
     
     def __init__(self, *args, **kwargs):
         # set default values
-        self.update(
+        default_params = dict(
                     config.SOLR_MISC_DEFAULT_PARAMS,
-                    sort=config.SOLR_DEFAULT_SORT,
-                    rows=config.SOLR_DEFAULT_ROWS,
                     wt=config.SOLR_DEFAULT_FORMAT
                     )
+        self.update(**deepcopy(default_params))
         self.update(*args, **kwargs)
 
     def __getattr__(self, key):
