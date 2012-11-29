@@ -7,7 +7,7 @@
 <ol class="resultsList">
 {% for result in results['docs'] %}
     <li id="{{result['bibcode']}}">
-        <div class="bibcode"><a href="#">{{result['bibcode']}}</a></div>
+        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=result['bibcode']) }}">{{result['bibcode']}}</a></div>
         <div class="title">{{result['title']}}</div>
     </li>
 {% endfor %}
