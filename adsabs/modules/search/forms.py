@@ -35,9 +35,9 @@ def get_defaults_if_missing(req_val_lists, form):
 
 class QueryForm(Form):
     """Form for the basic search"""
-    q = TextField(u'Query', [required(), length(min=2, max=2048)], description=u"Query the ADS database")
+    q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
     #sort_dir = HiddenField(u'Sort direction', default='desc')
-    db_key =  SelectField(u'Database', choices=[('AST', 'Astronomy'), ('PHY', 'Physics'), ('ALL', 'All') ])
+    db_key =  SelectField(u'Database', choices=[('ASTRONOMY', 'Astronomy'), ('PHYSICS', 'Physics'), ('ALL', 'All') ])
     sort_type = SelectField(u'Sort', choices=[('DATE','Sort by Most recent'),('RELEVANCE','Sort by Most relevant'),
                                                 ('CITED','Sort by Most cited'),('POPULARITY','Sort by Most popular'),
                                                 #('second_order_operator', 'Use Second order operator'),
@@ -51,7 +51,7 @@ class QueryForm(Form):
     refereed = BooleanField(u'Refereed', description=u'Refereed only')
     article = BooleanField(u'Articles', description=u'Articles only')
     
-    default_if_missing = MultiDict([('db_key', 'ast'), ('sort_type', 'DATE')])
+    default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', 'DATE')])
     
     
     #second_order_type = RadioField(u'Explore the field', choices=[('hot','What people are reading'),('useful','What experts are citing'),
