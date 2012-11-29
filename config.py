@@ -8,7 +8,10 @@ class AppConfig(object):
     
     DEBUG = False
     TESTING = False
-
+    
+    # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
+    DEPLOYMENT_PATH = None
+    
     ADMINS = frozenset(['youremail@yourdomain.com'])
     SECRET_KEY = 'SecretKeyForSessionSigning'
 
