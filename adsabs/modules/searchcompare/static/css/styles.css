@@ -1,6 +1,7 @@
 
 div.header { font-size: 90%; text-align: center; }
 #controls { background-color: green; color: white; padding: 10px; }
+#compare-tools { background-color: #A7EFA7; padding: 10px; display:none; }
 ol.resultsList { background-color: #eee; }
 ol.resultsList div.bibcode { font-weight: bold; margin-top: 5px; }
 div.resultsSpinner { display: none; }

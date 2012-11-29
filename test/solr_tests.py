@@ -42,10 +42,18 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params.rows, 100)
         req.set_start(10)
         self.assertEqual(req.params.start, 10)
-        req.set_sort("DATE")
-        self.assertEqual(req.params.sort, "DATE asc")
-        req.set_sort("DATE", "desc")
-        self.assertEqual(req.params.sort, "DATE desc")
+        req.set_sort("bar")
+        self.assertEqual(req.params.sort, "bar desc")
+        req.set_sort("baz", "asc")
+        self.assertEqual(req.params.sort, "baz asc")
+    
+    def test_solr_request_add_sort(self):
+        req = solr.SolrRequest("foo")
+        self.assertEqual(req.params.sort, None)
+        req.add_sort("bar")
+        self.assertEqual(req.params.sort, "bar desc")
+        req.add_sort("baz", "asc")
+        self.assertEqual(req.params.sort, "bar desc,baz asc")
         
     def test_solr_request_add_facet(self):
         req = solr.SolrRequest("foo")   
@@ -65,6 +73,11 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertIn('f.author.facet.mincount', req.params)
         self.assertEqual(req.params['f.author.facet.limit'], 10)
         self.assertEqual(req.params['f.author.facet.mincount'], 5)
+        req.add_facet(['foo','bar'])
+        self.assertEqual(req.params['facet.field'], ['author','bibstem','keyword','foo','bar'])
+        req.add_facet(['baz', 'fez'], 3)
+        self.assertEqual(req.params['f.baz.facet.limit'], 3)
+        self.assertEqual(req.params['f.fez.facet.limit'], 3)
         
     def test_solr_request_add_filter(self):
         req = solr.SolrRequest("foo")   
@@ -84,15 +97,20 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params['hl.fl'], 'abstract,full')
         
     def test_response_content(self):
-        
         fixture = self.useFixture(SolrRawQueryFixture())
-        
         with self.app.test_request_context('/'):
             self.app.preprocess_request()
-            
             req = solr.SolrRequest("foo")
             resp = req.get_response()
             self.assertIn('results', resp.search_response())
+        
+    def test_query(self):
+        from adsabs.core.solr import query
+        fixture = self.useFixture(SolrRawQueryFixture())
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            resp = query("foo")
+            self.assertEquals(resp.request.params.q, "foo")
         
         
 if __name__ == '__main__':

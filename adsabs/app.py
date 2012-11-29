@@ -4,6 +4,7 @@ from logging import getLogger
 import logging.config
 from flask import Flask, render_template, send_from_directory
 from config import config, APP_NAME
+from wsgi_middleware import DeploymentPathMiddleware
 
 # For import *
 __all__ = ['create_app']
@@ -19,6 +20,7 @@ def create_app(config=config, app_name=None):
     app = Flask(app_name)
     _configure_app(app, config)
     _configure_logging(app)
+    _configure_wsgi_middleware(app)
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
@@ -43,6 +45,9 @@ def _configure_logging(app):
         logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
+    
+def _configure_wsgi_middleware(app):
+    app.wsgi_app = DeploymentPathMiddleware(app.wsgi_app)
 
 def _configure_blueprints(app):
     """

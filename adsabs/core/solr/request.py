@@ -41,10 +41,10 @@ class SolrRequest(object):
         else:
             raise Exception("fields must be expressed as a list or comma-separated string")
         
-    def set_sort(self, sort_field, direction="asc"):
+    def set_sort(self, sort_field, direction="desc"):
         self.params.sort = "%s %s" % (sort_field, direction)
         
-    def add_sort(self, sort_field, direction="asc"):
+    def add_sort(self, sort_field, direction="desc"):
         if not self.params.has_key('sort'):
             self.set_sort(sort_field, direction)
         else:
@@ -110,8 +110,9 @@ class SolrParams(dict):
         self.update(*args, **kwargs)
 
     def __getattr__(self, key):
-        val = dict.__getitem__(self, key)
-        return val
+        if not self.has_key(key):
+            return None
+        return dict.__getitem__(self, key)
 
     def __setattr__(self, key, val):
         dict.__setitem__(self, key, val)

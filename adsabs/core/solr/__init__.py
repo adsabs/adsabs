@@ -23,12 +23,13 @@ def query(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.
     if start:
         req.set_start(start)
         
-    try:
-        sort_field = config.SOLR_SORT_OPTIONS[sort]
-        req.add_sort(sort_field, sort_direction)
-    except KeyError:
-        log.error("Invalid sort option: %s" % sort)
-            
+    if sort is not None:
+        try:
+            sort_field = config.SOLR_SORT_OPTIONS[sort]
+            req.add_sort(sort_field, sort_direction)
+        except KeyError:
+            log.error("Invalid sort option: %s" % sort)
+                
     for filter_ in filters:
         req.add_filter(filter_)
     
@@ -49,5 +50,5 @@ def get_document(solr_id, **kwargs):
     req = SolrRequest(q="identifier:%s" % solr_id, fl="*")
     resp = req.get_response()
     if resp.get_count() == 1:
-        return resp.next()
+        return resp.get_doc(0)
 

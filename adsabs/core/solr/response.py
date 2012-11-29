@@ -4,26 +4,18 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
+import logging
 from simplejson import loads,dumps
+
 from .solrdoc import SolrDocument, SolrFacets
+
+log = logging.getLogger(__name__)
 
 class SolrResponse(object):
     
     def __init__(self, raw, request=None):
         self.raw = raw
         self.request = request
-        self.iter_idx = -1
-        
-    def __iter__(self):
-        self.iter_idx = -1
-        return self
-            
-    def next(self):
-        if self.iter_idx < len(self.docset) - 1:
-            self.iter_idx += 1         
-            return self.docset[self.iter_idx]
-        else:
-            raise StopIteration
         
     def search_response(self):
         resp = {
@@ -51,6 +43,12 @@ class SolrResponse(object):
     def get_docset_objects(self):
         return [SolrDocument(x) for x in self.get_docset()]
 
+    def get_doc(self, idx):
+        try:
+            return self.get_docset()[idx]
+        except IndexError:
+            log.debug("response has no doc at idx %d" % idx)
+    
     def get_facets(self):
         return self.raw.get('facet_counts', {})
     
