@@ -5,7 +5,12 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('searchcompare.static', filename='js/jquery.ba-bbq.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('searchcompare.static', filename='js/searchcompare.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('searchcompare.static', filename='js/difflib.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('searchcompare.static', filename='js/diffview.js') }}"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://github.com/downloads/ajayhada/SimpleDialog/SimpleDialog-2.0.js"></script>
 	<link rel="stylesheet" href="{{ url_for('searchcompare.static', filename='css/styles.css') }}">
+	<link rel="stylesheet" href="{{ url_for('searchcompare.static', filename='css/diffview.css') }}">
 	<link rel="stylesheet" href="{{ url_for('searchcompare.static', filename='css/Toast/toast.css') }}"/> 
 </head>
 <body>
@@ -29,16 +34,26 @@
             <input type="button" id="search-button" value="search"/>
         </div>
     </div>
+    
+    <div id="compare-tools" class="grid-12">
+        Comparison tools: <input type="button" id="diff-button" value="view diff"/>
+    </div>
+    
+    <div id="diff-display" class="grid-12">
+    </div>
+    
     <div class="grid-half searchResults">
-        <div class="resultsSpinner">Working...</div>
+        <div id="classic-spinner" class="resultsSpinner">Working...</div>
         <div id="results-classic">
         </div>
     </div>
+    
     <div class="grid-6 searchResults">
-        <div class="resultsSpinner">Working...</div>
+        <div id="solr-spinner" class="resultsSpinner">Working...</div>
         <div id="results-solr">
         </div>
     </div>
+    
   </div>
 </div>
 </bodY>
