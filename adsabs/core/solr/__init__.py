@@ -50,5 +50,5 @@ def get_document(solr_id, **kwargs):
     req = SolrRequest(q="identifier:%s" % solr_id, fl="*")
     resp = req.get_response()
     if resp.get_count() == 1:
-        return resp.next()
+        return resp.get_doc(0)
 

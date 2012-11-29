@@ -6,6 +6,7 @@ Created on Nov 12, 2012
 
 import fixtures
 from simplejson import dumps
+from copy import deepcopy
 
 from flask import g
 from adsabs.modules.user import AdsUser
@@ -38,6 +39,10 @@ class GlobalApiUserFixture(fixtures.Fixture):
         g.api_user = AdsUser.from_dev_key(self.dev_key)
         
 class SolrRawQueryFixture(fixtures.MonkeyPatch):
+    
+    @classmethod
+    def default_response(cls):
+        return deepcopy(cls.DEFAULT_RESPONSE)
     
     DEFAULT_RESPONSE = {
         'responseHeader': {

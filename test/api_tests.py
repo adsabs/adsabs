@@ -99,6 +99,10 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         self.insert_user("foo", developer=True)
         
+        fixture_data = SolrRawQueryFixture.default_response()
+        fixture_data['response']['docs'][0]['title'] = 'Foo Bar Polarization'
+        fixture = self.useFixture(SolrRawQueryFixture(fixture_data))
+        
         rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
         resp_data = loads(rv.data)
         self.assertIn("Polarization", resp_data['title'])
