@@ -99,9 +99,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         self.insert_user("foo", developer=True)
         
-        rv = self.client.get('/api/record/2012ApJ...759...36R?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
         resp_data = loads(rv.data)
-        self.assertIn("Radiation", resp_data['title'])
+        self.assertIn("Polarization", resp_data['title'])
     
     def test_content_types(self):
         
