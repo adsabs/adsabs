@@ -38,6 +38,7 @@ class AppConfig(object):
                          'CITED': 'citation_count',
                          'POPULARITY': 'read_count'
                         }
+    SEARCH_SECOND_ORDER_OPERATORS_OPTIONS = ['hot', 'useful', 'instructive']
     SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]']),('indent', 'true')]
     SOLR_DEFAULT_FORMAT = 'json'
     
