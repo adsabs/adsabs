@@ -27,21 +27,36 @@ def build_query_components(form):
     #one box query
     search_components['q'] = form['q'].data
     #databases
-    if form['db_key'].data in ('AST', 'PHY',):
-        search_components['filters'].append('database:%' % form['db_key'].data)
+    if form.db_key.data in ('AST', 'PHY',):
+        search_components['filters'].append('database:%' % form.db_key.data)
     #sorting
-    if form['sort_type'].data in config.SOLR_SORT_OPTIONS.keys():
-        search_components['sort'] = form['sort_type'].data
+    if form.sort_type.data in config.SOLR_SORT_OPTIONS.keys():
+        search_components['sort'] = form.sort_type.data
     #second order operators wrap the query
-    elif form['sort_type'].data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
-        search_components['q'] = '%s(%s)' % (form['sort_type'].data, search_components['q'])
+    elif form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
+        search_components['q'] = '%s(%s)' % (form.sort_type.data, search_components['q'])
     #date range
-    if form['year_from'].data or form['year_to']:
+    if form.year_from.data or form.year_to.data:
         mindate = '*'
         maxdate = '*'
-        
-    
-        
+        if form.year_from.data:
+            if form.month_from.data:
+                mindate = '%s%s00' % (form.year_from.data.zfill(4), form.month_from.data.zfill(2))
+            else:
+                mindate = '%s%s00' % (form.year_from.data.zfill(4), '00')
+        if form.year_to.data:
+            if form.month_to.data:
+                maxdate = '%s%s00' % (form.year_to.data.zfill(4), form.month_to.data.zfill(2))
+            else:
+                maxdate = '%s%s00' % (form.year_to.data.zfill(4), '00')
+        search_components['filters'].append('date_filter:[%s TO %s]' % (mindate, maxdate)) #????????????
+        #check with jay what happens if someone puts a year like 0956 vs 956
+    #refereed
+    if form.refereed.data:
+        search_components['filters'].append('property:REFEREED') #????????????
+    #articles only
+    if form.article.data:
+        search_components['filters'].append('-property:NONARTICLE') #????????????
     
     return search_components
 
