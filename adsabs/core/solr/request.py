@@ -67,14 +67,17 @@ class SolrRequest(object):
             if mincount:
                 self.params['f.%s.facet.mincount' % field] = mincount
             
-    def add_highlight(self, field, count=None):
+    def add_highlight(self, fields, count=None):
         self.params['hl'] = "true"
-        if not self.params.has_key('hl.fl'):
-            self.params['hl.fl'] = field
-        else:
-            self.params['hl.fl'] += ',' + field
-        if count:
-            self.params['hl.%s.snippets' % field] = count
+        if isinstance(fields, basestring):
+            fields = [fields]
+        for field in fields:
+            if not self.params.has_key('hl.fl'):
+                self.params['hl.fl'] = field
+            else:
+                self.params['hl.fl'] += ',' + field
+            if count:
+                self.params['f.%s.hl.snippets' % field] = count
             
     def get_response(self):
         try:
