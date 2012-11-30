@@ -51,7 +51,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_FACET_LIMIT = 100
     SEARCH_DEFAULT_FACET_MINCOUNT = 1
     SEARCH_DEFAULT_HIGHLIGHT_COUNT = 5
-    SEARCH_DEFAULT_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi', 'aff']
+    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi', 'aff']
     SEARCH_DEFAULT_SOLR_FACETS = ['bibstem_facet','author_facet','property','keyword','pub','year']
     SEARCH_DEFAULT_HIGHLIGHT_FIELDS = ['full','abstract','ack']
     
@@ -64,7 +64,7 @@ class AppConfig(object):
     API_DEFAULT_RESPONSE_FORMAT = 'json'
     # this is the full list of fields available
     # Note that most api accounts will not have access to the full list of fields
-    API_SOLR_FIELDS = ['bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','aff','full','ack','identifier']
+    API_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','aff','full','ack','identifier']
     API_SOLR_FACET_FIELDS = {
         'bibstem': 'bibstem_facet',
         'author': 'author_facet',

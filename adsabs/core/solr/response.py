@@ -6,15 +6,16 @@ Created on Sep 19, 2012
 
 import logging
 from simplejson import loads,dumps
+from copy import deepcopy
 
-from .solrdoc import SolrDocument, SolrFacets
+from .solrdoc import SolrDocument
 
 log = logging.getLogger(__name__)
 
 class SolrResponse(object):
     
     def __init__(self, raw, request=None):
-        self.raw = raw
+        self.raw = deepcopy(raw)
         self.request = request
         
     def search_response(self):
@@ -38,6 +39,10 @@ class SolrResponse(object):
         return self.raw
     
     def get_docset(self):
+        docset = self.raw['response'].get('docs', [])
+        if self.raw.has_key('highlighting'):
+            for doc in docset:
+                doc['highlights'] = self.raw['highlighting'][doc['id']]
         return self.raw['response'].get('docs', [])
     
     def get_docset_objects(self):

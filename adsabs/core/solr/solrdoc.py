@@ -45,19 +45,3 @@ class SolrDocument(object):
     def to_json(self):
         return dumps(self.data)
     
-class SolrFacets(object):
-    
-    @staticmethod
-    def from_dict(facet_data):
-        queries = facet_data['facet_queries']
-        fields = facet_data['facet_fields']
-        dates = facet_data['facet_dates']
-        ranges = facet_data['facet_ranges']
-        return SolrFacets(fields, queries, dates, ranges)
-        
-    def __init__(self, fields, queries={}, dates={}, ranges={}):
-        self.queries = queries
-        self.fields = fields
-        self.dates = dates
-        self.ranges = ranges
-        
