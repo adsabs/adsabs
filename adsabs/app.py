@@ -20,7 +20,8 @@ def create_app(config=config, app_name=None):
     app = Flask(app_name)
     _configure_app(app, config)
     _configure_logging(app)
-#    _configure_wsgi_middleware(app) #this is disabled until we figure out how to make the tests work with this option enabled
+    if not config.TESTING:
+        _configure_wsgi_middleware(app)
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
