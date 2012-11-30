@@ -13,9 +13,9 @@ from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 from config import config
 #from custom_wtform import SelectFieldCssClass
 
-__all__ = ["get_defaults_if_missing", "QueryForm", "AdvancedQueryForm"]
+__all__ = ["get_missing_defaults", "QueryForm", "AdvancedQueryForm"]
 
-def get_defaults_if_missing(req_val_lists, form):
+def get_missing_defaults(req_val_lists, form):
     """Function that given a form object and a set of parameters coming from the request
     populate the parameters with the default values of the form if they are not in the request"""
     
