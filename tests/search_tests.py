@@ -16,6 +16,7 @@ from config import config
 from tests.utils import SolrRawQueryFixture
 
 from flask import request
+from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict
 from adsabs.modules.search.misc_functions import build_basicquery_components
 from adsabs.modules.search.forms import get_missing_defaults, QueryForm
 
@@ -38,6 +39,28 @@ class SearchTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         rv = self.app.get('/search/?q=black+holes')
         assert 'Total Hits:' in rv.data
 
+
+class GetMissingDefaultsTestCase(unittest2.TestCase):
+    def test_all_defaults_present_1(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')])
+        self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
+        
+    def test_all_defaults_present_2(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'PHYSICS')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'PHYSICS')])
+        self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
+        
+    def test_missing_database(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'ASTRONOMY')])
+        self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
+        
+    def test_missing_sorting(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_key', u'PHYSICS')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'PHYSICS')])
+        self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
+        
 
 
 class BuildBasicQueryComponentsTestCase(unittest2.TestCase):
@@ -119,7 +142,7 @@ class BuildBasicQueryComponentsTestCase(unittest2.TestCase):
             out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'-property:NONARTICLE'], 'sort': u'DATE', }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
-        
+    
         
 if __name__ == '__main__':
     unittest2.main()
