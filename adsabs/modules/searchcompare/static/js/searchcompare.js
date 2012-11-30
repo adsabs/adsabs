@@ -53,9 +53,9 @@ $(document).ready(function() {
 			$("#solr-spinner").hide();
 		});
 		
-		$.when(classicReq, solrReq).then(function() {
-			$("#compare-tools").show();
-		})
+//		$.when(classicReq, solrReq).then(function() {
+//			$("#compare-tools").show();
+//		})
 		
 	});
 	$("#diff-button").bind('click', function(e) {

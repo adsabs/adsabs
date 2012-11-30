@@ -43,6 +43,11 @@ class SolrResponse(object):
     def get_docset_objects(self):
         return [SolrDocument(x) for x in self.get_docset()]
 
+    def get_doc_object(self, idx):
+        doc = self.get_doc(idx)
+        if doc:
+            return SolrDocument(doc)
+    
     def get_doc(self, idx):
         try:
             return self.get_docset()[idx]

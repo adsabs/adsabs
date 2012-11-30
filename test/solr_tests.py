@@ -86,7 +86,6 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         req.add_filter("author:Kurtz,M")
         self.assertEqual(req.params.fq, ['bibstem:ApJ', 'author:Kurtz,M'])
         
-        
     def test_solr_request_add_highlight(self):
         req = solr.SolrRequest("foo")
         self.assertNotIn('hl', req.params)
@@ -95,6 +94,11 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params['hl.fl'], 'abstract')
         req.add_highlight("full")
         self.assertEqual(req.params['hl.fl'], 'abstract,full')
+        req.add_highlight(['foo','bar'])
+        self.assertEqual(req.params['hl.fl'], 'abstract,full,foo,bar')
+        req.add_highlight(['baz', 'fez'], 3)
+        self.assertEqual(req.params['f.baz.hl.snippets'], 3)
+        self.assertEqual(req.params['f.fez.hl.snippets'], 3)
         
     def test_response_content(self):
         fixture = self.useFixture(SolrRawQueryFixture())
@@ -111,6 +115,10 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
             self.app.preprocess_request()
             resp = query("foo")
             self.assertEquals(resp.request.params.q, "foo")
+            resp = query("foo", rows=22)
+            self.assertEquals(resp.request.params.rows, 22)
+            resp = query("foo", start=11)
+            self.assertEquals(resp.request.params.start, 11)
         
         
 if __name__ == '__main__':
