@@ -14,7 +14,7 @@ import unittest2
 from adsabs.app import create_app
 from adsabs.core import solr
 from config import config
-from test.utils import SolrRawQueryFixture
+from tests.utils import SolrRawQueryFixture
 
 class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
 

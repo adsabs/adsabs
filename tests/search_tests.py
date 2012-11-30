@@ -13,7 +13,7 @@ import unittest2
 
 from adsabs.app import create_app
 from config import config
-from test.utils import SolrRawQueryFixture
+from tests.utils import SolrRawQueryFixture
 
 from flask import request
 from adsabs.modules.search.misc_functions import build_basicquery_components
@@ -37,6 +37,8 @@ class SearchTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         fixture = self.useFixture(SolrRawQueryFixture())
         rv = self.app.get('/search/?q=black+holes')
         assert 'Total Hits:' in rv.data
+
+
 
 class BuildBasicQueryComponentsTestCase(unittest2.TestCase):
     def setUp(self):

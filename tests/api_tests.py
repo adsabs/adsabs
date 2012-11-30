@@ -21,7 +21,7 @@ from adsabs.modules.api import ApiSearchRequest
 from adsabs.modules.api.permissions import DevPermissions as DP
 from adsabs.core.solr import SolrResponse
 from config import config
-from test.utils import *
+from tests.utils import *
         
 class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
 

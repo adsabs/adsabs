@@ -19,7 +19,7 @@ class UserTests(unittest2.TestCase):
         from adsabs.extensions import mongodb
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
         
-        from test.utils import user_creator
+        from tests.utils import user_creator
         self.insert_user = user_creator()
         
         self.app = app.test_client()
