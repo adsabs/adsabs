@@ -8,6 +8,7 @@ import unittest2
 from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
 from config import config
+from tests.utils import user_creator
 
 class UserTests(unittest2.TestCase):
 
@@ -19,9 +20,7 @@ class UserTests(unittest2.TestCase):
         from adsabs.extensions import mongodb
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
         
-        from tests.utils import user_creator
         self.insert_user = user_creator()
-        
         self.app = app.test_client()
         
     def test_ads_user(self):

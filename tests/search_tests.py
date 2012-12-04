@@ -16,7 +16,7 @@ from config import config
 from tests.utils import SolrRawQueryFixture
 
 from flask import request
-from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict
+from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport
 from adsabs.modules.search.misc_functions import build_basicquery_components
 from adsabs.modules.search.forms import get_missing_defaults, QueryForm
 

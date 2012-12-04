@@ -33,7 +33,6 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         from adsabs.extensions import mongodb
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
         
-        from test.utils import user_creator
         self.insert_user = user_creator()
             
         self.client = self.app.test_client()
