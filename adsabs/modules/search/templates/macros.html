@@ -1,14 +1,111 @@
-{% macro render_search_result(doc, cls='') %}
-<li>
-<div class='searchresult {{ cls }}'>
-    <div class='bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
-    <div class='title'>{{ doc.title }}</div>
-    {% if doc.author %}
-        <div class='author'>{{ '; '.join(doc.author) }}</div>
-    {% endif %}
-    <div class='pub'>{{ doc.pub }}</div>
-</div>
-</li>
+{% macro render_search_result(doc, loop_f, start_count=0, cls='') %}
+	<div class="row-fluid searchresult">
+		<div class="span1 ">
+			<label class="checkbox">
+				<input type="checkbox" value="{{ doc.bibcode }}" name="bibcode"/>
+				{{ loop_f.index + start_count }}.
+			</label>
+		</div>
+		<div class="span11">
+			<div class='span3 bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
+			<div class="span2 citation_count">
+				Cited by XXX
+			</div>
+			<div class="span3 letterlink_box">
+				[ E F G L X D T R C S N U ]
+			</div>
+		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title }}</a></div>
+		    {% if doc.author %}
+		        <div class="span12 author">
+		        {# { '; '.join(doc.author) } #}
+		        {% for auth in doc.author %}
+		        	{% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
+		        {% endfor %}
+		        {% if loop.length > 4 %}
+		        	<em>and {{ loop.length - 4 }} coauthors</em>
+		        {% endif %}
+		        </div>
+		    {% endif %}
+		    <div class="span12 snippets" style="color:red">snippets</div>
+	    </div>
+	</div>
+{% endmacro %}
+
+{# Macro to render a single group of facets with a unique level of deepness #}
+{% macro render_facet_box(facetid, facettitle, facetdata, open=False ) %}
+	<div class="accordion" id="accordion{{ facetid }}">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{ facetid }}" href="#collapse{{ facetid }}">
+				  {{ facettitle }} <i id="icon{{ facetid }}" class="icon-chevron-{% if open %}down{% else %}left{% endif %} pull-right"></i>
+				</a>
+			</div>
+			<div id="collapse{{ facetid }}" class="accordion-body collapse {% if open %}in{% endif %}">
+				<div class="accordion-inner">
+				  <ul id="facetList{{ facetid }}" class="unstyled">
+				  	{% for elem in facetdata %}
+				  		<li>{{ elem[0] }} ({{ elem[1] }})</li>
+				  	{% endfor %}
+				  </ul>
+				  <a class="more facetsMoreLess muted"><small>more...</small></a><a class="less facetsMoreLess muted pull-right"><small>less...</small></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		//Code to change the icon in the section containing the title of the facets 
+		$('#collapse{{ facetid }}').on('hide', function () {
+			$('#icon{{ facetid }}').attr('class', 'icon-chevron-left pull-right');
+		});
+		$('#collapse{{ facetid }}').on('show', function () {
+			$('#icon{{ facetid }}').attr('class', 'icon-chevron-down pull-right');
+		});
+		//Code to show/hide the facets
+		var max_facets = 5;
+		$('#facetList{{ facetid }} li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
+		//if I have hidden facets 
+		if ($('#facetList{{ facetid }} li:hidden').length > 0)
+		{
+			//I show the button "more" 
+			$('#collapse{{ facetid }} a.more').show();
+			//I configure the "more" to expand the list 
+			$('#collapse{{ facetid }} a.more').live('click', function(){
+				//I expand the next N elements 
+				var hidden_li = $('#facetList{{ facetid }} li:hidden');
+				for (var i=0; i<max_facets; i++)
+					$(hidden_li[i]).show('fast', function(){
+						//If there are no more hidden elements I hide the more button 
+						if ($('#facetList{{ facetid }} li:hidden').length == 0)
+							$('#collapse{{ facetid }} a.more').hide();
+					});
+				//I show the "less" anyway because there will be for sure more than N minimum elements 
+				if ($('#collapse{{ facetid }} a.less').is(':hidden'))
+					$('#collapse{{ facetid }} a.less').show();
+			});
+			//I configure the "less" to collapse the list 
+			$('#collapse{{ facetid }} a.less').live('click', function(){
+				var visible_li = $('#facetList{{ facetid }} li:visible');
+				var to_hide = max_facets;
+				//I make sure that I don't hide more than the minimum allowed 
+				if ((visible_li.length - max_facets) < max_facets)
+					to_hide = visible_li.length - max_facets;
+				//I hide the elements 
+				for (var i=1; i<=to_hide; i++)
+					$(visible_li[visible_li.length - i]).hide('fast', function(){
+						//If I've reached the minimum of elements to hide, I hide "less"
+						if ($('#facetList{{ facetid }} li:visible').length == max_facets)
+							$('#collapse{{ facetid }} a.less').hide();
+					});
+				//I show "more" if it is hidden 
+				if ($('#collapse{{ facetid }} a.more').is(':hidden'))
+					$('#collapse{{ facetid }} a.more').show();
+			});
+		}
+		
+
+	</script>
 {% endmacro %}
 
 {# The macro to render the search form has been moved in the global template folder to make it available everywhere #}
+
+

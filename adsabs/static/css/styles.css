@@ -1,29 +1,3 @@
-
-div.searchresult {
-	margin-bottom: 10px;
-}
-
-div.searchresult div.bibcode {
-	font-size: .9em;
-}
-
-div.searchresult div.title {
-	font-weight: bold;
-}
-
-div.absview {
-	margin-top: 20px;
-}
-
-div.absview div.row {
-	margin-bottom: 5px;
-}
-
-div.absview div.row label {
-	font-weight: bold;
-}
-
-
 /*CSS for global Layout*/
 html,
 body {
@@ -73,4 +47,54 @@ div.centered {
 	margin-left:10px;
 }
 
+/*********************/
+/*Search result page */
 
+div.searchresult {
+	margin-bottom: 10px;
+}
+
+div.searchresult div.bibcode, div.searchresult div.citation_count, div.searchresult div.letterlink_box, div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets {
+	float:left;
+	min-height:0;
+}
+
+div.searchresult div.citation_count, div.searchresult div.letterlink_box {
+	
+}
+
+div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets {
+	clear:both;
+	margin-left:0;
+}
+
+div.searchresult div.title {
+	clear:both;
+	font-weight: bold;
+	font-size:1.1em;
+}
+
+div.searchresult div.title a {
+	color: #333;	
+}
+
+div.absview {
+	margin-top: 20px;
+}
+
+div.absview div.row {
+	margin-bottom: 5px;
+}
+
+div.absview div.row label {
+	font-weight: bold;
+}
+
+#facets {
+	font-size:.9em;	
+}
+
+.facetsMoreLess {
+	cursor:pointer;
+	display:none;
+}

@@ -1,4 +1,4 @@
-{% from "macros.html" import render_search_result %} {# Local import #}
+{% from "macros.html" import render_search_result, render_facet_box %} {# Local import #}
 {% from "macros/search_macros.html" import render_search_form %} {# Global import #}
 
 {% extends "layout.html" %}
@@ -11,11 +11,33 @@
 
 {{ render_search_form(form) }}
 
-<h3>Total Hits: {{ resp.get_count() }}</h3>
-<ol class="searchresults">
-{% for doc in resp.get_docset_objects() %}
-    {{ render_search_result(doc) }}
-{% endfor %}
-</ol>
+<div class="container">
+	<div class="row">
+		<div class="span pull-right">
+			<button class="btn">More</button>
+		</div>
+		<div class="span pull-right">
+			<button class="btn">Sort</button>
+		</div>
+		<div class="span pull-right">
+			<h4>{{ resp.get_count() }} results</h4>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span2" id="facets">
+			{{ render_facet_box('Authors', 'Authors', resp.get_facets_fields('author_facet'), open=True) }}
+			{{ render_facet_box('Keywords', 'Keywords', resp.get_facets_fields('keyword')) }}
+		</div>
+		<div class="span10" id="results">
+			<form action="/search/dispatch">
+				<div class="container-fluid">
+				{% for doc in resp.get_docset_objects() %}
+				    {{ render_search_result(doc, loop, resp.get_start_count()) }}
+				{% endfor %}
+				</div>	
+			</form>
+		</div>
+	</div>
+</div>
 
 {% endblock %}

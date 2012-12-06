@@ -57,11 +57,18 @@ class SolrResponse(object):
     def get_facets(self):
         return self.raw.get('facet_counts', {})
     
+    def get_facets_fields(self, facet_name):
+        facets = self.get_facets().get('facet_fields', {}).get(facet_name, [])
+        return [tuple(facets[i:i+2]) for i in xrange(0, len(facets), 2)]
+    
     def get_query(self):
         return self.raw['responseHeader']['params']['q']
     
     def get_count(self):
         return int(self.raw['response']['numFound'])
+    
+    def get_start_count(self):
+        return int(self.raw['response']['start'])
     
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
