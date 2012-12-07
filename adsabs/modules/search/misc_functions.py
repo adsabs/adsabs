@@ -4,9 +4,10 @@ Created on Nov 30, 2012
 @author: dimilia
 '''
 
+from werkzeug.datastructures import CombinedMultiDict
 from config import config
 
-def build_basicquery_components(form):
+def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     """
     Takes in input a validated basic form and returns a dictionary containing 
     all the components needed to run a SOLR query
@@ -53,5 +54,9 @@ def build_basicquery_components(form):
         journal_abbr_string = ''
         for bibstem in form.journal_abbr.data.split(','):
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
-        search_components['filters'].append(journal_abbr_string[:-4])   
+        search_components['filters'].append(journal_abbr_string[:-4]) 
+    #the facets that are not included in the form
+    for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.keys():
+        for elem in request_values.getlist(facet):
+            search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
     return search_components

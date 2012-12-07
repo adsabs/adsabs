@@ -3,6 +3,7 @@ import os
 from logging import getLogger
 import logging.config
 from flask import Flask, render_template, send_from_directory
+from urllib import quote_plus
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 
@@ -25,7 +26,7 @@ def create_app(config=config, app_name=None):
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
-#    configure_template_filters(app)
+    _configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
 
@@ -95,6 +96,14 @@ def _configure_extensions(app):
     
     logger.debug("initializing pushrod")
     pushrod.init_app(app)  #@UndefinedVariable
+    
+def _configure_template_filters(app):
+    """
+    Configuration of additional filters needed in the templates
+    """
+    @app.template_filter('urlencode')
+    def urlencode_filter(value):
+        return quote_plus(value)
 
 def _configure_error_handlers(app):
     """

@@ -1,4 +1,4 @@
-{% from "macros.html" import render_search_result, render_facet_box %} {# Local import #}
+{% from "macros.html" import render_search_result, render_facet_box with context %} {# Local import #}
 {% from "macros/search_macros.html" import render_search_form %} {# Global import #}
 
 {% extends "layout.html" %}
@@ -25,8 +25,10 @@
 	</div>
 	<div class="row">
 		<div class="span2" id="facets">
-			{{ render_facet_box('Authors', 'Authors', resp.get_facets_fields('author_facet'), open=True) }}
-			{{ render_facet_box('Keywords', 'Keywords', resp.get_facets_fields('keyword')) }}
+			{{ render_facet_box('aut_f', 'Authors', resp, open=True) }}
+			{{ render_facet_box('key_f', 'Keywords', resp) }}
+			{{ render_facet_box('bib_f', 'Publications', resp) }}
+			{{ render_facet_box('prop_f', 'Refereed status', resp, limit_to=['refereed', 'not refereed'], facetid_html='refereed_f') }}
 		</div>
 		<div class="span10" id="results">
 			<form action="/search/dispatch">

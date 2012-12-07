@@ -31,20 +31,48 @@
 	</div>
 {% endmacro %}
 
-{# Macro to render a single group of facets with a unique level of deepness #}
-{% macro render_facet_box(facetid, facettitle, facetdata, open=False ) %}
-	<div class="accordion" id="accordion{{ facetid }}">
+{# ###Macro to render a single group of facets with a unique level of deepness### #}
+{% macro render_facet_box(facetid, facettitle, resp, open=False, limit_to=[], facetid_html=None ) %}
+	{# first of all I check which id to use to build the widget #}
+	{% if facetid_html == None %}
+		{% set facetid_html=facetid %}
+	{% endif %}
+	<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
 		<div class="accordion-group">
 			<div class="accordion-heading">
-				<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{ facetid }}" href="#collapse{{ facetid }}">
-				  {{ facettitle }} <i id="icon{{ facetid }}" class="icon-chevron-{% if open %}down{% else %}left{% endif %} pull-right"></i>
+				<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{ facetid_html }}" href="#collapse{{ facetid_html }}">
+				  {{ facettitle }} <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}left{% endif %} pull-right"></i>
 				</a>
 			</div>
-			<div id="collapse{{ facetid }}" class="accordion-body collapse {% if open %}in{% endif %}">
+			<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 				<div class="accordion-inner">
-				  <ul id="facetList{{ facetid }}" class="unstyled">
-				  	{% for elem in facetdata %}
-				  		<li>{{ elem[0] }} ({{ elem[1] }})</li>
+				  <ul id="facetList{{ facetid_html }}" class="unstyled">
+				  	{% for elem in resp.get_facets_fields(facetid) %}
+				  		{% if not limit_to %}
+					  		<li>
+					  		{% if elem[2] !='selected' %}
+					  			<a href="{{ request.url|replace(request.url_root, '/') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					  		{% else %}
+					  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
+					  			{{ elem[0] }} ({{ elem[1] }}) 
+					  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')}}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+					  		{% endif %}
+					  		</li>
+					  	{% else %}
+					  		{% for limit in limit_to %}
+					  			{% if elem[0] == limit %}
+					  				<li>
+						  			{% if elem[2] !='selected' %}
+						  			<a href="{{ request.url|replace(request.url_root, '/') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+							  		{% else %}
+							  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
+							  			{{ elem[0] }} ({{ elem[1] }}) 
+							  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')}}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+							  		{% endif %}
+							  		</li>
+					  			{% endif %}
+					  		{% endfor %}
+					  	{% endif %}
 				  	{% endfor %}
 				  </ul>
 				  <a class="more facetsMoreLess muted"><small>more...</small></a><a class="less facetsMoreLess muted pull-right"><small>less...</small></a>
@@ -54,37 +82,37 @@
 	</div>
 	<script type="text/javascript">
 		//Code to change the icon in the section containing the title of the facets 
-		$('#collapse{{ facetid }}').on('hide', function () {
-			$('#icon{{ facetid }}').attr('class', 'icon-chevron-left pull-right');
+		$('#collapse{{ facetid_html }}').on('hide', function () {
+			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-left pull-right');
 		});
-		$('#collapse{{ facetid }}').on('show', function () {
-			$('#icon{{ facetid }}').attr('class', 'icon-chevron-down pull-right');
+		$('#collapse{{ facetid_html }}').on('show', function () {
+			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-down pull-right');
 		});
 		//Code to show/hide the facets
 		var max_facets = 5;
-		$('#facetList{{ facetid }} li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
+		$('#facetList{{ facetid_html }} li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
 		//if I have hidden facets 
-		if ($('#facetList{{ facetid }} li:hidden').length > 0)
+		if ($('#facetList{{ facetid_html }} li:hidden').length > 0)
 		{
 			//I show the button "more" 
-			$('#collapse{{ facetid }} a.more').show();
+			$('#collapse{{ facetid_html }} a.more').show();
 			//I configure the "more" to expand the list 
-			$('#collapse{{ facetid }} a.more').live('click', function(){
+			$('#collapse{{ facetid_html }} a.more').live('click', function(){
 				//I expand the next N elements 
-				var hidden_li = $('#facetList{{ facetid }} li:hidden');
+				var hidden_li = $('#facetList{{ facetid_html }} li:hidden');
 				for (var i=0; i<max_facets; i++)
 					$(hidden_li[i]).show('fast', function(){
 						//If there are no more hidden elements I hide the more button 
-						if ($('#facetList{{ facetid }} li:hidden').length == 0)
-							$('#collapse{{ facetid }} a.more').hide();
+						if ($('#facetList{{ facetid_html }} li:hidden').length == 0)
+							$('#collapse{{ facetid_html }} a.more').hide();
 					});
 				//I show the "less" anyway because there will be for sure more than N minimum elements 
-				if ($('#collapse{{ facetid }} a.less').is(':hidden'))
-					$('#collapse{{ facetid }} a.less').show();
+				if ($('#collapse{{ facetid_html }} a.less').is(':hidden'))
+					$('#collapse{{ facetid_html }} a.less').show();
 			});
 			//I configure the "less" to collapse the list 
-			$('#collapse{{ facetid }} a.less').live('click', function(){
-				var visible_li = $('#facetList{{ facetid }} li:visible');
+			$('#collapse{{ facetid_html }} a.less').live('click', function(){
+				var visible_li = $('#facetList{{ facetid_html }} li:visible');
 				var to_hide = max_facets;
 				//I make sure that I don't hide more than the minimum allowed 
 				if ((visible_li.length - max_facets) < max_facets)
@@ -93,16 +121,14 @@
 				for (var i=1; i<=to_hide; i++)
 					$(visible_li[visible_li.length - i]).hide('fast', function(){
 						//If I've reached the minimum of elements to hide, I hide "less"
-						if ($('#facetList{{ facetid }} li:visible').length == max_facets)
-							$('#collapse{{ facetid }} a.less').hide();
+						if ($('#facetList{{ facetid_html }} li:visible').length == max_facets)
+							$('#collapse{{ facetid_html }} a.less').hide();
 					});
 				//I show "more" if it is hidden 
-				if ($('#collapse{{ facetid }} a.more').is(':hidden'))
-					$('#collapse{{ facetid }} a.more').show();
+				if ($('#collapse{{ facetid_html }} a.more').is(':hidden'))
+					$('#collapse{{ facetid_html }} a.more').show();
 			});
 		}
-		
-
 	</script>
 {% endmacro %}
 

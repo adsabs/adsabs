@@ -55,6 +55,14 @@ class AppConfig(object):
     SEARCH_DEFAULT_SOLR_FACETS = ['bibstem_facet','author_facet','property','keyword','pub','year']
     SEARCH_DEFAULT_HIGHLIGHT_FIELDS = ['full','abstract','ack']
     
+    #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
+    ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',
+                                         'aut_f':'author_facet',
+                                         'prop_f':'property',
+                                         'key_f':'keyword',
+                                         'pub_f':'pub',
+                                         'year_f':'year'}
+    
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
     
