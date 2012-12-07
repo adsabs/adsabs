@@ -6,8 +6,9 @@ Created on Sep 19, 2012
 
 import logging
 from simplejson import loads,dumps
-from config import config
+from math import ceil
 
+from config import config
 from .solrdoc import SolrDocument, SolrFacets
 
 log = logging.getLogger(__name__)
@@ -96,10 +97,56 @@ class SolrResponse(object):
         return self.raw['responseHeader']['params']['q']
     
     def get_count(self):
+        """
+        Returns the total number of record found
+        """
         return int(self.raw['response']['numFound'])
     
     def get_start_count(self):
+        """
+        Returns the number of the first record in the 
+        response compared to the total number
+        """
         return int(self.raw['response']['start'])
+    
+    def get_count_in_resp(self):
+        """
+        Returns the number of records in the current response
+        (it can be different from config.SEARCH_DEFAULT_ROWS)
+        """
+        return len(self.raw['response']['docs'])
+    
+    def get_pagination(self):
+        """
+        Returns a dictioary containing all the informations
+        about the status of the pagination 
+        """
+        max_pagination_len = 5
+        
+        total_num_pages = int(ceil(float(self.get_count()) / float(config.SEARCH_DEFAULT_ROWS)))
+        current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
+        
+        max_num_pages_before = int(ceil(min(max_pagination_len, total_num_pages) / 2.0)) - 1
+        max_num_pages_after = int(min(max_pagination_len, total_num_pages)) / 2
+        
+        distance_to_1 = current_page - 1
+        distance_to_max = total_num_pages - current_page
+        
+        num_pages_before = min(distance_to_1, max_num_pages_before)
+        num_pages_after = min(distance_to_max, max_num_pages_after)
+        
+        if num_pages_before < max_num_pages_before:
+            num_pages_after += max_num_pages_before - num_pages_before
+        if num_pages_after < max_num_pages_after:
+            num_pages_before += max_num_pages_after - num_pages_after
+        
+        return {
+               'max_pagination_len':max_pagination_len ,
+               'total_num_pages': total_num_pages,
+               'current_page': current_page,
+               'num_pages_before': num_pages_before,
+               'num_pages_after': num_pages_after,       
+        }
     
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
