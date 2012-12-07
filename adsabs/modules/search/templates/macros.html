@@ -40,9 +40,9 @@
 	<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
 		<div class="accordion-group">
 			<div class="accordion-heading">
-				<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{ facetid_html }}" href="#collapse{{ facetid_html }}">
-				  {{ facettitle }} <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}left{% endif %} pull-right"></i>
-				</a>
+				<div class="accordion-toggle" data-toggle="collapse" data-parent="#accordion{{ facetid_html }}" href="#collapse{{ facetid_html }}">
+				  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}left{% endif %} pull-right"></i>
+				</div>
 			</div>
 			<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 				<div class="accordion-inner">

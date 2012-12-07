@@ -23,6 +23,7 @@
 	padding: 2px 10px;	
 }
 
+/*Search box*/
 .drower-handle {
 	line-height:4px;
 	color:#AAA;
@@ -33,6 +34,11 @@
 	margin-bottom:5px;
 }
 
-.facetAccordion {
+/*facets in search result*/
+div.facetAccordion {
 	margin-bottom:5px;	
+}
+
+div.facetAccordion .accordion-heading {
+	color:#555;	
 }
