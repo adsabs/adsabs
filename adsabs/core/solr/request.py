@@ -81,7 +81,7 @@ class SolrRequest(object):
             
     def get_response(self):
         try:
-            json = g.solr.raw_query(**self.params)
+            json = g.solr.select.raw(**self.params)
         except:
             log.error("Something blew up when querying solr")
             raise

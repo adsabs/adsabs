@@ -14,7 +14,7 @@ import unittest2
 from adsabs.app import create_app
 from adsabs.core import solr
 from config import config
-from tests.utils import SolrRawQueryFixture
+from tests.utils import *
 
 class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
 
@@ -119,6 +119,19 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
             self.assertEquals(resp.request.params.rows, 22)
             resp = query("foo", start=11)
             self.assertEquals(resp.request.params.start, 11)
+        
+    def test_facet_arg_separator(self):
+        
+        request_params = None
+        def post_callback(arg_list):
+            request_params = arg_list[1]
+            
+        fixture = self.useFixture(SolrRequestPostMP(post_callback))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            resp = req.get_response()
+            self.assertIsNone(request_params)
         
         
 if __name__ == '__main__':

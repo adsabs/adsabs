@@ -72,3 +72,12 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
     def set_data(self, data):
         self.resp_data = data
         
+class SolrRequestPostMP(fixtures.MonkeyPatch):
+    
+    def __init__(self, callback):
+        
+        def _post(*args):
+            callback(args)
+            
+        fixtures.MonkeyPatch.__init__(self, 'solr.Solr._post', _post)
+        
