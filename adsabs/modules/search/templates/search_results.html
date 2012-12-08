@@ -1,4 +1,4 @@
-{% from "macros.html" import render_search_result, render_facet_box with context %} {# Local import #}
+{% from "macros.html" import render_search_result, render_facet_box, render_pagination with context %} {# Local import #}
 {% from "macros/search_macros.html" import render_search_form %} {# Global import #}
 
 {% extends "layout.html" %}
@@ -36,8 +36,9 @@
 				{% for doc in resp.get_docset_objects() %}
 				    {{ render_search_result(doc, loop, resp.get_start_count()) }}
 				{% endfor %}
-				</div>	
+				</div>
 			</form>
+			{{ render_pagination(resp.get_pagination()) }}
 		</div>
 	</div>
 </div>

@@ -16,6 +16,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
             'q' : None,
             'filters': [],
             'sort': None,
+            'start': None,
     }
     #one box query
     search_components['q'] = form.q.data
@@ -59,4 +60,9 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.keys():
         for elem in request_values.getlist(facet):
             search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
+    #I handle the page number
+    page = request_values.get('page')
+    if page:
+        if int(page) >0:
+            search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
     return search_components

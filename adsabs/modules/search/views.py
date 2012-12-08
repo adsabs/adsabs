@@ -20,7 +20,7 @@ def search():
     form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
     if form.validate():
         query_components = build_basicquery_components(form, request.values)
-        resp = query(query_components['q'], filters=query_components['filters'], sort=query_components['sort'])
+        resp = query(query_components['q'], filters=query_components['filters'], sort=query_components['sort'], start=query_components['start'])
         return render_template('search_results.html', resp=resp, form=form)
 
     

@@ -1,3 +1,5 @@
+{# The macro to render the search form has been moved in the global template folder to make it available everywhere #}
+
 {% macro render_search_result(doc, loop_f, start_count=0, cls='') %}
 	<div class="row-fluid searchresult">
 		<div class="span1 ">
@@ -31,12 +33,13 @@
 	</div>
 {% endmacro %}
 
-{# ###Macro to render a single group of facets with a unique level of deepness### #}
+{# ###Macro for a single group of facets with a unique level of deepness### #}
 {% macro render_facet_box(facetid, facettitle, resp, open=False, limit_to=[], facetid_html=None ) %}
 	{# first of all I check which id to use to build the widget #}
 	{% if facetid_html == None %}
 		{% set facetid_html=facetid %}
 	{% endif %}
+	{% set current_page = resp.get_pagination()['current_page']%}
 	<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
 		<div class="accordion-group">
 			<div class="accordion-heading">
@@ -51,11 +54,11 @@
 				  		{% if not limit_to %}
 					  		<li>
 					  		{% if elem[2] !='selected' %}
-					  			<a href="{{ request.url|replace(request.url_root, '/') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					  			<a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
 					  		{% else %}
 					  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 					  			{{ elem[0] }} ({{ elem[1] }}) 
-					  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')}}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+					  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 					  		{% endif %}
 					  		</li>
 					  	{% else %}
@@ -63,11 +66,11 @@
 					  			{% if elem[0] == limit %}
 					  				<li>
 						  			{% if elem[2] !='selected' %}
-						  			<a href="{{ request.url|replace(request.url_root, '/') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+						  			<a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
 							  		{% else %}
 							  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 							  			{{ elem[0] }} ({{ elem[1] }}) 
-							  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')}}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+							  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 							  		{% endif %}
 							  		</li>
 					  			{% endif %}
@@ -132,6 +135,33 @@
 	</script>
 {% endmacro %}
 
-{# The macro to render the search form has been moved in the global template folder to make it available everywhere #}
-
-
+{# ###Macro for pagination ### #}
+{% macro render_pagination(pagination) %}
+	<div class="pagination pagination-small pagination-centered">
+		<ul>
+			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="First"{% endif %}>
+				<a{% if pagination['current_page'] != 1 %} 
+				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
+			</li>
+			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="Prev"{% endif %}>
+				<a{% if pagination['current_page'] != 1 %} 
+				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
+			</li>
+			{% for page in pagination['pages_before'] %}
+			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			{% endfor %}
+			<li class="active"><a>{{ pagination['current_page'] }}</a></li>
+			{% for page in pagination['pages_after'] %}
+			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			{% endfor %}
+			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Next"{% endif %}>
+				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
+				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
+			</li>
+			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Last"{% endif %}>
+				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
+				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
+			</li>
+  		</ul>
+	</div>
+{% endmacro %}
