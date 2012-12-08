@@ -121,28 +121,32 @@ class SolrResponse(object):
         Returns a dictioary containing all the informations
         about the status of the pagination 
         """
-        max_pagination_len = 5 #maybe we want to put this in the configuration
-        num_total_pages = int(ceil(float(self.get_count()) / float(config.SEARCH_DEFAULT_ROWS)))
-        current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
-        max_num_pages_before = int(ceil(min(max_pagination_len, num_total_pages) / 2.0)) - 1
-        max_num_pages_after = int(min(max_pagination_len, num_total_pages)) / 2
-        distance_to_1 = current_page - 1
-        distance_to_max = num_total_pages - current_page
-        num_pages_before = min(distance_to_1, max_num_pages_before)
-        num_pages_after = min(distance_to_max, max_num_pages_after)
-        if num_pages_before < max_num_pages_before:
-            num_pages_after += max_num_pages_before - num_pages_before
-        if num_pages_after < max_num_pages_after:
-            num_pages_before += max_num_pages_after - num_pages_after 
-        pages_before = sorted([current_page - i for i in range(1, num_pages_before+1)])
-        pages_after = sorted([current_page + i for i in range(1, num_pages_after+1)])
-        return {
-               'max_pagination_len':max_pagination_len ,
-               'num_total_pages': num_total_pages,
-               'current_page': current_page,
-               'pages_before': pages_before,
-               'pages_after': pages_after,       
-        }
+        try:
+            self.pagination
+        except AttributeError:
+            max_pagination_len = 5 #maybe we want to put this in the configuration
+            num_total_pages = int(ceil(float(self.get_count()) / float(config.SEARCH_DEFAULT_ROWS)))
+            current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
+            max_num_pages_before = int(ceil(min(max_pagination_len, num_total_pages) / 2.0)) - 1
+            max_num_pages_after = int(min(max_pagination_len, num_total_pages)) / 2
+            distance_to_1 = current_page - 1
+            distance_to_max = num_total_pages - current_page
+            num_pages_before = min(distance_to_1, max_num_pages_before)
+            num_pages_after = min(distance_to_max, max_num_pages_after)
+            if num_pages_before < max_num_pages_before:
+                num_pages_after += max_num_pages_before - num_pages_before
+            if num_pages_after < max_num_pages_after:
+                num_pages_before += max_num_pages_after - num_pages_after 
+            pages_before = sorted([current_page - i for i in range(1, num_pages_before+1)])
+            pages_after = sorted([current_page + i for i in range(1, num_pages_after+1)])
+            self.pagination = {
+                   'max_pagination_len':max_pagination_len ,
+                   'num_total_pages': num_total_pages,
+                   'current_page': current_page,
+                   'pages_before': pages_before,
+                   'pages_after': pages_after,       
+            }
+        return self.pagination
     
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
