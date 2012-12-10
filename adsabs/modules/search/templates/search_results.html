@@ -19,8 +19,8 @@
 		<div class="span pull-right">
 			<button class="btn">Sort</button>
 		</div>
-		<div class="span pull-right">
-			<h4>{{ resp.get_count() }} results</h4>
+		<div class="span pull-right results_count">
+			Showing records {{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} out of {{ resp.get_count() }} results.
 		</div>
 	</div>
 	<div class="row">

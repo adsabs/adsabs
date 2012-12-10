@@ -49,6 +49,10 @@ div.centered {
 
 /*********************/
 /*Search result page */
+div.results_count {
+	font-weight: bold;
+	font-size:1.1em;
+}
 
 div.searchresult {
 	margin-bottom: 10px;
@@ -79,6 +83,7 @@ div.searchresult div.title {
 div.searchresult div.title a {
 	color: #333;	
 }
+
 
 div.absview {
 	margin-top: 20px;
