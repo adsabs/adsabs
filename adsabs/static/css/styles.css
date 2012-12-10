@@ -49,9 +49,12 @@ div.centered {
 
 /*********************/
 /*Search result page */
-div.results_count {
-	font-weight: bold;
-	font-size:1.1em;
+
+div.searchResults {
+	margin-top:5px;	
+}
+
+span.results_count {
 }
 
 div.searchresult {
@@ -85,6 +88,8 @@ div.searchresult div.title a {
 }
 
 
+
+/* Abstract*/
 div.absview {
 	margin-top: 20px;
 }

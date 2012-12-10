@@ -1,4 +1,4 @@
-{% from "macros.html" import render_search_result, render_facet_box, render_pagination with context %} {# Local import #}
+{% from "macros.html" import render_search_result, render_facet_box, render_pagination, render_result_numbers with context %} {# Local import #}
 {% from "macros/search_macros.html" import render_search_form %} {# Global import #}
 
 {% extends "layout.html" %}
@@ -11,28 +11,35 @@
 
 {{ render_search_form(form) }}
 
-<div class="container">
-	<div class="row">
-		<div class="span pull-right">
-			<button class="btn">More</button>
-		</div>
-		<div class="span pull-right">
-			<button class="btn">Sort</button>
-		</div>
-		<div class="span pull-right results_count">
-			Showing records {{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} out of {{ resp.get_count() }} results.
-		</div>
-	</div>
+<div class="container searchResults">
 	<div class="row">
 		<div class="span2" id="facets">
+			<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
+			<div class="accordion-group">
+				<div class="accordion-heading">
+					<div class="accordion-toggle facetAccordionHeader" data-toggle="" href="">
+					  <strong>Limit your search</strong>
+					</div>
+				</div>
+			</div>
 			{{ render_facet_box('aut_f', 'Authors', resp, open=True) }}
 			{{ render_facet_box('key_f', 'Keywords', resp) }}
 			{{ render_facet_box('bib_f', 'Publications', resp) }}
 			{{ render_facet_box('prop_f', 'Refereed status', resp, limit_to=['refereed', 'not refereed'], facetid_html='refereed_f') }}
+			</div>
 		</div>
 		<div class="span10" id="results">
 			<form action="/search/dispatch">
 				<div class="container-fluid">
+					<div class="row well well-small">
+						<div class="span4 firstspan">
+							{{ render_result_numbers(resp) }}
+						</div>
+						<div class="span2 pull-right">
+							<button class="btn pull-right">Sort</button>
+							<button class="btn pull-right">More</button>
+						</div>
+					</div>
 				{% for doc in resp.get_docset_objects() %}
 				    {{ render_search_result(doc, loop, resp.get_start_count()) }}
 				{% endfor %}

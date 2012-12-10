@@ -16,7 +16,9 @@ def format_ads_date(date_string):
     """
     Returns a formatted date given a numeric one
     """
-    if date_string[8:] == '00':
+    if date_string[5:7] == '00' and date_string[8:] == '00':
+        return date_string[:4]
+    elif date_string[8:] == '00':
         return strftime('%b %Y', strptime(date_string[:7],'%Y-%m'))
     else:
         return strftime('%d %b %Y', strptime(date_string,'%Y-%m-%d'))
