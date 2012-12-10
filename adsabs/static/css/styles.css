@@ -54,7 +54,8 @@ div.searchresult {
 	margin-bottom: 10px;
 }
 
-div.searchresult div.bibcode, div.searchresult div.citation_count, div.searchresult div.letterlink_box, div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets {
+div.searchresult div.bibcode, div.searchresult div.citation_count, div.searchresult div.letterlink_box, 
+div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets,  div.searchresult div.pubdate{
 	float:left;
 	min-height:0;
 }
@@ -63,7 +64,8 @@ div.searchresult div.citation_count, div.searchresult div.letterlink_box {
 	
 }
 
-div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets {
+div.searchresult div.title, div.searchresult div.author, div.searchresult div.snippets,  
+div.searchresult div.pubdate {
 	clear:both;
 	margin-left:0;
 }

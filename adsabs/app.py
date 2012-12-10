@@ -3,9 +3,9 @@ import os
 from logging import getLogger
 import logging.config
 from flask import Flask, render_template, send_from_directory
-from urllib import quote_plus
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
+from adsabs.core.template_filters import quote_url, format_ads_date
 
 # For import *
 __all__ = ['create_app']
@@ -103,7 +103,13 @@ def _configure_template_filters(app):
     """
     @app.template_filter('urlencode')
     def urlencode_filter(value):
-        return quote_plus(value)
+        return quote_url(value)
+    
+    @app.template_filter('format_ads_date')
+    def f_a_d(date_string):
+        return format_ads_date(date_string)
+    
+    
 
 def _configure_error_handlers(app):
     """
