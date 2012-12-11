@@ -51,6 +51,7 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
             }
         },
         'response': {
+            'start': 0,
             'numFound': 1,
             'docs': [{
                       'bibcode': 'xyz'
