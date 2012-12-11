@@ -86,7 +86,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         resp_data = loads(rv.data)
         self.assertIn('meta', resp_data)
         self.assertIn('results', resp_data)
-        self.assertTrue(resp_data['results']['count'] >= 1)
+        self.assertTrue(resp_data['meta']['count'] >= 1)
         self.assertIsInstance(resp_data['results']['docs'], list)
         
         self.insert_user("bar", developer=True, dev_perms={'facets': True})
@@ -101,10 +101,18 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         fixture_data = SolrRawQueryFixture.default_response()
         fixture_data['response']['docs'][0]['title'] = 'Foo Bar Polarization'
         fixture = self.useFixture(SolrRawQueryFixture(fixture_data))
-        
         rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
         resp_data = loads(rv.data)
         self.assertIn("Polarization", resp_data['title'])
+        
+        fixture_data['response']['numFound'] = 0
+        fixture = self.useFixture(SolrRawQueryFixture(fixture_data))
+        rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+        self.assertEqual(rv.status_code, 404)
+        self.assertIn("No record found with identifier 2012ApJ...751...88M", rv.data)
+        
+        
+        return
     
     def test_content_types(self):
         
@@ -115,6 +123,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         # default should be json
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
         self.assertIn('application/json', rv.content_type)
+        
+        rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+        self.assertIn('application/json', rv.content_type)
     
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/json'}))
         self.assertIn('application/json', rv.content_type)
@@ -122,13 +133,17 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
         self.assertIn('text/xml', rv.content_type)
     
+        rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
+        self.assertIn('text/xml', rv.content_type)
+    
+        rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&format=xml')
         self.assertIn('text/xml', rv.content_type)
         
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&format=blah')
         self.assertEqual(rv.status_code, 406)
         self.assertIn('renderer does not exist', rv.data)
-    
+        
     def test_request_creation(self):
         
         self.insert_user("foo", developer=True)

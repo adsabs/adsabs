@@ -18,6 +18,9 @@ class ApiPermissionError(Exception):
 class ApiRecordNotFound(Exception):
     pass
 
+class ApiSolrException(Exception):
+    pass
+
 def init_error_handlers(app):
     @app.errorhandler(ApiNotAuthenticatedError)
     @pushrod_view(xml_template="error.xml")
@@ -42,3 +45,9 @@ def init_error_handlers(app):
     def record_not_found(error):
         msg = "No record found with identifier %s" % error.message
         return {'error': msg},404,None
+    
+    @app.errorhandler(ApiSolrException)
+    @pushrod_view(xml_template="error.xml")
+    def solr_exception(error):
+        msg = "Search processing error: %s" % error.message
+        return {'error': msg},400,None

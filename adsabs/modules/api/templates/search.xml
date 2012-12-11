@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <response>
     <meta>
+      {% if meta.error %}
+          <error>{{ meta.error }}</error>
+      {% endif %}
+      <query>{{ meta.query }}</query>
+      <qtime>{{ meta.qtime }}</qtime>
+      <hits>{{ meta.hits }}</hits>
+      <start>{{ meta.start }}</start>
+      <rows>{{ meta.rows }}</rows>
     </meta>
-    <results count="{{ results.count }} ">
-    </results>
+    <docs>
+    </docs>
+    {% if results.facets %}
+        <facets>
+        </facets>
+    {% endif %}
 </response>

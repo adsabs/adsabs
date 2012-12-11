@@ -19,11 +19,17 @@ class SolrResponse(object):
         self.raw = deepcopy(raw)
         self.request = request
         
+    def is_error(self):
+        return self.raw['responseHeader']['status'] != 0
+    
     def search_response(self):
         resp = {
-            'meta': { 'errors': None },
-            'results': {
+            'meta': { 
+                'query': self.get_query(),
+                'qtime': self.get_qtime(),
                 'count': self.get_count(),
+             },
+            'results': {
                 'docs': self.get_docset(),
                 'facets': self.get_facets(),
             }
@@ -36,6 +42,9 @@ class SolrResponse(object):
         except IndexError:
             return None
         
+    def get_error(self):
+        return self.raw['error']['msg']
+    
     def raw_response(self):
         return self.raw
     

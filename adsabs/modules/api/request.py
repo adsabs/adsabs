@@ -9,7 +9,7 @@ from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
 from .permissions import DevPermissions
-from .errors import ApiPermissionError
+from .errors import ApiPermissionError,ApiSolrException
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
 
@@ -66,6 +66,8 @@ class ApiSearchRequest(object):
     def execute(self):
         solr_req = self.create_solr_request()
         self.resp = solr_req.get_response()
+        if self.resp.is_error():
+            raise ApiSolrException(self.resp.get_error())
         return self.resp
 
     def query(self):
@@ -73,16 +75,23 @@ class ApiSearchRequest(object):
     
 class ApiRecordRequest(ApiSearchRequest):
     
-    def __init__(self, identifier, request_vals, operator=None):
-        self.query_id = identifier
-        self.query_op = operator
+    def __init__(self, identifier, request_vals):
+        self.record_id = identifier
         ApiSearchRequest.__init__(self, request_vals)
         
-    def execute(self):
-        q = "identifier:%s" % self.query_id
-        if self.query_op:
-            q = "%s(%s)" % (self.query_op, q)
-        solr_req = SolrRequest(q, rows=1)
-        self.resp = solr_req.get_response()
-        return self.resp
+    def create_solr_request(self):
+        q = "identifier:%s" % self.record_id
+        req = SolrRequest(q, rows=1)
+        
+        if self.form.flds.data:
+            req.set_fields(self.form.flds.data)
+            
+        if len(self.form.hl.data):
+            for hl in self.form.hl.data:
+                req.add_highlight(hl.split(':'))
+                
+        if self.form.hlq.data:
+            req.set_hlq(self.form.hlq.data)
+            
+        return req
     

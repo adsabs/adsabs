@@ -46,6 +46,8 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
     
     DEFAULT_RESPONSE = {
         'responseHeader': {
+            'QTime': 100,
+            'status': 0,
             'params': {
                 'q': 'abc',
             }
