@@ -35,9 +35,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
         
         self.insert_user = user_creator()
-            
         self.client = self.app.test_client()
-        
         
     def test_empty_requests(self):
         
@@ -112,9 +110,6 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(rv.status_code, 404)
         self.assertIn("No record found with identifier 2012ApJ...751...88M", rv.data)
         
-        
-        return
-    
     def test_content_types(self):
         
         self.insert_user("foo", developer=True)
@@ -166,19 +161,74 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
             with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&%s' % qstring):
                 form = ApiQueryForm(request.values, csrf_enabled=False)
                 valid = form.validate()
+                if errors:
+                    for field, msg in errors.items():
+                        self.assertIn(field, form.errors)
+                        self.assertIn(msg, form.errors[field][0])
                 return valid
             
-        not_valid = lambda x: self.assertFalse(validate(x))
-        is_valid = lambda x: self.assertTrue(validate(x))
+        def is_valid(qstring):
+            self.assertTrue(validate(qstring))
+            
+        def not_valid(qstring, errors=None):
+            self.assertFalse(validate(qstring, errors))
         
         is_valid('q=black+holes')
-        not_valid('q=a')
-        not_valid('q=%s' % ("foobar" * 1000))
+        not_valid('q=a', {'q': 'input must be at least'})
+        not_valid('q=%s' % ("foobar" * 1000), {'q': 'input must be at no more'})
+        
         for f in config.API_SOLR_FIELDS:
-            is_valid('fields=%s' % f)
-        is_valid('fields=%s' % ','.join(config.API_SOLR_FIELDS))
-        not_valid('fields=foobar')
-        not_valid('fields=id, bibcode')
+            is_valid('fl=%s' % f)
+        is_valid('fl=%s' % ','.join(config.API_SOLR_FIELDS))
+        is_valid('fl=id,bibcode')
+        not_valid('fl=foobar', {'fl': 'not a selectable field'})
+        not_valid('fl=id, bibcode', {'fl': 'no whitespace'})
+        not_valid('fl=id+bibcode', {'fl': 'comma-separated'})
+        
+        from adsabs.modules.api.renderers import VALID_FORMATS
+        for fmt in VALID_FORMATS:
+            is_valid('fmt=%s' % fmt)
+        not_valid('fmt=foobar', {'fmt': 'Invalid format'})
+        
+        is_valid('hl=abstract')
+        is_valid('hl=title:3')
+        for f in config.API_SOLR_FIELDS:
+            is_valid('hl=%s' % f)
+        is_valid('hl=abstract&hl=full')
+        not_valid('hl=title-3', {'hl': 'Invalid highlight input'})
+        not_valid('hl=foobar', {'hl': 'not a selectable field'})
+        not_valid('hl=title:3:4', {'hl': 'Too many options'})
+        not_valid('hl=abstract&hl=full:3:4', {'hl': 'Too many options'})
+        not_valid('hl=abstract-3&hl=full:3:4', {'hl': 'Invalid highlight input'})
+        
+        is_valid('sort=DATE asc')
+        is_valid('sort=DATE desc')
+        not_valid('sort=year', {'sort': 'you must specify'})
+        not_valid('sort=foo asc', {'sort': 'Invalid sort type'})
+        not_valid('sort=DATE foo', {'sort': 'Invalid sort direction'})
+        for f in config.SOLR_SORT_OPTIONS.keys():
+            is_valid('sort=%s asc' % f)
+            
+        is_valid('facet=author')
+        is_valid('facet=author&facet=year')
+        for f in config.API_SOLR_FACET_FIELDS.keys():
+            is_valid('facet=%s' % f)
+        is_valid('facet=author:5')
+        is_valid('facet=author:5:10')
+        not_valid('facet=author:5:10:20', {'facet': 'Too many options'})
+        not_valid('facet=foo', {'facet': 'Invalid facet selection'})
+        not_valid('facet=author-5', {'facet': 'Invalid facet input'})
+        not_valid('facet=author:foo', {'facet': 'Values for limit and min must be integers'})
+        not_valid('facet=year&facet=author-5', {'facet': 'Invalid facet input'})
+        not_valid('facet=foo&facet=author-5', {'facet': 'Invalid facet selection'})
+        
+        is_valid('filter=author:"John, D"')
+        is_valid('filter=property:REFEREED')
+        is_valid('filter=author:"John, D"&filter=property:REFEREED')
+        not_valid('filter=property', {'filter': 'Format should be'})
+        not_valid('filter=property-bar', {'filter': 'Format should be'})
+        not_valid('filter=foo:bar', {'filter': 'Invalid filter field selection'})
+        not_valid('filter=author:%s' % ("foobar" * 1000), {'filter': 'input must be at no more than'})
         
 class PermissionsTest(unittest2.TestCase):
     

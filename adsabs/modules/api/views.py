@@ -43,7 +43,7 @@ def api_user_required(func):
 @api_user_required
 @pushrod_view(xml_template="search.xml")
 def search():
-    search_req = ApiSearchRequest(request.values)
+    search_req = ApiSearchRequest(request.args)
     if search_req.validate():
         resp = search_req.execute()
         return resp.search_response()
@@ -54,7 +54,7 @@ def search():
 @api_user_required
 @pushrod_view(xml_template="record.xml")
 def record(identifier):
-    record_req = ApiRecordRequest(identifier, request.values)
+    record_req = ApiRecordRequest(identifier, request.args)
     if record_req.validate():
         resp = record_req.execute()
         if not resp.get_count() > 0:

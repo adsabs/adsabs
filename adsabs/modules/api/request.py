@@ -4,7 +4,7 @@ Created on Nov 2, 2012
 @author: jluker
 '''
 import logging
-from flask import g #@UnresolvedImport
+from flask import g, request #@UnresolvedImport
 from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
@@ -32,8 +32,8 @@ class ApiSearchRequest(object):
     def create_solr_request(self):
         req = SolrRequest(self.form.q.data)
         
-        if self.form.fields.data:
-            req.set_fields(self.form.fields.data)
+        if self.form.fl.data:
+            req.set_fields(self.form.fl.data)
             
         if self.form.rows.data:
             req.set_rows(self.form.rows.data)
@@ -83,8 +83,8 @@ class ApiRecordRequest(ApiSearchRequest):
         q = "identifier:%s" % self.record_id
         req = SolrRequest(q, rows=1)
         
-        if self.form.fields.data:
-            req.set_fields(self.form.fields.data)
+        if self.form.fl.data:
+            req.set_fields(self.form.fl.data)
             
         if len(self.form.hl.data):
             for hl in self.form.hl.data:

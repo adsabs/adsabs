@@ -52,7 +52,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_FACET_LIMIT = 100
     SEARCH_DEFAULT_FACET_MINCOUNT = 1
     SEARCH_DEFAULT_HIGHLIGHT_COUNT = 5
-    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi', 'aff', 'pubdate']
+    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi','aff','pubdate','citation_count','references']
     SEARCH_DEFAULT_SOLR_FACETS = ['bibstem_facet','author_facet','property','keyword_facet','year']
     SEARCH_DEFAULT_HIGHLIGHT_FIELDS = ['full','abstract','ack']
     
@@ -80,7 +80,6 @@ class AppConfig(object):
         'property': 'property',
         'keyword': 'keyword_facet',
         'pubdate': 'pubdate',
-        'pub': 'pub',
         'year': 'year'
     }
 
