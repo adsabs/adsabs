@@ -19,6 +19,7 @@ from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
 from adsabs.modules.api import ApiSearchRequest
 from adsabs.modules.api.permissions import DevPermissions as DP
+from adsabs.modules.api.forms import ApiQueryForm
 from adsabs.core.solr import SolrResponse
 from config import config
 from tests.utils import *
@@ -155,6 +156,29 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
             req = ApiSearchRequest(request.values)
             solr_req = req.create_solr_request()
             self.assertEquals(solr_req.params.q, 'black holes')
+        
+    def test_validation(self):
+        
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(GlobalApiUserFixture("foo_dev_key"))
+        
+        def validate(qstring, errors=None):
+            with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&%s' % qstring):
+                form = ApiQueryForm(request.values, csrf_enabled=False)
+                valid = form.validate()
+                return valid
+            
+        not_valid = lambda x: self.assertFalse(validate(x))
+        is_valid = lambda x: self.assertTrue(validate(x))
+        
+        is_valid('q=black+holes')
+        not_valid('q=a')
+        not_valid('q=%s' % ("foobar" * 1000))
+        for f in config.API_SOLR_FIELDS:
+            is_valid('fields=%s' % f)
+        is_valid('fields=%s' % ','.join(config.API_SOLR_FIELDS))
+        not_valid('fields=foobar')
+        not_valid('fields=id, bibcode')
         
 class PermissionsTest(unittest2.TestCase):
     

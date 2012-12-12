@@ -32,8 +32,8 @@ class ApiSearchRequest(object):
     def create_solr_request(self):
         req = SolrRequest(self.form.q.data)
         
-        if self.form.flds.data:
-            req.set_fields(self.form.flds.data)
+        if self.form.fields.data:
+            req.set_fields(self.form.fields.data)
             
         if self.form.rows.data:
             req.set_rows(self.form.rows.data)
@@ -83,8 +83,8 @@ class ApiRecordRequest(ApiSearchRequest):
         q = "identifier:%s" % self.record_id
         req = SolrRequest(q, rows=1)
         
-        if self.form.flds.data:
-            req.set_fields(self.form.flds.data)
+        if self.form.fields.data:
+            req.set_fields(self.form.fields.data)
             
         if len(self.form.hl.data):
             for hl in self.form.hl.data:

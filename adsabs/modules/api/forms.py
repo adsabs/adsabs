@@ -31,7 +31,7 @@ def validate_q(form, field):
         
 class ApiQueryForm(Form):
     dev_key = fields_.TextField('dev_key', [validators.Required()])
-    flds = fields_.TextField('fields')
+    fields = fields_.TextField('fields')
     fmt = fields_.TextField('format')
     hl = fields_.FieldList(fields_.TextField('hl'))
     q = fields_.TextField('query', [validate_q])
@@ -42,13 +42,13 @@ class ApiQueryForm(Form):
     filter = fields_.FieldList(fields_.TextField('filter'))
     hlq = fields_.TextField('hlq', [validate_q])
 
-    def validate_flds(self, field):
+    def validate_fields(self, field):
         """
         checks that input is a comma separated list of field names
         """
         if not len(field.data):
             return
-        if re.search('[^a-z\.\_]', field.data, re.I):
+        if re.search('[^a-z\,\_]', field.data, re.I):
             raise ValidationError("Invalid field selection: value must be a comma-separated (no whitespace) list of field names")
         for field in field.data.split(','):
             if field not in config.API_SOLR_FIELDS:
