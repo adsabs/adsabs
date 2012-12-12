@@ -59,3 +59,8 @@ div.facetAccordion .facetAccordionHeader{
 div.row .firstspan{
 	margin:0;
 }
+
+/* FAcets summary on top of search results*/
+div.well-facets{
+	margin-bottom:10px;	
+}

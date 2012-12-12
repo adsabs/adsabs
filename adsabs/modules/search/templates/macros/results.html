@@ -1,0 +1,35 @@
+{# The macro to render the search form has been moved in the global template folder to make it available everywhere #}
+
+{% macro render_search_result(doc, loop_f, start_count=0, cls='') %}
+	<div class="row-fluid searchresult">
+		<div class="span1 ">
+			<label class="checkbox">
+				<input type="checkbox" value="{{ doc.bibcode }}" name="bibcode"/>
+				{{ loop_f.index + start_count }}.
+			</label>
+		</div>
+		<div class="span11">
+			<div class='span3 bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
+			<div class="span2 citation_count">
+				Cited by XXX
+			</div>
+			<div class="span3 letterlink_box">
+				[ E F G L X D T R C S N U ]
+			</div>
+		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title }}</a></div>
+		    {% if doc.author %}
+		        <div class="span12 author">
+		        {# { '; '.join(doc.author) } #}
+		        {% for auth in doc.author %}
+		        	{% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
+		        {% endfor %}
+		        {% if loop.length > 4 %}
+		        	<em>and {{ loop.length - 4 }} coauthors</em>
+		        {% endif %}
+		        </div>
+		    {% endif %}
+		    <div class="span12 pubdate"><em>Published in {{ doc.pubdate|format_ads_date}}</em></div>
+		    <div class="span12 snippets" style="color:red">snippets</div>
+	    </div>
+	</div>
+{% endmacro %}

@@ -1,39 +1,3 @@
-{# The macro to render the search form has been moved in the global template folder to make it available everywhere #}
-
-{% macro render_search_result(doc, loop_f, start_count=0, cls='') %}
-	<div class="row-fluid searchresult">
-		<div class="span1 ">
-			<label class="checkbox">
-				<input type="checkbox" value="{{ doc.bibcode }}" name="bibcode"/>
-				{{ loop_f.index + start_count }}.
-			</label>
-		</div>
-		<div class="span11">
-			<div class='span3 bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
-			<div class="span2 citation_count">
-				Cited by XXX
-			</div>
-			<div class="span3 letterlink_box">
-				[ E F G L X D T R C S N U ]
-			</div>
-		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title }}</a></div>
-		    {% if doc.author %}
-		        <div class="span12 author">
-		        {# { '; '.join(doc.author) } #}
-		        {% for auth in doc.author %}
-		        	{% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
-		        {% endfor %}
-		        {% if loop.length > 4 %}
-		        	<em>and {{ loop.length - 4 }} coauthors</em>
-		        {% endif %}
-		        </div>
-		    {% endif %}
-		    <div class="span12 pubdate"><em>Published in {{ doc.pubdate|format_ads_date}}</em></div>
-		    <div class="span12 snippets" style="color:red">snippets</div>
-	    </div>
-	</div>
-{% endmacro %}
-
 {# ###Macro for a single group of facets with a unique level of deepness### #}
 {% macro render_facet_box(facetid, facettitle, resp, open=False, limit_to=[], facetid_html=None ) %}
 	{# first of all I check which id to use to build the widget #}
@@ -79,7 +43,7 @@
 				  	{% endif %}
 			  	{% endfor %}
 			  </ul>
-			  <a class="more facetsMoreLess muted"><small>more...</small></a><a class="less facetsMoreLess muted pull-right"><small>less...</small></a>
+			  <a class="less facetsMoreLess muted"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
 			</div>
 		</div>
 	</div>
@@ -135,48 +99,42 @@
 	</script>
 {% endmacro %}
 
-{# ###Macro for very basic pagination with result number on top of the results #}
-{% macro render_result_numbers(resp) %}
-	{% set pagination=resp.get_pagination() %}
-	<span class="help-inline hidden-phone results_count">
-		<a {% if pagination['current_page'] == 1 %} class="disabled"{% else %}
-		href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
-		|
-		{{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} of {{ resp.get_count() }}
-		|
-		<a {% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} 
-		href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
-	</span>
-{% endmacro %}
 
-{# ###Macro for pagination ### #}
-{% macro render_pagination(pagination) %}
-	<div class="pagination pagination-small pagination-centered">
-		<ul>
-			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="First"{% endif %}>
-				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
-			</li>
-			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="Prev"{% endif %}>
-				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
-			</li>
-			{% for page in pagination['pages_before'] %}
-			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+{# ###Macro to render the list of applied facets #}
+{% macro render_applied_facets_box(resp) %}
+	{% set selected_facets = resp.get_facet_parameters() %}
+	{% set current_page = resp.get_pagination()['current_page']%}
+	<div class="row-fluid well well-small well-facets">
+		<div class="span11 firstspan">
+			{% for elem in selected_facets %}
+				<span class="appliedFilter">
+					{% if elem[0] == 'bib_f' %}
+						Publication :
+					{% elif elem[0] == 'aut_f' %}
+						Author :
+					{% elif elem[0] == 'key_f' %}
+						Keyword :
+					{% elif elem[0] == 'prop_f' and elem[1] in ['refereed', 'not refereed'] %}
+						
+					{% else %}
+						{{ elem[0] }} :
+					{% endif %}
+					{{ elem[1] }} 
+					{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
+					<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" 
+					title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+				</span>
 			{% endfor %}
-			<li class="active"><a>{{ pagination['current_page'] }}</a></li>
-			{% for page in pagination['pages_after'] %}
-			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+		</div>
+		<div class="span1">
+			{% set base_remove_all = [request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '')] %}
+			{% for elem in selected_facets %}
+				{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
+				{% do base_remove_all.append(base_remove_all[-1]|replace(remove_facet, '')) %}
+				
 			{% endfor %}
-			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Next"{% endif %}>
-				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
-			</li>
-			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Last"{% endif %}>
-				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
-			</li>
-  		</ul>
+			<a href="{{ base_remove_all[-1] }}">Clear all</a>
+		</div>
 	</div>
 {% endmacro %}
 

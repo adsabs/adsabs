@@ -97,6 +97,11 @@ def _configure_extensions(app):
     logger.debug("initializing pushrod")
     pushrod.init_app(app)  #@UndefinedVariable
     
+    logger.debug("initializing jinja2 extensions")
+    app.jinja_env.add_extension('jinja2.ext.with_')
+    app.jinja_env.add_extension('jinja2.ext.do')
+    app.jinja_env.add_extension('jinja2.ext.loopcontrols')
+    
 def _configure_template_filters(app):
     """
     Configuration of additional filters needed in the templates

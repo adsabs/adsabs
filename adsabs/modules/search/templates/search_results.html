@@ -1,5 +1,10 @@
-{% from "macros.html" import render_search_result, render_facet_box, render_pagination, render_result_numbers with context %} {# Local import #}
-{% from "macros/search_macros.html" import render_search_form %} {# Global import #}
+{# Local imports #}
+{% from "macros/results.html" import render_search_result with context %}
+{% from "macros/facets.html" import render_facet_box, render_applied_facets_box with context %}
+{% from "macros/pagination.html" import render_pagination, render_result_numbers with context %}
+
+{# Global imports #}
+{% from "macros/search_macros.html" import render_search_form %}
 
 {% extends "layout.html" %}
 
@@ -15,13 +20,13 @@
 	<div class="row">
 		<div class="span2" id="facets">
 			<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
-			<div class="accordion-group">
-				<div class="accordion-heading">
-					<div class="accordion-toggle facetAccordionHeader" data-toggle="" href="">
-					  <strong>Limit your search</strong>
+				<div class="accordion-group">
+					<div class="accordion-heading">
+						<div class="accordion-toggle facetAccordionHeader" data-toggle="" href="">
+						  <strong>Limit your search</strong>
+						</div>
 					</div>
 				</div>
-			</div>
 			{{ render_facet_box('aut_f', 'Authors', resp, open=True) }}
 			{{ render_facet_box('key_f', 'Keywords', resp) }}
 			{{ render_facet_box('bib_f', 'Publications', resp) }}
@@ -31,7 +36,12 @@
 		<div class="span10" id="results">
 			<form action="/search/dispatch">
 				<div class="container-fluid">
-					<div class="row well well-small">
+				{# The facet bar #}
+				{% if resp.get_facet_parameters() %}
+					{{ render_applied_facets_box(resp) }}
+				{% endif %}		
+				{# Navbar on top of the results #}
+					<div class="row-fluid well well-small">
 						<div class="span4 firstspan">
 							{{ render_result_numbers(resp) }}
 						</div>
@@ -40,6 +50,7 @@
 							<button class="btn pull-right">More</button>
 						</div>
 					</div>
+				{# The actual results #}
 				{% for doc in resp.get_docset_objects() %}
 				    {{ render_search_result(doc, loop, resp.get_start_count()) }}
 				{% endfor %}
