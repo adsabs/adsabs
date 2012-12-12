@@ -1,0 +1,102 @@
+{# ###Macro to render re_sort menu #}
+{% macro render_re_sort() %}
+	{% set re_sort_type = request.values.get('re_sort_type') %}
+	{% set re_sort_dir = request.values.get('re_sort_dir') %}
+	{% set base_re_sort_url = request.url|replace(request.url_root, '/')|replace('&re_sort_type=%s' % re_sort_type, '')|replace('&re_sort_dir=%s' % re_sort_dir, '')%}
+	<span class="dropdown pull-right">
+	<!-- Link or button to toggle dropdown -->
+		<a class="btn dropdown-toggle" data-toggle="dropdown" 
+			{% if re_sort_type and re_sort_dir %}
+			title="Re-sort applied"
+			{% else %}
+			title="Re-sort list of results"
+			{% endif %}
+			>
+			Re-sort
+			{% if re_sort_type and re_sort_dir %}
+			<i class="icon-ok-sign"></i>
+			{% else %}
+			<i class="icon-white"></i>
+			{% endif %}
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+			<li class="dropdown-submenu">
+				<a tabindex="-1">by date
+				{% if re_sort_type == 'DATE' %}
+				<i class="icon-ok-sign"></i>
+				{% endif %}</a>
+				<ul class="dropdown-menu">
+					<li class="nav-header">by date</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'DATE' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=desc">Descending
+						{% if re_sort_type == 'DATE' and re_sort_dir=='desc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+				</ul>
+			</li>
+		  <li class="dropdown-submenu">
+				<a tabindex="-1">by relevance
+				{% if re_sort_type == 'RELEVANCE' %}
+				<i class="icon-ok-sign"></i>
+				{% endif %}</a>
+				<ul class="dropdown-menu">
+					<li class="nav-header">by relevance</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=RELEVANCE&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'RELEVANCE' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=RELEVANCE&re_sort_dir=desc">Descending
+						{% if re_sort_type == 'RELEVANCE' and re_sort_dir=='desc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+				</ul>
+			</li>
+		  <li class="dropdown-submenu">
+				<a tabindex="-1">by citation num
+				{% if re_sort_type == 'CITED' %}
+				<i class="icon-ok-sign"></i>
+				{% endif %}</a>
+				<ul class="dropdown-menu">
+					<li class="nav-header">by citation num</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'CITED' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc">Descending
+						{% if re_sort_type == 'CITED' and re_sort_dir=='desc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+				</ul>
+			</li>
+		  <li class="dropdown-submenu">
+				<a tabindex="-1">by popularity
+				{% if re_sort_type == 'POPULARITY' %}
+				<i class="icon-ok-sign"></i>
+				{% endif %}</a>
+				<ul class="dropdown-menu">
+					<li class="nav-header">by popularity</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'POPULARITY' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=desc">Descending
+						{% if re_sort_type == 'POPULARITY' and re_sort_dir=='desc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</span>
+{% endmacro %}

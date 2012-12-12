@@ -17,6 +17,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
             'filters': [],
             'sort': None,
             'start': None,
+            'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
     }
     #one box query
     search_components['q'] = form.q.data
@@ -65,4 +66,12 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     if page:
         if int(page) >0:
             search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
+    
+    #re-sorting options
+    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
+        search_components['sort'] = request_values.get('re_sort_type')
+        if request_values.get('re_sort_dir') in ['asc', 'desc']:
+            search_components['sort_direction'] = request_values.get('re_sort_dir')
+        
+    
     return search_components

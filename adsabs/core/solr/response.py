@@ -122,7 +122,7 @@ class SolrResponse(object):
     
     def get_pagination(self):
         """
-        Returns a dictioary containing all the informations
+        Returns a dictionary containing all the informations
         about the status of the pagination 
         """
         try:
