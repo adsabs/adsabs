@@ -9,7 +9,7 @@
 	<div class="accordion-group">
 		<div class="accordion-heading">
 			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
-			  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}left{% endif %} pull-right"></i>
+			  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %} pull-right"></i>
 			</div>
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
@@ -50,7 +50,7 @@
 	<script type="text/javascript">
 		//Code to change the icon in the section containing the title of the facets 
 		$('#collapse{{ facetid_html }}').on('hide', function () {
-			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-left pull-right');
+			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-right pull-right');
 		});
 		$('#collapse{{ facetid_html }}').on('show', function () {
 			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-down pull-right');

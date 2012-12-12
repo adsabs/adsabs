@@ -15,7 +15,8 @@
 	        {{ form.q(class="span6", placeholder=form.q.description, autofocus="autofocus") }}
 	        {{ form.db_key(class="span2") }}
 	        {{ form.sort_type() }}
-	        <button class="btn btn-primary">Search</button>
+	        <button class="btn btn-primary">Search</button> 
+	        <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler" title="more options"><i class="icon-chevron-right"></i></span>
 	        <div id="advanced_options" class="row">
 	        	{# { form.sort_dir() } #}
 
@@ -58,7 +59,7 @@
 	        </div>
         </fieldset>     
     </form>
-    <button class="btn btn-mini" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler">more options</button>
+    
 </div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/query_form.js') }}"></script>
 

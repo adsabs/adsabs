@@ -9,9 +9,15 @@ function search_form_drawer_manager(obj_drower, obj_drawer_handler)
 	$(obj_drower).slideToggle('fast', function(){
 		//I check if the drawer is visible or not
 		if ($(obj_drower).is(":visible"))
-			$(obj_drawer_handler).html('less options');
+		{
+			$(obj_drawer_handler).html('<i class="icon-chevron-down"></i>');
+			$(obj_drawer_handler).attr('title', 'less options');
+		}
 		else
-			$(obj_drawer_handler).html('more options');
+		{
+			$(obj_drawer_handler).html('<i class="icon-chevron-right"></i>');
+			$(obj_drawer_handler).attr('title', 'more options');
+		}
 	});
 };
 
