@@ -71,8 +71,8 @@ class DevPermissions(object):
                 self._facets_ok(form.facet.data)
             self._max_rows_ok(form.rows.data)
             self._max_start_ok(form.start.data)
-            if len(form.flds.data):
-                self._fields_ok(form.flds.data)
+            if len(form.fl.data):
+                self._fields_ok(form.fl.data)
             if len(form.hl.data):
                 self._highlight_ok(form.hl.data)
         except AssertionError, e:

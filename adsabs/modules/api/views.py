@@ -5,6 +5,7 @@ from flask import Blueprint, request, g
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 
 from functools import wraps
+import logging
 
 import errors
 from adsabs.modules.user import AdsUser
@@ -18,12 +19,20 @@ __all__ = ['api_blueprint']
 api_blueprint = Blueprint('api', __name__,template_folder="templates")
 errors.init_error_handlers(api_blueprint)
 
+log = logging.getLogger(__name__)
+
 def api_user_required(func):
     @wraps(func)
     def decorator(*args, **kwargs):
         if 'dev_key' not in request.args:
             raise errors.ApiNotAuthenticatedError("no developer token provided")
-        user = AdsUser.from_dev_key(request.args.get('dev_key'))
+        try:
+            user = AdsUser.from_dev_key(request.args.get('dev_key'))
+        except Exception, e:
+            import traceback
+            exc_info = sys.exc_info()
+            log.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+            user = None
         if not user:
             raise errors.ApiNotAuthenticatedError("unknown user")
         g.api_user = user
@@ -34,7 +43,7 @@ def api_user_required(func):
 @api_user_required
 @pushrod_view(xml_template="search.xml")
 def search():
-    search_req = ApiSearchRequest(request.values)
+    search_req = ApiSearchRequest(request.args)
     if search_req.validate():
         resp = search_req.execute()
         return resp.search_response()
@@ -42,11 +51,10 @@ def search():
         
         
 @api_blueprint.route('/record/<identifier>', methods=['GET'])
-@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
 @api_user_required
 @pushrod_view(xml_template="record.xml")
-def record(identifier, operator=None):
-    record_req = ApiRecordRequest(identifier, request.values, operator=operator)
+def record(identifier):
+    record_req = ApiRecordRequest(identifier, request.args)
     if record_req.validate():
         resp = record_req.execute()
         if not resp.get_count() > 0:
@@ -54,6 +62,11 @@ def record(identifier, operator=None):
         return resp.record_response()
     raise errors.ApiInvalidRequest(record_req.errors())
         
+@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
+@api_user_required
+@pushrod_view(xml_template="record.xml")
+def record_operator(identifier, operator):
+    pass
 
 #@api_blueprint.route('/mlt/', methods=['GET'])
 #@api_user_required
