@@ -30,14 +30,14 @@ class SearchTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
     def tearDown(self):
         pass
 
-    def test_basic_search_page(self):
-        rv = self.app.get('/search/')
-        assert 'Query the ADS database' in rv.data
+#    def test_basic_search_page(self):
+#        rv = self.app.get('/search/')
+#        assert 'Query the ADS database' in rv.data
         
-    def test_basic_search_results(self):
-        fixture = self.useFixture(SolrRawQueryFixture())
-        rv = self.app.get('/search/?q=black+holes')
-        assert 'Total Hits:' in rv.data
+#    def test_basic_search_results(self):
+#        fixture = self.useFixture(SolrRawQueryFixture())
+#        rv = self.app.get('/search/?q=black+holes')
+#        assert 'Total Hits:' in rv.data
 
 
 class GetMissingDefaultsTestCase(unittest2.TestCase):
