@@ -98,6 +98,10 @@
 					</li>
 				</ul>
 			</li>
+			{% if re_sort_type and re_sort_dir %}
+			<li class="divider"></li>
+			<li><a tabindex="-1" href="{{ base_re_sort_url }}">Remove Re-sort</a></li>
+			{% endif %}
 		</ul>
 	</span>
 {% endmacro %}

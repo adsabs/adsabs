@@ -159,9 +159,7 @@ class SolrResponse(object):
         Returns a dictionary containing all the informations
         about the status of the pagination 
         """
-        try:
-            self.pagination
-        except AttributeError:
+        if not hasattr(self, 'pagination'):
             max_pagination_len = 5 #maybe we want to put this in the configuration
             num_total_pages = int(ceil(float(self.get_count()) / float(config.SEARCH_DEFAULT_ROWS)))
             current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
