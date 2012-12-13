@@ -56,9 +56,24 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
             'start': 0,
             'numFound': 1,
             'docs': [{
+                      'id': '1234',
                       'bibcode': 'xyz'
                     }],
-            'facets': [ ('bar', 1) ]
+            'facet_counts': {
+                "facet_fields": {
+                    "year": [ 
+                        "2009", 3,
+                        "2008", 5,
+                    ]
+                }
+            },
+            'highlighting': {
+                "1234": {
+                    "abstract": [
+                        "foo <em>bar</em> baz",
+                    ]
+                }
+            }
         }
     }
     

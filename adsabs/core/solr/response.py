@@ -31,7 +31,7 @@ class SolrResponse(object):
              },
             'results': {
                 'docs': self.get_docset(),
-                'facets': self.get_facets(),
+                'facets': self.get_all_facets(),
             }
         }
         return resp
@@ -69,14 +69,23 @@ class SolrResponse(object):
         except IndexError:
             log.debug("response has no doc at idx %d" % idx)
     
-    def get_facets(self):
-        return self.raw.get('facet_counts', {})
+    def get_all_facets(self):
+        if not self.request.facets_on():
+            return {}
+        return self.raw['facet_counts']
     
     def get_facets_fields(self, facet_name):
+        if not self.request.facets_on():
+            return []
+        solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
+        
         #I extract the facets from the raw response
-        facets_list = self.get_facets().get('facet_fields', {}).get(config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None), [])
+        raw_facet_fields = self.raw['response']['facet_counts']['facet_fields']
+        facets_list = raw_facet_fields.get(solr_field_name, [])
+        
         #I split the list in tuples
         facets_tuples_list = [tuple(facets_list[i:i+2]) for i in xrange(0, len(facets_list), 2)]
+        
         #I extract the facet parameter submitted
         query_parameters = self.get_facet_param_field(facet_name)
         return [(elem[0], elem[1], 'selected') if elem[0] in query_parameters else (elem[0], elem[1], '') for elem in facets_tuples_list]
@@ -91,18 +100,18 @@ class SolrResponse(object):
         """
         Returns the list of query parameters
         """
-        try: 
-            self.request_facet_params
-        except AttributeError:
+        if not hasattr(self, 'request_facet_params'):
             facet_params = []
             #first I extract the query parameters excluding the default ones
-            search_params = list(set(self.request.params.get('fq', [])) - set(dict(config.SOLR_MISC_DEFAULT_PARAMS).get('fq', [])))
+            search_filters = self.request.get_filters(exclude_defaults=True)
             #I extract only the parameters of the allowed facets
-            for solr_facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
-                for elem in search_params:
-                    param = elem.split(':', 1)
-                    if param[0] == config.ALLOWED_FACETS_FROM_WEB_INTERFACE[solr_facet]:
-                        facet_params.append((solr_facet, param[1].strip('"')))
+            inverted_allowed_facet_dict = dict((v,k) for k,v in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.iteritems())
+            for filter_val in search_filters:
+                filter_split = filter_val.split(':', 1)
+                if filter_split[0] in inverted_allowed_facet_dict:
+                    facet_name = inverted_allowed_facet_dict[filter_split[0]]
+                    facet_params.append((facet_name, filter_split[1].strip('"')))
+                        
             self.request_facet_params = facet_params
         return self.request_facet_params
     

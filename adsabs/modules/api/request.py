@@ -29,7 +29,7 @@ class ApiSearchRequest(object):
     def errors(self):
         pass
     
-    def create_solr_request(self):
+    def _create_solr_request(self):
         req = SolrRequest(self.form.q.data)
         
         if self.form.fl.data:
@@ -64,7 +64,7 @@ class ApiSearchRequest(object):
         return req
                 
     def execute(self):
-        solr_req = self.create_solr_request()
+        solr_req = self._create_solr_request()
         self.resp = solr_req.get_response()
         if self.resp.is_error():
             raise ApiSolrException(self.resp.get_error())
@@ -79,7 +79,7 @@ class ApiRecordRequest(ApiSearchRequest):
         self.record_id = identifier
         ApiSearchRequest.__init__(self, request_vals)
         
-    def create_solr_request(self):
+    def _create_solr_request(self):
         q = "identifier:%s" % self.record_id
         req = SolrRequest(q, rows=1)
         
