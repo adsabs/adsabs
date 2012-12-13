@@ -100,6 +100,20 @@ class SolrRequest(object):
                 qstring.append((key, to_str(value)))
         qstring = urlencode(qstring, doseq=True)
         return "%s/select?%s" % (g.solr.url, qstring)
+    
+    def highlights_on(self):
+        return self.params.hl and True or False
+    
+    def facets_on(self):
+        return self.params.facet and True or False
+    
+    def get_filters(self, exclude_defaults=False):
+        filters = self.params.get('fq', [])
+        if exclude_defaults:
+            default_params = dict(config.SOLR_MISC_DEFAULT_PARAMS)
+            filters = filter(lambda x: x not in default_params.get('fq', []), filters)
+        return filters
+        
         
 class SolrParams(dict):
     

@@ -57,8 +57,10 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         
     def test_solr_request_add_facet(self):
         req = solr.SolrRequest("foo")   
+        self.assertFalse(req.facets_on())
         self.assertNotIn('facet', req.params)
         req.add_facet('author')
+        self.assertTrue(req.facets_on())
         self.assertEqual(req.params['facet'], 'true')
         self.assertEqual(req.params['facet.field'], ['author'])
         req.add_facet('bibstem')
@@ -85,11 +87,15 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params.fq, ['bibstem:ApJ'])
         req.add_filter("author:Kurtz,M")
         self.assertEqual(req.params.fq, ['bibstem:ApJ', 'author:Kurtz,M'])
+        self.assertIn('bibstem:ApJ', req.get_filters())
+        self.assertIn('author:Kurtz,M', req.get_filters())
         
     def test_solr_request_add_highlight(self):
         req = solr.SolrRequest("foo")
         self.assertNotIn('hl', req.params)
+        self.assertFalse(req.highlights_on())
         req.add_highlight("abstract")
+        self.assertTrue(req.highlights_on())
         self.assertEqual(req.params['hl'], 'true')
         self.assertEqual(req.params['hl.fl'], 'abstract')
         req.add_highlight("full")
@@ -108,6 +114,9 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
             resp = req.get_response()
             self.assertIn('results', resp.search_response())
         
+    def test_highlight_inclusion(self):
+        fixture = self.useFixture(SolrRawQueryFixture())
+        
     def test_query(self):
         from adsabs.core.solr import query
         fixture = self.useFixture(SolrRawQueryFixture())
@@ -121,10 +130,14 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
             self.assertEquals(resp.request.params.start, 11)
         
     def test_facet_arg_separator(self):
-        
+        """
+        tests that our config.SOLR_ARG_SEPARATOR successfully works around
+        solrpy's replacing of '_' with '.' in our field-specific params
+        """ 
         self._solr_request_params = None
         
         class MockResp(object):
+            """callback needs to return an object with a read() method"""
             def read(self):
                 return '{}'
             

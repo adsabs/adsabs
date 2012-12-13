@@ -149,7 +149,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
             self.app.preprocess_request()
             fixture.set_api_user()
             req = ApiSearchRequest(request.values)
-            solr_req = req.create_solr_request()
+            solr_req = req._create_solr_request()
             self.assertEquals(solr_req.params.q, 'black holes')
         
     def test_validation(self):
