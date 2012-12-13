@@ -80,7 +80,7 @@ class SolrResponse(object):
         solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
         
         #I extract the facets from the raw response
-        raw_facet_fields = self.raw['response']['facet_counts']['facet_fields']
+        raw_facet_fields = self.raw['facet_counts']['facet_fields']
         facets_list = raw_facet_fields.get(solr_field_name, [])
         
         #I split the list in tuples
