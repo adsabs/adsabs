@@ -21,7 +21,7 @@ def format_ads_date(date_string):
     elif date_string[5:7] == '00' and date_string[8:] == '00':
         return date_string[:4]
     elif date_string[8:] == '00':
-        return strftime('%b %Y', strptime(date_string[:7],'%Y-%m'))
+        return u'%s %s' % (strftime('%b', strptime(date_string[5:7],'%m')), date_string[:4])
     else:
-        return strftime('%d %b %Y', strptime(date_string,'%Y-%m-%d'))
+        return u'%s %s' % (strftime('%d %b', strptime(date_string[5:],'%m-%d')), date_string[:4])
         
