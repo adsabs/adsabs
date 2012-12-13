@@ -13,6 +13,8 @@
 			<div class="span2 citation_count">
 				{% if doc.citation_count > 0 %}
 				Cited by {{ doc.citation_count }}
+				{% else %}
+				&nbsp;
 				{% endif %}
 			</div>
 			<div class="span3 letterlink_box">
