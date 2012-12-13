@@ -1,6 +1,6 @@
 {# ###### Macro for the basic search form ###### #}
 {% macro render_search_form(form) %}
-<div id="search_form">
+<div class="container" id="search_form">
     <form class="form-search form-search-cust" method="GET" action="{{ url_for('search.search') }}">
         {{ form.rows }}
         <fieldset>
@@ -12,15 +12,20 @@
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' object:&quot;', '&quot;');">Object</a></small></div>
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' full:&quot;', '&quot;');">Fulltext</a></small></div>
             </div>
-	        {{ form.q(class="span6", placeholder=form.q.description, autofocus="autofocus") }}
-	        {{ form.db_key(class="span2") }}
-	        {{ form.sort_type() }}
-	        <button class="btn btn-primary">Search</button> 
-	        <span class="btn pull-right" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler" title="more options"><i class="icon-plus"></i></span>
+            <div class="row">
+            	<div class="span12">
+			        {{ form.q(class="span6", placeholder=form.q.description, autofocus="autofocus") }}
+			        <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler" title="more options"><i class="icon-plus"></i></span>
+			        {{ form.db_key(class="span2") }}
+			        {{ form.sort_type() }}
+			        <button class="btn btn-primary">Search</button>
+		        </div>
+	        </div>
 	        <div id="advanced_options" class="row">
+	        	<div class="span11 well well-small">
 	        	{# { form.sort_dir() } #}
 
-	        		<div class="span4 well adv_opt_box">
+	        		<div class="span4 adv_opt_box">
 	        			<div class="row">
 	        				<div class="span4">Publication date between</div>
 	        			</div>
@@ -31,7 +36,7 @@
 	        				</div>
 	        			</div>
 	        		</div>
-	        		<div class="span2 well adv_opt_box adv_opt_box_foll">
+	        		<div class="span2 adv_opt_box adv_opt_box_foll">
 	        			<div class="row">
 	        				<div class="span2">{{ form.journal_abbr.description }}</div>
 	        			</div>
@@ -39,7 +44,7 @@
 	        				<div class="span2">{{ form.journal_abbr(class="span2") }}</div>
 	        			</div>
 	        		</div>
-	        		<div class="span2 well adv_opt_box adv_opt_box_foll">
+	        		<div class="span2 adv_opt_box adv_opt_box_foll">
 	        			<div class="row">
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.refereed }} {{ form.refereed.description }}</label></div>
 	        			</div>
@@ -47,7 +52,7 @@
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.article }} {{ form.article.description }}</label></div>
 	        			</div>
 	        		</div>
-	        	
+	        	</div>
 	        	{# ####COMMENTED### 
 	        	{% for radio in form.second_order_type %}
 	        		{% if loop.index == 1 %}

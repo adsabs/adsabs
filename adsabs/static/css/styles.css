@@ -30,6 +30,10 @@ div.centered {
 	margin-top:2px;
 }
 
+#advanced_options .well {
+	margin-bottom:0px	
+}
+
 /*css for query forms*/
 .link_only_js {
 	cursor: pointer;
@@ -51,7 +55,7 @@ div.centered {
 /*Search result page */
 
 div.searchResults {
-	margin-top:5px;	
+	margin-top:0px;	
 }
 
 span.results_count {
