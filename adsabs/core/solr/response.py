@@ -75,6 +75,10 @@ class SolrResponse(object):
         return self.raw['facet_counts']
     
     def get_facets_fields(self, facet_name):
+        """
+        Returns the facets list for a specific facet.
+        It takes care of checking if the facet has been selected 
+        """
         if not self.request.facets_on():
             return []
         solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
@@ -89,6 +93,15 @@ class SolrResponse(object):
         #I extract the facet parameter submitted
         query_parameters = self.get_facet_param_field(facet_name)
         return [(elem[0], elem[1], 'selected') if elem[0] in query_parameters else (elem[0], elem[1], '') for elem in facets_tuples_list]
+    
+    def get_hier_facets_fields(self, facet_name):
+        """
+        Like get_facets_fields but returns a more complex structure for the hierarchical facets 
+        """
+        if not self.request.facets_on():
+            return []
+        solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
+    
     
     def get_facet_param_field(self, facet_name):
         """
