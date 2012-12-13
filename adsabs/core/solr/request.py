@@ -41,6 +41,11 @@ class SolrRequest(object):
         else:
             raise Exception("fields must be expressed as a list or comma-separated string")
         
+    def get_fields(self):
+        if self.params.has_key('fl'):
+            return self.params.fl.split(',')
+        return []
+        
     def set_sort(self, sort_field, direction="desc"):
         self.params.sort = "%s %s" % (sort_field, direction)
         
@@ -50,11 +55,23 @@ class SolrRequest(object):
         else:
             self.params.sort += ',%s %s' % (sort_field, direction)
         
+    def get_sort(self):
+        sort = []
+        if self.params.has_key('sort'):
+            return [tuple(x.split()) for x in self.params.sort.split(',')]
+    
     def set_hlq(self, hlq):
         self.params['hl.q'] = hlq
         
     def add_filter(self, filter_):
         self.params.append('fq', filter_)
+        
+    def get_filters(self, exclude_defaults=False):
+        filters = self.params.get('fq', [])
+        if exclude_defaults:
+            default_params = dict(config.SOLR_MISC_DEFAULT_PARAMS)
+            filters = filter(lambda x: x not in default_params.get('fq', []), filters)
+        return filters
         
     def add_facet(self, fields, limit=None, mincount=None):
         self.params['facet'] = "true"
@@ -67,6 +84,18 @@ class SolrRequest(object):
             if mincount:
                 self.params['f.%s.facet.mincount' % field] = mincount
             
+    def facets_on(self):
+        return self.params.facet and True or False
+    
+    def get_facets(self):
+        facets = []
+        if self.facets_on():
+            for fl in self.params.get('facet.field', []):
+                limit = self.params.get('f.%s.facet.limit' % fl, None)
+                mincount = self.params.get('f.%s.facet.mincount' % fl, None)
+                facets.append((fl, limit, mincount))
+        return facets
+    
     def add_highlight(self, fields, count=None):
         self.params['hl'] = "true"
         if isinstance(fields, basestring):
@@ -74,11 +103,22 @@ class SolrRequest(object):
         for field in fields:
             if not self.params.has_key('hl.fl'):
                 self.params['hl.fl'] = field
-            else:
+            elif field not in self.params['hl.fl'].split(','):
                 self.params['hl.fl'] += ',' + field
             if count:
                 self.params['f.%s.hl.snippets' % field] = count
             
+    def highlights_on(self):
+        return self.params.hl and True or False
+    
+    def get_highlights(self):
+        highlights = []
+        if self.highlights_on() and self.params.has_key('hl.fl'):
+            for fl in self.params.get('hl.fl').split(','):
+                count = self.params.get('f.%s.hl.snippets' % fl, None)
+                highlights.append((fl, count))
+        return highlights
+    
     def get_response(self):
         try:
             json = g.solr.select.raw(**self.params)
@@ -101,19 +141,6 @@ class SolrRequest(object):
         qstring = urlencode(qstring, doseq=True)
         return "%s/select?%s" % (g.solr.url, qstring)
     
-    def highlights_on(self):
-        return self.params.hl and True or False
-    
-    def facets_on(self):
-        return self.params.facet and True or False
-    
-    def get_filters(self, exclude_defaults=False):
-        filters = self.params.get('fq', [])
-        if exclude_defaults:
-            default_params = dict(config.SOLR_MISC_DEFAULT_PARAMS)
-            filters = filter(lambda x: x not in default_params.get('fq', []), filters)
-        return filters
-        
         
 class SolrParams(dict):
     

@@ -31,9 +31,12 @@ class SolrResponse(object):
              },
             'results': {
                 'docs': self.get_docset(),
-                'facets': self.get_all_facets(),
             }
         }
+        
+        if self.request.facets_on():
+            resp['results']['facets'] = self.get_all_facets(),
+            
         return resp
     
     def record_response(self, idx=0):
@@ -50,7 +53,7 @@ class SolrResponse(object):
     
     def get_docset(self):
         docset = self.raw['response'].get('docs', [])
-        if self.raw.has_key('highlighting'):
+        if self.request.highlights_on() and self.raw.has_key('highlighting'):
             for doc in docset:
                 doc['highlights'] = self.raw['highlighting'][doc['id']]
         return self.raw['response'].get('docs', [])
