@@ -38,14 +38,20 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         req = solr.SolrRequest("foo")   
         req.set_fields("bar,baz")
         self.assertEqual(req.params.fl, 'bar,baz')
+        self.assertEqual(req.get_fields(), ['bar','baz'])
+        req.set_fields(['foo','bar'])
+        self.assertEqual(req.params.fl, 'foo,bar')
+        self.assertEqual(req.get_fields(), ['foo','bar'])
         req.set_rows(100)
         self.assertEqual(req.params.rows, 100)
         req.set_start(10)
         self.assertEqual(req.params.start, 10)
         req.set_sort("bar")
         self.assertEqual(req.params.sort, "bar desc")
+        self.assertEqual(req.get_sort(), [('bar','desc')])
         req.set_sort("baz", "asc")
         self.assertEqual(req.params.sort, "baz asc")
+        self.assertEqual(req.get_sort(), [('baz','asc')])
     
     def test_solr_request_add_sort(self):
         req = solr.SolrRequest("foo")
@@ -61,15 +67,19 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertNotIn('facet', req.params)
         req.add_facet('author')
         self.assertTrue(req.facets_on())
+        self.assertEqual(req.get_facets(), [('author', None, None)])
         self.assertEqual(req.params['facet'], 'true')
         self.assertEqual(req.params['facet.field'], ['author'])
         req.add_facet('bibstem')
+        self.assertEqual(req.get_facets(), [('author', None, None), ('bibstem', None, None)])
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem'])
         req.add_facet('keyword', 10)
+        self.assertEqual(req.get_facets(), [('author', None, None), ('bibstem', None, None), ('keyword', 10, None)])
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem', 'keyword'])
         self.assertIn('f.keyword.facet.limit', req.params)
         self.assertEqual(req.params['f.keyword.facet.limit'], 10)
         req.add_facet('author', 10, 5)
+        self.assertEqual(req.get_facets(), [('author', 10, 5), ('bibstem', None, None), ('keyword', 10, None)])
         self.assertEqual(req.params['facet.field'], ['author', 'bibstem', 'keyword'])
         self.assertIn('f.author.facet.limit', req.params)
         self.assertIn('f.author.facet.mincount', req.params)
@@ -89,6 +99,7 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params.fq, ['bibstem:ApJ', 'author:Kurtz,M'])
         self.assertIn('bibstem:ApJ', req.get_filters())
         self.assertIn('author:Kurtz,M', req.get_filters())
+        self.assertEqual(req.get_filters(exclude_defaults=True), ['bibstem:ApJ','author:Kurtz,M'])
         
     def test_solr_request_add_highlight(self):
         req = solr.SolrRequest("foo")
@@ -98,8 +109,12 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertTrue(req.highlights_on())
         self.assertEqual(req.params['hl'], 'true')
         self.assertEqual(req.params['hl.fl'], 'abstract')
+        self.assertEqual(req.get_highlights(), [('abstract', None)])
         req.add_highlight("full")
         self.assertEqual(req.params['hl.fl'], 'abstract,full')
+        self.assertEqual(req.get_highlights(), [('abstract', None), ('full', None)])
+        req.add_highlight('full', 2)
+        self.assertEqual(req.get_highlights(), [('abstract', None), ('full', 2)])
         req.add_highlight(['foo','bar'])
         self.assertEqual(req.params['hl.fl'], 'abstract,full,foo,bar')
         req.add_highlight(['baz', 'fez'], 3)
@@ -108,14 +123,20 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         
     def test_response_content(self):
         fixture = self.useFixture(SolrRawQueryFixture())
-        with self.app.test_request_context('/'):
-            self.app.preprocess_request()
-            req = solr.SolrRequest("foo")
-            resp = req.get_response()
-            self.assertIn('results', resp.search_response())
+        
+        def get_resp(req):
+            with self.app.test_request_context('/'):
+                self.app.preprocess_request()
+                resp = req.get_response()
+                return resp.search_response()
+            
+        self.assertIn('results', get_resp(solr.SolrRequest("foo")))
+        self.assertNotIn('facets', get_resp(solr.SolrRequest("foo")))
         
     def test_highlight_inclusion(self):
         fixture = self.useFixture(SolrRawQueryFixture())
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
         
     def test_query(self):
         from adsabs.core.solr import query

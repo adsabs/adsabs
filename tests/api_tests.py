@@ -91,6 +91,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         self.insert_user("bar", developer=True, dev_perms={'facets': True})
         rv = self.client.get('/api/search/?q=black+holes&dev_key=bar_dev_key')
         resp_data = loads(rv.data)
+        self.assertNotIn('facets', resp_data['results'])
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=bar_dev_key&facet=author')
+        resp_data = loads(rv.data)
         self.assertIn('facets', resp_data['results'])
     
     def test_record_output(self):
