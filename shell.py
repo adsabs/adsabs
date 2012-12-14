@@ -62,5 +62,11 @@ def tools():
     python manage.py runserver
     """
 
+@manager.command
+def create_api_user(email):
+    from adsabs.modules.user import AdsUser
+    user = AdsUser.from_email(email)
+    
+    
 if __name__ == "__main__":
     manager.run()

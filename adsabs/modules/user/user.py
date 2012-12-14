@@ -81,6 +81,17 @@ class AdsUser():
         if user_rec:
             return AdsUser(user_rec)
         return None
+    
+    @staticmethod
+    def from_email(email):
+        """
+        function that will check if the developer key is a valid one and returns the 
+        """
+        #I retrieve the user from the local database
+        user_rec = AdsUserRecord.query.filter(AdsUserRecord.username==email).first() #@UndefinedVariable
+        if user_rec:
+            return AdsUser(user_rec)
+        return None
      
     #In the init I copy locally the variables coming from the user object
     def __init__(self, user_rec):

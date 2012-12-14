@@ -11,6 +11,12 @@ from flask.ext.login import current_user #@UnresolvedImport
 from config import config
 from .errors import ApiPermissionError
 
+def generate_dev_key(user):
+    pass
+
+def create_perms(level="basic"):
+    pass
+
 class DevPermissions(object):
     
     @staticmethod
