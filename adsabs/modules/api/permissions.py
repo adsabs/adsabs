@@ -5,15 +5,73 @@ Created on Nov 15, 2012
 '''
 
 import re
+import os
+import string
+import base64
+import hashlib
+from random import sample, choice
+
 from flask import g
 from flask.ext.login import current_user #@UnresolvedImport
 
 from config import config
 from .errors import ApiPermissionError
 
-def generate_dev_key(user):
-    pass
+PERMISSION_LEVELS = {
+    "basic": {
+        "max_rows": 20,
+        "max_start": 300,
+        "ex_fields": ['full','reader','citations'],
+        "facets": False,
+        "highlights": False,
+    },
+    "devel": {
+        "max_rows": 100,
+        "max_start": 5000,
+        "ex_fields": ['full','reader','citations'],
+        "facets": True,
+        "facet_limit_max": 100,
+        "highlights": True,
+        "highlight_limit_max": 3,
+    },
+    "collab": {},
+}
 
+# dev key hashing strategy borrowed from http://crackstation.net/hashing-security.htm
+HASH_SALT_BYTES = 24
+DEV_KEY_LENGTH = 16
+HASH_SECTION_DELIMITER = ":"
+HASH_SECTION_COUNT = 3
+HASHLIB_METHOD = "sha512"
+
+def _generate_hash(key, salt):
+    t_sha = hashlib.new(HASHLIB_METHOD)
+    t_sha.update(key+salt)
+    return t_sha.digest()
+    
+def create_dev_key():
+    chars = string.letters + string.digits
+    dev_key = ''.join(choice(chars) for _ in range(DEV_KEY_LENGTH))
+    salt = os.urandom(HASH_SALT_BYTES)
+    hashed = _generate_hash(dev_key, salt)
+    t_sha = hashlib.new(HASHLIB_METHOD)
+    t_sha.update(dev_key+salt)
+    hash_struct = HASH_SECTION_DELIMITER.join(
+        HASHLIB_METHOD,
+        salt,
+        base64.urlsafe_b64encode(hashed)
+        )
+    return (dev_key, hash_struct)
+
+def validate_dev_key(dev_key, hash_struct):
+    try:
+        method,salt,stored_hash = hash_struct.split(HASH_SECTION_DELIMITER)
+    except ValueError:
+        return False
+    stored_hash = base64.urlsafe_b64decode(stored_hash)
+    test_hash = _generate_hash(dev_key, salt)
+    return stored_hash == test_hash
+    
 def create_perms(level="basic"):
     pass
 
