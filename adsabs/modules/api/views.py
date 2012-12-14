@@ -8,7 +8,7 @@ from functools import wraps
 import logging
 
 import errors
-from adsabs.modules.user import AdsUser
+from .user import AdsApiUser
 from adsabs.core import solr
 from .request import ApiSearchRequest, ApiRecordRequest
 
@@ -27,7 +27,7 @@ def api_user_required(func):
         if 'dev_key' not in request.args:
             raise errors.ApiNotAuthenticatedError("no developer token provided")
         try:
-            user = AdsUser.from_dev_key(request.args.get('dev_key'))
+            user = AdsApiUser.from_dev_key(request.args.get('dev_key'))
         except Exception, e:
             import traceback
             exc_info = sys.exc_info()

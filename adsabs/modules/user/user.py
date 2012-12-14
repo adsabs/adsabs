@@ -9,7 +9,7 @@ from .models import AdsUserRecord
 
 __all__ = ['AdsUser', 'authenticate' ]
 
-class AdsUser():
+class AdsUser(object):
     """
     Class that creates a User object given a mongo user object
     """
@@ -72,12 +72,11 @@ class AdsUser():
         return None
         
     @staticmethod
-    def from_dev_key(dev_key):
+    def from_email(email):
         """
-        function that will check if the developer key is a valid one and returns the 
         """
         #I retrieve the user from the local database
-        user_rec = AdsUserRecord.query.filter(AdsUserRecord.developer_key==dev_key).first() #@UndefinedVariable
+        user_rec = AdsUserRecord.query.filter(AdsUserRecord.username==email).first() #@UndefinedVariable
         if user_rec:
             return AdsUser(user_rec)
         return None
@@ -85,17 +84,6 @@ class AdsUser():
     #In the init I copy locally the variables coming from the user object
     def __init__(self, user_rec):
         self.user_rec = user_rec
-#        self.cookie_id = user_local_info.cookie_id
-#        self.myads_id = user_local_info.myads_id
-#        self.username = user_local_info.username
-#        self.firstname = user_local_info.firstname
-#        self.lastname = user_local_info.lastname
-#        self.active = user_local_info.active
-#        self.anonymous = user_local_info.anonymous
-#        self.developer = user_local_info.developer
-#        self.developer_key = user_local_info.developer_key
-#        self.developer_level = user_local_info.developer_level
-#        self.developer_perms = user_local_info.developer_perms
         
         #for the templates
         if self.user_rec.firstname != '' and self.user_rec.lastname != '':
@@ -120,15 +108,6 @@ class AdsUser():
 
     def get_id(self):
         return self.user_rec.cookie_id
-    
-    def is_developer(self):
-        return self.user_rec.developer_key and True
-    
-    def get_dev_key(self):
-        return self.user_rec.developer_key
-    
-    def get_dev_perms(self):
-        return self.user_rec.developer_perms
 
 def get_classic_user(login, password):
     """
