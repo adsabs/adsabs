@@ -1,6 +1,6 @@
 {# Local imports #}
 {% from "macros/results.html" import render_search_result with context %}
-{% from "macros/facets.html" import render_facet_box, render_applied_facets_box with context %}
+{% from "macros/facets.html" import render_facet_box, render_2level_hier_facet_box, render_applied_facets_box with context %}
 {% from "macros/pagination.html" import render_pagination, render_result_numbers with context %}
 {% from "macros/button_menu.html" import render_re_sort with context %}
 
@@ -28,10 +28,11 @@
 						</div>
 					</div>
 				</div>
-			{{ render_facet_box('aut_f', 'Authors', resp, open=True) }}
+			{{ render_2level_hier_facet_box('aut_f', 'Authors', resp, open=True) }}
 			{{ render_facet_box('key_f', 'Keywords', resp) }}
 			{{ render_facet_box('bib_f', 'Publications', resp) }}
 			{{ render_facet_box('prop_f', 'Refereed status', resp, limit_to=['refereed', 'not refereed'], facetid_html='refereed_f') }}
+			{{ render_facet_box('bibgr_f', 'Bib Groups', resp) }}
 			{{ render_facet_box('year_f', 'Year', resp) }}
 			</div>
 		</div>

@@ -7,9 +7,12 @@ Created on Sep 19, 2012
 import logging
 from simplejson import loads,dumps
 from math import ceil
+from copy import deepcopy
+from collections import defaultdict
+
 from config import config
 from .solrdoc import SolrDocument
-from copy import deepcopy
+
 
 log = logging.getLogger(__name__)
 
@@ -101,10 +104,48 @@ class SolrResponse(object):
         """
         Like get_facets_fields but returns a more complex structure for the hierarchical facets 
         """
+        def update_multidict(fac_dict, hier_facet):
+            """ Function to create the data structure for the facets"""
+            x = fac_dict
+            level = hier_facet[0]
+            fac_list = hier_facet[1:-1]
+            last_value = hier_facet[-1]
+            for i in range(int(level) +1):
+                if i != int(level):
+                    x = x[fac_list[i]][1]
+                else:
+                    x[fac_list[i]] = (last_value, {})
+        def fac_dict_to_tuple(fac_dict):
+            """Returns a tuple version of the dictionary of facets"""
+            tuple_facets = sorted(fac_dict.items(), key= lambda x: (-x[1][0], x[0]))
+            ret_list = []
+            for elem in tuple_facets:
+                if not elem[1][1]:
+                    ret_list.append(elem)
+                else:
+                    ret_list.append((elem[0], (elem[1][0], fac_dict_to_tuple(elem[1][1]))))
+            return tuple(ret_list)
+                    
         if not self.request.facets_on():
             return []
         solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
-    
+        
+        raw_facet_fields = self.raw['facet_counts']['facet_fields']
+        facets_list = raw_facet_fields.get(solr_field_name, [])
+        #I split the list in tuples
+        facets_tuples_list = [tuple(facets_list[i:i+2]) for i in xrange(0, len(facets_list), 2)]
+        
+        #then I put all the levels of the hierarchical facets in a unique tuple
+        hier_facets_split = [tuple(elem[0].split('/') + [elem[1]]) for elem in facets_tuples_list]
+        #I sort the tuples because I need them in the right order to fill in the dictionary
+        hier_facets_split.sort(key = lambda x: (x[0], -x[-1]))
+        #I re organize the facets
+        final_facets = {}
+        for elem in hier_facets_split:
+            update_multidict(final_facets, elem)
+        #then I convert them back to lists of tuples and I return it
+        return fac_dict_to_tuple(final_facets)
+        
     
     def get_facet_param_field(self, facet_name):
         """

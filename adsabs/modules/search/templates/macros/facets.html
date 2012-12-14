@@ -19,11 +19,17 @@
 			  		{% if not limit_to %}
 				  		<li>
 				  		{% if elem[2] !='selected' %}
+				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+				  			{#
 				  			<a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+				  			#}
 				  		{% else %}
 				  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 				  			{{ elem[0] }} ({{ elem[1] }}) 
+				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+				  			{#
 				  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+				  			#}
 				  		{% endif %}
 				  		</li>
 				  	{% else %}
@@ -31,11 +37,11 @@
 				  			{% if elem[0] == limit %}
 				  				<li>
 					  			{% if elem[2] !='selected' %}
-					  			<a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
 						  		{% else %}
 						  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 						  			{{ elem[0] }} ({{ elem[1] }}) 
-						  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 						  		{% endif %}
 						  		</li>
 				  			{% endif %}
@@ -99,6 +105,30 @@
 	</script>
 {% endmacro %}
 
+{# ###Macro for a single group of facets with 2 levels of deepness### #}
+{% macro render_2level_hier_facet_box(facetid, facettitle, resp, open=False, facetid_html=None ) %}
+	{# first of all I check which id to use to build the widget #}
+	{% if facetid_html == None %}
+		{% set facetid_html=facetid %}
+	{% endif %}
+	{% set current_page = resp.get_pagination()['current_page']%}
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
+			  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %} pull-right"></i>
+			</div>
+		</div>
+		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
+			<div class="accordion-inner">
+			  <ul id="facetList{{ facetid_html }}" class="unstyled">
+			  	{% for elem in resp.get_hier_facets_fields(facetid) %}
+			  		
+			  	{% endfor %}
+			  </ul>
+			</div>
+		</div>
+	</div>
+{% endmacro %}
 
 {# ###Macro to render the list of applied facets #}
 {% macro render_applied_facets_box(resp) %}
@@ -116,6 +146,8 @@
 						Keyword :
 					{% elif elem[0] == 'year_f' %}
 						Year :
+					{% elif elem[0] == 'bibgr_f' %}
+						Bibgroup :
 					{% elif elem[0] == 'prop_f' and elem[1] in ['refereed', 'not refereed'] %}
 						
 					{% else %}
@@ -123,19 +155,19 @@
 					{% endif %}
 					{{ elem[1] }} 
 					{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
-					<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" 
+					<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" 
 					title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
 				</span>
 			{% endfor %}
 		</div>
 		<div class="span1">
-			{% set base_remove_all = [request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '')] %}
+			{% set base_remove_all = [request.query_string|replace('&page=%s' % current_page, '')] %}
 			{% for elem in selected_facets %}
 				{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
 				{% do base_remove_all.append(base_remove_all[-1]|replace(remove_facet, '')) %}
 				
 			{% endfor %}
-			<a href="{{ base_remove_all[-1] }}">Clear all</a>
+			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}">Clear all</a>
 		</div>
 	</div>
 {% endmacro %}

@@ -3,12 +3,12 @@
 	{% set pagination=resp.get_pagination() %}
 	<span class="help-inline hidden-phone results_count">
 		<a {% if pagination['current_page'] == 1 %} class="disabled"{% else %}
-		href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
+		href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
 		|
 		{{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} of {{ resp.get_count() }}
 		|
 		<a {% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} 
-		href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
+		href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
 	</span>
 {% endmacro %}
 
@@ -18,26 +18,26 @@
 		<ul>
 			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="First"{% endif %}>
 				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
+				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
 			</li>
 			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="Prev"{% endif %}>
 				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
+				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
 			</li>
 			{% for page in pagination['pages_before'] %}
-			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
 			{% endfor %}
 			<li class="active"><a>{{ pagination['current_page'] }}</a></li>
 			{% for page in pagination['pages_after'] %}
-			<li><a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
 			{% endfor %}
 			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Next"{% endif %}>
 				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
+				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
 			</li>
 			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Last"{% endif %}>
 				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
+				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
 			</li>
   		</ul>
 	</div>
