@@ -43,7 +43,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
             if form.month_to.data:
                 maxdate = u'%s%s00' % (form.year_to.data, unicode(form.month_to.data).zfill(2))
             else:
-                maxdate = u'%s%s00' % (form.year_to.data, u'00')
+                maxdate = u'%s%s00' % (form.year_to.data, u'13')
         search_components['filters'].append(u'pubdate_sort:[%s TO %s]' % (mindate, maxdate))
     #refereed
     if form.refereed.data:

@@ -107,6 +107,12 @@ class BuildBasicQueryComponentsTestCase(unittest2.TestCase):
             out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[20090900 TO 20101200]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
+            
+    def test_query_with_date_range_4(self):
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=09&year_from=2009&year_to=2010'):
+            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[20090900 TO 20101300]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form), out)
        
     def test_journal_abbreviations_1(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&journal_abbr=ApJ'):
