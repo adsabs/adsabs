@@ -8,7 +8,6 @@ from flask import g, request #@UnresolvedImport
 from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
-from .permissions import DevPermissions
 from .errors import ApiPermissionError,ApiSolrException
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
@@ -19,11 +18,11 @@ class ApiSearchRequest(object):
     
     def __init__(self, request_vals):
         self.form = ApiQueryForm(request_vals, csrf_enabled=False)
-        self.perms = DevPermissions.current_user_perms()
+        self.user = g.api_user
         
     def validate(self):
         valid = self.form.validate()
-        perms_ok = self.perms.check_permissions(self.form)
+        perms_ok = self.user.check_permissions(self.form)
         return valid and perms_ok
     
     def errors(self):

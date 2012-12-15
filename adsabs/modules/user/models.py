@@ -22,6 +22,5 @@ class AdsUserRecord(mongodb.Document): #@UndefinedVariable
     anonymous = mongodb.BoolField(default=True) #@UndefinedVariable
     developer_key = mongodb.StringField(default='', required=False) #@UndefinedVariable
     developer_perms = mongodb.AnythingField(default={}, required=False) #@UndefinedVariable
-    salt = mongodb.StringField() #@UndefinedVariable
     cookie_id_index = document.Index().descending('cookie_id').unique()
     

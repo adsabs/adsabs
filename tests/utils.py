@@ -9,7 +9,7 @@ from simplejson import dumps
 from copy import deepcopy
 
 from flask import g
-from adsabs.modules.user import AdsUser
+from adsabs.modules.api.user import AdsApiUser
 
 def user_creator():
     def func(username, developer=False, dev_perms=None):
@@ -36,7 +36,7 @@ class GlobalApiUserFixture(fixtures.Fixture):
         self.dev_key = dev_key
         
     def set_api_user(self):
-        g.api_user = AdsUser.from_dev_key(self.dev_key)
+        g.api_user = AdsApiUser.from_dev_key(self.dev_key)
         
 class SolrRawQueryFixture(fixtures.MonkeyPatch):
     

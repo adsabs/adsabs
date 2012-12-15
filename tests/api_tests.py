@@ -16,9 +16,9 @@ from simplejson import loads
 
 from flask import request, g
 from adsabs.app import create_app
-from adsabs.modules.user import AdsUser
+from adsabs.modules.api import AdsApiUser
 from adsabs.modules.api import ApiSearchRequest
-from adsabs.modules.api.permissions import DevPermissions as DP
+from adsabs.modules.api import user
 from adsabs.modules.api.forms import ApiQueryForm
 from adsabs.core.solr import SolrResponse
 from config import config
@@ -64,6 +64,28 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         rv = self.client.get('/api/record/1234')
         self.assertEqual(rv.status_code, 401)
+        
+    def test_dev_user(self):
+        
+        self.insert_user("a")
+        
+        user = AdsApiUser.from_dev_key("b_dev_key")
+        self.assertIsNone(user)
+        
+        self.insert_user("b")
+        user = AdsApiUser.from_dev_key("b_dev_key")
+        self.assertIsNone(user)
+        
+        self.insert_user("c", developer=True)
+        user = AdsApiUser.from_dev_key("c_dev_key")
+        self.assertIsNotNone(user)
+        self.assertTrue(user.is_developer())
+        self.assertEqual("c_name", user.name)
+        
+        self.insert_user("d", developer=True, dev_perms={"foo": 1})
+        user = AdsApiUser.from_dev_key("d_dev_key")
+        self.assertIsNotNone(user)
+        self.assertIn("foo", user.get_dev_perms())
         
     def test_authorized_request(self):
         
@@ -158,7 +180,6 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
     def test_validation(self):
         
         self.insert_user("foo", developer=True)
-        fixture = self.useFixture(GlobalApiUserFixture("foo_dev_key"))
         
         def validate(qstring, errors=None):
             with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&%s' % qstring):
@@ -237,6 +258,12 @@ class PermissionsTest(unittest2.TestCase):
     
     def test_permissions(self):
         
+        user_creator()("foo", developer=True)
+        def DP(perms):
+            u = AdsApiUser.from_dev_key("foo_dev_key")
+            u.perms = perms
+            return u
+        
         p = DP({})
         self.assertRaises(AssertionError, p._facets_ok, ["author"])
         p = DP({'facets': True})
@@ -286,6 +313,20 @@ class PermissionsTest(unittest2.TestCase):
         self.assertIsNone(p._highlight_ok(["abstract:2"]))
         self.assertIsNone(p._highlight_ok(["abstract:3"]))
         self.assertRaisesRegexp(AssertionError, 'highlight count 4 exceeds max allowed value: 3', p._highlight_ok, ["abstract:4"])
+    
+    def test_dev_key_creation(self):
+        
+        new_dev_key = user._create_dev_key()
+        self.assertEquals(len(new_dev_key), user.DEV_KEY_LENGTH)
+        
+        new_dev_key, dev_key_hash = user.generate_dev_key_hash()
+        self.assertEquals(len(new_dev_key), user.DEV_KEY_LENGTH)
+        hash_components = dev_key_hash.split(user.HASH_SECTION_DELIMITER)
+        self.assertEquals(len(hash_components), 3)
+        self.assertTrue(user.validate_dev_key(new_dev_key, dev_key_hash))
+        
+    def test_current_user_perms(self):
+        assert False
     
 if __name__ == '__main__':
     unittest2.main()

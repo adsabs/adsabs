@@ -33,23 +33,7 @@ class UserTests(unittest2.TestCase):
         self.assertIsNotNone(user)
         self.assertEqual("a_name", user.name)
         
-        user = AdsUser.from_dev_key("b_dev_key")
-        self.assertIsNone(user)
-        
-        self.insert_user("b")
-        user = AdsUser.from_dev_key("b_dev_key")
-        self.assertIsNone(user)
-        
-        self.insert_user("c", developer=True)
-        user = AdsUser.from_dev_key("c_dev_key")
-        self.assertIsNotNone(user)
-        self.assertTrue(user.is_developer())
-        self.assertEqual("c_name", user.name)
-        
-        self.insert_user("d", developer=True, dev_perms={"foo": 1})
-        user = AdsUser.from_dev_key("d_dev_key")
-        self.assertIsNotNone(user)
-        self.assertIn("foo", user.get_dev_perms())
+ 
         
         
 if __name__ == '__main__':

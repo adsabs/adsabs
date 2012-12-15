@@ -15,7 +15,11 @@ from flask import g
 from flask.ext.login import current_user #@UnresolvedImport
 
 from config import config
+from adsabs.modules.user import AdsUser
+from adsabs.modules.user.models import AdsUserRecord
 from .errors import ApiPermissionError
+
+__all__ = ['AdsApiUser', 'create_api_user']
 
 PERMISSION_LEVELS = {
     "basic": {
@@ -41,51 +45,105 @@ PERMISSION_LEVELS = {
 HASH_SALT_BYTES = 24
 DEV_KEY_LENGTH = 16
 HASH_SECTION_DELIMITER = ":"
-HASH_SECTION_COUNT = 3
-HASHLIB_METHOD = "sha512"
+HASH_METHOD = "sha512"
 
-def _generate_hash(key, salt):
-    t_sha = hashlib.new(HASHLIB_METHOD)
+def _generate_hash(key, salt, method=HASH_METHOD):
+    t_sha = hashlib.new(method)
     t_sha.update(key+salt)
     return t_sha.digest()
     
-def create_dev_key():
+def _create_dev_key():
     chars = string.letters + string.digits
     dev_key = ''.join(choice(chars) for _ in range(DEV_KEY_LENGTH))
-    salt = os.urandom(HASH_SALT_BYTES)
+    return dev_key
+    
+def generate_dev_key_hash():
+    dev_key = _create_dev_key()
+    salt = base64.b64encode(os.urandom(HASH_SALT_BYTES))
     hashed = _generate_hash(dev_key, salt)
-    t_sha = hashlib.new(HASHLIB_METHOD)
-    t_sha.update(dev_key+salt)
-    hash_struct = HASH_SECTION_DELIMITER.join(
-        HASHLIB_METHOD,
+    hash_struct = HASH_SECTION_DELIMITER.join([
+        HASH_METHOD,
         salt,
         base64.urlsafe_b64encode(hashed)
-        )
+        ])
     return (dev_key, hash_struct)
 
 def validate_dev_key(dev_key, hash_struct):
     try:
         method,salt,stored_hash = hash_struct.split(HASH_SECTION_DELIMITER)
-    except ValueError:
+        assert method == HASH_METHOD
+    except (AssertionError,ValueError):
         return False
     stored_hash = base64.urlsafe_b64decode(stored_hash)
-    test_hash = _generate_hash(dev_key, salt)
+    test_hash = _generate_hash(dev_key, salt, method)
     return stored_hash == test_hash
     
-def create_perms(level="basic"):
-    pass
+def default_perms(level):
+    try:
+        perms = PERMISSION_LEVELS[level]
+        return perms
+    except KeyError:
+        raise Exception("Unknown default permission level: %s" % level)
 
-class DevPermissions(object):
+def create_api_user(ads_user, level):
+    """
+    promote a regular AdsUser object to an AdsApiUser
+    """
+    api_user = AdsApiUser(ads_user.user_rec)
+    if not api_user.is_developer():
+        api_user.user_rec.developer_key = _create_dev_key()
+        api_user.user_rec.save()
+    api_user.set_perms(level)
+    return api_user
+    
+class AdsApiUser(AdsUser):
     
     @staticmethod
-    def current_user_perms():
-        user = g.api_user
-        perms = user.get_dev_perms()
-        return DevPermissions(perms)
-    
-    def __init__(self, perms):
-        self.perms = perms
+    def from_dev_key(dev_key):
+        """
+        function that will check if the developer key is a valid one and returns the api user object
+        """
+        #I retrieve the user from the local database
+        user_rec = AdsUserRecord.query.filter(AdsUserRecord.developer_key==dev_key).first() #@UndefinedVariable
+        if user_rec:
+            return AdsApiUser(user_rec)
+        return None 
+
+    def __init__(self, user_rec):
+        super(AdsApiUser, self).__init__(user_rec)
+        self.perms = user_rec.developer_perms
         
+    def set_perms(self, level=None, new_perms={}):
+        if level:
+            new_perms.update(default_perms(level).copy())
+        self.user_rec.developer_perms = new_perms
+        self.user_rec.save()
+            
+    def is_developer(self):
+        return self.user_rec.developer_key and True
+    
+    def get_dev_key(self):
+        return self.user_rec.developer_key
+    
+    def get_dev_perms(self):
+        return self.user_rec.developer_perms
+    
+    def check_permissions(self, form):
+        
+        try:
+            if len(form.facet.data):
+                self._facets_ok(form.facet.data)
+            self._max_rows_ok(form.rows.data)
+            self._max_start_ok(form.start.data)
+            if len(form.fl.data):
+                self._fields_ok(form.fl.data)
+            if len(form.hl.data):
+                self._highlight_ok(form.hl.data)
+        except AssertionError, e:
+            raise ApiPermissionError(e.message)
+        
+        return True
+    
     def _facets_ok(self, req_facets):
         assert self.perms.get('facets', False), 'facets disabled'
         
@@ -128,19 +186,4 @@ class DevPermissions(object):
                 assert highlight_max >= int(hl[1]), \
                     'highlight count %d exceeds max allowed value: %d' % (int(hl[1]), highlight_max)
         
-    def check_permissions(self, form):
-        
-        try:
-            if len(form.facet.data):
-                self._facets_ok(form.facet.data)
-            self._max_rows_ok(form.rows.data)
-            self._max_start_ok(form.start.data)
-            if len(form.fl.data):
-                self._fields_ok(form.fl.data)
-            if len(form.hl.data):
-                self._highlight_ok(form.hl.data)
-        except AssertionError, e:
-            raise ApiPermissionError(e.message)
-        
-        return True
     

@@ -6,7 +6,7 @@ import sys
 import tempfile
 import subprocess
 
-from flask.ext.script import Manager, prompt, prompt_pass, prompt_bool #@UnresolvedImport
+from flask.ext.script import Manager, Shell, prompt, prompt_choices, prompt_bool #@UnresolvedImport
 
 from adsabs import create_app
 from config import config
@@ -15,6 +15,12 @@ manager = Manager(create_app())
 
 app = create_app(config)
 project_root_path = os.path.join(os.path.dirname(app.root_path))
+
+def _make_context():
+    from adsabs.extensions import mongodb
+    return dict(app=app, mongodb=mongodb)
+
+manager.add_command("shell", Shell(make_context=_make_context))
 
 @manager.command
 def run():
@@ -63,9 +69,28 @@ def tools():
     """
 
 @manager.command
-def create_api_user(email):
+def create_api_user(email=None, level=None):
+    
     from adsabs.modules.user import AdsUser
-    user = AdsUser.from_email(email)
+    from adsabs.modules.api import user
+
+    if not email:
+        email = prompt("Enter e-mail address of Classic ADS account")
+        if not email:
+            sys.exit(1)
+    if not level:
+        level = prompt_choices("Enter developer permission level", sorted(user.PERMISSION_LEVELS.keys()), "basic")
+        if level not in user.PERMISSION_LEVELS:
+            sys.exit(1)
+            
+    ads_user = AdsUser.from_email(email)
+    if not ads_user:
+        print "user not found"
+        sys.exit(1)
+        
+    api_user = user.create_api_user(ads_user, level)
+    dev_key = api_user.get_dev_key()
+    print "API User created with %s permissions. Developer key: %s" % (level, dev_key)
     
     
 if __name__ == "__main__":
