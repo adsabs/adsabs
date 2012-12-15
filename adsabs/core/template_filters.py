@@ -8,10 +8,25 @@ from time import strftime, strptime
 
 def quote_url(value):
     """
-    Very basic function
+    Return the simple urllib.quote_plus for a normal string
+    But the in case of a string like 1/Fo o/Bar (hierarchical facets) it quotes only "Fo o" and "Bar"
     """
-    return quote_plus(value)
-
+    #re-encode the unicode characters
+    value = unicode(value).encode('utf-8')
+    try:
+        split_str = value.split('/')
+        int(split_str[0])
+    except ValueError:
+        return quote_plus(value)
+    
+    if len(split_str) == 1:
+        return quote_plus(value)
+    
+    ret_str = split_str[0]
+    for elem in split_str[1:]:
+        ret_str = '%s/%s' % (ret_str, quote_plus(elem))
+    return ret_str
+    
 def format_ads_date(date_string):
     """
     Returns a formatted date given a numeric one
@@ -25,3 +40,16 @@ def format_ads_date(date_string):
     else:
         return u'%s %s' % (strftime('%d %b', strptime(date_string[5:],'%m-%d')), date_string[:4])
         
+
+def format_ads_facet_str(value):
+    """
+    Returns a string to be shown as a facet
+    """
+    try:
+        split_str = value.split('/')
+        int(split_str[0])
+    except ValueError:
+        return value
+    if len(split_str) == 1:
+        return value
+    return split_str[-1]

@@ -34,6 +34,7 @@ div.centered {
 	margin-bottom:0px	
 }
 
+/*********************/
 /*css for query forms*/
 .link_only_js {
 	cursor: pointer;
@@ -92,6 +93,7 @@ div.searchresult div.title a {
 }
 
 
+/*********************/
 /*Facets on top*/
 span.appliedFilter {
     background: none repeat scroll 0 0 #E2EDFE;
@@ -108,7 +110,17 @@ span.appliedFilter a {
 	margin-left:10px;
 }
 
+/*********************/
+/*Facets on left*/
+ul.subFacet {
+	margin-left:10px;
+}
 
+span.expCollSubFacet {
+	cursor:pointer;
+}
+
+/*********************/
 /* Abstract*/
 div.absview {
 	margin-top: 20px;

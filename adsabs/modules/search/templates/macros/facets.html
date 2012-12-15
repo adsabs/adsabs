@@ -20,16 +20,10 @@
 				  		<li>
 				  		{% if elem[2] !='selected' %}
 				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
-				  			{#
-				  			<a href="{{ request.url|replace(request.url_root, '/')|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
-				  			#}
 				  		{% else %}
 				  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 				  			{{ elem[0] }} ({{ elem[1] }}) 
 				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
-				  			{#
-				  			<a href="{{ request.url|replace(request.url_root, '/')|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
-				  			#}
 				  		{% endif %}
 				  		</li>
 				  	{% else %}
@@ -63,20 +57,20 @@
 		});
 		//Code to show/hide the facets
 		var max_facets = 5;
-		$('#facetList{{ facetid_html }} li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
+		$('#facetList{{ facetid_html }} > li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
 		//if I have hidden facets 
-		if ($('#facetList{{ facetid_html }} li:hidden').length > 0)
+		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
 		{
 			//I show the button "more" 
 			$('#collapse{{ facetid_html }} a.more').show();
 			//I configure the "more" to expand the list 
 			$('#collapse{{ facetid_html }} a.more').live('click', function(){
 				//I expand the next N elements 
-				var hidden_li = $('#facetList{{ facetid_html }} li:hidden');
+				var hidden_li = $('#facetList{{ facetid_html }} > li:hidden');
 				for (var i=0; i<max_facets; i++)
 					$(hidden_li[i]).show('fast', function(){
 						//If there are no more hidden elements I hide the more button 
-						if ($('#facetList{{ facetid_html }} li:hidden').length == 0)
+						if ($('#facetList{{ facetid_html }} > li:hidden').length == 0)
 							$('#collapse{{ facetid_html }} a.more').hide();
 					});
 				//I show the "less" anyway because there will be for sure more than N minimum elements 
@@ -85,7 +79,7 @@
 			});
 			//I configure the "less" to collapse the list 
 			$('#collapse{{ facetid_html }} a.less').live('click', function(){
-				var visible_li = $('#facetList{{ facetid_html }} li:visible');
+				var visible_li = $('#facetList{{ facetid_html }} > li:visible');
 				var to_hide = max_facets;
 				//I make sure that I don't hide more than the minimum allowed 
 				if ((visible_li.length - max_facets) < max_facets)
@@ -94,7 +88,7 @@
 				for (var i=1; i<=to_hide; i++)
 					$(visible_li[visible_li.length - i]).hide('fast', function(){
 						//If I've reached the minimum of elements to hide, I hide "less"
-						if ($('#facetList{{ facetid_html }} li:visible').length == max_facets)
+						if ($('#facetList{{ facetid_html }} > li:visible').length == max_facets)
 							$('#collapse{{ facetid_html }} a.less').hide();
 					});
 				//I show "more" if it is hidden 
@@ -122,12 +116,91 @@
 			<div class="accordion-inner">
 			  <ul id="facetList{{ facetid_html }}" class="unstyled">
 			  	{% for elem in resp.get_hier_facets_fields(facetid) %}
-			  		
+			  		<li>
+			  			{% if elem[1][1] != 'selected' %}
+			  				<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=0/{{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1][0] }})</a>
+			  			{% else %}
+			  				{% set remove_facet = '&%s=0/%s' % (facetid, elem[0]|urlencode) %}
+			  				{{ elem[0] }} ({{ elem[1][0] }}) 
+						  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+			  			{% endif %}
+			  			{% if elem[1][2] %}
+			  				<span class="icon-plus-sign expCollSubFacet pull-right" href="#facetList{{ facetid_html }}_{{ loop.index }}"></span>
+			  				<ul id="facetList{{ facetid_html }}_{{ loop.index }}" class="unstyled subFacet collapse">
+			  					{% for subelem in elem[1][2] %}
+				  					{% if subelem[1][1] != 'selected' %}
+				  						<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=1/{{ elem[0]|urlencode }}/{{ subelem[0]|urlencode }}">{{ subelem[0] }} ({{ subelem[1][0] }})</a></li>
+			  						{% else %}
+						  				{% set remove_facet = '&%s=1/%s/%s' % (facetid, elem[0]|urlencode, subelem[0]|urlencode) %}
+						  				{{ subelem[0] }} ({{ subelem[1][0] }}) 
+									  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ subelem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+						  			{% endif %}
+			  					{% endfor %}
+			  				</ul>
+			  			{% endif %}
+			  		</li>
 			  	{% endfor %}
 			  </ul>
+			  <a class="less facetsMoreLess muted"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
 			</div>
 		</div>
 	</div>
+	<script type="text/javascript">
+		//Code to change the icon in the section containing the title of the facets 
+		$('#collapse{{ facetid_html }}').on('hide', function () {
+			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-right pull-right');
+		});
+		$('#collapse{{ facetid_html }}').on('show', function () {
+			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-down pull-right');
+		});
+		//Code to show/hide the facets
+		var max_facets = 5;
+		$('#facetList{{ facetid_html }} > li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
+		//if I have hidden facets 
+		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
+		{
+			//I show the button "more" 
+			$('#collapse{{ facetid_html }} a.more').show();
+			//I configure the "more" to expand the list 
+			$('#collapse{{ facetid_html }} a.more').live('click', function(){
+				//I expand the next N elements 
+				var hidden_li = $('#facetList{{ facetid_html }} > li:hidden');
+				for (var i=0; i<max_facets; i++)
+					$(hidden_li[i]).show('fast', function(){
+						//If there are no more hidden elements I hide the more button 
+						if ($('#facetList{{ facetid_html }} > li:hidden').length == 0)
+							$('#collapse{{ facetid_html }} a.more').hide();
+					});
+				//I show the "less" anyway because there will be for sure more than N minimum elements 
+				if ($('#collapse{{ facetid_html }} a.less').is(':hidden'))
+					$('#collapse{{ facetid_html }} a.less').show();
+			});
+			//I configure the "less" to collapse the list 
+			$('#collapse{{ facetid_html }} a.less').live('click', function(){
+				var visible_li = $('#facetList{{ facetid_html }} > li:visible');
+				var to_hide = max_facets;
+				//I make sure that I don't hide more than the minimum allowed 
+				if ((visible_li.length - max_facets) < max_facets)
+					to_hide = visible_li.length - max_facets;
+				//I hide the elements 
+				for (var i=1; i<=to_hide; i++)
+					$(visible_li[visible_li.length - i]).hide('fast', function(){
+						//If I've reached the minimum of elements to hide, I hide "less"
+						if ($('#facetList{{ facetid_html }} > li:visible').length == max_facets)
+							$('#collapse{{ facetid_html }} a.less').hide();
+					});
+				//I show "more" if it is hidden 
+				if ($('#collapse{{ facetid_html }} a.more').is(':hidden'))
+					$('#collapse{{ facetid_html }} a.more').show();
+			});
+			//configure the plus icons to open the sublists 
+			$('span.expCollSubFacet').live('click', function(){
+				$($(this).attr('href')).toggleClass('in');
+				$(this).toggleClass('icon-plus-sign');
+				$(this).toggleClass('icon-minus-sign');
+			});
+		}
+	</script>
 {% endmacro %}
 
 {# ###Macro to render the list of applied facets #}
@@ -153,10 +226,10 @@
 					{% else %}
 						{{ elem[0] }} :
 					{% endif %}
-					{{ elem[1] }} 
+					{{ elem[1]|format_ads_facet_str }} 
 					{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
 					<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" 
-					title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+					title="remove &quot;{{ elem[1]|format_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 				</span>
 			{% endfor %}
 		</div>

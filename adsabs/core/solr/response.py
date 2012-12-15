@@ -108,22 +108,23 @@ class SolrResponse(object):
             """ Function to create the data structure for the facets"""
             x = fac_dict
             level = hier_facet[0]
-            fac_list = hier_facet[1:-1]
-            last_value = hier_facet[-1]
+            fac_list = hier_facet[1:-2]
+            last_value = hier_facet[-2]
+            selection = hier_facet[-1]
             for i in range(int(level) +1):
                 if i != int(level):
-                    x = x[fac_list[i]][1]
+                    x = x[fac_list[i]][2]
                 else:
-                    x[fac_list[i]] = (last_value, {})
+                    x[fac_list[i]] = (last_value, selection, {})
         def fac_dict_to_tuple(fac_dict):
             """Returns a tuple version of the dictionary of facets"""
             tuple_facets = sorted(fac_dict.items(), key= lambda x: (-x[1][0], x[0]))
             ret_list = []
             for elem in tuple_facets:
-                if not elem[1][1]:
+                if not elem[1][2]:
                     ret_list.append(elem)
                 else:
-                    ret_list.append((elem[0], (elem[1][0], fac_dict_to_tuple(elem[1][1]))))
+                    ret_list.append((elem[0], (elem[1][0], elem[1][1], fac_dict_to_tuple(elem[1][2]))))
             return tuple(ret_list)
                     
         if not self.request.facets_on():
@@ -135,10 +136,12 @@ class SolrResponse(object):
         #I split the list in tuples
         facets_tuples_list = [tuple(facets_list[i:i+2]) for i in xrange(0, len(facets_list), 2)]
         
+        #I extract the facet parameter submitted
+        query_parameters = self.get_facet_param_field(facet_name)
         #then I put all the levels of the hierarchical facets in a unique tuple
-        hier_facets_split = [tuple(elem[0].split('/') + [elem[1]]) for elem in facets_tuples_list]
+        hier_facets_split = [tuple(elem[0].split('/') + [elem[1], 'selected']) if elem[0] in query_parameters else tuple(elem[0].split('/') + [elem[1], '']) for elem in facets_tuples_list]
         #I sort the tuples because I need them in the right order to fill in the dictionary
-        hier_facets_split.sort(key = lambda x: (x[0], -x[-1]))
+        hier_facets_split.sort(key = lambda x: (x[0], -x[-2]))
         #I re organize the facets
         final_facets = {}
         for elem in hier_facets_split:

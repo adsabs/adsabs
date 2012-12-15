@@ -5,7 +5,7 @@ import logging.config
 from flask import Flask, render_template, send_from_directory
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
-from adsabs.core.template_filters import quote_url, format_ads_date
+from adsabs.core.template_filters import quote_url, format_ads_date, format_ads_facet_str
 
 # For import *
 __all__ = ['create_app']
@@ -113,6 +113,10 @@ def _configure_template_filters(app):
     @app.template_filter('format_ads_date')
     def f_a_d(date_string):
         return format_ads_date(date_string)
+    
+    @app.template_filter('format_ads_facet_str')
+    def f_a_f_s(facet_string):
+        return format_ads_facet_str(facet_string)
     
     
 
