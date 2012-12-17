@@ -9,10 +9,10 @@ from simplejson import dumps
 from copy import deepcopy
 
 from flask import g
-from adsabs.modules.user import AdsUser
+from adsabs.modules.api.user import AdsApiUser, PERMISSION_LEVELS
 
 def user_creator():
-    def func(username, developer=False, dev_perms=None):
+    def func(username, developer=False, dev_perms=None, level=None):
         from adsabs.extensions import mongodb
         user_collection = mongodb.session.db.ads_users #@UndefinedVariable
         user_data = {
@@ -26,6 +26,8 @@ def user_creator():
             
         if dev_perms:
             user_data['developer_perms'] = dev_perms
+        elif level:
+            user_data['developer_perms'] = PERMISSION_LEVELS[level].copy()
             
         user_collection.insert(user_data)
     return func
@@ -36,7 +38,7 @@ class GlobalApiUserFixture(fixtures.Fixture):
         self.dev_key = dev_key
         
     def set_api_user(self):
-        g.api_user = AdsUser.from_dev_key(self.dev_key)
+        g.api_user = AdsApiUser.from_dev_key(self.dev_key)
         
 class SolrRawQueryFixture(fixtures.MonkeyPatch):
     
