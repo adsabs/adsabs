@@ -20,7 +20,7 @@
 			<div class="span3 letterlink_box">
 				[ E F G L X D T R C S N U ]
 			</div>
-		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title }}</a></div>
+		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title|safe_html_unescape|safe }}</a></div>
 		    {% if doc.author %}
 		        <div class="span12 author">
 		        {# { '; '.join(doc.author) } #}
@@ -33,7 +33,30 @@
 		        </div>
 		    {% endif %}
 		    <div class="span12 pubdate"><em>Published in {{ doc.pubdate|format_ads_date}}</em></div>
-		    <div class="span12 snippets" style="color:red">snippets</div>
+		    <div class="span12 snippets">
+		    	{% if doc.highlights.get('abstract') %}
+		    		{% set len_snippets_abs = doc.highlights.get('abstract')|length %}
+		    		{% for highlight in doc.highlights.get('abstract') %}
+		    			{% if loop.index0 < 4 %}
+		    				{# only the first 4 snippets are visualized #}
+		    				<span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
+		    			{% else %}
+		    				{% break %}
+		    			{% endif %}
+		    		{% endfor %}
+		    	{% else %}
+		    		{% set len_snippets_abs = 0 %}
+		    	{% endif %}
+		    	{% if doc.highlights.get('full') and len_snippets_abs <= 4 %}
+		    		{% for highlight in doc.highlights.get('full') %}
+		    			{% if loop.index0 < 4 - len_snippets_abs %}
+		    				<span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
+		    			{% else %}
+		    				{% break %}
+		    			{% endif %}
+		    		{% endfor %}
+		    	{% endif %}
+		    </div>
 	    </div>
 	</div>
 {% endmacro %}

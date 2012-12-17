@@ -5,6 +5,8 @@ Created on Dec 10, 2012
 '''
 from urllib import quote_plus
 from time import strftime, strptime
+import jinja2
+import scrubber
 
 def quote_url(value):
     """
@@ -53,3 +55,9 @@ def format_ads_facet_str(value):
     if len(split_str) == 1:
         return value
     return split_str[-1]
+
+def safe_html_unescape(html_str):
+    """
+    Returns a safely unescaped html string where the unsafe tags like <script> and their content is removed
+    """
+    return scrubber.Scrubber().scrub(jinja2.Markup(html_str).unescape())

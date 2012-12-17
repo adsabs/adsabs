@@ -40,7 +40,6 @@ div.centered {
 	clear:both;
 	background-color: #CFF;
 	color: #000;
-	width: 100%;
 	min-height: 100px;	
 	padding: 20px;
 }
@@ -101,6 +100,21 @@ div.searchresult div.title {
 
 div.searchresult div.title a {
 	color: #333;	
+}
+
+div.snippets {
+	padding: 0 20px;
+	font-size:.9em;
+	color:#555;
+}
+
+span.highlight {
+	display:block;
+	clear:both;
+}
+
+span.highlight em {
+	font-weight:bold;
 }
 
 
