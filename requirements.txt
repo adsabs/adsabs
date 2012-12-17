@@ -15,3 +15,5 @@ unittest2
 fixtures
 testtools
 nose==1.2.1
+scrubber>=1.6.1
+BeautifulSoup>=3.2.1
