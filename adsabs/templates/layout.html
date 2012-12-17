@@ -4,23 +4,23 @@
 	<meta charset="UTF-8">
 	<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
 	
-	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
 	
 	<!-- bootstrap stuff -->
-	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
 
 	<!-- IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
 	
-	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}" rel="stylesheet">
-	<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
 	
-	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
 	
 	{% block head%}{% endblock %}
 </head>
@@ -101,5 +101,11 @@
 	</div>
 </div><!-- Footer -->
 
+{% if g.conf_params['PRINT_DEBUG_TEMPLATE'] %}
+	<div id="debugSection">
+		DEBUG ON <br/>
+		{% block debugSection %}{% endblock %}
+	</div>
+{% endif %}
 </body>
 </html>

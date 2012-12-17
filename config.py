@@ -8,6 +8,9 @@ class AppConfig(object):
     
     DEBUG = False
     TESTING = False
+    PRINT_DEBUG_TEMPLATE = False
+    
+    APP_VERSION = '2012_12_17'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -27,8 +30,6 @@ class AppConfig(object):
     RECAPTCHA_PUBLIC_KEY = 'blahblahblahblahblahblahblahblahblah'
     RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
     RECAPTCHA_OPTIONS = {'theme': 'white'}
-    
-    APP_VERSION = '2012-08-21'
     
     MONGOALCHEMY_DATABASE = 'adsabs'
     MONGOALCHEMY_SERVER = 'localhost'

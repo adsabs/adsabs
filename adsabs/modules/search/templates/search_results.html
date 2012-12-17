@@ -5,7 +5,7 @@
 {% from "macros/button_menu.html" import render_re_sort with context %}
 
 {# Global imports #}
-{% from "macros/search_macros.html" import render_search_form %}
+{% from "macros/search_macros.html" import render_search_form with context %}
 
 {% extends "layout.html" %}
 
@@ -66,3 +66,9 @@
 </div>
 
 {% endblock %}
+
+{% if g.conf_params['PRINT_DEBUG_TEMPLATE'] %}
+	{% block debugSection %}
+		Request to SOLR: {{ resp.request.get_raw_request_url() }}
+	{% endblock %}
+{% endif %}

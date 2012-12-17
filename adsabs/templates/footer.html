@@ -1,7 +1,7 @@
 
 <div class="row">
 	<div class="span1">
-		<a href="http://www.nasa.gov"><img src="{{ url_for('static', filename='images/nasa.png') }}" title="NASA"/></a>
+		<a href="http://www.nasa.gov"><img src="{{ url_for('static', filename='images/nasa.png') }}?app_version={{ g.conf_params['APP_VERSION'] }}" title="NASA"/></a>
 	</div>
 	<div class="span3">
 		<p>&copy; The SAO/NASA Astrophysics Data System</p>
@@ -27,6 +27,6 @@
 	
 	</div>
 	<div class="span1">
-		<a href="http://www.cfa.harvard.edu/sao"><img src="{{ url_for('static', filename='images/si_logo.png') }}" title="Smithsonian Astrophysical Observatory"/></a>
+		<a href="http://www.cfa.harvard.edu/sao"><img src="{{ url_for('static', filename='images/si_logo.png') }}?app_version={{ g.conf_params['APP_VERSION'] }}" title="Smithsonian Astrophysical Observatory"/></a>
 	</div>
 </div>

@@ -35,6 +35,17 @@ div.centered {
 }
 
 /*********************/
+/*Debug section*/
+#debugSection {
+	clear:both;
+	background-color: #CFF;
+	color: #000;
+	width: 100%;
+	min-height: 100px;	
+	padding: 20px;
+}
+
+/*********************/
 /*css for query forms*/
 .link_only_js {
 	cursor: pointer;

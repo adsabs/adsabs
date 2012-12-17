@@ -2,7 +2,7 @@ import os
 
 from logging import getLogger
 import logging.config
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, g
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import quote_url, format_ads_date, format_ads_facet_str
@@ -29,6 +29,7 @@ def create_app(config=config, app_name=None):
     _configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
+    _configure_global_variables(app)
 
     return app
 
@@ -154,3 +155,14 @@ def _configure_misc_handlers(app):
     @app.route('/robots.txt')
     def robots():
         return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
+    
+def _configure_global_variables(app):
+    """
+    attaches to the g variable all the parameters from the configuration needed in the templates
+    """
+    @app.before_request
+    def attach_config_params():
+        g.conf_params = {}
+        g.conf_params['PRINT_DEBUG_TEMPLATE'] = config.PRINT_DEBUG_TEMPLATE
+        g.conf_params['APP_VERSION'] = config.APP_VERSION
+    
