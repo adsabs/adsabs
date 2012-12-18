@@ -117,6 +117,19 @@ span.highlight em {
 	font-weight:bold;
 }
 
+div.letterlink_box {
+	font-family: Courier,monospace;
+}
+
+div.letterlink_box .letterLink {
+	display: inline-block;
+    margin-left: 2px;
+    margin-right: 2px;	
+}
+div.letterlink_box .letterLinkAround {
+	margin:0;
+}
+
 
 /*********************/
 /*Facets on top*/

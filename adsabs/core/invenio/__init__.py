@@ -22,7 +22,7 @@ def record_url(recid, of=None):
         
 def get_abstract_xml_from_ads_id(self, ads_id):
     """
-    Simple method that returns 
+    Simple method that returns the marcxml for a bibcode
     """
     query_record_id = 'SELECT rec03.id_bibrec FROM bibrec_bib03x AS rec03 JOIN bib03x ON rec03.id_bibxxx = bib03x.id \
     WHERE bib03x.value="%(ads_id)s" UNION SELECT rec02.id_bibrec FROM bibrec_bib02x AS rec02 \
@@ -31,10 +31,63 @@ def get_abstract_xml_from_ads_id(self, ads_id):
     try:
         record_id = run_sql(query_record_id)[0][0]
     except IndexError:
-        record_id = None
+        return None
         
     if record_id:
         return record_xml_output(get_record(record_id)).replace('\n', '')
-    else:
-        return None
         
+def get_records(invenio_record_id_list):
+    """
+    Returns a list of bibrecords given a list of record ids
+    """
+    return [get_record(record_id) for record_id in invenio_record_id_list]
+    
+
+def get_metadata(invenio_record_id_list):
+    """
+    Returns the additional metadata needed for the result list and the abstract
+    """
+    def author_bibrec_to_dict(author_bibrec):
+        """Converts an author in the bibrecord format to a dictionary"""
+        author = {'name': None, 'normalized_name':None, 'type':None, 'native_name':None, 'affiliations':[], 'emails':[]}
+        for elem in author_bibrec:
+            if elem[0] == 'a':
+                author['name'] = elem[1]
+            elif elem[0] == 'b':
+                author['normalized_name'] = elem[1]
+            elif elem[0] == 'e':
+                author['type'] = elem[1]
+            elif elem[0] == 'q':
+                author['native_name'] = elem[1]
+            elif elem[0] == 'u':
+                author['affiliations'].append(elem[1])
+            elif elem[0] == 'm':
+                author['emails'].append(elem[1])
+        return author
+    
+    #I retrieve the medatata
+    bibrecords_list = get_records(invenio_record_id_list)
+    
+    records_metadata = {}
+    for bibrecord in bibrecords_list:
+        if bibrecord:
+            #bibrecord_id
+            if bibrecord.get('001'):
+                bibrecord_id = long(bibrecord.get('001')[0][3])
+            else:
+                continue
+            #author_list
+            authors = tuple()
+            if bibrecord.get('100'):
+                authors += (author_bibrec_to_dict(bibrecord.get('100')[0][0]), )
+            if bibrecord.get('700'):
+                for aut_rec in bibrecord.get('700'):
+                    authors += (author_bibrec_to_dict(aut_rec[0]), )
+            
+            #finally I append all the metadata I've retrieved
+            records_metadata[bibrecord_id] = {'authors':authors}
+    return records_metadata
+                
+            
+            
+    

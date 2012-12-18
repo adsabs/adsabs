@@ -18,7 +18,7 @@
 				{% endif %}
 			</div>
 			<div class="span3 letterlink_box">
-				[ E F G L X D T R C S N U ]
+				{{ render_letterlink_box(doc) }}
 			</div>
 		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title|safe_html_unescape|safe }}</a></div>
 		    {% if doc.author %}
@@ -59,4 +59,25 @@
 		    </div>
 	    </div>
 	</div>
+{% endmacro %}
+
+{% macro render_letterlink_box(doc) %}
+	{# few variables to build the letters #}
+	{% if doc.property %}{% if 'ADS_SCAN' in doc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
+	{% if doc.property %}{% if 'OPENACCESS' in doc.property %}{% set openaccess = True %}{% else %}{% set openaccess = False %}{%endif%}{% else %}{% set openaccess = False %}{% endif %}
+
+	<span class="letterLink letterLinkAround">[</span><span 
+	class="letterLink">E</span><span
+	class="letterLink">F</span><span 
+	class="letterLink">G</span><span 
+	class="letterLink">L</span><span 
+	class="letterLink">X</span><span 
+	class="letterLink">D</span><span 
+	class="letterLink">T</span><span 
+	class="letterLink">R</span><span 
+	class="letterLink">C</span><span 
+	class="letterLink">S</span><span 
+	class="letterLink">N</span><span 
+	class="letterLink">U</span><span 
+	class="letterLink letterLinkAround">]</span>
 {% endmacro %}
