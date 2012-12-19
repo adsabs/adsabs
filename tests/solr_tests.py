@@ -109,34 +109,39 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertTrue(req.highlights_on())
         self.assertEqual(req.params['hl'], 'true')
         self.assertEqual(req.params['hl.fl'], 'abstract')
-        self.assertEqual(req.get_highlights(), [('abstract', None)])
+        self.assertEqual(req.get_highlights(), [('abstract', None, None)])
         req.add_highlight("full")
         self.assertEqual(req.params['hl.fl'], 'abstract,full')
-        self.assertEqual(req.get_highlights(), [('abstract', None), ('full', None)])
+        self.assertEqual(req.get_highlights(), [('abstract', None, None), ('full', None, None)])
         req.add_highlight('full', 2)
-        self.assertEqual(req.get_highlights(), [('abstract', None), ('full', 2)])
+        self.assertEqual(req.get_highlights(), [('abstract', None, None), ('full', 2, None)])
         req.add_highlight(['foo','bar'])
         self.assertEqual(req.params['hl.fl'], 'abstract,full,foo,bar')
         req.add_highlight(['baz', 'fez'], 3)
         self.assertEqual(req.params['f.baz.hl.snippets'], 3)
         self.assertEqual(req.params['f.fez.hl.snippets'], 3)
+        self.assertNotIn('f.baz.hl.fragsize', req.params)
+        req.add_highlight("blah", 3, 5000)
+        self.assertEqual(req.params['f.blah.hl.fragsize'], 5000)
+        
+        
+    def get_resp(self, req):
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            resp = req.get_response()
+            return resp.search_response()
         
     def test_response_content(self):
         fixture = self.useFixture(SolrRawQueryFixture())
         
-        def get_resp(req):
-            with self.app.test_request_context('/'):
-                self.app.preprocess_request()
-                resp = req.get_response()
-                return resp.search_response()
-            
-        self.assertIn('results', get_resp(solr.SolrRequest("foo")))
-        self.assertNotIn('facets', get_resp(solr.SolrRequest("foo")))
+        self.assertIn('results', self.get_resp(solr.SolrRequest("foo")))
+        self.assertNotIn('facets', self.get_resp(solr.SolrRequest("foo"))['results'])
+        self.assertIn('facets', self.get_resp(solr.SolrRequest("foo").add_facet("bar"))['results'])
         
     def test_highlight_inclusion(self):
         fixture = self.useFixture(SolrRawQueryFixture())
-        with self.app.test_request_context('/'):
-            self.app.preprocess_request()
+        resp = self.get_resp(solr.SolrRequest("foo").add_highlight("abstract"))
+        self.assertIn('lorem <em>ipsum</em> lorem', resp['results']['docs'][0]['highlights']['abstract'])
         
     def test_query(self):
         from adsabs.core.solr import query

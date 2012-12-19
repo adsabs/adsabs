@@ -39,6 +39,15 @@ def api_user_required(func):
         return func(*args, **kwargs)
     return decorator
         
+@api_blueprint.route('/settings/', methods=['GET'])
+@api_user_required
+@pushrod_view(xml_template="settings.xml")
+def settings():
+    perms = g.api_user.get_dev_perms()
+    allowed_fields = g.api_user.get_allowed_fields()
+    perms.update({'allowed_fields': allowed_fields})
+    return perms
+
 @api_blueprint.route('/search/', methods=['GET'])
 @api_user_required
 @pushrod_view(xml_template="search.xml")

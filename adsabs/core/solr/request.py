@@ -23,15 +23,19 @@ class SolrRequest(object):
         
     def set_params(self, **kwargs):
         self.params.update(**kwargs)
+        return self
         
     def set_format(self, fmt):
         self.params.wt = fmt
+        return self
         
     def set_rows(self, rows):
         self.params.rows = rows
+        return self
         
     def set_start(self, start):
         self.params.start = start
+        return self
         
     def set_fields(self, fields):
         if isinstance(fields, list):
@@ -40,6 +44,7 @@ class SolrRequest(object):
             self.params.fl = fields
         else:
             raise Exception("fields must be expressed as a list or comma-separated string")
+        return self
         
     def get_fields(self):
         if self.params.has_key('fl'):
@@ -48,12 +53,14 @@ class SolrRequest(object):
         
     def set_sort(self, sort_field, direction="desc"):
         self.params.sort = "%s %s" % (sort_field, direction)
+        return self
         
     def add_sort(self, sort_field, direction="desc"):
         if not self.params.has_key('sort'):
             self.set_sort(sort_field, direction)
         else:
             self.params.sort += ',%s %s' % (sort_field, direction)
+        return self
         
     def get_sort(self):
         sort = []
@@ -62,9 +69,11 @@ class SolrRequest(object):
     
     def set_hlq(self, hlq):
         self.params['hl.q'] = hlq
+        return self
         
     def add_filter(self, filter_):
         self.params.append('fq', filter_)
+        return self
         
     def get_filters(self, exclude_defaults=False):
         filters = self.params.get('fq', [])
@@ -83,6 +92,7 @@ class SolrRequest(object):
                 self.params['f.%s.facet.limit' % field] = limit
             if mincount:
                 self.params['f.%s.facet.mincount' % field] = mincount
+        return self
             
     def facets_on(self):
         return self.params.facet and True or False
@@ -96,7 +106,7 @@ class SolrRequest(object):
                 facets.append((fl, limit, mincount))
         return facets
     
-    def add_highlight(self, fields, count=None):
+    def add_highlight(self, fields, count=None, fragsize=None):
         self.params['hl'] = "true"
         if isinstance(fields, basestring):
             fields = [fields]
@@ -107,6 +117,9 @@ class SolrRequest(object):
                 self.params['hl.fl'] += ',' + field
             if count:
                 self.params['f.%s.hl.snippets' % field] = count
+            if fragsize:
+                self.params['f.%s.hl.fragsize' % field] = fragsize
+        return self
             
     def highlights_on(self):
         return self.params.hl and True or False
@@ -116,7 +129,8 @@ class SolrRequest(object):
         if self.highlights_on() and self.params.has_key('hl.fl'):
             for fl in self.params.get('hl.fl').split(','):
                 count = self.params.get('f.%s.hl.snippets' % fl, None)
-                highlights.append((fl, count))
+                fragsize = self.params.get('f.%s.hl.fragsize' % fl, None)
+                highlights.append((fl, count, fragsize))
         return highlights
     
     def get_response(self):

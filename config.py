@@ -58,9 +58,10 @@ class AppConfig(object):
     SEARCH_DEFAULT_SORT = 'DATE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     
-    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi','aff','pubdate','citation_count','references']
+    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','doi','aff','pubdate','citation_count']
+    SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count']
     
-    SEARCH_DEFAULT_SOLR_FACETS = [
+    SOLR_SEARCH_DEFAULT_FACETS = [
         ('bibstem_facet',),
         ('author_facet',), 
         ('author_facet_hier', 1000, 1), 
@@ -70,7 +71,8 @@ class AppConfig(object):
         ('bibgroup',)
         ]
     
-    SEARCH_DEFAULT_HIGHLIGHT_FIELDS = [('full', 4),('abstract', 4)]
+    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
+    SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',

@@ -128,6 +128,11 @@ class AdsApiUser(AdsUser):
     def get_dev_perms(self):
         return self.user_rec.developer_perms
     
+    def get_allowed_fields(self):
+        ex_fields = self.user_rec.developer_perms.get('ex_fields',[])
+        allowed = [x for x in config.API_SOLR_FIELDS if x not in ex_fields]
+        return allowed
+    
     def check_permissions(self, form):
         
         try:

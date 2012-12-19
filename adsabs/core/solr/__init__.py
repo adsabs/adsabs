@@ -16,7 +16,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-def request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, \
+def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, \
           rows=config.SEARCH_DEFAULT_ROWS, start=None, **kwargs):
     
     req = SolrRequest(q, rows=rows)
@@ -34,12 +34,12 @@ def request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=confi
     for filter_ in filters:
         req.add_filter(filter_)
     
-    req.set_fields(config.SEARCH_DEFAULT_SOLR_FIELDS)
+    req.set_fields(config.SOLR_SEARCH_DEFAULT_FIELDS)
     
-    for facet in config.SEARCH_DEFAULT_SOLR_FACETS:
+    for facet in config.SOLR_SEARCH_DEFAULT_FACETS:
         req.add_facet(*facet)
         
-    for hl in config.SEARCH_DEFAULT_HIGHLIGHT_FIELDS:
+    for hl in config.SOLR_SEARCH_DEFAULT_HIGHLIGHTS:
         req.add_highlight(*hl)
     
     # allow for manual overrides
@@ -47,12 +47,26 @@ def request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=confi
     return req
 
 def query(*args, **kwargs):
-    req = request(*args, **kwargs)
+    req = search_request(*args, **kwargs)
     return req.get_response()
         
-def get_document(solr_id, **kwargs):
-    req = SolrRequest(q="identifier:%s" % solr_id, fl="*")
+def document_request(identifier, hlq=None, **kwargs):
+    req = SolrRequest(q="identifier:%s" % identifier)
+    
+    req.set_fields(config.SOLR_SEARCH_DEFAULT_FIELDS)
+    
+    if hlq:
+        for hl in config.SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS:
+            req.add_highlight(*hl)
+        req.set_hlq(hlq)
+        
+    req.set_params(**kwargs)
+    return req
+    
+def get_document(*args, **kwargs):
+    req = document_request(*args, **kwargs)
     resp = req.get_response()
     if resp.get_count() == 1:
         return resp.get_doc_object(0)
+        
 

@@ -59,7 +59,8 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
             'numFound': 1,
             'docs': [{
                       'id': '1234',
-                      'bibcode': 'xyz'
+                      'bibcode': 'xyz',
+                      'abstract': 'lorem ipsum'
                     }],
         },
         'facet_counts': {
@@ -73,7 +74,7 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
         'highlighting': {
             "1234": {
                 "abstract": [
-                    "foo <em>bar</em> baz",
+                    "lorem <em>ipsum</em> lorem",
                 ]
             }
         }
