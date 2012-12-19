@@ -25,14 +25,14 @@ PERMISSION_LEVELS = {
     "basic": {
         "max_rows": 20,
         "max_start": 300,
-        "ex_fields": ['full','reader','citations'],
+        "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": False,
         "highlights": False,
     },
     "devel": {
         "max_rows": 100,
         "max_start": 5000,
-        "ex_fields": ['full','reader','citations'],
+        "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": True,
         "facet_limit_max": 100,
         "highlights": True,
@@ -129,9 +129,7 @@ class AdsApiUser(AdsUser):
         return self.user_rec.developer_perms
     
     def get_allowed_fields(self):
-        ex_fields = self.user_rec.developer_perms.get('ex_fields',[])
-        allowed = [x for x in config.API_SOLR_FIELDS if x not in ex_fields]
-        return allowed
+        return self.user_rec.developer_perms.get('allowed_fields',[])
     
     def check_permissions(self, form):
         
@@ -152,12 +150,12 @@ class AdsApiUser(AdsUser):
     def _facets_ok(self, req_facets):
         assert self.perms.get('facets', False), 'facets disabled'
         
-        excluded = self.perms.get('ex_fields', [])
+        allowed = self.perms.get('allowed_fields', [])
         facet_limit_max = self.perms.get('facet_limit_max', 0)
         for facet in req_facets:
             # facet value format str[:limit[:mincount]], e.g., "author:100:10"
             facet = facet.strip().split(':')
-            assert facet[0] not in excluded, 'disallowed facet: %s' % facet[0]
+            assert facet[0] in allowed, 'disallowed facet: %s' % facet[0]
             if len(facet) > 1:
                 assert facet_limit_max >= int(facet[1]), \
                     'facet limit value %d exceeds max allowed value: %d' % (int(facet[1]), facet_limit_max)
@@ -171,12 +169,10 @@ class AdsApiUser(AdsUser):
         assert max_start >= req_start, 'start=%s exceeds max allowed value: %d' % (req_start, max_start)
     
     def _fields_ok(self, req_fields):
-        req_fields = set(re.split('[,\s]+', req_fields.strip()))
-        allowed = set(config.API_SOLR_FIELDS)
-        excluded = set(self.perms.get('ex_fields', []))
-        possible = allowed.difference(excluded)
-        denied = req_fields.difference(possible)
-        assert len(denied) == 0, 'disallowed fields: %s' % ','.join(denied)
+        req_fields = re.split('[,\s]+', req_fields.strip())
+        allowed = self.perms.get('allowed_fields', [])
+        for f in req_fields:
+            assert f in allowed, 'disallowed field: %s' % f
                    
     def _highlight_ok(self, hl_fields):
         assert self.perms.get('highlight', False), 'highlighting disabled'

@@ -202,9 +202,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         not_valid('q=a', {'q': 'input must be at least'})
         not_valid('q=%s' % ("foobar" * 1000), {'q': 'input must be at no more'})
         
-        for f in config.API_SOLR_FIELDS:
+        for f in config.API_SOLR_DEFAULT_FIELDS:
             is_valid('fl=%s' % f)
-        is_valid('fl=%s' % ','.join(config.API_SOLR_FIELDS))
+        is_valid('fl=%s' % ','.join(config.API_SOLR_DEFAULT_FIELDS))
         is_valid('fl=id,bibcode')
         not_valid('fl=foobar', {'fl': 'not a selectable field'})
         not_valid('fl=id, bibcode', {'fl': 'no whitespace'})
@@ -217,7 +217,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         is_valid('hl=abstract')
         is_valid('hl=title:3')
-        for f in config.API_SOLR_FIELDS:
+        for f in config.API_SOLR_DEFAULT_FIELDS:
             is_valid('hl=%s' % f)
         is_valid('hl=abstract&hl=full')
         not_valid('hl=title-3', {'hl': 'Invalid highlight input'})
@@ -279,12 +279,12 @@ class ApiUserTest(unittest2.TestCase):
         p = DP({})
         self.assertRaises(AssertionError, p._facets_ok, ["author"])
         p = DP({'facets': True})
-        self.assertIsNone(p._facets_ok(["author"]))
-        p = DP({'ex_fields': ['author']})
-        self.assertRaisesRegexp(AssertionError, 'facets disabled', p._facets_ok, ["author"])
-        p = DP({'facets': True, 'ex_fields': ['author']})
         self.assertRaisesRegexp(AssertionError, 'disallowed facet', p._facets_ok, ["author"])
-        p = DP({'facets': True, 'facet_limit_max': 10})
+        p = DP({'allowed_fields': ['author']})
+        self.assertRaisesRegexp(AssertionError, 'facets disabled', p._facets_ok, ["author"])
+        p = DP({'facets': True, 'allowed_fields': ['author']})
+        self.assertIsNone(p._facets_ok(["author"]))
+        p = DP({'facets': True, 'allowed_fields': ['author'], 'facet_limit_max': 10})
         self.assertIsNone(p._facets_ok(["author:9"]))
         self.assertIsNone(p._facets_ok(["author:10"]))
         self.assertIsNone(p._facets_ok(["author:10:100"]))
@@ -307,10 +307,11 @@ class ApiUserTest(unittest2.TestCase):
         self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', p._max_start_ok, 300)
         
         p = DP({})
+        self.assertRaisesRegexp(AssertionError, 'disallowed fields: bibcode', p._fields_ok, 'bibcode')
+        p = DP({'allowed_fields': ['bibcode']})
+        self.assertIsNone(p._fields_ok('bibcode'))
+        p = DP({'allowed_fields': ['bibcode,title']})
         self.assertIsNone(p._fields_ok('bibcode,title'))
-        p = DP({'ex_fields': ['full']})
-        self.assertIsNone(p._fields_ok('bibcode,title'))
-        self.assertRaises(AssertionError, p._fields_ok, 'bibcode,title,full')
         self.assertRaisesRegexp(AssertionError, 'disallowed fields: full', p._fields_ok, 'bibcode,title,full')
         
         p = DP({})
