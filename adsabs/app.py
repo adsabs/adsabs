@@ -30,6 +30,10 @@ def create_app(config=config, app_name=None):
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
     _configure_global_variables(app)
+    
+    if config.DEBUG:
+        from flask_debugtoolbar import DebugToolbarExtension
+        toolbar = DebugToolbarExtension(app)
 
     return app
 
