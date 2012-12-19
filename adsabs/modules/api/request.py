@@ -47,7 +47,10 @@ class ApiSearchRequest(object):
             
         if len(self.form.facet.data):
             for facet in self.form.facet.data:
-                req.add_facet(facet.split(':'))
+                facet = facet.split(':')
+                # translate facet to solr field name
+                facet[0] = config.API_SOLR_FACET_FIELDS[facet[0]]
+                req.add_facet(*facet)
         
         if len(self.form.hl.data):
             for hl in self.form.hl.data:

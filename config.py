@@ -91,9 +91,11 @@ class AppConfig(object):
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
     API_DEFAULT_RESPONSE_FORMAT = 'json'
-    # this is the full list of fields available
-    # Note that most api accounts will not have access to the full list of fields
-    API_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','aff','full','ack','identifier']
+    
+    API_SOLR_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','aff','identifier']
+    API_SOLR_EXTRA_FIELDS = ['full','references','ack']
+    API_SOLR_HIGHTLIGHT_FIELDS = ['title','abstract','full','ack']
+    
     API_SOLR_FACET_FIELDS = {
         'bibstem': 'bibstem_facet',
         'author': 'author_facet',

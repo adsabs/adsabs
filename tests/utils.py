@@ -68,6 +68,10 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
                 "year": [ 
                     "2009", 3,
                     "2008", 5,
+                ],
+                "bibstem_facet": [
+                    "ApJ", 10,
+                    "ArXiv", 8,
                 ]
             }
         },

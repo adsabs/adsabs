@@ -111,7 +111,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertTrue(resp_data['meta']['count'] >= 1)
         self.assertIsInstance(resp_data['results']['docs'], list)
         
-        self.insert_user("bar", developer=True, dev_perms={'facets': True})
+        self.insert_user("bar", developer=True, dev_perms={'facets': True, 'allowed_fields': ['author']})
         rv = self.client.get('/api/search/?q=black+holes&dev_key=bar_dev_key')
         resp_data = loads(rv.data)
         self.assertNotIn('facets', resp_data['results'])
@@ -202,9 +202,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         not_valid('q=a', {'q': 'input must be at least'})
         not_valid('q=%s' % ("foobar" * 1000), {'q': 'input must be at no more'})
         
-        for f in config.API_SOLR_FIELDS:
+        for f in config.API_SOLR_DEFAULT_FIELDS:
             is_valid('fl=%s' % f)
-        is_valid('fl=%s' % ','.join(config.API_SOLR_FIELDS))
+        is_valid('fl=%s' % ','.join(config.API_SOLR_DEFAULT_FIELDS))
         is_valid('fl=id,bibcode')
         not_valid('fl=foobar', {'fl': 'not a selectable field'})
         not_valid('fl=id, bibcode', {'fl': 'no whitespace'})
@@ -217,7 +217,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         is_valid('hl=abstract')
         is_valid('hl=title:3')
-        for f in config.API_SOLR_FIELDS:
+        for f in config.API_SOLR_DEFAULT_FIELDS:
             is_valid('hl=%s' % f)
         is_valid('hl=abstract&hl=full')
         not_valid('hl=title-3', {'hl': 'Invalid highlight input'})
@@ -267,7 +267,7 @@ class ApiUserTest(unittest2.TestCase):
         
         self.insert_user = user_creator()
         
-    def test_permissions(self):
+    def test_permission_checks(self):
         
         self.insert_user("foo", developer=True)
         
@@ -276,56 +276,119 @@ class ApiUserTest(unittest2.TestCase):
             u.perms = perms
             return u
         
-        p = DP({})
-        self.assertRaises(AssertionError, p._facets_ok, ["author"])
-        p = DP({'facets': True})
-        self.assertIsNone(p._facets_ok(["author"]))
-        p = DP({'ex_fields': ['author']})
-        self.assertRaisesRegexp(AssertionError, 'facets disabled', p._facets_ok, ["author"])
-        p = DP({'facets': True, 'ex_fields': ['author']})
-        self.assertRaisesRegexp(AssertionError, 'disallowed facet', p._facets_ok, ["author"])
-        p = DP({'facets': True, 'facet_limit_max': 10})
-        self.assertIsNone(p._facets_ok(["author:9"]))
-        self.assertIsNone(p._facets_ok(["author:10"]))
-        self.assertIsNone(p._facets_ok(["author:10:100"]))
-        self.assertRaisesRegexp(AssertionError, 'facet limit value 11 exceeds max', p._facets_ok, ["author:11"])
+        u = DP({})
+        self.assertRaises(AssertionError, u._facets_ok, ["author"])
         
-        p = DP({})
-        self.assertRaises(AssertionError, p._max_rows_ok, 10)
-        p = DP({'max_rows': 10})
-        self.assertIsNone(p._max_rows_ok(9))
-        self.assertIsNone(p._max_rows_ok(10))
-        self.assertRaises(AssertionError, p._max_rows_ok, 11)
-        self.assertRaisesRegexp(AssertionError, 'rows=11 exceeds max allowed value: 10', p._max_rows_ok, 11)
+        u = DP({'facets': True})
+        self.assertIsNone(u._facets_ok(["author"]))
+        self.assertRaisesRegexp(AssertionError, 'disallowed facet', u._facets_ok, ["foo"])
         
-        p = DP({})
-        self.assertRaises(AssertionError, p._max_start_ok, 100)
-        p = DP({'max_start': 200})
-        self.assertIsNone(p._max_start_ok(100))
-        self.assertIsNone(p._max_start_ok(200))
-        self.assertRaises(AssertionError, p._max_start_ok, 300)
-        self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', p._max_start_ok, 300)
+        u = DP({'facets': True, 'facet_limit_max': 10})
+        self.assertIsNone(u._facets_ok(["author:9"]))
+        self.assertIsNone(u._facets_ok(["author:10"]))
+        self.assertIsNone(u._facets_ok(["author:10:100"]))
+        self.assertRaisesRegexp(AssertionError, 'facet limit value 11 exceeds max', u._facets_ok, ["author:11"])
         
-        p = DP({})
-        self.assertIsNone(p._fields_ok('bibcode,title'))
-        p = DP({'ex_fields': ['full']})
-        self.assertIsNone(p._fields_ok('bibcode,title'))
-        self.assertRaises(AssertionError, p._fields_ok, 'bibcode,title,full')
-        self.assertRaisesRegexp(AssertionError, 'disallowed fields: full', p._fields_ok, 'bibcode,title,full')
+        u = DP({})
+        self.assertRaises(AssertionError, u._max_rows_ok, 10)
         
-        p = DP({})
-        self.assertRaises(AssertionError, p._highlight_ok, ["abstract"])
-        p = DP({'highlight': True})
-        self.assertIsNone(p._highlight_ok(['abstract']))
-        p = DP({'ex_highlight_fields': ['abstract']})
-        self.assertRaisesRegexp(AssertionError, 'highlighting disabled', p._highlight_ok, ["abstract"])
-        p = DP({'ex_highlight_fields': ['abstract'], 'highlight': True})
-        self.assertRaisesRegexp(AssertionError, 'disallowed highlight field: abstract', p._highlight_ok, ["abstract"])
-        p = DP({'highlight': True, 'highlight_max': 3})
-        self.assertIsNone(p._highlight_ok(["abstract:2"]))
-        self.assertIsNone(p._highlight_ok(["abstract:3"]))
-        self.assertRaisesRegexp(AssertionError, 'highlight count 4 exceeds max allowed value: 3', p._highlight_ok, ["abstract:4"])
+        u = DP({'max_rows': 10})
+        self.assertIsNone(u._max_rows_ok(9))
+        self.assertIsNone(u._max_rows_ok(10))
+        self.assertRaises(AssertionError, u._max_rows_ok, 11)
+        self.assertRaisesRegexp(AssertionError, 'rows=11 exceeds max allowed value: 10', u._max_rows_ok, 11)
+        
+        u = DP({})
+        self.assertRaises(AssertionError, u._max_start_ok, 100)
+        
+        u = DP({'max_start': 200})
+        self.assertIsNone(u._max_start_ok(100))
+        self.assertIsNone(u._max_start_ok(200))
+        self.assertRaises(AssertionError, u._max_start_ok, 300)
+        self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', u._max_start_ok, 300)
+        
+        u = DP({})
+        self.assertRaisesRegexp(AssertionError, 'disallowed field: bibcode', u._fields_ok, 'bibcode')
+        
+        u = DP({'allowed_fields': ['bibcode']})
+        self.assertIsNone(u._fields_ok('bibcode'))
+        
+        u = DP({'allowed_fields': ['bibcode','title']})
+        self.assertIsNone(u._fields_ok('bibcode,title'))
+        self.assertRaisesRegexp(AssertionError, 'disallowed field: full', u._fields_ok, 'bibcode,title,full')
+        
+        allowed_fields = []
+        for f in config.API_SOLR_DEFAULT_FIELDS:
+            allowed_fields.append(f)
+            u = DP({'allowed_fields': allowed_fields})
+            self.assertIsNone(u._fields_ok(f))
+        
+        u = DP({})
+        self.assertRaises(AssertionError, u._highlight_ok, ["abstract"])
+        
+        u = DP({'highlight': True})
+        self.assertRaisesRegexp(AssertionError, 'disallowed highlight field: abstract', u._highlight_ok, ["abstract"])
+        
+        u = DP({'highlight': True, 'highlight_fields': ['abstract']})
+        self.assertIsNone(u._highlight_ok(['abstract']))
+        
+        u = DP({'highlight_fields': ['foobar']})
+        self.assertRaisesRegexp(AssertionError, 'highlighting disabled', u._highlight_ok, ["foobar"])
+        
+        u = DP({'highlight': True, 'highlight_fields': ['foobar']})
+        self.assertIsNone(u._highlight_ok(['foobar']))
+        
+        u = DP({'highlight': True, 'highlight_fields': ['abstract'], 'highlight_limit_max': 3})
+        self.assertIsNone(u._highlight_ok(["abstract:2"]))
+        self.assertIsNone(u._highlight_ok(["abstract:3"]))
+        self.assertRaisesRegexp(AssertionError, 'highlight count 4 exceeds max allowed value: 3', u._highlight_ok, ["abstract:4"])
     
+    def test_default_perm_levels(self):
+        
+        self.insert_user("foo", developer=True, level="basic")
+        u = AdsApiUser.from_dev_key("foo_dev_key")
+        
+        self.assertIsNone(u._max_rows_ok(19))
+        self.assertIsNone(u._max_rows_ok(20))
+        self.assertRaisesRegexp(AssertionError, 'rows=21 exceeds max allowed value: 20', u._max_rows_ok, 21)
+        
+        self.assertIsNone(u._max_start_ok(300))
+        self.assertRaisesRegexp(AssertionError, 'start=301 exceeds max allowed value: 300', u._max_start_ok, 301)
+        
+        self.assertRaisesRegexp(AssertionError, 'facets disabled', u._facets_ok, ["author"])
+        self.assertRaisesRegexp(AssertionError, 'highlighting disabled', u._highlight_ok, ["title"])
+        for f in config.API_SOLR_DEFAULT_FIELDS:
+            self.assertIsNone(u._fields_ok(f))
+        for f in config.API_SOLR_EXTRA_FIELDS:
+            self.assertRaisesRegexp(AssertionError, 'disallowed field: %s' % f, u._fields_ok, f)
+            
+        self.insert_user("bar", developer=True, level="devel")
+        u = AdsApiUser.from_dev_key("bar_dev_key")
+            
+        self.assertIsNone(u._max_rows_ok(20))
+        self.assertRaisesRegexp(AssertionError, 'rows=101 exceeds max allowed value: 100', u._max_rows_ok, 101)
+        
+        self.assertIsNone(u._max_start_ok(5000))
+        self.assertRaisesRegexp(AssertionError, 'start=5001 exceeds max allowed value: 5000', u._max_start_ok, 5001)
+        
+        self.assertIsNone(u._facets_ok(['author']))
+        self.assertIsNone(u._highlight_ok(['abstract']))
+        
+        for f in config.API_SOLR_DEFAULT_FIELDS:
+            self.assertIsNone(u._fields_ok(f))
+            
+        for f in config.API_SOLR_EXTRA_FIELDS:
+            self.assertRaisesRegexp(AssertionError, 'disallowed field: %s' % f, u._fields_ok, f)
+            
+        for f in config.API_SOLR_HIGHTLIGHT_FIELDS:
+            self.assertIsNone(u._highlight_ok([f]))
+            self.assertIsNone(u._highlight_ok(["%s:4" % f]))
+            self.assertRaisesRegexp(AssertionError, 'highlight count 5 exceeds', u._highlight_ok, ["%s:5" % f])
+            
+        for f in config.API_SOLR_FACET_FIELDS.keys():
+            self.assertIsNone(u._facets_ok([f]))
+        
+        
     def test_dev_key_creation(self):
         
         new_dev_key = user._create_dev_key()
