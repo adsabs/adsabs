@@ -10,7 +10,7 @@ class AppConfig(object):
     TESTING = False
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2012_12_17'
+    APP_VERSION = '2012_12_20'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -58,7 +58,9 @@ class AppConfig(object):
     SEARCH_DEFAULT_SORT = 'DATE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     
-    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','doi','aff','pubdate','citation_count','references']
+    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi',
+                                  #'aff',
+                                  'pubdate','citation_count','references', 'links']
     
     SEARCH_DEFAULT_SOLR_FACETS = [
         ('bibstem_facet',),

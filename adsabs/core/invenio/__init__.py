@@ -3,6 +3,8 @@ from config import config
 from urllib2 import quote
 from urllib import urlencode
 
+from .inveniodoc import InvenioDoc
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -20,7 +22,7 @@ def record_url(recid, of=None):
     else:
         return record_url(recid) + '?' + urlencode({'of': of})
         
-def get_abstract_xml_from_ads_id(self, ads_id):
+def get_abstract_xml_from_ads_id(ads_id):
     """
     Simple method that returns the marcxml for a bibcode
     """
@@ -52,15 +54,15 @@ def get_metadata(invenio_record_id_list):
         author = {'name': None, 'normalized_name':None, 'type':None, 'native_name':None, 'affiliations':[], 'emails':[]}
         for elem in author_bibrec:
             if elem[0] == 'a':
-                author['name'] = elem[1]
+                author['name'] = elem[1].decode('utf8')
             elif elem[0] == 'b':
-                author['normalized_name'] = elem[1]
+                author['normalized_name'] = elem[1].decode('utf8')
             elif elem[0] == 'e':
                 author['type'] = elem[1]
             elif elem[0] == 'q':
-                author['native_name'] = elem[1]
+                author['native_name'] = elem[1].decode('utf8')
             elif elem[0] == 'u':
-                author['affiliations'].append(elem[1])
+                author['affiliations'].append(elem[1].decode('utf8'))
             elif elem[0] == 'm':
                 author['emails'].append(elem[1])
         return author
@@ -77,17 +79,47 @@ def get_metadata(invenio_record_id_list):
             else:
                 continue
             #author_list
-            authors = tuple()
+            author = tuple()
             if bibrecord.get('100'):
-                authors += (author_bibrec_to_dict(bibrecord.get('100')[0][0]), )
+                author += (author_bibrec_to_dict(bibrecord.get('100')[0][0]), )
             if bibrecord.get('700'):
                 for aut_rec in bibrecord.get('700'):
-                    authors += (author_bibrec_to_dict(aut_rec[0]), )
+                    author += (author_bibrec_to_dict(aut_rec[0]), )
+            #title
+            title = ''
+            if bibrecord.get('245'):
+                field = bibrecord.get('245')[0][0]
+                for elem in field:
+                    if elem[0] == 'a':
+                        title = elem[1].decode('utf8')
+            #bibcode
+            bibcode = ''
+            if bibrecord.get('970'):
+                field = bibrecord.get('970')[0][0]
+                for elem in field:
+                    if elem[0] == 'a':
+                        bibcode = elem[1]
             
             #finally I append all the metadata I've retrieved
-            records_metadata[bibrecord_id] = {'authors':authors}
+            records_metadata[bibrecord_id] = {'author':author, 'title':title, 'bibcode':bibcode}
     return records_metadata
                 
             
-            
+def get_invenio_metadata(ads_id):
+    """
+    Returns an inveniodoc object given an ads record id
+    """
+    query_record_id = 'SELECT rec03.id_bibrec FROM bibrec_bib03x AS rec03 JOIN bib03x ON rec03.id_bibxxx = bib03x.id \
+    WHERE bib03x.value="%s"' % ads_id
+    try:
+        record_id = run_sql(query_record_id)[0][0]
+    except IndexError:
+        return InvenioDoc({})
+    
+    metadata = get_metadata([record_id])
+    if not metadata.get(record_id):
+        return InvenioDoc({})
+    return InvenioDoc(metadata.get(record_id))
+    
+    
     

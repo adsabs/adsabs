@@ -158,20 +158,6 @@ span.expCollSubFacet {
 	cursor:pointer;
 }
 
-/*********************/
-/* Abstract*/
-div.absview {
-	margin-top: 20px;
-}
-
-div.absview div.row {
-	margin-bottom: 5px;
-}
-
-div.absview div.row label {
-	font-weight: bold;
-}
-
 #facets {
 	font-size:.9em;	
 }
@@ -180,3 +166,32 @@ div.absview div.row label {
 	cursor:pointer;
 	display:none;
 }
+
+/*********************/
+/* Abstract*/
+div.bibcodeHeader {
+	font-size:.9em;
+	font-weight: bold;
+}
+
+div.abstractTitle {
+	font-size: 1.2em;
+	font-weight: bold;	
+}
+
+
+/*********************/
+/* Abstract search_compare*/
+div.absview {
+	margin-top: 15px;
+}
+
+div.absview div.row-fluid {
+	margin-bottom: 5px;
+}
+
+div.absview div.row-fluid label {
+	font-weight: bold;
+}
+
+

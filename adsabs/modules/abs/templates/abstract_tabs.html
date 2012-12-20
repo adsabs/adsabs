@@ -1,0 +1,51 @@
+{# Local import #}
+{% from "macros/abstract.html" import view_abstract_info with context %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}{% if inveniodoc.author|length > 0 and inveniodoc.author[0].get('name') %}{{ inveniodoc.author[0].get('name')}}: {% endif %}{{ inveniodoc.title }}{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row-fluid">
+		<div class="span12 well well-small ">
+			<div class="span2 firstspan bibcodeHeader">{{ inveniodoc.bibcode }}</div>
+			<div class="dropdown pull-right">
+				<a class="btn dropdown-toggle" data-toggle="dropdown" >View <span class="caret"></span></a>
+				<ul class="dropdown-menu">
+					<li><a tabindex="-1" href="{{ solrdoc.classic_url() }}">in ADS Classic</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			<div class="tabbable">
+				<ul class="nav nav-tabs">
+					<li{% if curview == 'abstract'%} class="active"{% endif %}><a{% if curview != 'abstract'%} href="{{ url_for('abs.abstract', bibcode=inveniodoc.bibcode) }}"{% endif %}> Abstract </a></li>
+					<li{% if curview == 'references'%} class="active"{% endif %}><a{% if curview != 'references'%} href="{{ url_for('abs.references', bibcode=inveniodoc.bibcode) }}"{% endif %}> References </a></li>
+					<li{% if curview == 'citations'%} class="active"{% endif %}><a{% if curview != 'citations'%} href="{{ url_for('abs.citations', bibcode=inveniodoc.bibcode) }}"{% endif %}> Citations </a></li>
+					<li class="disabled"><a> Co-reads </a></li>
+					<li class="disabled"><a> Similar Articles </a></li>
+					<li class="disabled"><a> Table of contents </a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="span12">
+			{% if curview == 'abstract' %}
+				{{ view_abstract_info(solrdoc, inveniodoc) }}
+			{% elif curview == 'references' %}
+				references
+			{% elif curview == 'citations' %}
+				citations
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}
