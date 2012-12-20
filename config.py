@@ -53,6 +53,7 @@ class AppConfig(object):
     SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]']),('indent', 'true')]
     SOLR_DEFAULT_FORMAT = 'json'
     SOLR_ARG_SEPARATOR = '#' # used to thwart the defaul solrpy behavior of replacing '_' with '.' in all solr params
+    SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     
     SEARCH_DEFAULT_ROWS = '20'
     SEARCH_DEFAULT_SORT = 'DATE'
