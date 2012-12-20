@@ -9,10 +9,40 @@
 				<div class="row-fluid">
 					<div class="span12 abstractAuthors">
 						{% for author in inveniodoc.author %}
-							
+							<span class="authorName">{{ author.name }}</span>
+							{% if author.affiliations %}
+							<span class="authorAffiliation">(
+								{% for aff in author.affiliations %}
+									{{ aff }}{% if not loop.last %}; {% endif %}
+								{% endfor %}
+							)</span>{% endif %}{% if not loop.last %}; {% endif %}
 						{% endfor %}
 					</div>
 				</div>
+				<div class="row-fluid">
+					<div class="span12 abstractJournal">
+						{% if solrdoc.pub_raw %}
+							{{ solrdoc.pub_raw|safe }}
+							{% if solrdoc.pub %}
+							<span class="journalNormalized">({{ solrdoc.pub }})</span>
+							{% endif %}
+						{% endif %}
+					</div>
+				</div>
+				<div class="row-fluid">
+					<div class="span12 abstractPubdate">
+						<span class="pubdate"><em>Published in {{ solrdoc.pubdate|format_ads_date}}</em></span>
+					</div>
+				</div>
+				{% if solrdoc.doi %}
+				<div class="row-fluid">
+					<div class="span12 abstractDOI">DOI:
+						<span class=doi>
+						{% for doistr in solrdoc.doi %}{{ doistr }}{% if not loop.last %}; {% endif %}{% endfor %}
+						</span>
+					</div>
+				</div>
+				{% endif %}
 			</div>
 		</div>
 		<div id="abstractRightMenu" class="span3">
