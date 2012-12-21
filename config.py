@@ -60,16 +60,16 @@ class AppConfig(object):
     
     SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi',
                                   #'aff',
-                                  'pubdate','citation_count','references', 'links', 'pub_raw']
+                                  'pubdate','citation_count','references', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
     
     SEARCH_DEFAULT_SOLR_FACETS = [
-        ('bibstem_facet',),
-        ('author_facet',), 
+        ('bibstem_facet', 100, 1),
+        ('author_facet',1000, 1), 
         ('author_facet_hier', 1000, 1), 
-        ('property',),
-        ('keyword_facet',),
-        ('year',), 
-        ('bibgroup',)
+        ('property',100, 1),
+        ('keyword_facet',100, 1),
+        ('year',100, 1), 
+        ('bibgroup',100, 1),
         ]
     
     SEARCH_DEFAULT_HIGHLIGHT_FIELDS = [('full', 4),('abstract', 4)]

@@ -8,6 +8,16 @@ from time import strftime, strptime
 import jinja2
 import scrubber
 
+from config import config
+
+__all__ = [
+    'quote_url',
+    'format_ads_date',
+    'format_ads_facet_str',
+    'safe_html_unescape',
+    'ads_url_redirect',
+    ]
+
 def quote_url(value):
     """
     Return the simple urllib.quote_plus for a normal string
@@ -61,3 +71,24 @@ def safe_html_unescape(html_str):
     Returns a safely unescaped html string where the unsafe tags like <script> and their content is removed
     """
     return scrubber.Scrubber().scrub(jinja2.Markup(html_str).unescape())
+
+def ads_url_redirect(adsid, id_type):
+    """
+    Returns an url that points to the urlbuilder in ADS Classic
+    """
+    if id_type=='doi':
+        return "%s/cgi-bin/nph-abs_connect?fforward=http://dx.doi.org/%s" % (config.ADS_CLASSIC_BASEURL, adsid)
+    elif id_type=='data':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=DATA" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='electr':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=EJOURNAL" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='gif':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=GIF" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='article':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=ARTICLE" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='preprint':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=PREPRINT" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    #here all the other needed cases
+    else:
+        return adsid
+

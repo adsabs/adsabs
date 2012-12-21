@@ -99,9 +99,23 @@ def get_metadata(invenio_record_id_list):
                 for elem in field:
                     if elem[0] == 'a':
                         bibcode = elem[1]
+            #keywords
+            keyword = {'free':[], 'controlled':{}}
+            #first free
+            if bibrecord.get('653'):
+                for record in bibrecord.get('653'):
+                    #the subfields of the keywords are not repeatable, so I can convert them in a dictionary
+                    sub_dict = dict(record[0])
+                    #the free keyword don't have a schema so they don't need to be split
+                    keyword['free'].append({'keyword':sub_dict.get('a').decode('utf8'), 'norm_keyword':sub_dict.get('b').decode('utf8')})
+            if bibrecord.get('695'):
+                for record in bibrecord.get('695'):
+                    #the subfields of the keywords are not repeatable, so I can convert them in a dictionary
+                    sub_dict = dict(record[0])
+                    keyword['controlled'].setdefault(sub_dict.get('2').decode('utf8'), []).append({'keyword':sub_dict.get('a').decode('utf8'), 'norm_keyword':sub_dict.get('b').decode('utf8')})
             
             #finally I append all the metadata I've retrieved
-            records_metadata[bibrecord_id] = {'author':author, 'title':title, 'bibcode':bibcode}
+            records_metadata[bibrecord_id] = {'author':author, 'title':title, 'bibcode':bibcode, 'keyword':keyword}
     return records_metadata
                 
             

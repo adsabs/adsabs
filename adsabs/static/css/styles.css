@@ -130,6 +130,9 @@ div.letterlink_box .letterLinkAround {
 	margin:0;
 }
 
+div.letterlink_box span.letterLink a.letterOpenaccess {
+	color:#4AA02C;	
+}
 
 /*********************/
 /*Facets on top*/

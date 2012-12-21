@@ -19,7 +19,7 @@ def _register(renderer):
 # json is the default rendering method
 @renderer(name='json', mime_type=('application/json','text/html'))
 def json_renderer(unrendered, **kwargs):
-  return unrendered.rendered(
+    return unrendered.rendered(
       json.dumps(unrendered.response),
       'application/json')
   

@@ -5,7 +5,7 @@ import logging.config
 from flask import Flask, render_template, send_from_directory, g
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
-from adsabs.core.template_filters import quote_url, format_ads_date, format_ads_facet_str, safe_html_unescape
+from adsabs.core.template_filters import *
 
 # For import *
 __all__ = ['create_app']
@@ -122,6 +122,10 @@ def _configure_template_filters(app):
     @app.template_filter('safe_html_unescape')
     def s_h_f(html_string):
         return safe_html_unescape(html_string)
+    
+    @app.template_filter('ads_url_redirect')
+    def a_u_r(adsid, id_type):
+        return ads_url_redirect(adsid, id_type)
     
     
 

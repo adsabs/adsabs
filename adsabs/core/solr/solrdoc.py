@@ -20,7 +20,15 @@ class SolrDocument(object):
     def __getattr__(self, attr):
         if attr in self.data:
             return self.data[attr]
-
+    
+    def getattr_func(self, attr, func):
+        """
+        Returns an attribute after processing it with the function
+        """
+        data = self.__getattr__(attr)
+        if data:
+            return func(data)
+    
     def classic_url(self):
         return abstract_url(self.bibcode)
     
