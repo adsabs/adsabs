@@ -45,10 +45,16 @@ class SolrDocument(object):
     def to_json(self):
         return dumps(self.data)
     
-    def references(self, *args, **kwargs):
+    def _get_op(self, op, *args, **kwargs):
         from adsabs.core.solr import query
-        q = "refersto(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
+        q = "%s(%s:%s)" % (op, config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
         return query(q, *args, **kwargs)
+        
+    def get_references(self, *args, **kwargs):
+        return self._get_op("refersto")
+        
+    def get_citations(self, *args, **kwargs):
+        return self._get_op("cites")
         
         
     
