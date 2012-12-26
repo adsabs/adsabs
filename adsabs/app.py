@@ -49,7 +49,10 @@ def _configure_app(app, config):
 
 def _configure_logging(app):
     if 'LOGGING_CONFIG' in app.config:
-        logging.config.fileConfig(app.config['LOGGING_CONFIG'])
+        if isinstance(app.config['LOGGING_CONFIG'], dict):
+            logging.config.dictConfig(app.config['LOGGING_CONFIG'])
+        else:
+            logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
     
