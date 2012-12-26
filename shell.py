@@ -12,12 +12,8 @@ from flask.ext.script import Manager, prompt, prompt_choices #@UnresolvedImport
 from adsabs import create_app
 from config import config
 
-config.LOGGING_CONFIG = {
-    'version': 1,
-    'formatters': {'simple': {'format': '%(levelname)s %(message)s'}},
-    'handlers': {'console': {'level': 'INFO', 'class': 'logging.StreamHandler', 'formatter': 'simple'}},
-    'root': {'handlers': ['console']}
-    }
+config.LOGGING_CONFIG = None
+logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
 
 app = create_app(config)
 manager = Manager(app)

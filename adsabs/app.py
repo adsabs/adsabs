@@ -48,11 +48,8 @@ def _configure_app(app, config):
     pass
 
 def _configure_logging(app):
-    if 'LOGGING_CONFIG' in app.config:
-        if isinstance(app.config['LOGGING_CONFIG'], dict):
-            logging.config.dictConfig(app.config['LOGGING_CONFIG'])
-        else:
-            logging.config.fileConfig(app.config['LOGGING_CONFIG'])
+    if app.config.get('LOGGING_CONFIG'):
+        logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
     
