@@ -99,6 +99,15 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
         self.assertEqual(rv.status_code, 200)
+    
+    def test_api_version_header(self):
+        
+        self.insert_user("foo", developer=True)
+        
+        fixture = self.useFixture(SolrRawQueryFixture())
+        
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
+        self.assertIn('X-API-Version', rv.headers)
         
     def test_search_output(self):
         

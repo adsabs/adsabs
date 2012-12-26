@@ -91,6 +91,7 @@ class AppConfig(object):
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
+    API_CURRENT_VERSION = '0.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','aff','identifier']

@@ -25,29 +25,29 @@ def init_error_handlers(app):
     @app.errorhandler(ApiNotAuthenticatedError)
     @pushrod_view(xml_template="error.xml")
     def not_authenticated(error):
-        msg = "API authentication failed: %s" % error.message
+        msg = "API authentication failed: %s" % error
         return {'error': msg},401,None
     
     @app.errorhandler(ApiInvalidRequest)
     @pushrod_view(xml_template="error.xml")
     def invalid_request(error):
-        msg = "API request invalid: %s" % error.message
+        msg = "API request invalid: %s" % error
         return {'error': msg},401,None
     
     @app.errorhandler(ApiPermissionError)
     @pushrod_view(xml_template="error.xml")
     def permission_error(error):
-        msg = "Permission error: %s " % error.message
+        msg = "Permission error: %s " % error
         return {'error': msg},401,None
 
     @app.errorhandler(ApiRecordNotFound)
     @pushrod_view(xml_template="error.xml")
     def record_not_found(error):
-        msg = "No record found with identifier %s" % error.message
+        msg = "No record found with identifier %s" % error
         return {'error': msg},404,None
     
     @app.errorhandler(ApiSolrException)
     @pushrod_view(xml_template="error.xml")
     def solr_exception(error):
-        msg = "Search processing error: %s" % error.message
+        msg = "Search processing error: %s" % error
         return {'error': msg},400,None
