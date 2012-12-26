@@ -88,6 +88,8 @@ def ads_url_redirect(adsid, id_type):
         return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=ARTICLE" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
     elif id_type=='preprint':
         return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=PREPRINT" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='arXiv':
+        return "%s/cgi-bin/nph-abs_connect?fforward=http://arxiv.org/abs/%s" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
     elif id_type=='simbad':
         return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=SIMBAD" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
     elif id_type=='ned':

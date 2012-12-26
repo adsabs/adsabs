@@ -58,8 +58,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_SORT = 'DATE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     
-    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi',
-                                  #'aff',
+    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
                                   'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
     
     SEARCH_DEFAULT_SOLR_FACETS = [
@@ -70,6 +69,7 @@ class AppConfig(object):
         ('keyword_facet',100, 1),
         ('year',100, 1), 
         ('bibgroup',100, 1),
+        ('grant_facet_hier', 1000, 1)
         ]
     
     SEARCH_DEFAULT_HIGHLIGHT_FIELDS = [('full', 4),('abstract', 4)]
@@ -82,6 +82,7 @@ class AppConfig(object):
                                          'key_f':'keyword_facet',
                                          'pub_f':'pub',
                                          'year_f':'year',
+                                         'grant_f':'grant_facet_hier',
                                          }
     
     # copy logging.conf.dist -> logging.conf and uncomment

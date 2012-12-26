@@ -177,11 +177,6 @@ div.bibcodeHeader {
 	font-weight: bold;
 }
 
-div.abstractTitle {
-	font-size: 1.2em;
-	font-weight: bold;	
-}
-
 div.linkRightMenu {
 	border: 1px solid #E5E5E5;
     border-radius: 4px 4px 4px 4px;
@@ -191,6 +186,57 @@ div.linkRightMenu {
 
 div.linkRightMenu dl {
 	margin: 0 0 10px 0;	
+}
+
+div.abstractTitle {
+	font-size: 1.3em;
+	font-weight: bold;	
+}
+div.abstractAuthors, div.abstractJournal, div.abstractDOI, div.abstractKeyword, div.abstractCopyright, div.abstractArXiv, div.abstractPubdate {
+	padding-left: 20px;	
+}
+div.abstractAuthors {
+	margin-bottom: 10px;	
+}
+div.abstractAbstract {
+	padding: 15px 40px 15px 40px;
+}
+div.abstractAbstract span.abstract {
+	line-height: 120%;
+	font-size: 1.1em;
+}
+
+span.author, .coauthorsToggle, .affiliationToggle{
+	font-size: 1.1em;
+}
+a.coauthorsToggle, a.affiliationToggle {
+	cursor:pointer;	
+}
+.blockToggle {
+	display: block;
+}
+span.authorAffiliation {
+	color: #4A4344;
+    font-style: italic;
+    font-size: .9em;
+}
+div.abstractJournal, div.abstractPubdate {
+	font-size: .9em;
+	font-style: italic;
+}
+div.abstractDOI {
+	font-size: .9em;
+	font-weight: bold;	
+}
+div.keywordGroup{
+	margin-left:20px;
+}
+span.keywordTitle, span.arXivLink .title {
+	font-weight: bold;
+}
+
+.strHidden {
+	display:none;	
 }
 
 /*********************/
