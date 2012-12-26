@@ -82,9 +82,42 @@
 				{% endif %}
 			</div>
 		</div>
-		<div id="abstractRightMenu" class="span3">
-			right-menu
+		
+		{# I get the links #}
+		{% set links = solrdoc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
+		{% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
+		{# I get the ids #}
+		{% set ids = solrdoc.getattr_func('ids_data', g.formatter_funcs.field_to_json) %}
+		{% set id_types = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') %}{% do id_types.append(id.get('description')) %}{% endif %}{% endfor %}{% endif %}
+		{# few variables to build the letters #}
+		{% if solrdoc.property %}{% if 'ADS_SCAN' in solrdoc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
+		{% if solrdoc.property %}{% if 'PUB_OPENACCESS' in solrdoc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
+		
+		{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
+		(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) 
+		or ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+		<div id="abstractRightMenu" class="span3 linkRightMenu">
+			{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
+			(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) %}
+			<dl>
+				<dt>Full Text Sources</dt>
+				{% if 'electr' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">Publisher article</a>{% if pub_openaccess %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+				{% if ads_scan or 'pdf' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='article') }}">{% if ads_scan %}ADS PDF{% elif 'pdf' in link_types %}Publisher PDF{% endif %}</a>{% if ads_scan or pub_openaccess%} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+				{% if ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='gif') }}">ADS Scanned Article</a>  <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
+				{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='openurl') }}">Open URL</a></dd>{% endif %}
+				{% if 'arXiv' in id_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='preprint') }}">arXiv eprint</a> <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
+			</dl>
+			{% endif %}
+			{% if ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+			<dl>
+				<dt>Data Products</dt>
+				{% if 'data' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='data') }}">Archival Data</a></dd>{% endif %}
+				{% if 'simbad' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='simbad') }}">SIMBAD objects</a></dd>{% endif %}
+				{% if 'ned' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='ned') }}">NED objects</a></dd>{% endif %}
+			</dl>
+			{% endif %}
 		</div>
+		{% endif %}
 	</div>
 	
 	<!-- 

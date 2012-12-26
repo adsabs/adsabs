@@ -92,6 +92,8 @@ def ads_url_redirect(adsid, id_type):
         return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=SIMBAD" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
     elif id_type=='ned':
         return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=NED" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
+    elif id_type=='openurl':
+        return "%s/cgi-bin/nph-data_query?bibcode=%s&link_type=OPENURL" % (config.ADS_CLASSIC_BASEURL, quote_plus(adsid))
     #here all the other needed cases
     else:
         return adsid

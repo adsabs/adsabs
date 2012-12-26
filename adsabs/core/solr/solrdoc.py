@@ -59,6 +59,14 @@ class SolrDocument(object):
         else:
             return 0
     
+    def has_toc(self):
+        """Checks if abstract has a Table of contents"""
+        properties = self.__getattr__('property')
+        if properties and 'TOC' in properties:
+            return True
+        else:
+            return False     
+    
     def classic_url(self):
         return abstract_url(self.bibcode)
     
