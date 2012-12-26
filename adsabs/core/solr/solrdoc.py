@@ -29,6 +29,36 @@ class SolrDocument(object):
         if data:
             return func(data)
     
+    def has_references(self):
+        """Checks if references are present and returns a boolean"""
+        if self.__getattr__('reference'):
+            return True
+        else:
+            return False
+    
+    def get_references_count(self):
+        """Returns the number of references"""
+        if self.has_references():
+            return len(self.__getattr__('reference'))
+        else:
+            return 0
+    
+    def has_citations(self):
+        """Checks if citations are present and returns a boolean"""
+        if self.__getattr__('citation_count'):
+            return True
+        else:
+            return False
+        
+    def get_citation_count(self):
+        """Returns the number of citations
+           Now it is useless, but if we change the way we compute the citations this method can be pretty useful
+        """
+        if self.has_citations():
+            return self.__getattr__('citation_count')
+        else:
+            return 0
+    
     def classic_url(self):
         return abstract_url(self.bibcode)
     

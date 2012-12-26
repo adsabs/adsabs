@@ -60,7 +60,7 @@ class AppConfig(object):
     
     SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi',
                                   #'aff',
-                                  'pubdate','citation_count','references', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
+                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
     
     SEARCH_DEFAULT_SOLR_FACETS = [
         ('bibstem_facet', 100, 1),

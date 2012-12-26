@@ -34,3 +34,11 @@ def citations(bibcode):
     if not solrdoc:
         abort(404)
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='citations')
+
+@abs_blueprint.route('/<bibcode>/toc', methods=['GET'])
+def toc(bibcode):
+    solrdoc = solr.get_document(bibcode)
+    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    if not solrdoc:
+        abort(404)
+    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='toc')

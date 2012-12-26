@@ -11,8 +11,8 @@
 		<div class="span11">
 			<div class='span3 bibcode'><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.bibcode }}</a></div>
 			<div class="span2 citation_count">
-				{% if doc.citation_count > 0 %}
-				Cited by {{ doc.citation_count }}
+				{% if doc.get_citation_count() > 0 %}
+				Cited by {{ doc.get_citation_count() }}
 				{% else %}
 				&nbsp;
 				{% endif %}
@@ -62,8 +62,8 @@
 {% endmacro %}
 
 {% macro render_letterlink_box(doc) %}
-	{# I get the links ######## OCIO AL FIELD CHE CAMBIA #}
-	{% set links = doc.getattr_func('links', g.formatter_funcs.field_to_json) %}
+	{# I get the links #}
+	{% set links = doc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
 	{% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
 	
 	{# I get the ids #}
@@ -73,6 +73,7 @@
 	{# few variables to build the letters #}
 	{% if doc.property %}{% if 'ADS_SCAN' in doc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
 	{% if doc.property %}{% if 'PUB_OPENACCESS' in doc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
+	{% if doc.property %}{% if 'TOC' in doc.property %}{% set toc = True %}{% else %}{% set toc = False %}{%endif%}{% else %}{% set toc = False %}{% endif %}
 
 	<span class="letterLink letterLinkAround">[</span><span 
 	class="letterLink">{% if 'electr' in link_types %}<a target="_blank" {% if pub_openaccess %} class="letterOpenaccess"{% endif %} title="Publisher article{% if pub_openaccess %} (Open Access){% endif %}" href="{{ doc.bibcode|ads_url_redirect(id_type='electr') }}">E</a>{% else %}&nbsp;{% endif %}</span><span
@@ -81,11 +82,11 @@
 	class="letterLink">{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<a target="_blank" title="Open URL" href="{{ doc.bibcode|ads_url_redirect(id_type='openurl') }}">L</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'arXiv' in id_types %}<a target="_blank" class="letterOpenaccess" title="arXiv eprint (Open Access)" href="{{ doc.bibcode|ads_url_redirect(id_type='preprint') }}">X</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'data' in link_types %}<a target="_blank" title="Archival Data" href="{{ doc.bibcode|ads_url_redirect(id_type='data') }}">D</a>{% else %}&nbsp;{% endif %}</span><span 
-	class="letterLink">T</span><span 
-	class="letterLink">R</span><span 
-	class="letterLink">C</span><span 
-	class="letterLink">S</span><span 
-	class="letterLink">N</span><span 
-	class="letterLink">U</span><span 
+	class="letterLink">{% if toc %}<a href="{{ url_for('abs.toc', bibcode=doc.bibcode) }}" title="Table of contents">T</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if doc.has_references() %}<a href="{{ url_for('abs.references', bibcode=doc.bibcode) }}" title="References ({{ doc.get_references_count() }})">R</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if doc.has_citations() %}<a href="{{ url_for('abs.citations', bibcode=doc.bibcode) }}" title="Citations ({{ doc.get_citation_count() }})">C</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if 'simbad' in link_types %}<a target="_blank" title="SIMBAD objects" href="{{ doc.bibcode|ads_url_redirect(id_type='simbad') }}">S</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if 'ned' in link_types %}<a target="_blank" title="NED objects" href="{{ doc.bibcode|ads_url_redirect(id_type='ned') }}">N</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{# not implemented yet #}{% if False %}U{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink letterLinkAround">]</span>
 {% endmacro %}

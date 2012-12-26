@@ -26,11 +26,12 @@
 			<div class="tabbable">
 				<ul class="nav nav-tabs">
 					<li{% if curview == 'abstract'%} class="active"{% endif %}><a{% if curview != 'abstract'%} href="{{ url_for('abs.abstract', bibcode=inveniodoc.bibcode) }}"{% endif %}> Abstract </a></li>
-					<li{% if curview == 'references'%} class="active"{% endif %}><a{% if curview != 'references'%} href="{{ url_for('abs.references', bibcode=inveniodoc.bibcode) }}"{% endif %}> References </a></li>
-					<li{% if curview == 'citations'%} class="active"{% endif %}><a{% if curview != 'citations'%} href="{{ url_for('abs.citations', bibcode=inveniodoc.bibcode) }}"{% endif %}> Citations </a></li>
+					<li{% if curview == 'references'%} class="active"{% elif not solrdoc.has_references()%} class="disabled"{% endif %}><a{% if curview != 'references' and solrdoc.has_references() %} href="{{ url_for('abs.references', bibcode=inveniodoc.bibcode) }}"{% endif %}> References {% if solrdoc.has_references() %}({{ solrdoc.get_references_count() }}){% endif %}</a></li>
+					<li{% if curview == 'citations'%} class="active"{% elif not solrdoc.has_citations()%} class="disabled"{% endif %}><a{% if curview != 'citations' and solrdoc.has_citations() %} href="{{ url_for('abs.citations', bibcode=inveniodoc.bibcode) }}"{% endif %}> Citations {% if solrdoc.has_citations() %}({{ solrdoc.get_citation_count() }}){% endif %}</a></li>
 					<li class="disabled"><a> Co-reads </a></li>
 					<li class="disabled"><a> Similar Articles </a></li>
-					<li class="disabled"><a> Table of contents </a></li>
+					{% if solrdoc.property %}{% if 'TOC' in solrdoc.property %}{% set toc = True %}{% else %}{% set toc = False %}{%endif%}{% else %}{% set toc = False %}{% endif %}
+					<li{%if not toc %} class="disabled"{% endif %}><a{% if toc %} href="{{ url_for('abs.toc', bibcode=inveniodoc.bibcode) }}"{% endif %}> Table of contents </a></li>
 				</ul>
 			</div>
 		</div>
@@ -43,6 +44,8 @@
 				references
 			{% elif curview == 'citations' %}
 				citations
+			{% elif curview == 'toc' %}
+				table of contents
 			{% endif %}
 		</div>
 	</div>
