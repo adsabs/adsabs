@@ -1,43 +1,56 @@
 {# ###Macro for very basic pagination with result number on top of the results #}
-{% macro render_result_numbers(resp) %}
+{% macro render_result_numbers(resp, blueprint='search.search', bibcode=None) %}
+	{# base url#}
+	{% if not bibcode %}
+		{% set base_url = url_for(blueprint) %}
+	{% else %}
+		{% set base_url = url_for(blueprint, bibcode=bibcode) %}
+	{% endif %}
+	
 	{% set pagination=resp.get_pagination() %}
 	<span class="help-inline hidden-phone results_count">
 		<a {% if pagination['current_page'] == 1 %} class="disabled"{% else %}
-		href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
+		href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
 		|
 		{{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} of {{ resp.get_count() }}
 		|
 		<a {% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} 
-		href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
+		href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
 	</span>
 {% endmacro %}
 
 {# ###Macro for pagination ### #}
-{% macro render_pagination(pagination) %}
+{% macro render_pagination(pagination, blueprint='search.search', bibcode=None) %}
+	{# base url#}
+	{% if not bibcode %}
+		{% set base_url = url_for(blueprint) %}
+	{% else %}
+		{% set base_url = url_for(blueprint, bibcode=bibcode) %}
+	{% endif %}
 	<div class="pagination pagination-small pagination-centered">
 		<ul>
 			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="First"{% endif %}>
 				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
+				href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page=1"{% endif %}>&#171;</a>
 			</li>
 			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="Prev"{% endif %}>
 				<a{% if pagination['current_page'] != 1 %} 
-				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
+				href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249;</a>
 			</li>
 			{% for page in pagination['pages_before'] %}
-			<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			<li><a href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
 			{% endfor %}
 			<li class="active"><a>{{ pagination['current_page'] }}</a></li>
 			{% for page in pagination['pages_after'] %}
-			<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
+			<li><a href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ page }}">{{ page }}</a></li>
 			{% endfor %}
 			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Next"{% endif %}>
 				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
+				href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>&#8250;</a>
 			</li>
 			<li{% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} title="Last"{% endif %}>
 				<a{% if pagination['current_page'] != pagination['num_total_pages'] %} 
-				href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
+				href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['num_total_pages'] }}"{% endif %}>&#187;</a>
 			</li>
   		</ul>
 	</div>

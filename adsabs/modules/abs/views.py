@@ -7,6 +7,7 @@ from flask import Blueprint, request, g, render_template, abort
 from adsabs.core import solr
 from adsabs.core import invenio
 from adsabs.core.data_formatter import field_to_json
+from adsabs.modules.search.misc_functions import build_singledoc_components
 
 
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", static_folder="static")
@@ -32,24 +33,46 @@ def references(bibcode):
         abort(404)
     #I get the additional metadata
     inveniodoc = invenio.get_invenio_metadata(bibcode)
+    #I parse the get options 
+    query_components = build_singledoc_components(request.values)
     #I get the list of references
-    solr_reference_list = solrdoc.get_references()
+    solr_reference_list = solrdoc.get_references(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
     #I append to the g element a dictionary of functions I need in the template
     g.formatter_funcs = {'field_to_json':field_to_json}
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='references', reference_list=solr_reference_list)
 
 @abs_blueprint.route('/<bibcode>/citations', methods=['GET'])
 def citations(bibcode):
+    #I get the document
     solrdoc = solr.get_document(bibcode)
-    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    #if there are no citations I return a 404
     if not solrdoc or not solrdoc.has_citations():
         abort(404)
-    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='citations')
+    #I get the additional metadata
+    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    #I parse the get options 
+    query_components = build_singledoc_components(request.values)
+    #I get the list of citations
+    solr_citation_list = solrdoc.get_citations(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
+    #I append to the g element a dictionary of functions I need in the template
+    g.formatter_funcs = {'field_to_json':field_to_json}
+    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='citations', citation_list=solr_citation_list)
 
 @abs_blueprint.route('/<bibcode>/toc', methods=['GET'])
 def toc(bibcode):
+    #I get the document
     solrdoc = solr.get_document(bibcode)
-    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    #if there are no citations I return a 404
     if not solrdoc or not solrdoc.has_toc():
         abort(404)
-    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='toc')
+    #I get the additional metadata
+    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    #I parse the get options 
+    query_components = build_singledoc_components(request.values)
+    solr_toc_list = solrdoc.get_toc(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
+    #I append to the g element a dictionary of functions I need in the template
+    g.formatter_funcs = {'field_to_json':field_to_json}
+    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='toc', toc_list=solr_toc_list)
+
+
+

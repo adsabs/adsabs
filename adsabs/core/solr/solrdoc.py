@@ -97,10 +97,30 @@ class SolrDocument(object):
         return query(q, *args, **kwargs)
         
     def get_references(self, *args, **kwargs):
-        return self._get_op("refersto")
+        """
+        Returns the list of references
+        """
+        return self._get_op("cites", *args, **kwargs)
         
     def get_citations(self, *args, **kwargs):
-        return self._get_op("cites")
-        
-        
+        """
+        Returns the list of citations
+        """
+        return self._get_op("citedby", *args, **kwargs)
     
+    def get_toc(self, *args, **kwargs):
+        """
+        Returns the table of contents
+        It queries SOLR for the first 13 characters of the bibcode and "*"
+        If the 14th character is a "E" I add also this before the "*"
+        """
+        from adsabs.core.solr import query
+        bibcode = self.data[config.SOLR_DOCUMENT_ID_FIELD]
+        if bibcode[13] == 'E':
+            bibquery = bibcode[:14]
+        else:
+            bibquery = bibcode[:13]
+        q = "%s:%s*" % (config.SOLR_DOCUMENT_ID_FIELD, bibquery)
+        return query(q, *args, **kwargs)
+        
+        
