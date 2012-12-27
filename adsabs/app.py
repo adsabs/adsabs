@@ -92,6 +92,7 @@ def _configure_extensions(app):
     try:
         logger.debug("initializing mongodb")
         mongodb.init_app(app) #@UndefinedVariable
+        mongodb.session.db.write_concern = {'w': 1, 'j': True}
     except Exception, e:
         logger.error("Failed to initialize mongoalchemy session: %s" % e.message)
         raise

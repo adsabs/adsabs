@@ -32,7 +32,7 @@ class AdsUser(object):
                                         lastname=classic_user.get('lastname'), 
                                         active=True, 
                                         anonymous=False)
-            new_rec.save(safe=True)
+            new_rec.save()
             # then I re-extract the user object
             # (don't think it's necessary to re-fetch the record
             #user_local_info = AdsUser.query.filter(AdsUser.cookie_id==user_obj.get('cookie')).first() #@UndefinedVariable

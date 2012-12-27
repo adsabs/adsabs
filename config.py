@@ -34,7 +34,7 @@ class AppConfig(object):
     MONGOALCHEMY_DATABASE = 'adsabs'
     MONGOALCHEMY_SERVER = 'localhost'
     MONGOALCHEMY_PORT = 27017
-    MONGOALCHEMY_OPTIONS = "safe=true"
+    MONGOALCHEMY_SAFE_SESSION = False
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
@@ -104,6 +104,7 @@ class AppConfig(object):
 
     API_CURRENT_VERSION = '0.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
+    API_SOLR_DEFAULT_SORT = ('pubdate_sort','desc')
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','aff','identifier']
     API_SOLR_EXTRA_FIELDS = ['full','references','ack']
