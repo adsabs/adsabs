@@ -7,23 +7,23 @@ Created on Nov 30, 2012
 from werkzeug.datastructures import CombinedMultiDict
 from config import config
 
-def _get_page_component(request_values):
-    """"Handles the page number component that is a function of the max number of results in the page """
-    page = request_values.get('page')
-    if page:
-        if int(page) >0:
-            return str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
-    return None
-
-def _get_resorting_component(request_values):
-    """Handles the resorting components"""
-    sort = config.SEARCH_DEFAULT_SORT
-    sort_direction = config.SEARCH_DEFAULT_SORT_DIRECTION
-    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
-        sort = request_values.get('re_sort_type')
-        if request_values.get('re_sort_dir') in ['asc', 'desc']:
-            sort_direction = request_values.get('re_sort_dir')       
-    return sort, sort_direction
+#def _get_page_component(request_values):
+#    """"Handles the page number component that is a function of the max number of results in the page """
+#    page = request_values.get('page')
+#    if page:
+#        if int(page) >0:
+#            return str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
+#    return None
+#
+#def _get_resorting_component(request_values):
+#    """Handles the resorting components"""
+#    sort = config.SEARCH_DEFAULT_SORT
+#    sort_direction = config.SEARCH_DEFAULT_SORT_DIRECTION
+#    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
+#        sort = request_values.get('re_sort_type')
+#        if request_values.get('re_sort_dir') in ['asc', 'desc']:
+#            sort_direction = request_values.get('re_sort_dir')       
+#    return sort, sort_direction
 
 def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     """
@@ -48,6 +48,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     #second order operators wrap the query
     elif form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
         search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
+        search_components['sort'] = None
     #date range
     if form.year_from.data or form.year_to.data:
         mindate = '*'
@@ -80,9 +81,15 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
         for elem in request_values.getlist(facet):
             search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
     #I handle the page number
-    search_components['start'] = _get_page_component(request_values)
+    page = request_values.get('page')
+    if page:
+        if int(page) >0:
+            search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
     #re-sorting options
-    search_components['sort'], search_components['sort_direction'] = _get_resorting_component(request_values)
+    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
+        search_components['sort'] = request_values.get('re_sort_type')
+        if request_values.get('re_sort_dir') in ['asc', 'desc']:
+            search_components['sort_direction'] = request_values.get('re_sort_dir')       
     return search_components
 
 def build_singledoc_components(request_values):
@@ -95,8 +102,14 @@ def build_singledoc_components(request_values):
             'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
     }
     #I handle the page number
-    search_components['start'] = _get_page_component(request_values)
+    page = request_values.get('page')
+    if page:
+        if int(page) >0:
+            search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
     #re-sorting options
-    search_components['sort'], search_components['sort_direction'] = _get_resorting_component(request_values)
+    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
+        search_components['sort'] = request_values.get('re_sort_type')
+        if request_values.get('re_sort_dir') in ['asc', 'desc']:
+            search_components['sort_direction'] = request_values.get('re_sort_dir')
     return search_components
     
