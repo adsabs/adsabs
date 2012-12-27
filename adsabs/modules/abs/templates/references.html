@@ -1,0 +1,25 @@
+{# Global imports #}
+{% from "macros/record_list_macros/results.html" import render_search_result with context %}
+{% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
+{% from "macros/record_list_macros/button_menu.html" import render_re_sort with context %}
+
+<form action="">
+	<div class="container-fluid">	
+	{# Navbar on top of the results #}
+		<div class="row-fluid well well-small">
+			<div class="span4 firstspan">
+				{{ render_result_numbers(reference_list) }}
+			</div>
+			<div class="span2 pull-right">
+				<!-- button class="btn pull-right">Sort</button-->
+				<!-- button class="btn pull-right">More</button-->
+				{{ render_re_sort(reference_list) }}
+			</div>
+		</div>
+	{# The actual results #}
+	{% for doc in reference_list.get_docset_objects() %}
+	    {{ render_search_result(doc, loop, reference_list.get_start_count()) }}
+	{% endfor %}
+	</div>
+</form>
+{{ render_pagination(reference_list.get_pagination()) }}
