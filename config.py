@@ -53,17 +53,27 @@ class AppConfig(object):
     SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]']),('indent', 'true')]
     SOLR_DEFAULT_FORMAT = 'json'
     SOLR_ARG_SEPARATOR = '#' # used to thwart the defaul solrpy behavior of replacing '_' with '.' in all solr params
+    SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     
     SEARCH_DEFAULT_ROWS = '20'
     SEARCH_DEFAULT_SORT = 'DATE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     
-    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
+#    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
+#                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
+#    
+#    SEARCH_DEFAULT_SOLR_FACETS = [
+#        ('bibstem_facet', 100, 1),
+#        ('author_facet',1000, 1), 
+
+#    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
+    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
                                   'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
+    SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     
-    SEARCH_DEFAULT_SOLR_FACETS = [
+    SOLR_SEARCH_DEFAULT_FACETS = [
         ('bibstem_facet', 100, 1),
-        ('author_facet',1000, 1), 
+        #('author_facet',),
         ('author_facet_hier', 1000, 1), 
         ('property',100, 1),
         ('keyword_facet',100, 1),
@@ -72,7 +82,8 @@ class AppConfig(object):
         ('grant_facet_hier', 1000, 1)
         ]
     
-    SEARCH_DEFAULT_HIGHLIGHT_FIELDS = [('full', 4),('abstract', 4)]
+    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
+    SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',
@@ -91,10 +102,13 @@ class AppConfig(object):
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
 
+    API_CURRENT_VERSION = '0.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
-    # this is the full list of fields available
-    # Note that most api accounts will not have access to the full list of fields
-    API_SOLR_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','references','aff','full','ack','identifier']
+    
+    API_SOLR_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','abstract','keyword','aff','identifier']
+    API_SOLR_EXTRA_FIELDS = ['full','references','ack']
+    API_SOLR_HIGHTLIGHT_FIELDS = ['title','abstract','full','ack']
+    
     API_SOLR_FACET_FIELDS = {
         'bibstem': 'bibstem_facet',
         'author': 'author_facet',

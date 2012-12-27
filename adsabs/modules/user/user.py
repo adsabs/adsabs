@@ -108,6 +108,9 @@ class AdsUser(object):
 
     def get_id(self):
         return self.user_rec.cookie_id
+    
+    def get_username(self):
+        return self.user_rec.username
 
 def get_classic_user(login, password):
     """

@@ -5,22 +5,20 @@ import sys
 
 import tempfile
 import subprocess
+import logging
 
-from flask.ext.script import Manager, Shell, prompt, prompt_choices, prompt_bool #@UnresolvedImport
+from flask.ext.script import Manager, prompt, prompt_choices #@UnresolvedImport
 
 from adsabs import create_app
 from config import config
 
-manager = Manager(create_app())
+config.LOGGING_CONFIG = None
+logging.basicConfig(format='%(levelname)s - %(message)s', level=logging.INFO)
 
 app = create_app(config)
-project_root_path = os.path.join(os.path.dirname(app.root_path))
+manager = Manager(app)
 
-def _make_context():
-    from adsabs.extensions import mongodb
-    return dict(app=app, mongodb=mongodb)
-
-manager.add_command("shell", Shell(make_context=_make_context))
+log = logging.getLogger("shell")
 
 @manager.command
 def run():
@@ -73,7 +71,7 @@ def create_api_user(email=None, level=None):
     
     from adsabs.modules.user import AdsUser
     from adsabs.modules.api import user
-
+    
     if not email:
         email = prompt("Enter e-mail address of Classic ADS account")
         if not email:
@@ -85,18 +83,17 @@ def create_api_user(email=None, level=None):
             
     ads_user = AdsUser.from_email(email)
     if not ads_user:
-        print "user not found"
+        log.info("user not found")
         sys.exit(1)
         
     # first check if the user is already a dev
     api_user = user.AdsApiUser(ads_user.user_rec)
     if api_user.is_developer():
-        print "User already has api access. Developer key: %s" % api_user.get_dev_key()
+        log.info("User already has api access. Developer key: %s" % api_user.get_dev_key())
     else:
         api_user = user.create_api_user(ads_user, level)
         dev_key = api_user.get_dev_key()
-        print "API User created with %s permissions. Developer key: %s" % (level, dev_key)
-    
+        log.info("API User created with %s permissions. Developer key: %s" % (level, dev_key))
     
 if __name__ == "__main__":
     manager.run()

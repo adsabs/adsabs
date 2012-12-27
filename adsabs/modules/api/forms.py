@@ -62,7 +62,7 @@ class ApiQueryForm(Form):
         if re.search('[^a-z\,\_]', field.data, re.I):
             raise ValidationError("Invalid field selection: value must be a comma-separated (no whitespace) list of field names")
         for field_name in field.data.split(','):
-            if field_name not in config.API_SOLR_FIELDS:
+            if field_name not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
                 raise ValidationError("Invalid field selection: %s is not a selectable field" % field_name)
     
     def validate_fmt(self, field):
@@ -78,7 +78,7 @@ class ApiQueryForm(Form):
             if re.search('[^0-9a-z\_\:]', hl, re.I):
                 raise ValidationError("Invalid highlight input: %s. Format is field[:count].")
             hl = hl.split(':')
-            if hl[0] not in config.API_SOLR_FIELDS:
+            if hl[0] not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
                 raise ValidationError("Invalid highlight selection: %s is not a selectable field" % hl[0])
             if len(hl) > 1:
                 if not hl[1].isdigit():
@@ -126,7 +126,7 @@ class ApiQueryForm(Form):
                 field_name,query = filter.split(':')
             except ValueError: # too many/few values to split
                 raise ValidationError("Invalid filter: %s. Format should be 'field:value'" % filter)
-            if field_name not in config.API_SOLR_FIELDS:
+            if field_name not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
                 raise ValidationError("Invalid filter field selection: %s is not a queryable field" % field_name)
             if len(query) > MAX_QUERY_LENGTH:
                 raise ValidationError("%s input must be at no more than %s characters" % (field_name, MAX_QUERY_LENGTH))

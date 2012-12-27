@@ -30,6 +30,10 @@ def create_app(config=config, app_name=None):
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
     _configure_global_variables(app)
+    
+    if config.DEBUG:
+        from flask_debugtoolbar import DebugToolbarExtension
+        toolbar = DebugToolbarExtension(app)
 
     return app
 
@@ -44,7 +48,7 @@ def _configure_app(app, config):
     pass
 
 def _configure_logging(app):
-    if 'LOGGING_CONFIG' in app.config:
+    if app.config.get('LOGGING_CONFIG'):
         logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
