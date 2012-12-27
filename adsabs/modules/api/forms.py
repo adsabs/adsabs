@@ -14,7 +14,7 @@ from .renderers import VALID_FORMATS
 from config import config
 
 MIN_QUERY_LENGTH = 2
-MAX_QUERY_LENGTH = 2048
+MAX_QUERY_LENGTH = 1000
 SORT_DIRECTIONS = ['asc','desc']
 
 class RepeatableField(Field):

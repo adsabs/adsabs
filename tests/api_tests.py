@@ -24,9 +24,18 @@ from adsabs.modules.api.forms import ApiQueryForm
 from adsabs.core.solr import SolrResponse
 from config import config
 from tests.utils import *
-        
-class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
 
+import solr
+SOLR_AVAILABLE = False
+try:
+    s = solr.SolrConnection(config.SOLR_URL)
+    s.conn.connect()
+    SOLR_AVAILABLE = True
+except:
+    pass
+        
+class APIBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
+    
     def setUp(self):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
@@ -37,7 +46,9 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         
         self.insert_user = user_creator()
         self.client = self.app.test_client()
-        
+                
+class APITests(APIBaseTestCase):
+
     def test_empty_requests(self):
         
         rv = self.client.get('/api/')
@@ -264,7 +275,7 @@ class APITests(unittest2.TestCase, fixtures.TestWithFixtures):
         not_valid('filter=foo:bar', {'filter': 'Invalid filter field selection'})
         not_valid('filter=author:%s' % ("foobar" * 1000), {'filter': 'input must be at no more than'})
         
-class ApiUserTest(unittest2.TestCase):
+class ApiUserTest(APIBaseTestCase):
     
     def setUp(self):
         config.TESTING = True
@@ -432,6 +443,22 @@ class ApiUserTest(unittest2.TestCase):
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         self.assertEqual(api_user.user_rec.developer_perms, {'bar': 'baz'})
         
+class ApiLiveSolrTests(APIBaseTestCase):
+    
+    @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
+    def test_returned_fields(self):
+        self.insert_user("foo", developer=True, level="basic")
+        api_user = AdsApiUser.from_dev_key("foo_dev_key")
+        
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
+        resp = loads(rv.data)
+        for f in resp['results']['docs'][0].keys():
+            self.assertIn(f, api_user.get_allowed_fields())
+            
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fl=bibcode,title')
+        resp = loads(rv.data)
+        for f in resp['results']['docs'][0].keys():
+            self.assertIn(f, ['bibcode','title'])
         
     
 if __name__ == '__main__':

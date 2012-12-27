@@ -33,9 +33,13 @@ class ApiSearchRequest(object):
         
         if self.form.fl.data:
             req.set_fields(self.form.fl.data)
+        else:
+            req.set_fields(self.user.get_allowed_fields())
             
         if self.form.rows.data:
             req.set_rows(self.form.rows.data)
+        else:
+            req.set_rows(config.SEARCH_DEFAULT_ROWS)
             
         if self.form.start.data:
             req.set_start(self.form.start.data)
@@ -44,6 +48,8 @@ class ApiSearchRequest(object):
             (sort, direction) = self.form.sort.data.split()
             sort_field = config.SOLR_SORT_OPTIONS[sort]
             req.set_sort(sort_field, direction)
+        else:
+            req.set_sort(*config.API_SOLR_DEFAULT_SORT)
             
         if len(self.form.facet.data):
             for facet in self.form.facet.data:
@@ -87,6 +93,8 @@ class ApiRecordRequest(ApiSearchRequest):
         
         if self.form.fl.data:
             req.set_fields(self.form.fl.data)
+        else:
+            req.set_fields(self.user.get_allowed_fields())
             
         if len(self.form.hl.data):
             for hl in self.form.hl.data:
