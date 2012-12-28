@@ -8,6 +8,7 @@
 {# few variables to build the letters #}
 {% if solrdoc.property %}{% if 'ADS_SCAN' in solrdoc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
 {% if solrdoc.property %}{% if 'PUB_OPENACCESS' in solrdoc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
+{% if solrdoc.property %}{% if 'PRIVATE' in solrdoc.property %}{% set private_abstract = True %}{% else %}{% set private_abstract = False %}{%endif%}{% else %}{% set private_abstract = False %}{% endif %}
 		
 <div class="container-fluid absview">
 	<div class="row-fluid">
@@ -58,7 +59,16 @@
 				<div class="row-fluid">
 					<div class="span12 abstractAbstract">
 						<span class="abstract">
-							{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape|safe }}{% else %}Abstract not available.{% endif %}
+							{% if not private_abstract %}
+								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape|safe }}{% else %}Abstract not available.{% endif %}
+							{% else %}
+								Abstract available on the 
+								{% if 'electr' in link_types %}
+								<a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">publisher website</a>.
+								{% else %}
+								publisher website.
+								{% endif %}
+							{% endif %}
 						</span>
 					</div>
 				</div>
