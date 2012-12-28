@@ -151,6 +151,10 @@ span.appliedFilter a {
 	margin-left:10px;
 }
 
+a.clearAll {
+	font-size:.9em;	
+}
+
 /*********************/
 /*Facets on left*/
 ul.subFacet {

@@ -242,7 +242,7 @@
 				{% do base_remove_all.append(base_remove_all[-1]|replace(remove_facet, '')) %}
 				
 			{% endfor %}
-			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}">Clear all</a>
+			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}" class="clearAll">Clear all</a>
 		</div>
 	</div>
 {% endmacro %}
