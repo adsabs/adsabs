@@ -17,7 +17,7 @@
 
 <div class="container searchResults">
 	<div class="row">
-		<div class="span2" id="facets">
+		<div class="span3" id="facets">
 			<div class="accordion facetAccordion" id="accordion{{ facetid_html }}">
 				<div class="accordion-group">
 					<div class="accordion-heading">
@@ -35,7 +35,7 @@
 			{{ render_facet_box('year_f', 'Year', resp) }}
 			</div>
 		</div>
-		<div class="span10" id="results">
+		<div class="span9 noMarginSpan" id="results">
 			<form action="">
 				<div class="container-fluid">
 				{# The facet bar #}
@@ -47,7 +47,7 @@
 						<div class="span4 firstspan">
 							{{ render_result_numbers(resp) }}
 						</div>
-						<div class="span2 pull-right">
+						<div class="span3 pull-right">
 							<!-- button class="btn pull-right">Sort</button-->
 							<!-- button class="btn pull-right">More</button-->
 							{{ render_re_sort(resp) }}

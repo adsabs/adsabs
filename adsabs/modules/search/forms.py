@@ -41,8 +41,9 @@ class QueryForm(Form):
     sort_type = SelectField(u'Sort', choices=[('DATE','Sort by Most recent'),('RELEVANCE','Sort by Most relevant'),
                                                 ('CITED','Sort by Most cited'),('POPULARITY','Sort by Most popular'),
                                                 #('second_order_operator', 'Use Second order operator'),
-                                                ('hot','Explore What people are reading'),('useful','Explore What experts are citing'),
-                                                ('instructive','Explore Reviews and introductory papers ')] )
+                                                #('hot','Explore What people are reading'),('useful','Explore What experts are citing'),
+                                                #('instructive','Explore Reviews and introductory papers ')
+                                                ] )
     month_from = IntegerField(u'Month From', [optional(), validators.NumberRange(min=1, max=12, message='Month not valid')])
     month_to = IntegerField(u'Month To', [optional(), validators.NumberRange(min=1, max=12, message='Month not valid')])
     year_from = IntegerField(u'Year From', [optional(), validators.NumberRange(min=1, max=2500, message='Year not valid')])

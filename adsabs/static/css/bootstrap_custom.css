@@ -42,6 +42,14 @@ a.disabled {
 	margin-bottom:15px;
 }
 
+.autoWidth {
+	width:auto;	
+}
+
+.noMarginSpan {
+	margin-left:0;	
+}
+
 /*facets in search result*/
 div.facetAccordion {
 	margin-bottom:5px;	
