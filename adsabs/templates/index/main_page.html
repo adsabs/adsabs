@@ -24,6 +24,12 @@
   	</div>
 </div>
 
+<div id="text_welcome">
+	{% if static_content %}
+		{{ static_content|safe_html_unescape|safe }}
+	{% endif %}
+</div>
+
 <!-- 
 
 <br>
