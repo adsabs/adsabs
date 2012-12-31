@@ -21,17 +21,22 @@ class SolrResponse(object):
     def __init__(self, raw, request=None):
         self.raw = deepcopy(raw)
         self.request = request
+        self.meta = {}
         
     def is_error(self):
         return self.raw['responseHeader']['status'] != 0
     
     def search_response(self):
-        resp = {
-            'meta': { 
+        
+        self.meta.update({
                 'query': self.get_query(),
                 'qtime': self.get_qtime(),
+                'hits': self.get_hits(),
                 'count': self.get_count(),
-             },
+        })
+        
+        resp = {
+            'meta': self.meta,
             'results': {
                 'docs': self.get_docset(),
             }
@@ -51,6 +56,9 @@ class SolrResponse(object):
     def get_error(self):
         return self.raw['error']['msg']
     
+    def add_meta(self, key, value):
+        self.meta[key] = value
+        
     def raw_response(self):
         return self.raw
     
@@ -78,7 +86,7 @@ class SolrResponse(object):
     def get_all_facets(self):
         if not self.request.facets_on():
             return {}
-        return self.raw['facet_counts']
+        return self.raw['facet_counts']['facet_fields']
     
     def get_facets_fields(self, facet_name):
         """
@@ -180,6 +188,12 @@ class SolrResponse(object):
     
     def get_count(self):
         """
+        Returns number of documents in current response
+        """
+        return len(self.raw['response']['docs'])
+    
+    def get_hits(self):
+        """
         Returns the total number of record found
         """
         return int(self.raw['response']['numFound'])
@@ -191,13 +205,6 @@ class SolrResponse(object):
         """
         return int(self.raw['response']['start'])
     
-    def get_count_in_resp(self):
-        """
-        Returns the number of records in the current response
-        (it can be different from config.SEARCH_DEFAULT_ROWS)
-        """
-        return len(self.raw['response']['docs'])
-    
     def get_pagination(self):
         """
         Returns a dictionary containing all the informations
@@ -205,7 +212,7 @@ class SolrResponse(object):
         """
         if not hasattr(self, 'pagination'):
             max_pagination_len = 5 #maybe we want to put this in the configuration
-            num_total_pages = int(ceil(float(self.get_count()) / float(config.SEARCH_DEFAULT_ROWS)))
+            num_total_pages = int(ceil(float(self.get_hits()) / float(config.SEARCH_DEFAULT_ROWS)))
             current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
             max_num_pages_before = int(ceil(min(max_pagination_len, num_total_pages) / 2.0)) - 1
             max_num_pages_after = int(min(max_pagination_len, num_total_pages)) / 2

@@ -76,6 +76,7 @@ class ApiSearchRequest(object):
         self.resp = solr_req.get_response()
         if self.resp.is_error():
             raise ApiSolrException(self.resp.get_error())
+        self.resp.add_meta('api-version', g.api_version)
         return self.resp
 
     def query(self):

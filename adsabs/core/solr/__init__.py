@@ -66,7 +66,7 @@ def document_request(identifier, hlq=None, **kwargs):
 def get_document(*args, **kwargs):
     req = document_request(*args, **kwargs)
     resp = req.get_response()
-    if resp.get_count() == 1:
+    if resp.get_hits() == 1:
         return resp.get_doc_object(0)
         
 

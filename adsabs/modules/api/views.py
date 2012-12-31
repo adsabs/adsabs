@@ -39,10 +39,17 @@ def api_user_required(func):
         g.api_user = user
         return func(*args, **kwargs)
     return decorator
+
+@api_blueprint.before_request
+def get_api_version_header():
+    g.api_version = request.headers.get('X-API-Version', config.API_CURRENT_VERSION)
         
 @api_blueprint.after_request
 def add_api_version_header(response):
-    response.headers['X-API-Version'] = config.API_CURRENT_VERSION
+    """
+    Add default api version header if not already set
+    """
+    response.headers.setdefault('X-API-Version', g.api_version)
     return response
 
 @api_blueprint.route('/settings/', methods=['GET'])
@@ -72,7 +79,7 @@ def record(identifier):
     record_req = ApiRecordRequest(identifier, request.args)
     if record_req.validate():
         resp = record_req.execute()
-        if not resp.get_count() > 0:
+        if not resp.get_hits() > 0:
             raise errors.ApiRecordNotFound(identifier)
         return resp.record_response()
     raise errors.ApiInvalidRequest(record_req.errors())

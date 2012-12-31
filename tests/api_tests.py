@@ -119,6 +119,14 @@ class APITests(APIBaseTestCase):
         
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
         self.assertIn('X-API-Version', rv.headers)
+        self.assertEqual(config.API_CURRENT_VERSION, rv.headers['X-API-Version'])
+        resp_data = loads(rv.data)
+        self.assertEqual(config.API_CURRENT_VERSION, resp_data['meta']['api-version'])
+        
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=[('X-API-Version','0.2')])
+        self.assertEqual('0.2', rv.headers['X-API-Version'])
+        resp_data = loads(rv.data)
+        self.assertEqual('0.2', resp_data['meta']['api-version'])
         
     def test_search_output(self):
         

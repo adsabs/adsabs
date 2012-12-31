@@ -12,7 +12,7 @@
 		<a {% if pagination['current_page'] == 1 %} class="disabled"{% else %}
 		href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] - 1 }}"{% endif %}>&#8249; Previous</a>
 		|
-		{{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count_in_resp() }} of {{ resp.get_count() }}
+		{{ resp.get_start_count() + 1}} to {{ resp.get_start_count() + resp.get_count() }} of {{ resp.get_count() }}
 		|
 		<a {% if pagination['current_page'] == pagination['num_total_pages'] %} class="disabled"{% else %} 
 		href="{{ base_url }}?{{ request.query_string|replace('&page=%s' % pagination['current_page'], '') }}&page={{ pagination['current_page'] + 1 }}"{% endif %}>Next &#8250;</a>
