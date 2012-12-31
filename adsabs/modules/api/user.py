@@ -23,15 +23,15 @@ __all__ = ['AdsApiUser', 'create_api_user']
 
 PERMISSION_LEVELS = {
     "basic": {
-        "max_rows": 20,
-        "max_start": 300,
+        "max_rows": 100,
+        "max_start": 10000,
         "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": False,
         "highlight": False,
     },
     "devel": {
-        "max_rows": 100,
-        "max_start": 5000,
+        "max_rows": 200,
+        "max_start": 50000,
         "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": True,
         "facet_limit_max": 100,
@@ -40,7 +40,7 @@ PERMISSION_LEVELS = {
         "highlight_fields": config.API_SOLR_HIGHTLIGHT_FIELDS[:]
     },
     "collab": {
-        "max_rows": 100,
+        "max_rows": 200,
         "max_start": None,
         "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:] + config.API_SOLR_EXTRA_FIELDS[:],
         "facets": True,

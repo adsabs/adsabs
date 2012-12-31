@@ -110,8 +110,8 @@ class AppConfig(object):
     API_DEFAULT_RESPONSE_FORMAT = 'json'
     API_SOLR_DEFAULT_SORT = ('pubdate_sort','desc')
     
-    API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','score','property','abstract','keyword','aff','identifier']
-    API_SOLR_EXTRA_FIELDS = ['full','references','ack']
+    API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','aff','identifier','doi']
+    API_SOLR_EXTRA_FIELDS = ['full','references','ack','score']
     API_SOLR_HIGHTLIGHT_FIELDS = ['title','abstract','full','ack']
     
     API_SOLR_FACET_FIELDS = {

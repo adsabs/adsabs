@@ -89,7 +89,7 @@ class ApiRecordRequest(ApiSearchRequest):
         ApiSearchRequest.__init__(self, request_vals)
         
     def _create_solr_request(self):
-        q = "identifier:%s" % self.record_id
+        q = "identifier:%s OR doi:%s" % (self.record_id, self.record_id)
         req = SolrRequest(q, rows=1)
         
         if self.form.fl.data:
@@ -99,7 +99,8 @@ class ApiRecordRequest(ApiSearchRequest):
             
         if len(self.form.hl.data):
             for hl in self.form.hl.data:
-                req.add_highlight(hl.split(':'))
+                hl = hl.split(':')
+                req.add_highlight(*hl)
                 
         if self.form.hlq.data:
             req.set_hlq(self.form.hlq.data)

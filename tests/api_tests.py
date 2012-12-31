@@ -376,12 +376,12 @@ class ApiUserTest(APIBaseTestCase):
         self.insert_user("foo", developer=True, level="basic")
         u = AdsApiUser.from_dev_key("foo_dev_key")
         
-        self.assertIsNone(u._max_rows_ok(19))
-        self.assertIsNone(u._max_rows_ok(20))
-        self.assertRaisesRegexp(AssertionError, 'rows=21 exceeds max allowed value: 20', u._max_rows_ok, 21)
+        self.assertIsNone(u._max_rows_ok(99))
+        self.assertIsNone(u._max_rows_ok(100))
+        self.assertRaisesRegexp(AssertionError, 'rows=101 exceeds max allowed value: 100', u._max_rows_ok, 101)
         
         self.assertIsNone(u._max_start_ok(300))
-        self.assertRaisesRegexp(AssertionError, 'start=301 exceeds max allowed value: 300', u._max_start_ok, 301)
+        self.assertRaisesRegexp(AssertionError, 'start=10001 exceeds max allowed value: 10000', u._max_start_ok, 10001)
         
         self.assertRaisesRegexp(AssertionError, 'facets disabled', u._facets_ok, ["author"])
         self.assertRaisesRegexp(AssertionError, 'highlighting disabled', u._highlight_ok, ["title"])
@@ -393,11 +393,11 @@ class ApiUserTest(APIBaseTestCase):
         self.insert_user("bar", developer=True, level="devel")
         u = AdsApiUser.from_dev_key("bar_dev_key")
             
-        self.assertIsNone(u._max_rows_ok(20))
-        self.assertRaisesRegexp(AssertionError, 'rows=101 exceeds max allowed value: 100', u._max_rows_ok, 101)
+        self.assertIsNone(u._max_rows_ok(200))
+        self.assertRaisesRegexp(AssertionError, 'rows=201 exceeds max allowed value: 200', u._max_rows_ok, 201)
         
-        self.assertIsNone(u._max_start_ok(5000))
-        self.assertRaisesRegexp(AssertionError, 'start=5001 exceeds max allowed value: 5000', u._max_start_ok, 5001)
+        self.assertIsNone(u._max_start_ok(50000))
+        self.assertRaisesRegexp(AssertionError, 'start=50001 exceeds max allowed value: 50000', u._max_start_ok, 50001)
         
         self.assertIsNone(u._facets_ok(['author']))
         self.assertIsNone(u._highlight_ok(['abstract']))
@@ -452,6 +452,9 @@ class ApiUserTest(APIBaseTestCase):
         self.assertEqual(api_user.user_rec.developer_perms, {'bar': 'baz'})
         
 class ApiLiveSolrTests(APIBaseTestCase):
+    """
+    Tests that rely on a live solr instance rather than canned responses
+    """
     
     @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
     def test_returned_fields(self):
@@ -467,6 +470,20 @@ class ApiLiveSolrTests(APIBaseTestCase):
         resp = loads(rv.data)
         for f in resp['results']['docs'][0].keys():
             self.assertIn(f, ['bibcode','title'])
+        
+    @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
+    def test_record_requests(self):
+        self.insert_user("foo", developer=True, level="basic")
+        rv = self.client.get('/api/record/2010A&A...524A..15D?dev_key=foo_dev_key')
+        resp = loads(rv.data)
+        self.assertIn('id', resp)
+        rv = self.client.get('/api/record/hep-th/9108008?dev_key=foo_dev_key')
+        resp = loads(rv.data)
+        self.assertIn('id', resp)
+        rv = self.client.get('/api/record/10.1126/science.1.19.520?dev_key=foo_dev_key')
+        resp = loads(rv.data)
+        self.assertIn('id', resp)
+            
         
     
 if __name__ == '__main__':

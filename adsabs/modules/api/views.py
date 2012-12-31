@@ -72,7 +72,7 @@ def search():
     raise errors.ApiInvalidRequest(search_req.errors())
         
         
-@api_blueprint.route('/record/<identifier>', methods=['GET'])
+@api_blueprint.route('/record/<path:identifier>', methods=['GET'])
 @api_user_required
 @pushrod_view(xml_template="record.xml")
 def record(identifier):
@@ -84,11 +84,11 @@ def record(identifier):
         return resp.record_response()
     raise errors.ApiInvalidRequest(record_req.errors())
         
-@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
-@api_user_required
-@pushrod_view(xml_template="record.xml")
-def record_operator(identifier, operator):
-    pass
+#@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
+#@api_user_required
+#@pushrod_view(xml_template="record.xml")
+#def record_operator(identifier, operator):
+#    pass
 
 #@api_blueprint.route('/mlt/', methods=['GET'])
 #@api_user_required
