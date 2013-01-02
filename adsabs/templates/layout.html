@@ -107,5 +107,12 @@
 		{% block debugSection %}{% endblock %}
 	</div>
 {% endif %}
+
+{% if config.ANALYTICS_ENABLED %}
+{% block analytics %}
+{% include 'analytics.html' %}
+{% endblock %}
+{% endif %}
+
 </body>
 </html>

@@ -31,6 +31,9 @@ class AppConfig(object):
     RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
     RECAPTCHA_OPTIONS = {'theme': 'white'}
     
+    ANALYTICS_ENABLED = True
+    ANALYTICS_ACCOUNT_ID = 'UA-37369750-1'
+    
     MONGOALCHEMY_DATABASE = 'adsabs'
     MONGOALCHEMY_SERVER = 'localhost'
     MONGOALCHEMY_PORT = 27017
