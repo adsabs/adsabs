@@ -12,6 +12,9 @@ __all__ = ['create_app']
 
 logger = None
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo") 
+
 def create_app(config=config, app_name=None):
     """Create a Flask app."""
 
