@@ -25,10 +25,11 @@ log = logging.getLogger(__name__)
 def api_user_required(func):
     @wraps(func)
     def decorator(*args, **kwargs):
-        if 'dev_key' not in request.args:
+        dev_key = request.args.get('dev_key', None)
+        if not dev_key or len(dev_key) == 0:
             raise errors.ApiNotAuthenticatedError("no developer token provided")
         try:
-            user = AdsApiUser.from_dev_key(request.args.get('dev_key'))
+            user = AdsApiUser.from_dev_key(dev_key)
         except Exception, e:
             import traceback
             exc_info = sys.exc_info()

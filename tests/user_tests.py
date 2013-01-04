@@ -26,8 +26,8 @@ class UserTests(AdsabsBaseTestCase):
 class ApiUserTests(AdsabsBaseTestCase):
     
     def test_create_api_user(self):
-        self.insert_user("foo", developer=False)
-        ads_user = AdsUser.from_id("foo_cookie_id")
+        self.insert_user("bar", developer=False)
+        ads_user = AdsUser.from_id("bar_cookie_id")
         self.assertTrue(ads_user.user_rec.developer_key in [None, ""])
         api_user = create_api_user(ads_user, "basic")
         self.assertTrue(api_user.is_developer())

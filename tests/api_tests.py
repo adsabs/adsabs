@@ -98,6 +98,16 @@ class APITests(AdsabsBaseTestCase):
         rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
         self.assertEqual(rv.status_code, 200)
     
+    def test_empty_dev_key(self):
+        """ensure that a user record with a dev_key of "" doesn't allow access to empty dev_key input"""
+        
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(SolrRawQueryFixture())
+        user = AdsApiUser.from_dev_key("foo_dev_key")
+        user.set_dev_key("")
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=')
+        self.assertEqual(rv.status_code, 401)
+        
     def test_api_version_header(self):
         
         self.insert_user("foo", developer=True)
