@@ -91,6 +91,17 @@ class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.assertEqual(req.params['f.baz.facet.limit'], 3)
         self.assertEqual(req.params['f.fez.facet.limit'], 3)
         
+    def test_solr_request_add_facet_output_key(self):
+        
+        req = solr.SolrRequest("foo")
+        req.add_facet("author", output_key="authorz")
+        self.assertEqual(req.params['facet.field'], ["{!ex=dt key=authorz}author"])
+        
+        req = solr.SolrRequest("foo")
+        req.add_facet("title", limit=10, output_key="titlez")
+        self.assertEqual(req.params['facet.field'], ["{!ex=dt key=titlez}title"])
+        self.assertEqual(req.params['f.title.facet.limit'], 10)
+        
     def test_solr_request_add_filter(self):
         req = solr.SolrRequest("foo")   
         req.add_filter("bibstem:ApJ")

@@ -82,12 +82,15 @@ class SolrRequest(object):
             filters = filter(lambda x: x not in default_params.get('fq', []), filters)
         return filters
         
-    def add_facet(self, fields, limit=None, mincount=None):
+    def add_facet(self, fields, limit=None, mincount=None, output_key=None):
         self.params['facet'] = "true"
         if isinstance(fields, basestring):
             fields = [fields]
         for field in fields:
-            self.params.append('facet.field', field)
+            if output_key:
+                self.params.append('facet.field', "{!ex=dt key=%s}%s" % (output_key, field))
+            else:
+                self.params.append('facet.field', field)
             if limit:
                 self.params['f.%s.facet.limit' % field] = limit
             if mincount:
@@ -137,7 +140,7 @@ class SolrRequest(object):
         try:
             json = g.solr.select.raw(**self.params)
         except:
-            log.error("Something blew up when querying solr")
+            log.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())
             raise
         
         data = loads(json)

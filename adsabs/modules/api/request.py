@@ -54,9 +54,16 @@ class ApiSearchRequest(object):
         if len(self.form.facet.data):
             for facet in self.form.facet.data:
                 facet = facet.split(':')
-                # translate facet to solr field name
-                facet[0] = config.API_SOLR_FACET_FIELDS[facet[0]]
-                req.add_facet(*facet)
+                api_facet_name = facet[0]
+                solr_field_name = config.API_SOLR_FACET_FIELDS[api_facet_name]
+                if api_facet_name != solr_field_name:
+                    # translate api facet name to solr field name in request *and* response
+                    # see http://wiki.apache.org/solr/SimpleFacetParameters#key_:_Changing_the_output_key
+                    output_key = api_facet_name
+                    facet[0] = solr_field_name
+                else:
+                    output_key = None
+                req.add_facet(*facet, output_key=output_key)
         
         if len(self.form.hl.data):
             for hl in self.form.hl.data:

@@ -43,7 +43,7 @@ class SolrResponse(object):
         }
         
         if self.request.facets_on():
-            resp['results']['facets'] = self.get_all_facets(),
+            resp['results']['facets'] = self.get_all_facets()
             
         return resp
     
