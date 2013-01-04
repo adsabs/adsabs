@@ -16,12 +16,11 @@ from adsabs.core import solr
 from config import config
 from tests.utils import *
 
-class SolrTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
+class SolrTestCase(AdsabsBaseTestCase):
 
     def setUp(self):
-        config.TESTING = True
+        super(SolrTestCase, self).setUp()
         config.SOLR_MISC_DEFAULT_PARAMS = []
-        self.app = create_app(config)
         
     def test_solr_request_defaults(self):
         req = solr.SolrRequest("foo")

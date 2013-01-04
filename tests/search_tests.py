@@ -13,29 +13,22 @@ import unittest2
 
 from adsabs.app import create_app
 from config import config
-from tests.utils import SolrRawQueryFixture
+from tests.utils import *
 
 from flask import request
 from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport
 from adsabs.modules.search.misc_functions import build_basicquery_components
 from adsabs.modules.search.forms import get_missing_defaults, QueryForm
 
-class SearchTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
-
-    def setUp(self):
-        config.TESTING = True
-        app = create_app(config)
-        self.app = app.test_client()
-
-    def tearDown(self):
-        pass
+class SearchTestCase(AdsabsBaseTestCase):
 
     def test_basic_search_results(self):
         fixture = self.useFixture(SolrRawQueryFixture())
-        rv = self.app.get('/search/?q=black+holes')
+        rv = self.client.get('/search/?q=black+holes')
         self.assertIn('1 to 1 of', rv.data)
 
-class GetMissingDefaultsTestCase(unittest2.TestCase):
+class GetMissingDefaultsTestCase(AdsabsBaseTestCase):
+    
     def test_all_defaults_present_1(self):
         request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')]), ImmutableMultiDict([])])
         out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')])
@@ -58,13 +51,7 @@ class GetMissingDefaultsTestCase(unittest2.TestCase):
         
 
 
-class BuildBasicQueryComponentsTestCase(unittest2.TestCase):
-    def setUp(self):
-        config.TESTING = True
-        self.app = create_app(config)
-
-    def tearDown(self):
-        pass
+class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     
     def test_only_query(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"'):

@@ -5,12 +5,28 @@ Created on Nov 12, 2012
 '''
 
 import fixtures
+import unittest2
 from simplejson import dumps
 from copy import deepcopy
 
 from flask import g
 from adsabs.modules.api.user import AdsApiUser, PERMISSION_LEVELS
+from config import config
+from adsabs.app import create_app
 
+class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
+    
+    def setUp(self):
+        config.TESTING = True
+        config.MONGOALCHEMY_DATABASE = 'test'
+        self.app = create_app(config)
+        
+        from adsabs.extensions import mongodb
+        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
+        
+        self.insert_user = user_creator()
+        self.client = self.app.test_client()
+        
 def user_creator():
     def func(username, developer=False, dev_perms=None, level=None):
         from adsabs.extensions import mongodb

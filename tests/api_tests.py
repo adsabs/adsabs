@@ -34,20 +34,7 @@ try:
 except:
     pass
         
-class APIBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
-    
-    def setUp(self):
-        config.TESTING = True
-        config.MONGOALCHEMY_DATABASE = 'test'
-        self.app = create_app(config)
-        
-        from adsabs.extensions import mongodb
-        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
-        
-        self.insert_user = user_creator()
-        self.client = self.app.test_client()
-                
-class APITests(APIBaseTestCase):
+class APITests(AdsabsBaseTestCase):
 
     def test_empty_requests(self):
         
@@ -283,7 +270,7 @@ class APITests(APIBaseTestCase):
         not_valid('filter=foo:bar', {'filter': 'Invalid filter field selection'})
         not_valid('filter=author:%s' % ("foobar" * 1000), {'filter': 'input must be at no more than'})
         
-class ApiUserTest(APIBaseTestCase):
+class ApiUserTest(AdsabsBaseTestCase):
     
     def setUp(self):
         config.TESTING = True
@@ -428,16 +415,7 @@ class ApiUserTest(APIBaseTestCase):
         self.assertEquals(len(hash_components), 3)
         self.assertTrue(user.validate_dev_key(new_dev_key, dev_key_hash))
         
-    def test_create_api_user(self):
-        self.insert_user("foo", developer=False)
-        ads_user = AdsUser.from_id("foo_cookie_id")
-        self.assertTrue(ads_user.user_rec.developer_key in [None, ""])
-        api_user = user.create_api_user(ads_user, "basic")
-        self.assertTrue(api_user.is_developer())
-        self.assertEqual(api_user.user_rec.developer_perms, user.PERMISSION_LEVELS["basic"])
-        dev_key = api_user.get_dev_key()
-        api_user2 = AdsApiUser.from_dev_key(dev_key)
-        self.assertEqual(api_user.get_dev_key(), api_user2.get_dev_key())
+
         
     def test_set_perms(self):
         self.insert_user("foo", developer=True, level="basic")
@@ -451,7 +429,7 @@ class ApiUserTest(APIBaseTestCase):
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         self.assertEqual(api_user.user_rec.developer_perms, {'bar': 'baz'})
         
-class ApiLiveSolrTests(APIBaseTestCase):
+class ApiLiveSolrTests(AdsabsBaseTestCase):
     """
     Tests that rely on a live solr instance rather than canned responses
     """
