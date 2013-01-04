@@ -78,7 +78,7 @@ class ApiQueryForm(Form):
             if re.search('[^0-9a-z\_\:]', hl, re.I):
                 raise ValidationError("Invalid highlight input: %s. Format is field[:count].")
             hl = hl.split(':')
-            if hl[0] not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
+            if hl[0] not in config.API_SOLR_HIGHLIGHT_FIELDS:
                 raise ValidationError("Invalid highlight selection: %s is not a selectable field" % hl[0])
             if len(hl) > 1:
                 if not hl[1].isdigit():

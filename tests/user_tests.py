@@ -23,7 +23,6 @@ class UserTests(AdsabsBaseTestCase):
         self.assertIsNotNone(user)
         self.assertEqual("a_name", user.name)
         
-        
 class ApiUserTests(AdsabsBaseTestCase):
     
     def test_create_api_user(self):

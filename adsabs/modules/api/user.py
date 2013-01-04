@@ -37,7 +37,7 @@ PERMISSION_LEVELS = {
         "facet_limit_max": 100,
         "highlight": True,
         "highlight_limit_max": 4,
-        "highlight_fields": config.API_SOLR_HIGHTLIGHT_FIELDS[:]
+        "highlight_fields": config.API_SOLR_HIGHLIGHT_FIELDS[:]
     },
     "collab": {
         "max_rows": 200,
@@ -47,7 +47,7 @@ PERMISSION_LEVELS = {
         "facet_limit_max": 500,
         "highlight": True,
         "highlight_limit_max": 4,
-        "highlight_fields": config.API_SOLR_HIGHTLIGHT_FIELDS[:]
+        "highlight_fields": config.API_SOLR_HIGHLIGHT_FIELDS[:]
     }
 }
 
@@ -101,8 +101,8 @@ def create_api_user(ads_user, level):
     """
     api_user = AdsApiUser(ads_user.user_rec)
     if not api_user.is_developer():
-        api_user.user_rec.developer_key = _create_dev_key()
-        api_user.user_rec.save()
+        developer_key = _create_dev_key()
+        api_user.set_dev_key(developer_key)
     api_user.set_perms(level)
     return api_user
     
@@ -122,6 +122,10 @@ class AdsApiUser(AdsUser):
     def __init__(self, user_rec):
         super(AdsApiUser, self).__init__(user_rec)
         self.perms = user_rec.developer_perms
+        
+    def set_dev_key(self, dev_key):
+        self.user_rec.developer_key = dev_key
+        self.user_rec.save()
         
     def set_perms(self, level=None, new_perms={}):
         if level:

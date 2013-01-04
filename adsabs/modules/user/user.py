@@ -58,8 +58,8 @@ class AdsUser(object):
         #then I return an instance of a local style User object
         return AdsUser(user_rec)
 
-    @staticmethod
-    def from_id(id_):
+    @classmethod
+    def from_id(cls, id_):
         """
         function needed by the Flask-Login to make the Login work
         given an user id (an actual meaningless id) it returns the user object
@@ -68,17 +68,17 @@ class AdsUser(object):
         #I retrieve the user from the local database
         user_rec = AdsUserRecord.query.filter(AdsUserRecord.cookie_id==id_).first() #@UndefinedVariable
         if user_rec:
-            return AdsUser(user_rec)
+            return cls(user_rec)
         return None
         
-    @staticmethod
-    def from_email(email):
+    @classmethod
+    def from_email(cls, email):
         """
         """
         #I retrieve the user from the local database
         user_rec = AdsUserRecord.query.filter(AdsUserRecord.username==email).first() #@UndefinedVariable
         if user_rec:
-            return AdsUser(user_rec)
+            return cls(user_rec)
         return None
      
     #In the init I copy locally the variables coming from the user object

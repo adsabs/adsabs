@@ -232,7 +232,7 @@ class APITests(AdsabsBaseTestCase):
         
         is_valid('hl=abstract')
         is_valid('hl=title:3')
-        for f in config.API_SOLR_DEFAULT_FIELDS:
+        for f in config.API_SOLR_HIGHLIGHT_FIELDS:
             is_valid('hl=%s' % f)
         is_valid('hl=abstract&hl=full')
         not_valid('hl=title-3', {'hl': 'Invalid highlight input'})
@@ -395,7 +395,7 @@ class ApiUserTest(AdsabsBaseTestCase):
         for f in config.API_SOLR_EXTRA_FIELDS:
             self.assertRaisesRegexp(AssertionError, 'disallowed field: %s' % f, u._fields_ok, f)
             
-        for f in config.API_SOLR_HIGHTLIGHT_FIELDS:
+        for f in config.API_SOLR_HIGHLIGHT_FIELDS:
             self.assertIsNone(u._highlight_ok([f]))
             self.assertIsNone(u._highlight_ok(["%s:4" % f]))
             self.assertRaisesRegexp(AssertionError, 'highlight count 5 exceeds', u._highlight_ok, ["%s:5" % f])
