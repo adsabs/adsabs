@@ -118,3 +118,13 @@ class SolrRequestPostMP(fixtures.MonkeyPatch):
     def __init__(self, callback):
         fixtures.MonkeyPatch.__init__(self, 'solr.Solr._post', callback)
         
+class SolrNotAvailableFixture(fixtures.MonkeyPatch):
+    
+    def __init__(self, exc_class, exc_msg=None):
+        self.exc_class = exc_class
+        self.exc_msg = exc_msg
+        
+        def raise_ex(*args, **kwargs):
+            raise self.exc_class(self.exc_msg)
+        
+        fixtures.MonkeyPatch.__init__(self, 'solr.SearchHandler.raw', raise_ex)

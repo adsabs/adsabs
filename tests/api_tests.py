@@ -20,6 +20,7 @@ from adsabs.modules.user import AdsUser
 from adsabs.modules.api import AdsApiUser
 from adsabs.modules.api import ApiSearchRequest
 from adsabs.modules.api import user
+from adsabs.modules.api import errors
 from adsabs.modules.api.forms import ApiQueryForm
 from adsabs.core.solr import SolrResponse
 from config import config
@@ -160,6 +161,12 @@ class APITests(AdsabsBaseTestCase):
         rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
         self.assertEqual(rv.status_code, 404)
         self.assertIn("No record found with identifier 2012ApJ...751...88M", rv.data)
+        
+    def test_solr_unavailable(self):
+        self.insert_user("foo", developer=True)
+        fixture = self.useFixture(SolrNotAvailableFixture(errors.ApiSolrException))
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
+        self.assertIn("Search processing error: Error communicating with search service", rv.data)
         
     def test_content_types(self):
         

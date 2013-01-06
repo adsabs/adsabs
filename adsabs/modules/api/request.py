@@ -80,10 +80,19 @@ class ApiSearchRequest(object):
                 
     def execute(self):
         solr_req = self._create_solr_request()
-        self.resp = solr_req.get_response()
-        if self.resp.is_error():
-            raise ApiSolrException(self.resp.get_error())
-        self.resp.add_meta('api-version', g.api_version)
+        
+        try:
+            solr_resp = solr_req.get_response()
+        except Exception, e:
+            # TODO: Log this error + traceback
+            # raaise a more user-friendly exception
+            raise ApiSolrException("Error communicating with search service")
+        
+        if solr_resp.is_error():
+            raise ApiSolrException(solr_resp.get_error())
+        
+        solr_resp.add_meta('api-version', g.api_version)
+        self.resp = solr_resp
         return self.resp
 
     def query(self):
