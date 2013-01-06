@@ -91,7 +91,7 @@ def validate_dev_key(dev_key, hash_struct):
 def default_perms(level):
     try:
         perms = PERMISSION_LEVELS[level]
-        return perms
+        return perms.copy()
     except KeyError:
         raise Exception("Unknown default permission level: %s" % level)
 
@@ -127,10 +127,10 @@ class AdsApiUser(AdsUser):
         self.user_rec.developer_key = dev_key
         self.user_rec.save()
         
-    def set_perms(self, level=None, new_perms={}):
+    def set_perms(self, level=None, perms={}):
         if level:
-            new_perms.update(default_perms(level).copy())
-        self.user_rec.developer_perms = new_perms
+            perms = default_perms(level)
+        self.user_rec.developer_perms = perms
         self.user_rec.save()
             
     def is_developer(self):
@@ -162,10 +162,10 @@ class AdsApiUser(AdsUser):
         return True
     
     def _facets_ok(self, req_facets):
-        assert self.perms.get('facets', False), 'facets disabled'
+        assert self.user_rec.developer_perms.get('facets', False), 'facets disabled'
         
         allowed = config.API_SOLR_FACET_FIELDS.keys()
-        facet_limit_max = self.perms.get('facet_limit_max', 0)
+        facet_limit_max = self.user_rec.developer_perms.get('facet_limit_max', 0)
         for facet in req_facets:
             # facet value format str[:limit[:mincount]], e.g., "author:100:10"
             facet = facet.strip().split(':')
@@ -175,24 +175,24 @@ class AdsApiUser(AdsUser):
                     'facet limit value %d exceeds max allowed value: %d' % (int(facet[1]), facet_limit_max)
         
     def _max_rows_ok(self, req_rows):
-        max_rows = self.perms.get('max_rows', 0)
+        max_rows = self.user_rec.developer_perms.get('max_rows', 0)
         assert max_rows >= req_rows, 'rows=%s exceeds max allowed value: %d' % (req_rows, max_rows)
                    
     def _max_start_ok(self, req_start):
-        max_start = self.perms.get('max_start', 0)
+        max_start = self.user_rec.developer_perms.get('max_start', 0)
         assert max_start >= req_start, 'start=%s exceeds max allowed value: %d' % (req_start, max_start)
     
     def _fields_ok(self, req_fields):
         req_fields = re.split('[,\s]+', req_fields.strip())
-        allowed = self.perms.get('allowed_fields', [])
+        allowed = self.user_rec.developer_perms.get('allowed_fields', [])
         for f in req_fields:
             assert f in allowed, 'disallowed field: %s' % f
                    
     def _highlight_ok(self, hl_fields):
-        assert self.perms.get('highlight', False), 'highlighting disabled'
+        assert self.user_rec.developer_perms.get('highlight', False), 'highlighting disabled'
         
-        allowed = self.perms.get('highlight_fields', [])
-        highlight_max = self.perms.get('highlight_limit_max', 0)
+        allowed = self.user_rec.developer_perms.get('highlight_fields', [])
+        highlight_max = self.user_rec.developer_perms.get('highlight_limit_max', 0)
         for hl in hl_fields:
             # highlight field format str[:count], e.g., "abstract:3"
             hl = hl.strip().split(':')

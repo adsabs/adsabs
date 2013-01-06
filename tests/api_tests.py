@@ -298,7 +298,7 @@ class ApiUserTest(AdsabsBaseTestCase):
         
         def DP(perms):
             u = AdsApiUser.from_dev_key("foo_dev_key")
-            u.perms = perms
+            u.set_perms(perms=perms)
             return u
         
         u = DP({})
@@ -435,7 +435,7 @@ class ApiUserTest(AdsabsBaseTestCase):
         api_user.set_perms("devel")
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         self.assertEqual(api_user.user_rec.developer_perms, user.PERMISSION_LEVELS["devel"])
-        api_user.set_perms(new_perms={'bar': 'baz'})
+        api_user.set_perms(perms={'bar': 'baz'})
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         self.assertEqual(api_user.user_rec.developer_perms, {'bar': 'baz'})
         
