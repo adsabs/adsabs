@@ -17,7 +17,7 @@
 			  <ul id="facetList{{ facetid_html }}" class="unstyled">
 			  	{% for elem in resp.get_facets_fields(facetid) %}
 			  		{% if not limit_to %}
-				  		<li>
+				  		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
 				  		{% if elem[2] !='selected' %}
 				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
 				  		{% else %}
@@ -57,7 +57,6 @@
 		});
 		//Code to show/hide the facets
 		var max_facets = 5;
-		$('#facetList{{ facetid_html }} > li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
 		//if I have hidden facets 
 		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
 		{
@@ -116,7 +115,7 @@
 			<div class="accordion-inner">
 			  <ul id="facetList{{ facetid_html }}" class="unstyled">
 			  	{% for elem in resp.get_hier_facets_fields(facetid) %}
-			  		<li>
+			  		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
 			  			{% if elem[1][1] != 'selected' %}
 			  				<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=0/{{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1][0] }})</a>
 			  			{% else %}
@@ -155,7 +154,6 @@
 		});
 		//Code to show/hide the facets
 		var max_facets = 5;
-		$('#facetList{{ facetid_html }} > li:gt('+(max_facets-1)+')').hide(); //the "5" shoud be a variable thai I can configure from outside!!  
 		//if I have hidden facets 
 		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
 		{
