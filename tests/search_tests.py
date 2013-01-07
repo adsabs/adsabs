@@ -6,14 +6,16 @@ Created on Nov 5, 2012
 
 import os
 import site
-site.addsitedir(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #@UndefinedVariable
+tests_dir = os.path.dirname(os.path.abspath(__file__))
+site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
+site.addsitedir(tests_dir) #@UndefinedVariable
 
 import fixtures
 import unittest2
 
 from adsabs.app import create_app
 from config import config
-from tests.utils import *
+from test_utils import *
 
 from flask import request
 from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport

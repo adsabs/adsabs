@@ -51,11 +51,23 @@ def _configure_app(app, config):
     pass
 
 def _configure_logging(app):
+    
     if app.config.get('LOGGING_CONFIG'):
         logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
     logger = getLogger()
     
+    if config.LOGGING_MONGO_ENABLED:
+        from mongolog.handlers import MongoHandler
+        handler = MongoHandler(
+            db=config.MONGOALCHEMY_DATABASE,
+            collection=config.LOGGING_MONGO_COLLECTION,
+            host=config.MONGOALCHEMY_SERVER,
+            port=config.MONGOALCHEMY_PORT,
+            level=getattr(logging, config.LOGGING_MONGO_LEVEL)
+        )
+        logger.addHandler(handler)
+        
 def _configure_wsgi_middleware(app):
     app.wsgi_app = DeploymentPathMiddleware(app.wsgi_app)
 
@@ -141,25 +153,33 @@ def _configure_error_handlers(app):
     """
     function that configures some basic handlers for errors
     """
-    @app.errorhandler(400)
-    def bad_request_page(error):
-        return render_template("errors/400.html"), 400
+    from errors import create_error_handler
     
-    @app.errorhandler(403)
-    def forbidden_page(error):
-        return render_template("errors/403.html"), 403
-
-    @app.errorhandler(404)
-    def page_not_found(error):
-        return render_template("errors/404.html"), 404
-
-    @app.errorhandler(405)
-    def method_not_allowed_page(error):
-        return render_template("errors/405.html"), 405
-
-    @app.errorhandler(500)
-    def server_error_page(error):
-        return render_template("errors/500.html"), 500
+    create_error_handler(app, 400, 'errors/400.html')
+    create_error_handler(app, 403, 'errors/403.html')
+    create_error_handler(app, 404, 'errors/404.html')
+    create_error_handler(app, 405, 'errors/405.html')
+    create_error_handler(app, 500, 'errors/500.html')
+    
+#    @app.errorhandler(400)
+#    def forbidden_page(error):
+#        return render_template("errors/400.html"), 400
+#
+#    @app.errorhandler(403)
+#    def forbidden_page(error):
+#        return render_template("errors/403.html"), 403
+#
+#    @app.errorhandler(404)
+#    def page_not_found(error):
+#        return render_template("errors/404.html"), 404
+#
+#    @app.errorhandler(405)
+#    def method_not_allowed_page(error):
+#        return render_template("errors/405.html"), 405
+#
+#    @app.errorhandler(500)
+#    def server_error_page(error):
+#        return render_template("errors/500.html"), 500
     
 def _configure_misc_handlers(app):
     """

@@ -106,6 +106,9 @@ class AppConfig(object):
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
+    LOGGING_MONGO_ENABLED = True
+    LOGGING_MONGO_COLLECTION = 'log'
+    LOGGING_MONGO_LEVEL = 'ERROR'
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
