@@ -83,8 +83,8 @@ class AppConfig(object):
         ('keyword_facet',100, 1),
         ('year',100, 1), 
         ('bibgroup',100, 1),
-        #('data_facet',100, 1),
-        #('vizier_facet',100, 1),
+        ('data_facet',100, 1),
+        ('vizier_facet',100, 1),
         ('grant_facet_hier', 1000, 1),
         ]
     
@@ -100,8 +100,8 @@ class AppConfig(object):
                                          'pub_f':'pub',
                                          'year_f':'year',
                                          'grant_f':'grant_facet_hier',
-                                         #'data_f':'data_facet',
-                                         #'vizier_f':'vizier_facet',
+                                         'data_f':'data_facet',
+                                         'vizier_f':'vizier_facet',
                                          }
     
     # copy logging.conf.dist -> logging.conf and uncomment

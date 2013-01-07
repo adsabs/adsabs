@@ -32,8 +32,8 @@
 			{{ render_facet_box('prop_f', 'Refereed status', resp, limit_to=['refereed', 'not refereed'], facetid_html='refereed_f') }}
 			{{ render_facet_box('bibgr_f', 'Bib Groups', resp) }}
 			{{ render_2level_hier_facet_box('grant_f', 'Grants', resp) }}
-			{#{ render_facet_box('data_f', 'Data', resp) }#}
-			{#{ render_facet_box('vizier_f', 'Vizier Tables', resp) }#}
+			{{ render_facet_box('data_f', 'Data', resp) }}
+			{{ render_facet_box('vizier_f', 'Vizier Tables', resp) }}
 			{{ render_facet_box('year_f', 'Year', resp) }}
 			{#{ render_facet_box('prop_f', 'Property', resp) }#}
 			</div>
