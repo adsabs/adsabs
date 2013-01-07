@@ -40,6 +40,7 @@ class AppConfig(object):
     MONGOALCHEMY_SAFE_SESSION = False
     
     SOLR_URL = 'http://adsate:8987/solr/collection1'
+    SOLR_TIMEOUT = 300
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
                          'CITED': 'citation_count',
