@@ -191,13 +191,13 @@
 				if ($('#collapse{{ facetid_html }} a.more').is(':hidden'))
 					$('#collapse{{ facetid_html }} a.more').show();
 			});
-			//configure the plus icons to open the sublists 
-			$('span.expCollSubFacet{{ facetid_html }}').live('click', function(){
-				$($(this).attr('href')).toggleClass('in');
-				$(this).toggleClass('icon-plus-sign');
-				$(this).toggleClass('icon-minus-sign');
-			});
 		}
+		//configure the plus icons to open the sublists 
+		$('span.expCollSubFacet{{ facetid_html }}').live('click', function(){
+			$($(this).attr('href')).toggleClass('in');
+			$(this).toggleClass('icon-plus-sign');
+			$(this).toggleClass('icon-minus-sign');
+		});
 	</script>
 {% endmacro %}
 
