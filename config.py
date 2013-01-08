@@ -54,7 +54,11 @@ class AppConfig(object):
                          'POPULARITY': 'read_count'
                         }
     SEARCH_SECOND_ORDER_OPERATORS_OPTIONS = ['hot', 'useful', 'instructive']
-    SOLR_MISC_DEFAULT_PARAMS = [('fq', ['pubdate_sort:[* TO 20130000]']),('indent', 'true')]
+    SOLR_MISC_DEFAULT_PARAMS = [
+        ('hl.maxAnalyzedChars', '150000'), 
+        ('fq', ['pubdate_sort:[* TO 20130000]']),
+        ('indent', 'true')
+    ]
     SOLR_DEFAULT_FORMAT = 'json'
     SOLR_ARG_SEPARATOR = '#' # used to thwart the defaul solrpy behavior of replacing '_' with '.' in all solr params
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
