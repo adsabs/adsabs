@@ -124,7 +124,7 @@
 						  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 			  			{% endif %}
 			  			{% if elem[1][2] %}
-			  				<span class="icon-plus-sign expCollSubFacet pull-right" href="#facetList{{ facetid_html }}_{{ loop.index }}"></span>
+			  				<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }} pull-right" href="#facetList{{ facetid_html }}_{{ loop.index }}"></span>
 			  				<ul id="facetList{{ facetid_html }}_{{ loop.index }}" class="unstyled subFacet collapse">
 			  					{% for subelem in elem[1][2] %}
 				  					{% if subelem[1][1] != 'selected' %}
@@ -192,7 +192,7 @@
 					$('#collapse{{ facetid_html }} a.more').show();
 			});
 			//configure the plus icons to open the sublists 
-			$('span.expCollSubFacet').live('click', function(){
+			$('span.expCollSubFacet{{ facetid_html }}').live('click', function(){
 				$($(this).attr('href')).toggleClass('in');
 				$(this).toggleClass('icon-plus-sign');
 				$(this).toggleClass('icon-minus-sign');
