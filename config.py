@@ -88,7 +88,7 @@ class AppConfig(object):
         ('property',100, 1),
         ('keyword_facet',100, 1),
         ('year',100, 1), 
-        ('bibgroup',100, 1),
+        ('bibgroup_facet',100, 1),
         ('data_facet',100, 1),
         ('vizier_facet',100, 1),
         ('grant_facet_hier', 1000, 1),
@@ -99,7 +99,7 @@ class AppConfig(object):
     
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',
-                                         'bibgr_f':'bibgroup',
+                                         'bibgr_f':'bibgroup_facet',
                                          'aut_f':'author_facet_hier',
                                          'prop_f':'property',
                                          'key_f':'keyword_facet',
