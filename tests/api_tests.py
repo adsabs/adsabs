@@ -31,8 +31,8 @@ from test_utils import *
 import solr
 SOLR_AVAILABLE = False
 try:
-    s = solr.SolrConnection(config.SOLR_URL)
-    s.conn.connect()
+    s = solr.SolrConnection(config.SOLR_URL, timeout=3)
+    rv = s.query("*", rows=0)
     SOLR_AVAILABLE = True
 except:
     pass
