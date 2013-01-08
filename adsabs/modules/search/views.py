@@ -11,6 +11,13 @@ search_blueprint = Blueprint('search', __name__, template_folder="templates", st
 
 __all__ = ['search_blueprint','search', 'search_advanced']
 
+@search_blueprint.after_request
+def add_caching_header(response):
+    """
+    Adds caching headers
+    """
+    response.headers.setdefault('Cache-Control', 'max-age=3600, must-revalidate')
+    return response
 
 @search_blueprint.route('/', methods=('GET', 'POST'))
 def search():

@@ -14,6 +14,14 @@ abs_blueprint = Blueprint('abs', __name__, template_folder="templates", static_f
 
 __all__ = ['abs_blueprint']
 
+@abs_blueprint.after_request
+def add_caching_header(response):
+    """
+    Adds caching headers
+    """
+    response.headers.setdefault('Cache-Control', 'max-age=3600, must-revalidate')
+    return response
+
 @abs_blueprint.route('/<bibcode>', methods=['GET'])
 def abstract(bibcode):
     solrdoc = solr.get_document(bibcode)

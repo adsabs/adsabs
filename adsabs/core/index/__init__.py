@@ -6,6 +6,14 @@ from adsabs.modules.search.forms import QueryForm
 #I define the blueprint
 index_blueprint = Blueprint('index', __name__)
 
+@index_blueprint.after_request
+def add_caching_header(response):
+    """
+    Adds caching headers
+    """
+    response.headers.setdefault('Cache-Control', 'max-age=3600, must-revalidate')
+    return response
+
 @index_blueprint.route('/', methods=['GET', 'POST'])
 def index():
     """
