@@ -5,6 +5,7 @@ from .forms import QueryForm, get_missing_defaults
 from adsabs.core.solr import query
 from adsabs.core.data_formatter import field_to_json
 from misc_functions import build_basicquery_components
+from config import config
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", static_folder="static")
@@ -16,7 +17,11 @@ def add_caching_header(response):
     """
     Adds caching headers
     """
-    response.headers.setdefault('Cache-Control', 'max-age=3600, must-revalidate')
+    if not config.DEBUG:
+        cache_header = 'max-age=3600, must-revalidate'
+    else:
+        cache_header = 'no-cache'
+    response.headers.setdefault('Cache-Control', cache_header)    
     return response
 
 @search_blueprint.route('/', methods=('GET', 'POST'))

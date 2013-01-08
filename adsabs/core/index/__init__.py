@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, current_app
 import os
 
 from adsabs.modules.search.forms import QueryForm
+from config import config
 
 #I define the blueprint
 index_blueprint = Blueprint('index', __name__)
@@ -11,7 +12,11 @@ def add_caching_header(response):
     """
     Adds caching headers
     """
-    response.headers.setdefault('Cache-Control', 'max-age=3600, must-revalidate')
+    if not config.DEBUG:
+        cache_header = 'max-age=3600, must-revalidate'
+    else:
+        cache_header = 'no-cache'
+    response.headers.setdefault('Cache-Control', cache_header)
     return response
 
 @index_blueprint.route('/', methods=['GET', 'POST'])
