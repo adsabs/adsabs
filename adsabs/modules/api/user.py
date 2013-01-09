@@ -25,14 +25,12 @@ PERMISSION_LEVELS = {
     "basic": {
         "max_rows": 100,
         "max_start": 10000,
-        "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": False,
         "highlight": False,
     },
     "devel": {
         "max_rows": 200,
         "max_start": 50000,
-        "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:],
         "facets": True,
         "facet_limit_max": 100,
         "highlight": True,
@@ -42,7 +40,7 @@ PERMISSION_LEVELS = {
     "collab": {
         "max_rows": 200,
         "max_start": None,
-        "allowed_fields": config.API_SOLR_DEFAULT_FIELDS[:] + config.API_SOLR_EXTRA_FIELDS[:],
+        "allowed_fields": config.API_SOLR_EXTRA_FIELDS[:],
         "facets": True,
         "facet_limit_max": 500,
         "highlight": True,
@@ -143,7 +141,8 @@ class AdsApiUser(AdsUser):
         return self.user_rec.developer_perms
     
     def get_allowed_fields(self):
-        return self.user_rec.developer_perms.get('allowed_fields',[])
+        extra_fields = self.user_rec.developer_perms.get('allowed_fields',[])
+        return config.API_SOLR_DEFAULT_FIELDS + extra_fields
     
     def check_permissions(self, form):
         
@@ -184,7 +183,7 @@ class AdsApiUser(AdsUser):
     
     def _fields_ok(self, req_fields):
         req_fields = re.split('[,\s]+', req_fields.strip())
-        allowed = self.user_rec.developer_perms.get('allowed_fields', [])
+        allowed = self.get_allowed_fields()
         for f in req_fields:
             assert f in allowed, 'disallowed field: %s' % f
                    

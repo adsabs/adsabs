@@ -342,12 +342,8 @@ class ApiUserTest(AdsabsBaseTestCase):
         self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', u._max_start_ok, 300)
         
         u = DP({})
-        self.assertRaisesRegexp(AssertionError, 'disallowed field: bibcode', u._fields_ok, 'bibcode')
-        
-        u = DP({'allowed_fields': ['bibcode']})
+        self.assertRaisesRegexp(AssertionError, 'disallowed field: full', u._fields_ok, 'full')
         self.assertIsNone(u._fields_ok('bibcode'))
-        
-        u = DP({'allowed_fields': ['bibcode','title']})
         self.assertIsNone(u._fields_ok('bibcode,title'))
         self.assertRaisesRegexp(AssertionError, 'disallowed field: full', u._fields_ok, 'bibcode,title,full')
         
