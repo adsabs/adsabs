@@ -70,7 +70,7 @@ def search():
     if search_req.validate():
         resp = search_req.execute()
         return resp.search_response()
-    raise errors.ApiInvalidRequest(search_req.errors())
+    raise errors.ApiInvalidRequest(search_req.input_errors())
         
         
 @api_blueprint.route('/record/<path:identifier>', methods=['GET'])

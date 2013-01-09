@@ -284,8 +284,8 @@ class APITests(AdsabsBaseTestCase):
         is_valid('filter=author:"John, D"')
         is_valid('filter=property:REFEREED')
         is_valid('filter=author:"John, D"&filter=property:REFEREED')
-        not_valid('filter=property', {'filter': 'Format should be'})
-        not_valid('filter=property-bar', {'filter': 'Format should be'})
+        is_valid('filter=foo')
+        not_valid('filter=%s' % ("foobar" * 1000), {'filter': 'input must be at no more than'})
         not_valid('filter=foo:bar', {'filter': 'Invalid filter field selection'})
         not_valid('filter=author:%s' % ("foobar" * 1000), {'filter': 'input must be at no more than'})
         

@@ -25,8 +25,8 @@ class ApiSearchRequest(object):
         perms_ok = self.user.check_permissions(self.form)
         return valid and perms_ok
     
-    def errors(self):
-        pass
+    def input_errors(self):
+        return self.form.errors
     
     def _create_solr_request(self):
         req = SolrRequest(self.form.q.data)

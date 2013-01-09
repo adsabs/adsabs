@@ -122,11 +122,14 @@ class ApiQueryForm(Form):
         for filter in field.data:
             if not len(filter):
                 continue
-            try:
-                field_name,query = filter.split(':')
-            except ValueError: # too many/few values to split
-                raise ValidationError("Invalid filter: %s. Format should be 'field:value'" % filter)
-            if field_name not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
+            filter = filter.split(':')
+            if len(filter) > 1:
+                field_name = filter[0]
+                query = filter[1]
+            else:
+                field_name = None
+                query = filter[0]
+            if field_name and field_name not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:
                 raise ValidationError("Invalid filter field selection: %s is not a queryable field" % field_name)
             if len(query) > MAX_QUERY_LENGTH:
                 raise ValidationError("%s input must be at no more than %s characters" % (field_name, MAX_QUERY_LENGTH))
