@@ -11,7 +11,7 @@ import base64
 import hashlib
 from random import sample, choice
 
-from flask import g
+from flask import g, render_template
 from flask.ext.login import current_user #@UnresolvedImport
 
 from config import config
@@ -200,4 +200,17 @@ class AdsApiUser(AdsUser):
                 assert highlight_max >= int(hl[1]), \
                     'highlight count %d exceeds max allowed value: %d' % (int(hl[1]), highlight_max)
         
+    def send_welcome_message(self):
+        import smtplib
+        
+        ctx = {
+            'from': config.API_WELCOME_FROM_EMAIL,
+            'email': self.get_username(),
+            'dev_key': self.get_dev_key(),
+            'name': self.name
+            }
+        msg = render_template('welcome.txt', **ctx)
+        server = smtplib.SMTP(config.SMTP_HOST)
+        server.sendmail(ctx['from'], [ctx['email']], msg)
+        server.quit()
     

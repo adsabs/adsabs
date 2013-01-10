@@ -1,0 +1,22 @@
+From: {{ from }}
+To: {{ email }}
+Subject: Welcome to the ADS Developer API
+
+{% if name %}
+Hello {{ name }}!
+{% else %}
+Hello!
+{% endif %}
+Welcome to the new ADS Developer API. Thank you for helping us test and improve the functionality in this "alpha" release of the API service. Below instructions and info about accessing and learning more about the service.
+
+Disclaimer: this is a v0.1 "alpha" release of the service. You are one of a handful of early users. We expect there will be bugs. We expect that there will be changes. We expect later versions of the API will break backwards compatibility. We still hope that this initial release will be useful and provide interesting data, but consider yourself warned. :)
+
+Access to the API currently requires an access token, or ''dev_key''. Your ''dev_key'' is:
+
+{{ dev_key }}
+
+The API access and authentication mechanism is not designed to be highly secure at this point, and is one of the things we anticipate will change in the future. In the meantime, please do not share your ''dev_key''.
+
+To help you get started there is a Github repository at https://github.com/adsabs/adsabs-dev-api with an overview of the service and example code (in python). This is also a work in progress. Feel free to use the ''Issues'' section of the repository to inform us of problems you find. You can also contact me (jluker@cfa.harvard.edu) directly via e-mail.
+
+Thanks on behalf of the entire the ADS Team!

@@ -40,13 +40,17 @@ def useradd(email=None, level=None):
     api_user = user.AdsApiUser(ads_user.user_rec)
     if api_user.is_developer():
         log.info("User already has api access. Developer key: %s" % api_user.get_dev_key())
-        if not prompt_bool("Would you like to reset the user's permissions", False):
-            user.set_permissions(level)
+        if prompt_bool("Would you like to reset the user's permissions", False):
+            api_user.set_perms(level)
             log.info("API User permissions updated")
+        return
             
     api_user = user.create_api_user(ads_user, level)
     dev_key = api_user.get_dev_key()
     log.info("API User created with %s permissions. Developer key: %s" % (level, dev_key))
+    
+    if prompt_bool("Send welcome message", True):
+        sendwelcome(dev_key=dev_key, no_prompt=True)
     
 @manager.command
 def userinfo(email=None, dev_key=None):
@@ -56,7 +60,7 @@ def userinfo(email=None, dev_key=None):
     if email:
         api_user = user.AdsApiUser.from_email(email)
     elif dev_key:
-        api_user = user.AdsApiUser.from_dev_key()
+        api_user = user.AdsApiUser.from_dev_key(dev_key)
     else:
         log.error("You must provide an email address or dev_key for the lookup")
         sys.exit(1)
@@ -75,7 +79,7 @@ def userdel(email=None, dev_key=None):
     if email:
         api_user = user.AdsApiUser.from_email(email)
     elif dev_key:
-        api_user = user.AdsApiUser.from_dev_key()
+        api_user = user.AdsApiUser.from_dev_key(dev_key)
     else:
         log.error("You must provide an email address or dev_key for the lookup")
         sys.exit(1)
@@ -83,8 +87,26 @@ def userdel(email=None, dev_key=None):
     if not api_user:
         log.info("User not found")
     elif prompt_bool("Remove API access for user %s" % api_user.get_username(), True):
-        api_user.set_dev_key(None)
-        api_user.set_perms(new_perms={})
+        api_user.set_dev_key("")
+        api_user.set_perms(perms={})
         
+@manager.command
+def sendwelcome(email=None, dev_key=None, no_prompt=False):
+    """send the welcome message to an api user"""
+    from adsabs.modules.api import user
     
+    if email:
+        api_user = user.AdsApiUser.from_email(email)
+    elif dev_key:
+        api_user = user.AdsApiUser.from_dev_key(dev_key)
+    else:
+        log.error("You must provide an email address or dev_key for the lookup")
+        sys.exit(1)
+    
+    if not api_user:
+        log.info("User not found")
+    else:
+        if no_prompt or prompt_bool("Send welcome message to %s" % api_user.get_username(), True):
+            api_user.send_welcome_message()
+            log.info("Welcome message sent")
     

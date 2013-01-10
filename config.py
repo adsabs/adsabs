@@ -135,6 +135,9 @@ class AppConfig(object):
         'pubdate': 'pubdate',
         'year': 'year'
     }
+    
+    SMTP_HOST = 'localhost'
+    API_WELCOME_FROM_EMAIL = 'jluker@cfa.harvard.edu'
 
 try:
     from local_config import LocalConfig
