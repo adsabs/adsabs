@@ -20,7 +20,8 @@ __all__ = ['api_blueprint']
 api_blueprint = Blueprint('api', __name__,template_folder="templates")
 errors.init_error_handlers(api_blueprint)
 
-log = logging.getLogger(__name__)
+api_logger = logging.getLogger(__name__)
+logger = logging.getLogger('adsabs')
 
 def api_user_required(func):
     @wraps(func)
@@ -33,7 +34,7 @@ def api_user_required(func):
         except Exception, e:
             import traceback
             exc_info = sys.exc_info()
-            log.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+            logger.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
             user = None
         if not user:
             raise errors.ApiNotAuthenticatedError("unknown user")
@@ -45,6 +46,13 @@ def api_user_required(func):
 def get_api_version_header():
     g.api_version = request.headers.get('X-API-Version', config.API_CURRENT_VERSION)
         
+@api_blueprint.after_request
+def log_api_request(response):
+    if hasattr(g, 'api_request'):
+        req = g.api_request
+        api_logger.info(req)
+    return response
+    
 @api_blueprint.after_request
 def add_api_version_header(response):
     """

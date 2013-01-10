@@ -1,15 +1,26 @@
 [loggers]
-keys=root
+keys=root,adsabs,api
 
 [handlers]
-keys=console,file
+keys=console,file,errors,api
 
 [formatters]
 keys=simple,verbose
 
 [logger_root]
 level=INFO
-handlers=console,file
+handlers=
+
+[logger_adsabs]
+level=INFO
+qualname=adsabs
+handlers=file,console,errors
+propogate=0
+
+[logger_api]
+level=INFO
+qualname=adsabs.modules.api
+handlers=api
 
 [handler_console]
 class=StreamHandler
@@ -20,6 +31,15 @@ args=(sys.stdout,)
 class=FileHandler
 formatter=verbose
 args=("logs/adsabs.log",)
+
+[handler_errors]
+level=ERROR
+class=mongolog.handlers.MongoHandler
+args=('log','adsabs','localhost',27017, 'INFO')
+
+[handler_api]
+class=mongolog.handlers.MongoHandler
+args=('api','adsabs','localhost',27017, INFO)
 
 [formatter_simple]
 format=%(asctime)s - %(levelname)s - %(message)s

@@ -3,6 +3,7 @@ import os
 from logging import getLogger
 import logging.config
 from flask import Flask, render_template, send_from_directory, g, Markup
+from mongolog.handlers import MongoHandler
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import *
@@ -56,18 +57,22 @@ def _configure_logging(app):
     if app.config.get('LOGGING_CONFIG'):
         logging.config.fileConfig(app.config['LOGGING_CONFIG'])
     global logger
-    logger = getLogger()
+    logger = getLogger('adsabs')
     
-    if config.LOGGING_MONGO_ENABLED:
-        from mongolog.handlers import MongoHandler
-        handler = MongoHandler(
-            db=config.MONGOALCHEMY_DATABASE,
-            collection=config.LOGGING_MONGO_COLLECTION,
-            host=config.MONGOALCHEMY_SERVER,
-            port=config.MONGOALCHEMY_PORT,
-            level=getattr(logging, config.LOGGING_MONGO_LEVEL)
-        )
-        logger.addHandler(handler)
+    for handler in logger.handlers:
+        if isinstance(handler, MongoHandler):
+            app.logger.addHandler(handler)
+    return
+#    if config.LOGGING_MONGO_ENABLED:
+#        from mongolog.handlers import MongoHandler
+#        handler = MongoHandler(
+#            db=config.MONGOALCHEMY_DATABASE,
+#            collection=config.LOGGING_MONGO_COLLECTION,
+#            host=config.MONGOALCHEMY_SERVER,
+#            port=config.MONGOALCHEMY_PORT,
+#            level=getattr(logging, config.LOGGING_MONGO_LEVEL)
+#        )
+#        logger.addHandler(handler)
         
 def _configure_wsgi_middleware(app):
     app.wsgi_app = DeploymentPathMiddleware(app.wsgi_app)

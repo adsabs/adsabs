@@ -12,13 +12,14 @@ from .errors import ApiPermissionError,ApiSolrException
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
             
 class ApiSearchRequest(object):
     
     def __init__(self, request_vals):
         self.form = ApiQueryForm(request_vals, csrf_enabled=False)
         self.user = g.api_user
+        g.api_request = self
         
     def validate(self):
         valid = self.form.validate()
@@ -83,16 +84,17 @@ class ApiSearchRequest(object):
         
         try:
             solr_resp = solr_req.get_response()
+            self.resp = solr_resp
         except Exception, e:
             # TODO: Log this error + traceback
             # raaise a more user-friendly exception
             raise ApiSolrException("Error communicating with search service")
         
-        if solr_resp.is_error():
-            raise ApiSolrException(solr_resp.get_error())
+        self.resp.add_meta('api-version', g.api_version)
         
-        solr_resp.add_meta('api-version', g.api_version)
-        self.resp = solr_resp
+        if self.resp.is_error():
+            raise ApiSolrException(self.resp.get_error())
+        
         return self.resp
 
     def query(self):
