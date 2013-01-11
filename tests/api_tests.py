@@ -17,6 +17,7 @@ from werkzeug import Headers #@UnresolvedImport
 from simplejson import loads
 
 from flask import request, g
+from flask.ext.pushrod.renderers import RendererNotFound
 from adsabs.app import create_app
 from adsabs.modules.user import AdsUser
 from adsabs.modules.api import AdsApiUser
@@ -193,12 +194,24 @@ class APITests(AdsabsBaseTestCase):
         self.assertIn('text/xml', rv.content_type)
     
         rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
-        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&format=xml')
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fmt=xml')
         self.assertIn('text/xml', rv.content_type)
         
-        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&format=blah')
-        self.assertEqual(rv.status_code, 406)
-        self.assertIn('renderer does not exist', rv.data)
+        try:
+            rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fmt=blah')
+        except Exception, e:
+            self.assertIsInstance(e, RendererNotFound)
+#            self.assertEqual(rv.status_code, 406)
+#            self.assertIn('renderer does not exist', rv.data)
+        
+        rv = self.client.get('/api/settings/?dev_key=foo_dev_key&fmt=xml')
+        self.assertIn('<settings>', rv.data)
+        
+        rv = self.client.get('/api/record/xyz?dev_key=foo_dev_key&fmt=xml')
+        self.assertIn('<bibcode type="str">xyz</bibcode', rv.data)
+        
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
+        self.assertIn('<hits type="int">1</hits>', rv.data)
         
     def test_request_creation(self):
         

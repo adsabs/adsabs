@@ -55,7 +55,7 @@ def add_api_version_header(response):
 
 @api_blueprint.route('/settings/', methods=['GET'])
 @api_user_required
-@pushrod_view(xml_template="settings.xml")
+@pushrod_view(xml_template="settings.xml", wrap='settings')
 def settings():
     perms = g.api_user.get_dev_perms()
     allowed_fields = g.api_user.get_allowed_fields()
@@ -75,7 +75,7 @@ def search():
         
 @api_blueprint.route('/record/<path:identifier>', methods=['GET'])
 @api_user_required
-@pushrod_view(xml_template="record.xml")
+@pushrod_view(xml_template="record.xml", wrap='doc')
 def record(identifier):
     record_req = ApiRecordRequest(identifier, request.args)
     if record_req.validate():

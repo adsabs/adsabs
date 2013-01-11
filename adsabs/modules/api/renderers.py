@@ -24,10 +24,14 @@ def json_renderer(unrendered, **kwargs):
       'application/json')
   
 @renderer(name='xml', mime_type=('application/xml','text/xml'))
-def xml_renderer(unrendered, xml_template=None, **kwargs):
+def xml_renderer(unrendered, xml_template=None, wrap=None, **kwargs):
     if xml_template:
+        if wrap:
+            content = {wrap: unrendered.response}
+        else:
+            content = unrendered.response
         return unrendered.rendered(
-            flask.render_template(xml_template, **unrendered.response),
+            flask.render_template(xml_template, **content),
             'text/xml')
     else:
         return NotImplemented

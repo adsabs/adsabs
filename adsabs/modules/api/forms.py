@@ -17,6 +17,9 @@ MIN_QUERY_LENGTH = 2
 MAX_QUERY_LENGTH = 1000
 SORT_DIRECTIONS = ['asc','desc']
 
+from flask.ext.pushrod import Pushrod #@UnresolvedImport
+Pushrod.format_arg_name = 'fmt'
+
 class RepeatableField(Field):
     """
     Necessary as WTForms default Field classes don't allow for repeated values
