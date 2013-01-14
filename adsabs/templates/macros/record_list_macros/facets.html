@@ -126,16 +126,19 @@
 			  			{% if elem[1][2] %}
 			  				<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }} pull-right" href="#facetList{{ facetid_html }}_{{ loop.index }}"></span>
 			  				<ul id="facetList{{ facetid_html }}_{{ loop.index }}" class="unstyled subFacet collapse">
+			  					{% set rowloop = loop %}
 			  					{% for subelem in elem[1][2] %}
 				  					{% if subelem[1][1] != 'selected' %}
-				  						<li><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=1/{{ elem[0]|urlencode }}/{{ subelem[0]|urlencode }}">{{ subelem[0] }} ({{ subelem[1][0] }})</a></li>
+				  						<li class="subelem_{{ facetid_html }}_{{ rowloop.index }}{% if loop.index > 5 %} strHidden{% endif %}"><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=1/{{ elem[0]|urlencode }}/{{ subelem[0]|urlencode }}">{{ subelem[0] }} ({{ subelem[1][0] }})</a></li>
 			  						{% else %}
 						  				{% set remove_facet = '&%s=1/%s/%s' % (facetid, elem[0]|urlencode, subelem[0]|urlencode) %}
 						  				{{ subelem[0] }} ({{ subelem[1][0] }}) 
 									  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ subelem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 						  			{% endif %}
 			  					{% endfor %}
+			  					<li><span class="less_{{ facetid_html }}_2nd facetsMoreLess muted pull-left" href=".subelem_{{ facetid_html }}_{{ loop.index }}"><small>less...</small></span><span class="more_{{ facetid_html }}_2nd facetsMoreLess muted pull-right" href=".subelem_{{ facetid_html }}_{{ loop.index }}"><small>more...</small></span></li>
 			  				</ul>
+			  				
 			  			{% endif %}
 			  		</li>
 			  	{% endfor %}
@@ -192,6 +195,56 @@
 					$('#collapse{{ facetid_html }} a.more').show();
 			});
 		}
+		
+		//the more and less button for each sub_group 
+		var sec_more = $('.more_{{ facetid_html }}_2nd');
+		for (var i=0; i<sec_more.length; i++)
+		{
+			//for each more button if there are hidden subelements I show the "more" 
+			if($($(sec_more[i]).attr('href') + ':hidden').length > 0)
+			{
+				//I show the button and configure it to show more elements 
+				$(sec_more[i]).show()
+					.live('click', function(){
+						//I show the  additional elements 
+						var to_show = $($(this).attr('href') + ':hidden');
+						for (var j=0; j<max_facets; j++)
+							$(to_show[j]).show();
+						//I show the less button if it is hidden 
+						var less_button = $($(this).parent()).children('.less_{{ facetid_html }}_2nd');
+						if ($(less_button).is(':hidden'))
+							$(less_button).show();
+						//If there are no more hidden element I hide the more button 
+						if($($(this).attr('href') + ':hidden').length == 0)
+							$(this).hide();
+					});
+			}
+		}
+		
+		var sec_less = $('.less_{{ facetid_html }}_2nd');
+		for (var i=0; i<sec_less.length; i++)
+		{
+			if($($(sec_less[i]).attr('href') + ':hidden').length > 0)
+			{
+				$(sec_less[i]).live('click', function(){
+					var visible_li = $($(this).attr('href') + ':visible');
+					var to_hide = max_facets;
+					//I make sure that I don't hide more than the minimum allowed 
+					if ((visible_li.length - max_facets) < max_facets)
+						to_hide = visible_li.length - max_facets;
+					for (var i=1; i<=to_hide; i++)
+						$(visible_li[visible_li.length - i]).hide();
+					//I show the more button if it is hidden 
+					var more_button = $($(this).parent()).children('.more_{{ facetid_html }}_2nd');
+					if ($(more_button).is(':hidden'))
+						$(more_button).show();
+					//If there are no more hidden element I hide the more button 
+					if($($(this).attr('href') + ':visible').length == max_facets)
+						$(this).hide();
+				})
+			}
+		}
+		
 		//configure the plus icons to open the sublists 
 		$('span.expCollSubFacet{{ facetid_html }}').live('click', function(){
 			$($(this).attr('href')).toggleClass('in');

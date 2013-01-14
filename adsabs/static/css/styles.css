@@ -159,6 +159,7 @@ a.clearAll {
 /*Facets on left*/
 ul.subFacet {
 	margin-left:10px;
+	margin-right:20px;
 }
 
 span.expCollSubFacet {
