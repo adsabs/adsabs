@@ -12,8 +12,6 @@ import dict2xml
 # For import *
 __all__ = ['create_app']
 
-logger = None
-
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo") 
 
@@ -56,24 +54,9 @@ def _configure_logging(app):
     
     if app.config.get('LOGGING_CONFIG'):
         logging.config.fileConfig(app.config['LOGGING_CONFIG'])
-    global logger
-    logger = getLogger('adsabs')
-    
-    for handler in logger.handlers:
-        if isinstance(handler, MongoHandler):
-            app.logger.addHandler(handler)
-    return
-#    if config.LOGGING_MONGO_ENABLED:
-#        from mongolog.handlers import MongoHandler
-#        handler = MongoHandler(
-#            db=config.MONGOALCHEMY_DATABASE,
-#            collection=config.LOGGING_MONGO_COLLECTION,
-#            host=config.MONGOALCHEMY_SERVER,
-#            port=config.MONGOALCHEMY_PORT,
-#            level=getattr(logging, config.LOGGING_MONGO_LEVEL)
-#        )
-#        logger.addHandler(handler)
-        
+    logger = logging.getLogger(__name__)
+    logger.info("Logging configured!")
+
 def _configure_wsgi_middleware(app):
     app.wsgi_app = DeploymentPathMiddleware(app.wsgi_app)
 
@@ -82,6 +65,7 @@ def _configure_blueprints(app):
     Function that registers the blueprints
     """
     from adsabs.blueprint_conf import BLUEPRINTS
+    logger = logging.getLogger(__name__)
     
     for blueprint in BLUEPRINTS:
         logger.debug("registering blueprint: %s" % blueprint['blueprint'])
@@ -98,6 +82,7 @@ def _configure_extensions(app):
     """
     from adsabs.extensions import login_manager, mongodb, solr, pushrod
     from adsabs.modules.user import AdsUser
+    logger = logging.getLogger(__name__)
     
     # login.
     login_manager.login_view = 'user.login'

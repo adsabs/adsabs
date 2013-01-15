@@ -20,8 +20,7 @@ __all__ = ['api_blueprint']
 api_blueprint = Blueprint('api', __name__,template_folder="templates")
 errors.init_error_handlers(api_blueprint)
 
-api_logger = logging.getLogger(__name__)
-logger = logging.getLogger('adsabs')
+logger = logging.getLogger(__name__)
 
 def api_user_required(func):
     @wraps(func)
@@ -48,9 +47,9 @@ def get_api_version_header():
         
 @api_blueprint.after_request
 def log_api_request(response):
-    if hasattr(g, 'api_request'):
-        req = g.api_request
-        api_logger.info(req)
+    api_request = getattr(g, 'api_request', None)
+    flask_request = request
+    logger.info("foo!")
     return response
     
 @api_blueprint.after_request

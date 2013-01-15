@@ -1,3 +1,15 @@
+# * Flask app.logger events must be handled by configured handlers
+# Errors/exceptions must be written to
+#   * mongo: collection=errors
+#   * stderr (apache.err, console)
+# INFO/DEBUG events must be written to
+#   * adsabs.log
+#   * stdout (console)
+# Search request details must be written to 
+#   * mongo: collection=searches
+# API requests must be written to 
+#   * mongo: collection=api
+
 [loggers]
 keys=root,adsabs,api
 
