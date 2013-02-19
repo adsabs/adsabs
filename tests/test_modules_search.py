@@ -19,7 +19,7 @@ from test_utils import *
 
 from flask import request
 from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport
-from adsabs.modules.search.misc_functions import build_basicquery_components
+from adsabs.modules.search.misc_functions import build_basicquery_components, build_singledoc_components
 from adsabs.modules.search.forms import get_missing_defaults, QueryForm
 
 class SearchTestCase(AdsabsBaseTestCase):
@@ -134,7 +134,43 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'-property:NONARTICLE'], 'sort': u'DATE', 'start': None , 'sort_direction': 'desc'}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
+            
+class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
     
+    def test_no_parameters_from_request(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([]), ImmutableMultiDict([])])
+        out = {'sort': config.SEARCH_DEFAULT_SORT, 'start': None, 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
+    
+    def test_re_sort(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEVANCE')]), ImmutableMultiDict([])])
+        out = {'sort': 'RELEVANCE', 'start': None, 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
+    
+    def test_re_sort_and_sort_dir(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEVANCE'), ('re_sort_dir', 'asc')]), ImmutableMultiDict([])])
+        out = {'sort': 'RELEVANCE', 'start': None, 'sort_direction':'asc',}
+        self.assertEqual(build_singledoc_components(request_values), out)
+        
+    def test_start_page(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('page', '2')]), ImmutableMultiDict([])])
+        out = {'sort': config.SEARCH_DEFAULT_SORT, 'start': str((int(request_values.get('page')) - 1) * int(config.SEARCH_DEFAULT_ROWS)), 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
+    
+    def test_wrong_re_sort(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEvance')]), ImmutableMultiDict([])])
+        out = {'sort': config.SEARCH_DEFAULT_SORT, 'start': None, 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
+    
+    def test_wrong_re_sort_and_search_dir(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEvance'), ('re_sort_dir', 'aSC')]), ImmutableMultiDict([])])
+        out = {'sort': config.SEARCH_DEFAULT_SORT, 'start': None, 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
+    
+    def test_wrong_start_page(self):
+        request_values = CombinedMultiDict([ImmutableMultiDict([('page', '2a')]), ImmutableMultiDict([])])
+        out = {'sort': config.SEARCH_DEFAULT_SORT, 'start': None, 'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,}
+        self.assertEqual(build_singledoc_components(request_values), out)
         
 if __name__ == '__main__':
     unittest2.main()

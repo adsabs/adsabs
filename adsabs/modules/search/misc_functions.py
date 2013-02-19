@@ -83,7 +83,11 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     #I handle the page number
     page = request_values.get('page')
     if page:
-        if int(page) >0:
+        try:
+            int_page = int(page)
+        except ValueError:
+            int_page = None
+        if int_page >0:
             search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
     #re-sorting options
     if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
@@ -104,7 +108,11 @@ def build_singledoc_components(request_values):
     #I handle the page number
     page = request_values.get('page')
     if page:
-        if int(page) >0:
+        try:
+            int_page = int(page)
+        except ValueError:
+            int_page = None
+        if int_page >0:
             search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
     #re-sorting options
     if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
