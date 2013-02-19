@@ -1,3 +1,8 @@
+'''
+Created on Feb 19, 2013
+
+@author: dimilia
+'''
 from flask import Blueprint, render_template, request, current_app
 import os
 
@@ -6,6 +11,8 @@ from config import config
 
 #I define the blueprint
 index_blueprint = Blueprint('index', __name__)
+
+__all__ = ['index_blueprint']
 
 @index_blueprint.after_request
 def add_caching_header(response):

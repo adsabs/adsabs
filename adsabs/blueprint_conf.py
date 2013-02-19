@@ -8,16 +8,17 @@ each tuple contains
 """
 
 #blueprints from core module
-from adsabs.core import index
+
 
 _BLUEPRINTS_CORE = [
-    {'module':index, 'blueprint':'index_blueprint', 'prefix':''},
+    
 ]
 
 #blueprints from all other modules
-from adsabs.modules import search, user, api, abs
+from adsabs.modules import search, user, api, abs, index
 
 _BLUEPRINTS_MODULES = [
+    {'module':index, 'blueprint':'index_blueprint', 'prefix':''},
     {'module':user, 'blueprint':'user_blueprint', 'prefix':'/user'},
     {'module':search, 'blueprint':'search_blueprint', 'prefix':'/search'},
     {'module':api, 'blueprint':'api_blueprint', 'prefix':'/api'},
