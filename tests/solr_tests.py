@@ -17,6 +17,15 @@ from adsabs.core import solr
 from config import config
 from test_utils import *
 
+import solr as solrpy
+SOLR_AVAILABLE = False
+try:
+    s = solrpy.SolrConnection(config.SOLR_URL, timeout=3)
+    rv = s.query("*", rows=0)
+    SOLR_AVAILABLE = True
+except:
+    pass
+        
 class SolrTestCase(AdsabsBaseTestCase):
 
     def setUp(self):
@@ -190,6 +199,23 @@ class SolrTestCase(AdsabsBaseTestCase):
             resp = req.get_response()
             
         self.assertIn("f.bar_baz.facet.mincount=1", self._solr_request_params)
+        
+    @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
+    def test_cannot_send_request_errors(self):
+        from adsabs.core.solr import query
+        from random import choice
+        import string
+        chars = string.letters + string.digits
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            failures = []
+            for i in range(100):
+                try:
+                    resp = query(''.join(choice(chars) for _ in range(10)), rows=0)
+                    print resp.get_count()
+                except Exception, e:
+                    failures.append(e)
+            self.assertEquals(len(failures), 0)
         
         
 if __name__ == '__main__':
