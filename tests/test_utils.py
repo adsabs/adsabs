@@ -19,6 +19,7 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
     def setUp(self):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
+        config.LOGGING_CONFIG = None
         self.app = create_app(config)
         
         from adsabs.extensions import mongodb
