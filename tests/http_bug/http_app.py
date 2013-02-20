@@ -4,6 +4,12 @@ Created on Feb 19, 2013
 @author: jluker
 '''
     
+import os
+import site
+tests_dir = os.path.dirname(os.path.abspath(__file__))
+site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
+site.addsitedir(tests_dir) #@UndefinedVariable
+
 from flask import Flask
 app = Flask(__name__)
 
@@ -27,8 +33,6 @@ def query():
     except Exception, e:
         print >>sys.stderr, str(e)
         return "0"
-    
-    return "Hello World!"
 
 if __name__ == "__main__":
     app.run(port=5001)
