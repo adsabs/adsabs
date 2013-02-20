@@ -16,6 +16,8 @@ except ImportError:
     log.warn("Invenio import failure! Invenio data layer functions will not work!")
     
 
+__all__ = ['record_url', 'get_abstract_xml_from_ads_id', 'get_records', 'get_metadata', 'get_invenio_metadata']
+
 def record_url(recid, of=None):
     if not of:
         return config.INVENIO_BASEURL + '/record/' + quote(str(recid))
