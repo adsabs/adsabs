@@ -480,7 +480,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
     @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
     def test_record_requests(self):
         self.insert_user("foo", developer=True, level="basic")
-        rv = self.client.get('/api/record/2010A&A...524A..15D?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/2000A&AS..143...85A?dev_key=foo_dev_key')
         resp = loads(rv.data)
         self.assertIn('id', resp)
         rv = self.client.get('/api/record/hep-th/9108008?dev_key=foo_dev_key')

@@ -43,11 +43,35 @@ def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_directio
         req.add_highlight(*hl)
     
     # allow for manual overrides
-    req.set_params(**kwargs)
+    if len(kwargs):
+        req.set_params(**kwargs)
+        
     return req
 
-def query(*args, **kwargs):
-    req = search_request(*args, **kwargs)
+def query(q, **kwargs):
+    req = search_request(q, **kwargs)
+    return req.get_response()
+
+def facet_request(q, filters=[], facet_fields={}, **kwargs):
+    req = SolrRequest(q, rows=0)
+    
+    for filter_ in filters:
+        req.add_filter(filter_)
+    
+    if not len(facet_fields):
+        facet_fields = dict([(x, None) for x in config.SOLR_SEARCH_DEFAULT_FACETS])
+        
+    for facet, prefix in facet_fields.items():
+        req.add_facet(*facet)
+        req.add_facet_prefix(facet[0], prefix)
+        
+    if len(kwargs):
+        req.set_params(**kwargs)
+        
+    return req
+    
+def facet_query(q, **kwargs):
+    req = facet_request(q, **kwargs)
     return req.get_response()
         
 def document_request(identifier, hlq=None, **kwargs):

@@ -143,7 +143,12 @@ class SolrTestCase(AdsabsBaseTestCase):
         self.assertNotIn('f.baz.hl.fragsize', req.params)
         req.add_highlight("blah", 3, 5000)
         self.assertEqual(req.params['f.blah.hl.fragsize'], 5000)
-        
+    
+    def test_solr_request_add_facet_prefix(self):
+        req = solr.SolrRequest("foo")
+        req.add_facet_prefix("author", "bar")
+        self.assertIn("f.author.facet.prefix", req.params)
+        self.assertEqual(req.params['f.author.facet.prefix'], "bar")
         
     def get_resp(self, req):
         with self.app.test_request_context('/'):
@@ -199,6 +204,20 @@ class SolrTestCase(AdsabsBaseTestCase):
             resp = req.get_response()
             
         self.assertIn("f.bar_baz.facet.mincount=1", self._solr_request_params)
+        
+    def test_facet_request(self):
+        from adsabs.core.solr import facet_request
+        
+        req = facet_request("foo")
+        self.assertEquals(req.params.rows, 0)
+        
+        req = facet_request("foo", facet_fields={("bar",): "baz"})
+        self.assertTrue(req.facets_on())
+        self.assertEqual(req.get_facets(), [('bar', None, None)])
+        self.assertEqual(req.params['facet'], 'true')
+        self.assertEqual(req.params['facet.field'], ['bar'])
+        self.assertIn("f.bar.facet.prefix", req.params)
+        self.assertEqual(req.params["f.bar.facet.prefix"], "baz")
 
 if __name__ == '__main__':
     unittest2.main()

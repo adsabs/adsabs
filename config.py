@@ -41,7 +41,7 @@ class AppConfig(object):
     MONGOALCHEMY_PORT = 27017
     MONGOALCHEMY_SAFE_SESSION = False
     
-    SOLR_URL = 'http://adsate:8987/solr/collection1'
+    SOLR_URL = 'http://adsate:8989/solr/collection1'
     SOLR_TIMEOUT = 300
     SOLR_MAX_RETRIES = 5
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',

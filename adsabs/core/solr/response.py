@@ -237,5 +237,6 @@ class SolrResponse(object):
     
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
+    
         
         

@@ -94,6 +94,16 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
         search_components['sort'] = request_values.get('re_sort_type')
         if request_values.get('re_sort_dir') in ['asc', 'desc']:
             search_components['sort_direction'] = request_values.get('re_sort_dir')       
+        
+    # facet field/prefix options
+    if request_values.get('facet_field'):
+        field = request_values.get('facet_field')
+        try:
+            facet_defaults = filter(lambda x: x[0] == field, config.SOLR_SEARCH_DEFAULT_FACETS)[0]
+            search_components['facet_fields'] = { facet_defaults : request_values.get('facet_prefix') }
+        except IndexError:
+            pass
+        
     return search_components
 
 def build_singledoc_components(request_values):

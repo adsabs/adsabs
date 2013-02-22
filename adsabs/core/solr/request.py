@@ -86,6 +86,7 @@ class SolrRequest(object):
         self.params['facet'] = "true"
         if isinstance(fields, basestring):
             fields = [fields]
+        self.params.setdefault('facet.field', [])
         for field in fields:
             if output_key:
                 self.params.append('facet.field', "{!ex=dt key=%s}%s" % (output_key, field))
@@ -99,6 +100,9 @@ class SolrRequest(object):
             
     def facets_on(self):
         return self.params.facet and True or False
+    
+    def add_facet_prefix(self, field, prefix):
+        self.params['f.%s.facet.prefix' % field] = prefix
     
     def get_facets(self):
         facets = []
@@ -145,6 +149,10 @@ class SolrRequest(object):
         
         data = loads(json)
         return SolrResponse(data, self)
+    
+    def get_response_facets(self):
+        search_response = self.get_response()
+        return search_response.get_facets()
     
     def get_raw_request_url(self):
         qstring = []
