@@ -8,6 +8,7 @@ import fixtures
 import unittest2
 from simplejson import dumps
 from copy import deepcopy
+from datetime import datetime
 
 from flask import g
 from adsabs.modules.api.user import AdsApiUser, PERMISSION_LEVELS
@@ -20,6 +21,7 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         config.TESTING = True
         config.MONGOALCHEMY_DATABASE = 'test'
         config.LOGGING_CONFIG = None
+        config.CSRF_ENABLED = False
         self.app = create_app(config)
         
         from adsabs.extensions import mongodb
@@ -27,6 +29,11 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         
         self.insert_user = user_creator()
         self.client = self.app.test_client()
+        
+    def tearDown(self):
+        
+        from adsabs.extensions import mongodb
+        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
         
 def user_creator():
     def func(username, developer=False, dev_perms=None, level=None):
@@ -36,6 +43,7 @@ def user_creator():
             "username": username + "_name",
             "myads_id": username + "_myads_id",
             "cookie_id": username + "_cookie_id",
+            "registered": datetime.utcnow(),
         }
         
         if developer:
@@ -129,3 +137,29 @@ class SolrNotAvailableFixture(fixtures.MonkeyPatch):
             raise self.exc_class(self.exc_msg)
         
         fixtures.MonkeyPatch.__init__(self, 'solr.SearchHandler.raw', raise_ex)
+        
+class ClassicADSSignonFixture(fixtures.MonkeyPatch):
+    
+    DEFAULT_USER_DATA = {
+         'cookie': 'abc123',
+         'email': 'foo@example.com',
+         'firstname': 'Foo',
+         'lastname': 'Bar',
+         'loggedin': '1',
+         'message': 'LOGGED_IN',
+         'myadsid': '123456',
+         'openurl_icon': '',
+         'openurl_srv': ''
+    }
+
+    def __init__(self, user_data=None):
+        if user_data is None:
+            user_data = self.DEFAULT_USER_DATA
+        self.user_data = user_data
+        
+        def get_classic_user(u, p):
+            return deepcopy(self.user_data)
+        
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.modules.user.user.get_classic_user', get_classic_user)      
+        
+

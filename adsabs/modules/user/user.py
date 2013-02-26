@@ -1,9 +1,11 @@
 '''
 Module to interface with the back-end authentication system
 '''
+import pytz
 import urllib
 import urllib2
 from simplejson import loads
+from datetime import datetime
 
 from .models import AdsUserRecord
 
@@ -30,6 +32,7 @@ class AdsUser(object):
                                         username=classic_user.get('email'), 
                                         firstname=classic_user.get('firstname'), 
                                         lastname=classic_user.get('lastname'), 
+                                        registered=datetime.utcnow().replace(tzinfo=pytz.utc),
                                         active=True, 
                                         anonymous=False)
             new_rec.save()
@@ -111,6 +114,24 @@ class AdsUser(object):
     
     def get_username(self):
         return self.user_rec.username
+    
+    def get_registered(self):
+        """
+        Returns the UTC datetime object representing when the user first registered
+        """
+        return self.user_rec.registered
+    
+    def set_last_signon(self, dt=None):
+        if not dt:
+            dt = datetime.utcnow().replace(tzinfo=pytz.utc)
+        self.user_rec.last_signon = dt
+        self.user_rec.save()
+        
+    def get_last_signon(self):
+        """
+        Returns the UTC datetime object representing when the user first registered
+        """
+        return self.user_rec.last_signon
 
 def get_classic_user(login, password):
     """

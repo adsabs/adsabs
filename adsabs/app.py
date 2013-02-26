@@ -1,4 +1,5 @@
 import os
+import pytz
 
 from logging import getLogger
 import logging.config
@@ -108,7 +109,11 @@ def _configure_extensions(app):
     try:
         logger.debug("initializing mongodb")
         mongodb.init_app(app) #@UndefinedVariable
+        # The flask-mongoalchemy extension doesn't expose 
+        # these options to init_app so we have to do them manually
         mongodb.session.db.write_concern = {'w': 1, 'j': True}
+        mongodb.session.tz_aware = True
+        mongodb.session.timezone = pytz.utc
     except Exception, e:
         logger.error("Failed to initialize mongoalchemy session: %s" % e.message)
         raise

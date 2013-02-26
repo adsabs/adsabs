@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import (Blueprint, request, flash, redirect, 
                    url_for, render_template)
 from flask.ext.login import (login_required, login_user,    #@UnresolvedImport
@@ -39,8 +40,8 @@ def login():
 
     if form.validate_on_submit():
         user, authenticated = authenticate(form.login.data, form.password.data)
-
         if user and authenticated:
+            user.set_last_signon()
             remember = request.form.get('remember') == 'y'
             if login_user(user, remember=remember):
                 flash("Successfully logged in!", 'success')
