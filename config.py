@@ -83,16 +83,16 @@ class AppConfig(object):
     SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     
     SOLR_SEARCH_DEFAULT_FACETS = [
+        # tuple format: (solr field name, limit, mincount, output key, prefix)
         ('bibstem_facet', 100, 1),
-        #('author_facet',),
-        ('author_facet_hier', 1000, 1), 
+        ('author_facet_hier', 1000, 1, None, "0/"), 
         ('property',100, 1),
         ('keyword_facet',100, 1),
-        ('year',100, 1), 
+        ('year',100, 1),
         ('bibgroup_facet',100, 1),
         ('data_facet',100, 1),
         ('vizier_facet',100, 1),
-        ('grant_facet_hier', 1000, 1),
+        ('grant_facet_hier', 1000, 1, None, "0/"),
         ]
     
     SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]

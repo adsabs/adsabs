@@ -99,8 +99,8 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
     if request_values.get('facet_field'):
         field = request_values.get('facet_field')
         try:
-            facet_defaults = filter(lambda x: x[0] == field, config.SOLR_SEARCH_DEFAULT_FACETS)[0]
-            search_components['facet_fields'] = { facet_defaults : request_values.get('facet_prefix') }
+            facet_config = filter(lambda x: x[0] == field, config.SOLR_SEARCH_DEFAULT_FACETS)[0]
+            search_components['facet_fields'] = [facet_config]
         except IndexError:
             pass
         

@@ -82,20 +82,19 @@ class SolrRequest(object):
             filters = filter(lambda x: x not in default_params.get('fq', []), filters)
         return filters
         
-    def add_facet(self, fields, limit=None, mincount=None, output_key=None):
+    def add_facet(self, field, limit=None, mincount=None, output_key=None, prefix=None):
         self.params['facet'] = "true"
-        if isinstance(fields, basestring):
-            fields = [fields]
         self.params.setdefault('facet.field', [])
-        for field in fields:
-            if output_key:
-                self.params.append('facet.field', "{!ex=dt key=%s}%s" % (output_key, field))
-            else:
-                self.params.append('facet.field', field)
-            if limit:
-                self.params['f.%s.facet.limit' % field] = limit
-            if mincount:
-                self.params['f.%s.facet.mincount' % field] = mincount
+        if output_key:
+            self.params.append('facet.field', "{!ex=dt key=%s}%s" % (output_key, field))
+        else:
+            self.params.append('facet.field', field)
+        if limit:
+            self.params['f.%s.facet.limit' % field] = limit
+        if mincount:
+            self.params['f.%s.facet.mincount' % field] = mincount
+        if prefix:
+            self.params['f.%s.facet.prefix' % field] = prefix
         return self
             
     def facets_on(self):
@@ -108,9 +107,15 @@ class SolrRequest(object):
         facets = []
         if self.facets_on():
             for fl in self.params.get('facet.field', []):
+                if fl.startswith('{!ex=dt'):
+                    m = re.search("key=(\w+)}(\w+)", fl)
+                    output_key, fl = m.groups()
+                else:
+                    output_key = None
                 limit = self.params.get('f.%s.facet.limit' % fl, None)
                 mincount = self.params.get('f.%s.facet.mincount' % fl, None)
-                facets.append((fl, limit, mincount))
+                prefix = self.params.get('f.%s.facet.prefix' % fl, None)
+                facets.append((fl, limit, mincount, output_key, prefix))
         return facets
     
     def add_highlight(self, fields, count=None, fragsize=None):
@@ -149,10 +154,6 @@ class SolrRequest(object):
         
         data = loads(json)
         return SolrResponse(data, self)
-    
-    def get_response_facets(self):
-        search_response = self.get_response()
-        return search_response.get_facets()
     
     def get_raw_request_url(self):
         qstring = []

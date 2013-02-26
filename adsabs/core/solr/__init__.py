@@ -52,18 +52,17 @@ def query(q, **kwargs):
     req = search_request(q, **kwargs)
     return req.get_response()
 
-def facet_request(q, filters=[], facet_fields={}, **kwargs):
+def facet_request(q, filters=[], facet_fields=None, **kwargs):
     req = SolrRequest(q, rows=0)
     
     for filter_ in filters:
         req.add_filter(filter_)
     
-    if not len(facet_fields):
-        facet_fields = dict([(x, None) for x in config.SOLR_SEARCH_DEFAULT_FACETS])
+    if not facet_fields:
+        facet_fields = config.SOLR_SEARCH_DEFAULT_FACETS
         
-    for facet, prefix in facet_fields.items():
+    for facet in facet_fields:
         req.add_facet(*facet)
-        req.add_facet_prefix(facet[0], prefix)
         
     if len(kwargs):
         req.set_params(**kwargs)
