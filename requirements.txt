@@ -20,5 +20,6 @@ scrubber>=1.6.1
 BeautifulSoup>=3.2.1
 flask-debugtoolbar
 MySQL-python
--e git+https://github.com/quandyfactory/dict2xml.git#egg=dict2xml
+dicttoxml >= 0.8
 pytz
+

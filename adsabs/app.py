@@ -7,7 +7,7 @@ from flask import Flask, render_template, send_from_directory, g, Markup
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import *
-import dict2xml
+import dicttoxml
 
 # For import *
 __all__ = ['create_app']
@@ -155,7 +155,7 @@ def _configure_template_filters(app):
     
     @app.template_filter('dict2xml')
     def d_2_x(d):
-        xml = dict2xml.dict2xml(d, root=False)
+        xml = dicttoxml.dicttoxml(d, root=False)
         return Markup(xml)
     
 def _configure_error_handlers(app):
