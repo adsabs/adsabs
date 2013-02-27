@@ -7,6 +7,7 @@ Flask-Login>=0.1
 Flask-Mail>=0.6
 Flask-Pushrod>=0.1.2
 SQLAlchemy>=0.7.3
+MongoAlchemy>=0.13.3
 WTForms>=1.0
 -e git+https://github.com/adsabs/flask-solrpy.git#egg=Flask-Solrpy
 -e git+https://github.com/puentesarrin/mongodb-log.git#egg=mongolog-dev
