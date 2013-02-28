@@ -15,7 +15,7 @@ _BLUEPRINTS_CORE = [
 ]
 
 #blueprints from all other modules
-from adsabs.modules import search, user, api, abs, index
+from adsabs.modules import search, user, api, abs, index, dynamicjs
 
 _BLUEPRINTS_MODULES = [
     {'module':index, 'blueprint':'index_blueprint', 'prefix':''},
@@ -23,6 +23,7 @@ _BLUEPRINTS_MODULES = [
     {'module':search, 'blueprint':'search_blueprint', 'prefix':'/search'},
     {'module':api, 'blueprint':'api_blueprint', 'prefix':'/api'},
     {'module':abs, 'blueprint':'abs_blueprint', 'prefix':'/abs' },
+    {'module':dynamicjs, 'blueprint':'dynjs_blueprint', 'prefix':'/dynjs'},
 ]
 
 try:

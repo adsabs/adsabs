@@ -135,6 +135,21 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
             
+    def test_facets_components(self):
+        with self.app.test_request_context('/search/facets?q=author%3A%22civano%22&aut_f=1%2FCivano%2C+F%2FCivano%2C+F.&sort_type=DATE&db_key=ASTRONOMY&facet_field=templ_aut_f&facet_prefix=1/Civano,%20F/'):
+            out = {'facet_field_interf_id': u'templ_aut_f',
+                     'facet_fields': [('author_facet_hier', -1, 1, None, u'1/Civano, F/')],
+                     'filters': [u'database:ASTRONOMY',
+                      u'author_facet_hier:"1/Civano, F/Civano, F."'],
+                     'q': u'author:"civano"',
+                     'sort': u'DATE',
+                     'sort_direction': 'desc',
+                     'start': None}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=True), out)
+            self.assertNotEqual(build_basicquery_components(form, request.values), out)
+    
+            
 class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
     
     def test_no_parameters_from_request(self):

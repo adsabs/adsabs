@@ -47,9 +47,9 @@
 	        			</div>
 	        		</div>
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">
-	        			<div class="row">
+	        			<!-- div class="row">
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.refereed }} {{ form.refereed.description }}</label></div>
-	        			</div>
+	        			</div-->
 	        			<div class="row">
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.article }} {{ form.article.description }}</label></div>
 	        			</div>
@@ -68,6 +68,6 @@
     </form>
     
 </div>
-<script type="text/javascript" src="{{ url_for('static', filename='js/query_form.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/query_form.js') }}?app_version={{ config.APP_VERSION }}"></script>
 
 {% endmacro %}

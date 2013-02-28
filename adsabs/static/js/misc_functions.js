@@ -2,34 +2,6 @@
  * 
  */
 
-//###########################################################################################//
-//Definition of a new jQuery Method that is an extended version of the $.get
-$.getADS = function(url_ads, data_ads, success_ads, error_ads, dataType_ads)
-{
-	$.ajax({
-		type: "GET",
-		url: url_ads,
-		data: data_ads,
-		success: success_ads,
-		error: error_ads,
-		dataType: dataType_ads,
-		timeout: 600000,
-	});
-};
-
-$.postADS = function(url_ads, data_ads, success_ads, error_ads, dataType_ads)
-{
-	$.ajax({
-		type: "POST",
-		url: url_ads,
-		data: data_ads,
-		success: success_ads,
-		error: error_ads,
-		dataType: dataType_ads,
-		timeout: 600000,
-	});
-};
-
 //definition of a new jQuery method to set the cursor at a certain point of the textfield
 /**** thanks to Mark from StackOverflow ****/
 $.fn.selectRange = function(start, end) {
@@ -51,6 +23,59 @@ $.fn.selectRange = function(start, end) {
 RegExp.escape = function(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
+
+//###########################################################################################//
+// definition of the spinner extension for jquery
+$.fn.spin = function(opts, color) {
+	var presets = {
+		"tiny": { lines: 8, length: 2, width: 2, radius: 3 },
+		"small": { lines: 8, length: 4, width: 3, radius: 5 },
+		"large": { lines: 10, length: 8, width: 4, radius: 8 },
+		"ads_facets" : {
+				  lines: 11, // The number of lines to draw
+				  length: 5, // The length of each line
+				  width: 2, // The line thickness
+				  radius: 2, // The radius of the inner circle
+				  corners: 1, // Corner roundness (0..1)
+				  rotate: 0, // The rotation offset
+				  color: '#000', // #rgb or #rrggbb
+				  speed: 1.2, // Rounds per second
+				  trail: 60, // Afterglow percentage
+				  shadow: false, // Whether to render a shadow
+				  hwaccel: false, // Whether to use hardware acceleration
+				  className: 'spinner', // The CSS class to assign to the spinner
+				  zIndex: 2e9, // The z-index (defaults to 2000000000)
+				  top: 'auto', // Top position relative to parent in px
+				  left: 'auto' // Left position relative to parent in px
+				}
+	};
+	if (Spinner) {
+		return this.each(function() {
+			var $this = $(this),
+				data = $this.data();
+			
+			if (data.spinner) {
+				data.spinner.stop();
+				delete data.spinner;
+			}
+			if (opts !== false) {
+				if (typeof opts === "string") {
+					if (opts in presets) {
+						opts = presets[opts];
+					} else {
+						opts = {};
+					}
+					if (color) {
+						opts.color = color;
+					}
+				}
+				data.spinner = new Spinner($.extend({color: $this.css('color')}, opts)).spin(this);
+			}
+		});
+	} else {
+		throw "Spinner class not available.";
+	}
+};
 
 //###########################################################################################//
 
@@ -78,3 +103,7 @@ Misc.wrapText = function(elementID, openTag, closeTag)
     endrepl = start + replacement.length - closeTag.length;
     textArea.selectRange(endrepl, endrepl);
 };
+
+
+
+

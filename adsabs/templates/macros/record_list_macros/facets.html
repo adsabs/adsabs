@@ -1,5 +1,14 @@
 {# ###Macro for a single group of facets with a unique level of deepness### #}
-{% macro render_facet_box(facetid, facettitle, resp, open=False, limit_to=[], facetid_html=None ) %}
+{% macro render_facet_box(templ_facetid, resp) %}
+	{# I get the configuration for this facet #}
+	{% set facet_config = config.FACETS_IN_TEMPLATE_CONFIG[templ_facetid] %}
+	{# then I extract the configurations I need #}
+	{% set facetid=facet_config['facetid'] %} 
+	{% set facettitle=facet_config['facet_title'] %} 
+	{% set open=facet_config['open_by_default'] %} 
+	{% set limit_to=facet_config['value_limit_to'] %} 
+	{% set facetid_html=facet_config['facetid_html'] %}
+	
 	{# first of all I check which id to use to build the widget #}
 	{% if facetid_html == None %}
 		{% set facetid_html=facetid %}
@@ -9,7 +18,7 @@
 	<div class="accordion-group">
 		<div class="accordion-heading">
 			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
-			  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %} pull-right"></i>
+				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong> 
 			</div>
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
@@ -19,11 +28,10 @@
 			  		{% if not limit_to %}
 				  		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
 				  		{% if elem[2] !='selected' %}
-				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
 				  		{% else %}
-				  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 				  			{{ elem[0] }} ({{ elem[1] }}) 
-				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 				  		{% endif %}
 				  		</li>
 				  	{% else %}
@@ -31,11 +39,10 @@
 				  			{% if elem[0] == limit %}
 				  				<li>
 					  			{% if elem[2] !='selected' %}
-					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}={{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
 						  		{% else %}
-						  			{% set remove_facet = '&%s=%s' % (facetid, elem[0]|urlencode) %}
 						  			{{ elem[0] }} ({{ elem[1] }}) 
-						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 						  		{% endif %}
 						  		</li>
 				  			{% endif %}
@@ -48,211 +55,72 @@
 		</div>
 	</div>
 	<script type="text/javascript">
-		//Code to change the icon in the section containing the title of the facets 
-		$('#collapse{{ facetid_html }}').on('hide', function () {
-			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-right pull-right');
-		});
-		$('#collapse{{ facetid_html }}').on('show', function () {
-			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-down pull-right');
-		});
-		//Code to show/hide the facets
-		var max_facets = 5;
-		//if I have hidden facets 
-		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
-		{
-			//I show the button "more" 
-			$('#collapse{{ facetid_html }} a.more').show();
-			//I configure the "more" to expand the list 
-			$('#collapse{{ facetid_html }} a.more').live('click', function(){
-				//I expand the next N elements 
-				var hidden_li = $('#facetList{{ facetid_html }} > li:hidden');
-				for (var i=0; i<max_facets; i++)
-					$(hidden_li[i]).show('fast', function(){
-						//If there are no more hidden elements I hide the more button 
-						if ($('#facetList{{ facetid_html }} > li:hidden').length == 0)
-							$('#collapse{{ facetid_html }} a.more').hide();
-					});
-				//I show the "less" anyway because there will be for sure more than N minimum elements 
-				if ($('#collapse{{ facetid_html }} a.less').is(':hidden'))
-					$('#collapse{{ facetid_html }} a.less').show();
-			});
-			//I configure the "less" to collapse the list 
-			$('#collapse{{ facetid_html }} a.less').live('click', function(){
-				var visible_li = $('#facetList{{ facetid_html }} > li:visible');
-				var to_hide = max_facets;
-				//I make sure that I don't hide more than the minimum allowed 
-				if ((visible_li.length - max_facets) < max_facets)
-					to_hide = visible_li.length - max_facets;
-				//I hide the elements 
-				for (var i=1; i<=to_hide; i++)
-					$(visible_li[visible_li.length - i]).hide('fast', function(){
-						//If I've reached the minimum of elements to hide, I hide "less"
-						if ($('#facetList{{ facetid_html }} > li:visible').length == max_facets)
-							$('#collapse{{ facetid_html }} a.less').hide();
-					});
-				//I show "more" if it is hidden 
-				if ($('#collapse{{ facetid_html }} a.more').is(':hidden'))
-					$('#collapse{{ facetid_html }} a.more').show();
-			});
-		}
+		$(document).ready(
+			function(){
+				FacetsComponents.sigle_level_manager('{{ facetid_html }}');
+			}		
+		);
 	</script>
 {% endmacro %}
 
+
 {# ###Macro for a single group of facets with 2 levels of deepness### #}
-{% macro render_2level_hier_facet_box(facetid, facettitle, resp, open=False, facetid_html=None ) %}
+{% macro render_2level_hier_facet_box(templ_facetid, resp) %}
+	{# I get the configuration for this facet #}
+	{% set facet_config = config.FACETS_IN_TEMPLATE_CONFIG[templ_facetid] %}
+	{# then I extract the configurations I need #}
+	{% set facetid=facet_config['facetid'] %} 
+	{% set facettitle=facet_config['facet_title'] %} 
+	{% set open=facet_config['open_by_default'] %} 
+	{% set facetid_html=facet_config['facetid_html'] %}
+	
 	{# first of all I check which id to use to build the widget #}
 	{% if facetid_html == None %}
 		{% set facetid_html=facetid %}
 	{% endif %}
 	{% set current_page = resp.get_pagination()['current_page']%}
+	{# I get the list of applied facets for this level and I create a list of IDs of facets to be open by default #}
+	{% set facet_ids_to_open = (resp.get_facet_param_field(facetid)|get_prev_level_applied_facets(1)) %}
 	<div class="accordion-group">
 		<div class="accordion-heading">
 			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
-			  <strong>{{ facettitle }}</strong> <i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %} pull-right"></i>
+				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong>
 			</div>
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 			<div class="accordion-inner">
-			  <ul id="facetList{{ facetid_html }}" class="unstyled">
-			  	{% for elem in resp.get_hier_facets_fields(facetid) %}
-			  		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
-			  			{% if elem[1][1] != 'selected' %}
-			  				<a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=0/{{ elem[0]|urlencode }}">{{ elem[0] }} ({{ elem[1][0] }})</a>
-			  			{% else %}
-			  				{% set remove_facet = '&%s=0/%s' % (facetid, elem[0]|urlencode) %}
-			  				{{ elem[0] }} ({{ elem[1][0] }}) 
-						  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
-			  			{% endif %}
-			  			{% if elem[1][2] %}
-			  				<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }} pull-right" href="#facetList{{ facetid_html }}_{{ loop.index }}"></span>
-			  				<ul id="facetList{{ facetid_html }}_{{ loop.index }}" class="unstyled subFacet collapse">
-			  					{% set rowloop = loop %}
-			  					{% for subelem in elem[1][2] %}
-				  					{% if subelem[1][1] != 'selected' %}
-				  						<li class="subelem_{{ facetid_html }}_{{ rowloop.index }}{% if loop.index > 5 %} strHidden{% endif %}"><a href="{{ url_for('search.search') }}?{{ request.query_string|replace('&page=%s' % current_page, '') }}&{{ facetid }}=1/{{ elem[0]|urlencode }}/{{ subelem[0]|urlencode }}">{{ subelem[0] }} ({{ subelem[1][0] }})</a></li>
-			  						{% else %}
-						  				{% set remove_facet = '&%s=1/%s/%s' % (facetid, elem[0]|urlencode, subelem[0]|urlencode) %}
-						  				{{ subelem[0] }} ({{ subelem[1][0] }}) 
-									  	<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" title="remove &quot;{{ subelem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
-						  			{% endif %}
-			  					{% endfor %}
-			  					<li><span class="less_{{ facetid_html }}_2nd facetsMoreLess muted pull-left" href=".subelem_{{ facetid_html }}_{{ loop.index }}"><small>less...</small></span><span class="more_{{ facetid_html }}_2nd facetsMoreLess muted pull-right" href=".subelem_{{ facetid_html }}_{{ loop.index }}"><small>more...</small></span></li>
-			  				</ul>
-			  				
-			  			{% endif %}
-			  		</li>
-			  	{% endfor %}
-			  </ul>
-			  <a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
+				<ul id="facetList{{ facetid_html }}" class="unstyled">
+				{% for elem in resp.get_facets_fields(facetid, hierarchical=True) %}
+					<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
+					<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }}{% if elem[4] in facet_ids_to_open %} openByDefault{% endif %}" 
+						data-id_sublevel="second_level_{{ elem[4]|facet_to_id }}"
+						data-templ_facetid="{{ templ_facetid }}"
+						data-query_params_url="{{ request.query_string }}"
+						data-facet_prefix_next_level="{{ elem[4]|facet_next_level_prefix }}"
+						onclick="FacetsComponents.hierarchical_level_two_builder(this);"></span>
+					{% if elem[3] != 'selected' %}
+		  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
+		  			{% else %}
+		  				{{ elem[1] }} ({{ elem[2] }}) 
+					  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+		  			{% endif %}
+					<div id="second_level_{{ elem[4]|facet_to_id }}" class="emptySubFacets collapse"></div>
+					</li>
+				{% endfor %}
+				</ul>
+				<a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript">
-		//Code to change the icon in the section containing the title of the facets 
-		$('#collapse{{ facetid_html }}').on('hide', function () {
-			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-right pull-right');
-		});
-		$('#collapse{{ facetid_html }}').on('show', function () {
-			$('#icon{{ facetid_html }}').attr('class', 'icon-chevron-down pull-right');
-		});
-		//Code to show/hide the facets
-		var max_facets = 5;
-		//if I have hidden facets 
-		if ($('#facetList{{ facetid_html }} > li:hidden').length > 0)
-		{
-			//I show the button "more" 
-			$('#collapse{{ facetid_html }} a.more').show();
-			//I configure the "more" to expand the list 
-			$('#collapse{{ facetid_html }} a.more').live('click', function(){
-				//I expand the next N elements 
-				var hidden_li = $('#facetList{{ facetid_html }} > li:hidden');
-				for (var i=0; i<max_facets; i++)
-					$(hidden_li[i]).show('fast', function(){
-						//If there are no more hidden elements I hide the more button 
-						if ($('#facetList{{ facetid_html }} > li:hidden').length == 0)
-							$('#collapse{{ facetid_html }} a.more').hide();
-					});
-				//I show the "less" anyway because there will be for sure more than N minimum elements 
-				if ($('#collapse{{ facetid_html }} a.less').is(':hidden'))
-					$('#collapse{{ facetid_html }} a.less').show();
-			});
-			//I configure the "less" to collapse the list 
-			$('#collapse{{ facetid_html }} a.less').live('click', function(){
-				var visible_li = $('#facetList{{ facetid_html }} > li:visible');
-				var to_hide = max_facets;
-				//I make sure that I don't hide more than the minimum allowed 
-				if ((visible_li.length - max_facets) < max_facets)
-					to_hide = visible_li.length - max_facets;
-				//I hide the elements 
-				for (var i=1; i<=to_hide; i++)
-					$(visible_li[visible_li.length - i]).hide('fast', function(){
-						//If I've reached the minimum of elements to hide, I hide "less"
-						if ($('#facetList{{ facetid_html }} > li:visible').length == max_facets)
-							$('#collapse{{ facetid_html }} a.less').hide();
-					});
-				//I show "more" if it is hidden 
-				if ($('#collapse{{ facetid_html }} a.more').is(':hidden'))
-					$('#collapse{{ facetid_html }} a.more').show();
-			});
-		}
-		
-		//the more and less button for each sub_group 
-		var sec_more = $('.more_{{ facetid_html }}_2nd');
-		for (var i=0; i<sec_more.length; i++)
-		{
-			//for each more button if there are hidden subelements I show the "more" 
-			if($($(sec_more[i]).attr('href') + ':hidden').length > 0)
-			{
-				//I show the button and configure it to show more elements 
-				$(sec_more[i]).show()
-					.live('click', function(){
-						//I show the  additional elements 
-						var to_show = $($(this).attr('href') + ':hidden');
-						for (var j=0; j<max_facets; j++)
-							$(to_show[j]).show();
-						//I show the less button if it is hidden 
-						var less_button = $($(this).parent()).children('.less_{{ facetid_html }}_2nd');
-						if ($(less_button).is(':hidden'))
-							$(less_button).show();
-						//If there are no more hidden element I hide the more button 
-						if($($(this).attr('href') + ':hidden').length == 0)
-							$(this).hide();
-					});
-			}
-		}
-		
-		var sec_less = $('.less_{{ facetid_html }}_2nd');
-		for (var i=0; i<sec_less.length; i++)
-		{
-			if($($(sec_less[i]).attr('href') + ':hidden').length > 0)
-			{
-				$(sec_less[i]).live('click', function(){
-					var visible_li = $($(this).attr('href') + ':visible');
-					var to_hide = max_facets;
-					//I make sure that I don't hide more than the minimum allowed 
-					if ((visible_li.length - max_facets) < max_facets)
-						to_hide = visible_li.length - max_facets;
-					for (var i=1; i<=to_hide; i++)
-						$(visible_li[visible_li.length - i]).hide();
-					//I show the more button if it is hidden 
-					var more_button = $($(this).parent()).children('.more_{{ facetid_html }}_2nd');
-					if ($(more_button).is(':hidden'))
-						$(more_button).show();
-					//If there are no more hidden element I hide the more button 
-					if($($(this).attr('href') + ':visible').length == max_facets)
-						$(this).hide();
-				})
-			}
-		}
-		
-		//configure the plus icons to open the sublists 
-		$('span.expCollSubFacet{{ facetid_html }}').live('click', function(){
-			$($(this).attr('href')).toggleClass('in');
-			$(this).toggleClass('icon-plus-sign');
-			$(this).toggleClass('icon-minus-sign');
-		});
+		$(document).ready(
+			function(){
+				FacetsComponents.hierarchical_level_one_manager('{{ facetid_html }}');
+			}	
+		);
 	</script>
 {% endmacro %}
+
 
 {# ###Macro to render the list of applied facets #}
 {% macro render_applied_facets_box(resp) %}
@@ -284,18 +152,15 @@
 						{{ elem[0] }} :
 					{% endif %}
 					{{ elem[1]|format_ads_facet_str }} 
-					{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
-					<a href="{{ url_for('search.search') }}?{{ request.query_string|replace(remove_facet, '')|replace('&page=%s' % current_page, '') }}" 
+					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" 
 					title="remove &quot;{{ elem[1]|format_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 				</span>
 			{% endfor %}
 		</div>
 		<div class="span1">
-			{% set base_remove_all = [request.query_string|replace('&page=%s' % current_page, '')] %}
+			{% set base_remove_all = [request.query_string|rem_par_url('page')] %}
 			{% for elem in selected_facets %}
-				{% set remove_facet = '&%s=%s' % (elem[0], elem[1]|urlencode) %}
-				{% do base_remove_all.append(base_remove_all[-1]|replace(remove_facet, '')) %}
-				
+				{% do base_remove_all.append(base_remove_all[-1]|rem_par_url(elem[0], elem[1])) %}				
 			{% endfor %}
 			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}" class="clearAll">Clear all</a>
 		</div>

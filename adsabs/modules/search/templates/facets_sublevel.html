@@ -1,0 +1,47 @@
+{# Template that renders a set of facets that are not in the first level coming together #}
+
+{# I get the configuration for the facet #}
+{% set facet_config = config.FACETS_IN_TEMPLATE_CONFIG[facet_field_interf_id] %}
+{# then I extract the configurations I need #}
+{% set facetid=facet_config['facetid'] %} 
+{% set facettitle=facet_config['facet_title'] %} 
+{% set open=facet_config['open_by_default'] %} 
+{% set facetid_html=facet_config['facetid_html'] %}
+
+{# first of all I check which id to use to build the widget #}
+{% if facetid_html == None %}
+	{% set facetid_html=facetid %}
+{% endif %}
+
+{% set facets_list = resp.get_facets_fields(facetid, hierarchical=True) %}
+{% set base_query_string=request.query_string|rem_par_url('page')|rem_par_url('facet_field')|rem_par_url('facet_prefix') %}
+
+{# I create the facet group id #}
+{% if facets_list|length > 0 %}
+	{% set facet_group_id = '/'.join(facets_list[0][1:-4])|facet_to_id %}
+{% else %}
+	{% set facet_group_id = '' %}
+{% endif %}
+
+<ul class="unstyled subFacet">
+	{% for facet in facets_list %}
+		{% if facet[-2] != 'selected' %}
+			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{% if loop.index > 5 %} strHidden{% endif %}"><a href="{{ url_for('search.search') }}?{{ base_query_string|ins_par_url(facetid, facet[-1]) }}">{{ facet[-4] }} ({{ facet[-3] }})</a></li>
+		{% else %}
+			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{#% if loop.index > 5 %} strHidden{% endif %#}">{{ facet[-4] }} ({{ facet[-3] }}) 
+				<a href="{{ url_for('search.search') }}?{{ base_query_string|rem_par_url(facetid, facet[-1]) }}" title="remove &quot;{{ facet[-4] }}&quot;"><i class="icon-remove-sign"></i></a>
+			</li>
+		{% endif %}
+	{% endfor %}
+	<li>
+		<span id="less_subelem_{{ facetid_html }}_{{ facet_group_id }}" class="facetsMoreLess muted pull-left"><small>less...</small></span>
+		<span id="more_subelem_{{ facetid_html }}_{{ facet_group_id }}" class="facetsMoreLess muted pull-right"><small>more...</small></span>
+	</li>
+</ul>
+<script type="text/javascript">
+	$(document).ready(
+		function(){
+			FacetsComponents.hierarchical_level_two_manager('subelem_{{ facetid_html }}_{{ facet_group_id }}');
+		}	
+	);
+</script>

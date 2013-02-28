@@ -57,18 +57,21 @@ def search():
     return render_template('search.html', form=form)
 
 @search_blueprint.route('/facets', methods=('GET', 'POST'))
-def facets(facet_field=None):
+def facets():
     """
     returns facet sets for a search query
     """
     form = init_search_form()
     if form.validate():
-        query_components = build_basicquery_components(form, request.values)
-        resp = solr.facet_query(query_components['q'], 
+        query_components = build_basicquery_components(form, request.values, facets_components=True)
+        if query_components.get('facet_fields') and query_components.get('facet_field_interf_id'):
+            resp = solr.facet_query(query_components['q'], 
                             facet_fields=query_components['facet_fields'],
                             filters=query_components['filters']
                             )
-        return render_template('search_facets.html', resp=resp, form=form)
+            return render_template('facets_sublevel.html', resp=resp, facet_field_interf_id=query_components['facet_field_interf_id'] )
+        else:
+            return 'facet query parameters error'
     
     
 @search_blueprint.route('/advanced/', methods=('GET', 'POST'))

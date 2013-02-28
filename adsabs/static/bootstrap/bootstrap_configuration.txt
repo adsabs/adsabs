@@ -1,0 +1,5 @@
+Bootstrap version 2.3.1
+Custom version without:
+- responsive Narrow tablets and below (<767px)
+- responsive Tablets to desktops (767-979px)
+- responsive navbar

@@ -2,25 +2,28 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
-	
-	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
+	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
 	<!-- bootstrap stuff -->
-	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
-	<!-- link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet"-->
+	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
+	<!-- link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet"-->
 
 	<!-- IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
-	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
-	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ g.conf_params['APP_VERSION'] }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
+	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
 	
-	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}?app_version={{ g.conf_params['APP_VERSION'] }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/spin.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/record_list_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
 	{% block head%}{% endblock %}
 </head>
@@ -101,7 +104,7 @@
 	</div>
 </div><!-- Footer -->
 
-{% if g.conf_params['PRINT_DEBUG_TEMPLATE'] %}
+{% if config.PRINT_DEBUG_TEMPLATE %}
 	<div id="debugSection">
 		DEBUG ON <br/>
 		{% block debugSection %}{% endblock %}

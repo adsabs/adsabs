@@ -7,25 +7,8 @@ Created on Nov 30, 2012
 from werkzeug.datastructures import CombinedMultiDict
 from config import config
 
-#def _get_page_component(request_values):
-#    """"Handles the page number component that is a function of the max number of results in the page """
-#    page = request_values.get('page')
-#    if page:
-#        if int(page) >0:
-#            return str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
-#    return None
-#
-#def _get_resorting_component(request_values):
-#    """Handles the resorting components"""
-#    sort = config.SEARCH_DEFAULT_SORT
-#    sort_direction = config.SEARCH_DEFAULT_SORT_DIRECTION
-#    if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
-#        sort = request_values.get('re_sort_type')
-#        if request_values.get('re_sort_dir') in ['asc', 'desc']:
-#            sort_direction = request_values.get('re_sort_dir')       
-#    return sort, sort_direction
 
-def build_basicquery_components(form, request_values=CombinedMultiDict([])):
+def build_basicquery_components(form, request_values=CombinedMultiDict([]), facets_components=False):
     """
     Takes in input a validated basic form and returns a dictionary containing 
     all the components needed to run a SOLR query
@@ -77,7 +60,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
         search_components['filters'].append(journal_abbr_string[:-4]) 
     #the facets that are not included in the form
-    for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.keys():
+    for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
         for elem in request_values.getlist(facet):
             search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
     #I handle the page number
@@ -94,15 +77,28 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([])):
         search_components['sort'] = request_values.get('re_sort_type')
         if request_values.get('re_sort_dir') in ['asc', 'desc']:
             search_components['sort_direction'] = request_values.get('re_sort_dir')       
-        
-    # facet field/prefix options
-    if request_values.get('facet_field'):
-        field = request_values.get('facet_field')
-        try:
-            facet_config = filter(lambda x: x[0] == field, config.SOLR_SEARCH_DEFAULT_FACETS)[0]
-            search_components['facet_fields'] = [facet_config]
-        except IndexError:
-            pass
+    
+    #If I'm managing facets components
+    if facets_components:
+        # facet field/prefix options
+        facet_field_interface = request_values.get('facet_field')
+        facet_prefix = request_values.get('facet_prefix')    
+        if facet_field_interface and facet_prefix:
+            if facet_field_interface in config.FACETS_IN_TEMPLATE_CONFIG:
+                facet_field = config.FACETS_IN_TEMPLATE_CONFIG[facet_field_interface]['facetid']
+                #if the facet is allowed 
+                if facet_field in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
+                    #I add the tuple containing the facet that I want to extract
+                    search_components['facet_fields']= []
+                    search_components['facet_field_interf_id'] = facet_field_interface
+                    try:
+                        facet_config = list(filter(lambda x: x[0] == config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet_field], config.SOLR_SEARCH_DEFAULT_FACETS)[0])
+                        #I want all the sublevel facets
+                        facet_config[1] = -1
+                        facet_config[4] = facet_prefix
+                        search_components['facet_fields'].append(tuple(facet_config))
+                    except IndexError:
+                        pass
         
     return search_components
 

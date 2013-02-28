@@ -85,14 +85,14 @@ class AppConfig(object):
     SOLR_SEARCH_DEFAULT_FACETS = [
         # tuple format: (solr field name, limit, mincount, output key, prefix)
         ('bibstem_facet', 100, 1),
-        ('author_facet_hier', 1000, 1, None, "0/"), 
+        ('author_facet_hier', 200, 1, None, "0/"), 
         ('property',100, 1),
         ('keyword_facet',100, 1),
         ('year',100, 1),
         ('bibgroup_facet',100, 1),
         ('data_facet',100, 1),
         ('vizier_facet',100, 1),
-        ('grant_facet_hier', 1000, 1, None, "0/"),
+        ('grant_facet_hier', 100, 1, None, "0/"),
         ]
     
     SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
@@ -110,6 +110,17 @@ class AppConfig(object):
                                          'data_f':'data_facet',
                                          'vizier_f':'vizier_facet',
                                          }
+    #Dictionary with the configuration of the facets for the templates
+    FACETS_IN_TEMPLATE_CONFIG = {'templ_aut_f' : {'facetid':'aut_f', 'facet_title':'Authors', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_key_f' : {'facetid':'key_f', 'facet_title':'Keywords', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_bib_f' : {'facetid':'bib_f', 'facet_title':'Publications', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_refereed_f' : {'facetid':'prop_f', 'facet_title':'Refereed status', 'open_by_default':False, 'value_limit_to':['refereed', 'not refereed'], 'facetid_html':'refereed_f'},
+                                 'templ_bibgr_f' : {'facetid':'bibgr_f', 'facet_title':'Bib Groups', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_grant_f' : {'facetid':'grant_f', 'facet_title':'Grants', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_data_f' : {'facetid':'data_f', 'facet_title':'Data', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_vizier_f' : {'facetid':'vizier_f', 'facet_title':'Vizier Tables', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_year_f' : {'facetid':'year_f', 'facet_title':'Year', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},                                 
+                                }
     
     # copy logging.conf.dist -> logging.conf and uncomment
     LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')

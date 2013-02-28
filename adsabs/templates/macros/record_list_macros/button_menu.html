@@ -111,3 +111,21 @@
 		</ul>
 	</span>
 {% endmacro %}
+
+{# ###Macro to render view/export menu #}
+{% macro render_export_menu() %}
+<div class="export_view_menu dropdown pull-right">
+	<a class="btn dropdown-toggle" data-toggle="dropdown" >View <span class="caret"></span></a>
+	<ul class="dropdown-menu">
+		<li class="nav-header">selected records:</li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
+	</ul>
+</div>
+{% endmacro %}
+
+{# ###Macro to render toggle all button #}
+{% macro render_toggle_all_paper_list() %}
+<span class="btn" title="Toggle all" onclick="$('input[type=checkbox][name=bibcode]').prop('checked', function() {return !$(this).prop('checked')});">
+	<i class="icon icon-check"></i>
+</span>
+{% endmacro %}

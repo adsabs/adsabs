@@ -144,7 +144,7 @@
 	
 	<script type="text/javascript">
 		//toggle for the coauthors in a list with more than 10 authors 
-		$('.coauthorsToggle').live('click', function(){
+		$('.coauthorsToggle').on('click', function(){
 			//I show or hide the coauthors 
 			$('.authorMoreTen').toggleClass('strHidden');
 			//I show the link in a newline when all the authors are visible 
@@ -156,7 +156,7 @@
 				$('.coauthorsToggle > span.textToggle').html('and');
 		});
 		//toggle for the affiliations 
-		$('.affiliationToggle').live('click', function(){
+		$('.affiliationToggle').on('click', function(){
 			//I show or hide the affiliations 
 			$('.authorAffiliation').toggleClass('strHidden');
 			// then I change the text in the link 

@@ -3,11 +3,10 @@ import pytz
 
 from logging import getLogger
 import logging.config
-from flask import Flask, render_template, send_from_directory, g, Markup
+from flask import Flask, send_from_directory
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
-from adsabs.core.template_filters import *
-import dicttoxml
+from adsabs.core.template_filters import configure_template_filters
 
 # For import *
 __all__ = ['create_app']
@@ -34,7 +33,7 @@ def create_app(config=config, app_name=None):
     _configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
-    _configure_global_variables(app)
+#    _configure_global_variables(app)
     
     if config.DEBUG:
         from flask_debugtoolbar import DebugToolbarExtension
@@ -132,31 +131,10 @@ def _configure_extensions(app):
 def _configure_template_filters(app):
     """
     Configuration of additional filters needed in the templates
+    (left a function here in case we need to have multiple configuration functions)
     """
-    @app.template_filter('urlencode')
-    def urlencode_filter(value):
-        return quote_url(value)
+    configure_template_filters(app)
     
-    @app.template_filter('format_ads_date')
-    def f_a_d(date_string):
-        return format_ads_date(date_string)
-    
-    @app.template_filter('format_ads_facet_str')
-    def f_a_f_s(facet_string):
-        return format_ads_facet_str(facet_string)
-    
-    @app.template_filter('safe_html_unescape')
-    def s_h_f(html_string):
-        return safe_html_unescape(html_string)
-    
-    @app.template_filter('ads_url_redirect')
-    def a_u_r(adsid, id_type):
-        return ads_url_redirect(adsid, id_type)
-    
-    @app.template_filter('dict2xml')
-    def d_2_x(d):
-        xml = dicttoxml.dicttoxml(d, root=False)
-        return Markup(xml)
     
 def _configure_error_handlers(app):
     """
@@ -169,26 +147,7 @@ def _configure_error_handlers(app):
     create_error_handler(app, 404, 'errors/404.html')
     create_error_handler(app, 405, 'errors/405.html')
     create_error_handler(app, 500, 'errors/500.html')
-    
-#    @app.errorhandler(400)
-#    def forbidden_page(error):
-#        return render_template("errors/400.html"), 400
-#
-#    @app.errorhandler(403)
-#    def forbidden_page(error):
-#        return render_template("errors/403.html"), 403
-#
-#    @app.errorhandler(404)
-#    def page_not_found(error):
-#        return render_template("errors/404.html"), 404
-#
-#    @app.errorhandler(405)
-#    def method_not_allowed_page(error):
-#        return render_template("errors/405.html"), 405
-#
-#    @app.errorhandler(500)
-#    def server_error_page(error):
-#        return render_template("errors/500.html"), 500
+
     
 def _configure_misc_handlers(app):
     """
@@ -201,13 +160,13 @@ def _configure_misc_handlers(app):
     def robots():
         return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
     
-def _configure_global_variables(app):
-    """
-    attaches to the g variable all the parameters from the configuration needed in the templates
-    """
-    @app.before_request
-    def attach_config_params():
-        g.conf_params = {}
-        g.conf_params['PRINT_DEBUG_TEMPLATE'] = config.PRINT_DEBUG_TEMPLATE
-        g.conf_params['APP_VERSION'] = config.APP_VERSION
+#def _configure_global_variables(app):
+#    """
+#    attaches to the g variable all the parameters from the configuration needed in the templates
+#    """
+#    @app.before_request
+#    def attach_config_params():
+#        g.conf_params = {}
+#        g.conf_params['PRINT_DEBUG_TEMPLATE'] = config.PRINT_DEBUG_TEMPLATE
+#        g.conf_params['APP_VERSION'] = config.APP_VERSION
     

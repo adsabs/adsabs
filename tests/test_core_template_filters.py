@@ -60,6 +60,37 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         self.assertEqual(tf.ads_url_redirect('FOOBAR', 'simbad'), '%s/cgi-bin/nph-data_query?bibcode=FOOBAR&link_type=SIMBAD' % config.ADS_CLASSIC_BASEURL)
         self.assertEqual(tf.ads_url_redirect('FOOBAR', 'ned'), '%s/cgi-bin/nph-data_query?bibcode=FOOBAR&link_type=NED' % config.ADS_CLASSIC_BASEURL)
         self.assertEqual(tf.ads_url_redirect('FOOBAR', 'openurl'), '%s/cgi-bin/nph-data_query?bibcode=FOOBAR&link_type=OPENURL' % config.ADS_CLASSIC_BASEURL)
+        
+    def test_facet_id_to_html_id(self):
+        self.assertEqual(tf.facet_id_to_html_id("1/D' Onghia, Elena K."), "1_D__Onghia__Elena_K_")
+        self.assertEqual(tf.facet_id_to_html_id("Black Holes: One FOO]BAR"), "Black_Holes__One_FOO_BAR")
+        
+    def test_facet_get_next_level_prefix(self):
+        self.assertEqual(tf.facet_get_next_level_prefix("1/D' Onghia, E/D' Onghia, Elena K."), "2/D' Onghia, E/D' Onghia, Elena K./")
+        self.assertEqual(tf.facet_get_next_level_prefix("11/D' Onghia, E/D' Onghia, Elena K."), "12/D' Onghia, E/D' Onghia, Elena K./")
+        self.assertEqual(tf.facet_get_next_level_prefix("111/D' Onghia, Elena K."), "112/D' Onghia, Elena K./")
+        
+    def test_update_param_url_query_str(self):
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', '', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'foobar', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'foobar', 'newval'), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'db_key', 'newval'), 'q=author%3A%22civano%22&sort_type=DATE&db_key=newval')
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=foo', 'sort_type', 'bar'), 'q=author%3A%22civano%22&sort_type=bar&db_key=ASTRONOMY')
+        self.assertEqual(tf.update_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=foo', 'sort_type', 'bar', 'foo'), 'q=author%3A%22civano%22&sort_type=DATE&sort_type=bar&db_key=ASTRONOMY')
+    
+    def test_insert_param_url_query_str(self):
+        self.assertEqual(tf.insert_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', '', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.insert_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'foo', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.insert_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'foo', 'bar'), 'q=author%3A%22civano%22&sort_type=DATE&foo=bar&db_key=ASTRONOMY')
+        self.assertEqual(tf.insert_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'sort_type', 'bar'), 'q=author%3A%22civano%22&sort_type=DATE&sort_type=bar&db_key=ASTRONOMY')
+
+    def test_remove_param_url_query_str(self):
+        self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', '', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'foo', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE')
+        self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'db_key', ''), 'q=author%3A%22civano%22&sort_type=DATE')
+        self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=bar', 'sort_type', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY')
+        self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=bar', 'sort_type', 'bar'), 'q=author%3A%22civano%22&sort_type=DATE&db_key=ASTRONOMY')
+
 
 
 if __name__ == '__main__':

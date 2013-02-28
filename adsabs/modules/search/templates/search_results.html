@@ -2,7 +2,7 @@
 {% from "macros/record_list_macros/results.html" import render_search_result with context %}
 {% from "macros/record_list_macros/facets.html" import render_facet_box, render_2level_hier_facet_box, render_applied_facets_box with context %}
 {% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
-{% from "macros/record_list_macros/button_menu.html" import render_re_sort with context %}
+{% from "macros/record_list_macros/button_menu.html" import render_re_sort, render_export_menu, render_toggle_all_paper_list with context %}
 {% from "macros/search_macros.html" import render_search_form with context %}
 
 {% extends "layout.html" %}
@@ -15,6 +15,8 @@
 
 {{ render_search_form(form) }}
 
+<script type="text/javascript" src="{{ url_for('static', filename='js/facets_components.js') }}?app_version={{ config.APP_VERSION }}"></script>
+
 <div class="container searchResults">
 	<div class="row">
 		<div class="span3" id="facets">
@@ -26,20 +28,19 @@
 						</div>
 					</div>
 				</div>
-			{{ render_2level_hier_facet_box('aut_f', 'Authors', resp, open=True) }}
-			{{ render_facet_box('key_f', 'Keywords', resp) }}
-			{{ render_facet_box('bib_f', 'Publications', resp) }}
-			{{ render_facet_box('prop_f', 'Refereed status', resp, limit_to=['refereed', 'not refereed'], facetid_html='refereed_f') }}
-			{{ render_facet_box('bibgr_f', 'Bib Groups', resp) }}
-			{{ render_2level_hier_facet_box('grant_f', 'Grants', resp) }}
-			{{ render_facet_box('data_f', 'Data', resp) }}
-			{{ render_facet_box('vizier_f', 'Vizier Tables', resp) }}
-			{{ render_facet_box('year_f', 'Year', resp) }}
-			{#{ render_facet_box('prop_f', 'Property', resp) }#}
+			{{ render_2level_hier_facet_box('templ_aut_f', resp) }}
+			{{ render_facet_box('templ_key_f', resp) }}
+			{{ render_facet_box('templ_bib_f', resp) }}
+			{{ render_facet_box('templ_refereed_f', resp) }}
+			{{ render_facet_box('templ_bibgr_f', resp) }}
+			{{ render_2level_hier_facet_box('templ_grant_f', resp) }}
+			{{ render_facet_box('templ_data_f', resp) }}
+			{{ render_facet_box('templ_vizier_f', resp) }}
+			{{ render_facet_box('templ_year_f', resp) }}
 			</div>
 		</div>
 		<div class="span9 noMarginSpan" id="results">
-			<form action="">
+			<form id="search_results_form" action="">
 				<div class="container-fluid">
 				{# The facet bar #}
 				{% if resp.get_facet_parameters() %}
@@ -47,13 +48,16 @@
 				{% endif %}		
 				{# Navbar on top of the results #}
 					<div class="row-fluid well well-small">
-						<div class="span4 firstspan">
+						<div class="span5 firstspan">
+							{{ render_toggle_all_paper_list() }}
 							{{ render_result_numbers(resp) }}
 						</div>
-						<div class="span3 pull-right">
+						
+						<div class="span4 pull-right">
 							<!-- button class="btn pull-right">Sort</button-->
 							<!-- button class="btn pull-right">More</button-->
 							{{ render_re_sort(resp) }}
+							{{ render_export_menu() }}
 						</div>
 					</div>
 				{# The actual results #}
@@ -69,7 +73,7 @@
 
 {% endblock %}
 
-{% if g.conf_params['PRINT_DEBUG_TEMPLATE'] %}
+{% if config.PRINT_DEBUG_TEMPLATE %}
 	{% block debugSection %}
 		Request to SOLR: {{ resp.request.get_raw_request_url() }}
 	{% endblock %}
