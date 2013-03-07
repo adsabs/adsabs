@@ -89,26 +89,29 @@
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 			<div class="accordion-inner">
-				<ul id="facetList{{ facetid_html }}" class="unstyled">
-				{% for elem in resp.get_facets_fields(facetid, hierarchical=True) %}
-					<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
-					<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }}{% if elem[4] in facet_ids_to_open %} openByDefault{% endif %}" 
-						data-id_sublevel="second_level_{{ elem[4]|facet_to_id }}"
-						data-templ_facetid="{{ templ_facetid }}"
-						data-query_params_url="{{ request.query_string }}"
-						data-facet_prefix_next_level="{{ elem[4]|facet_next_level_prefix }}"
-						onclick="FacetsComponents.hierarchical_level_two_builder(this);"></span>
-					{% if elem[3] != 'selected' %}
-		  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
-		  			{% else %}
-		  				{{ elem[1] }} ({{ elem[2] }}) 
-					  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
-		  			{% endif %}
-					<div id="second_level_{{ elem[4]|facet_to_id }}" class="emptySubFacets collapse"></div>
-					</li>
-				{% endfor %}
-				</ul>
-				<a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
+				<form action="">
+					<ul id="facetList{{ facetid_html }}" class="unstyled">
+					{% for elem in resp.get_facets_fields(facetid, hierarchical=True) %}
+						<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
+							<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }}{% if elem[4] in facet_ids_to_open %} openByDefault{% endif %}" 
+								data-id_sublevel="second_level_{{ elem[4]|facet_to_id }}"
+								data-templ_facetid="{{ templ_facetid }}"
+								data-query_params_url="{{ request.query_string }}"
+								data-facet_prefix_next_level="{{ elem[4]|facet_next_level_prefix }}"
+								onclick="FacetsComponents.hierarchical_level_two_builder(this);"></span>
+							{# <input class="checkboxfacet checkboxclass_{{ facetid_html }}" type="checkbox" data-value="{{ elem[4] }}" onchange=""/> #}
+							{% if elem[3] != 'selected' %}
+				  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
+				  			{% else %}
+				  				{{ elem[1] }} ({{ elem[2] }}) 
+							  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+				  			{% endif %}
+							<div id="second_level_{{ elem[4]|facet_to_id }}" class="emptySubFacets collapse"></div>
+						</li>
+					{% endfor %}
+					</ul>
+					<a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
+				</form>
 			</div>
 		</div>
 	</div>

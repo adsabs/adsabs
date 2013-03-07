@@ -1,20 +1,22 @@
 {# Global imports #}
 {% from "macros/record_list_macros/results.html" import render_search_result with context %}
 {% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
-{% from "macros/record_list_macros/button_menu.html" import render_re_sort with context %}
+{% from "macros/record_list_macros/button_menu.html" import render_re_sort, render_toggle_all_paper_list, render_export_menu with context %}
 
 {% macro render_list_articles(list_articles, blueprint, bibcode) %}
 <form action="">
 	<div class="container-fluid">	
 	{# Navbar on top of the results #}
 		<div class="row-fluid well well-small">
-			<div class="span4 firstspan">
+			<div class="span5 firstspan">
+				{{ render_toggle_all_paper_list() }}
 				{{ render_result_numbers(list_articles, blueprint, bibcode) }}
 			</div>
-			<div class="span2 pull-right">
+			<div class="span4 pull-right">
 				<!-- button class="btn pull-right">Sort</button-->
 				<!-- button class="btn pull-right">More</button-->
 				{{ render_re_sort(list_articles, blueprint, bibcode) }}
+				{{ render_export_menu() }}
 			</div>
 		</div>
 	{# The actual results #}

@@ -195,6 +195,10 @@ div.emptySubFacets {
 	width: 50px;	
 }
 
+input.checkboxfacet {
+	margin-bottom: 5px;	
+}
+
 /*********************/
 /* Abstract*/
 div.bibcodeHeader {
