@@ -483,7 +483,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         rv = self.client.get('/api/record/2000A&AS..143...85A?dev_key=foo_dev_key')
         resp = loads(rv.data)
         self.assertIn('id', resp)
-        rv = self.client.get('/api/record/hep-th/9108008?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/1005.1529?dev_key=foo_dev_key')
         resp = loads(rv.data)
         self.assertIn('id', resp)
         rv = self.client.get('/api/record/10.1126/science.1.19.520?dev_key=foo_dev_key')
