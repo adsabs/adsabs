@@ -4,6 +4,7 @@ Created on Nov 12, 2012
 @author: jluker
 '''
 
+import mongobox
 import fixtures
 import unittest2
 from simplejson import dumps
@@ -18,22 +19,29 @@ from adsabs.app import create_app
 class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
     
     def setUp(self):
+        self.box = mongobox.MongoBox(scripting=True, auth=True)
+        self.box.start()
+        self.boxclient = self.box.client()
+        self.boxclient['admin'].add_user('foo','bar')
+        self.boxclient['admin'].authenticate('foo','bar')
+        self.boxclient['test'].add_user('test','test')
+        
         config.TESTING = True
+        config.MONGOALCHEMY_HOST = 'localhost'
+        config.MONGOALCHEMY_PORT = self.box.port
         config.MONGOALCHEMY_DATABASE = 'test'
+        config.MONGOALCHEMY_USER = 'test'
+        config.MONGOALCHEMY_PASSWORD = 'test'
         config.LOGGING_CONFIG = None
         config.CSRF_ENABLED = False
+        
         self.app = create_app(config)
-        
-        from adsabs.extensions import mongodb
-        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
-        
-        self.insert_user = user_creator()
         self.client = self.app.test_client()
         
-    def tearDown(self):
+        self.insert_user = user_creator()
         
-        from adsabs.extensions import mongodb
-        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
+    def tearDown(self):
+        self.box.stop()
         
 def user_creator():
     def func(username, developer=False, dev_perms=None, level=None):

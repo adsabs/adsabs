@@ -65,6 +65,8 @@ def _configure_logging(app):
             collection=config.LOGGING_MONGO_COLLECTION,
             host=config.MONGOALCHEMY_SERVER,
             port=config.MONGOALCHEMY_PORT,
+            username=config.MONGOALCHEMY_USER,
+            password=config.MONGOALCHEMY_PASSWORD,
             level=getattr(logging, config.LOGGING_MONGO_LEVEL)
         )
         logger.addHandler(handler)

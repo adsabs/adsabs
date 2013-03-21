@@ -40,6 +40,9 @@ class AppConfig(object):
     MONGOALCHEMY_SERVER = 'localhost'
     MONGOALCHEMY_PORT = 27017
     MONGOALCHEMY_SAFE_SESSION = False
+    MONGOALCHEMY_SERVER_AUTH = False
+    MONGOALCHEMY_USER = 'adsabs'
+    MONGOALCHEMY_PASSWORD = 'adsabs'
     
     SOLR_URL = 'http://adswhy:9000/solr/collection1'
     SOLR_TIMEOUT = 300
