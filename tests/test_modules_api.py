@@ -304,16 +304,6 @@ class APITests(AdsabsBaseTestCase):
         
 class ApiUserTest(AdsabsBaseTestCase):
     
-    def setUp(self):
-        config.TESTING = True
-        config.MONGOALCHEMY_DATABASE = 'test'
-        self.app = create_app(config)
-        
-        from adsabs.extensions import mongodb
-        mongodb.session.db.connection.drop_database('test') #@UndefinedVariable
-        
-        self.insert_user = user_creator()
-        
     def test_permission_checks(self):
         
         self.insert_user("foo", developer=True)
