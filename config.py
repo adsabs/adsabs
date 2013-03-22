@@ -42,7 +42,7 @@ class AppConfig(object):
     MONGOALCHEMY_SAFE_SESSION = False
     MONGOALCHEMY_SERVER_AUTH = False
     MONGOALCHEMY_USER = 'adsabs'
-    MONGOALCHEMY_PASSWORD = 'adsabs'
+    MONGOALCHEMY_PASSWORD = ''
     
     SOLR_URL = 'http://adswhy:9000/solr/collection1'
     SOLR_TIMEOUT = 300
