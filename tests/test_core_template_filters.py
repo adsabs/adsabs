@@ -42,6 +42,11 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         self.assertEqual(tf.format_ads_facet_str('0/Foobar'), 'Foobar')
         self.assertEqual(tf.format_ads_facet_str('1/Foo/bar'), 'bar')
         self.assertEqual(tf.format_ads_facet_str('Foo/bar'), 'Foo/bar')
+        
+    def test_format_complex_ads_facet_str(self):
+        self.assertEqual(tf.format_complex_ads_facet_str('Foobar'), 'Foobar')
+        self.assertEqual(tf.format_complex_ads_facet_str('("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")'), '"Civano, Francesca M." OR "Elvis, Martin"')
+        self.assertEqual(tf.format_complex_ads_facet_str('(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")'), '-"Civano, Francesca M." AND -"Elvis, Martin"')
        
     def test_safe_html_unescape(self):
         self.assertEqual(tf.safe_html_unescape('Foobar'), u'Foobar')
@@ -90,7 +95,6 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE', 'db_key', ''), 'q=author%3A%22civano%22&sort_type=DATE')
         self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=bar', 'sort_type', ''), 'q=author%3A%22civano%22&db_key=ASTRONOMY')
         self.assertEqual(tf.remove_param_url_query_str('q=author%3A%22civano%22&db_key=ASTRONOMY&sort_type=DATE&sort_type=bar', 'sort_type', 'bar'), 'q=author%3A%22civano%22&sort_type=DATE&db_key=ASTRONOMY')
-
 
 
 if __name__ == '__main__':

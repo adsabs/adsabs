@@ -64,6 +64,28 @@ def format_ads_facet_str(value):
         return value
     return split_str[-1]
 
+def format_complex_ads_facet_str(value):
+    """
+    Returns a string that can be used as human readable facet
+    """
+    value = value.strip('()')
+    ret_value = []
+    tmp_quoted_str = []
+    quoted_section = False
+    for char in value:
+        if char != '"' and not quoted_section:
+            ret_value.append(char)
+        elif char != '"' and quoted_section:
+            tmp_quoted_str.append(char)
+        elif char == '"' and not quoted_section:
+            quoted_section = True
+            ret_value.append(char)
+        elif char == '"' and quoted_section:
+            quoted_section = False
+            ret_value = ret_value + list(format_ads_facet_str(''.join(tmp_quoted_str)))
+            ret_value.append(char)
+    return ''.join(ret_value)
+
 def safe_html_unescape(html_str):
     """
     Returns a safely unescaped html string where the unsafe tags like <script> and their content is removed
@@ -204,6 +226,10 @@ def configure_template_filters(app):
     @app.template_filter('format_ads_facet_str')
     def f_a_f_s(facet_string):
         return format_ads_facet_str(facet_string)
+    
+    @app.template_filter('format_complex_ads_facet_str')
+    def f_c_a_f_s(facet_string):
+        return format_complex_ads_facet_str(facet_string)
     
     @app.template_filter('safe_html_unescape')
     def s_h_f(html_string):

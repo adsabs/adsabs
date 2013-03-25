@@ -12,9 +12,11 @@ FacetsComponents.sigle_level_manager = function(facetid_html)
 	//Code to change the icon in the section containing the title of the facets 
 	$('#collapse'+facetid_html).on('hide', function () {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-right');
+		$('#apply_menu_'+facetid_html).hide();
 	});
 	$('#collapse'+facetid_html).on('show', function () {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-down');
+		$('#apply_menu_'+facetid_html).show();
 	});
 	//Code to show/hide the facets
 	var max_facets = 5;
@@ -66,9 +68,11 @@ FacetsComponents.hierarchical_level_one_manager = function(facetid_html)
 	//Code to change the icon in the section containing the title of the facets 
 	$('#collapse'+facetid_html).on('hide', function () {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-right');
+		$('#apply_menu_'+facetid_html).hide();
 	});
 	$('#collapse'+facetid_html).on('show', function () {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-down');
+		$('#apply_menu_'+facetid_html).show();
 	});
 	//Code to show/hide the facets
 	var max_facets = 5;
@@ -125,8 +129,8 @@ FacetsComponents.hierarchical_level_one_manager = function(facetid_html)
 FacetsComponents.hierarchical_level_two_builder = function(node_obj)
 {
 	//first of all I change the icon after I click
-	$(node_obj).toggleClass('icon-plus-sign');
-	$(node_obj).toggleClass('icon-minus-sign');
+	$(node_obj).toggleClass('icon-chevron-right');
+	$(node_obj).toggleClass('icon-chevron-down');
 	//I toggle the visibility of the second level
 	var id_sublevel = $(node_obj).data('id_sublevel');
 	$('#'+id_sublevel).toggleClass('in');
@@ -201,6 +205,99 @@ FacetsComponents.hierarchical_level_two_manager = function(facetid_html)
 };
 
 
+/*
+ * Function that handles the selection of multiple facets in the same group
+ */
+FacetsComponents.multiple_facet_selection = function(node_obj)
+{
+	//I get the value of the current checkbox and I add/remove it to the list of selected checkboxes
+	var facetid_html = $(node_obj).data('facetid_html');
+	//I extract the original version of the facet id: I need it because the facet id for some facets is different from the one displayed in the interface (i.e. refereed and properties in general)
+	var facetid_orig = $(node_obj).data('facetid_original');
+	if (facetid_orig === undefined)
+		facetid_orig = null
+	var cur_value = $(node_obj).data('value');
+	var cur_selection = $('#facetForm_'+facetid_html).data('selected_checkbox_facets');
+	if ($(node_obj).is(':checked'))
+		cur_selection[cur_value] = true;
+	else
+		delete cur_selection[cur_value];
+	
+	//then I call the function to manage the button for the options to apply
+	this.apply_facet_manager(facetid_html, facetid_orig);
+};
+
+/*
+ * Function that manages tha "apply" button of a group of facets
+ */
+FacetsComponents.apply_facet_manager = function(facetid_html, facetid_orig)
+{
+	//I get the list of selected facets
+	var cur_selection = $('#facetForm_'+facetid_html).data('selected_checkbox_facets');
+	//if the number of selected facets is == 0 I disable the "apply menu" 
+	if (Object.keys(cur_selection).length == 0)
+	{
+		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_excl').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+'>ul>li.op_excl').addClass('disabled').on('click', function(){return false;});
+		if (! $('#apply_menu_'+facetid_html+' >a').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+' >a').addClass('disabled');
+	}
+	//if the number of selected facets is == 1 I enable the "apply menu" with only the exclude
+	else if (Object.keys(cur_selection).length == 1)
+	{
+		if ($('#apply_menu_'+facetid_html+' >a').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+' >a').removeClass('disabled');
+		if ($('#apply_menu_'+facetid_html+'>ul>li.op_excl').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+'>ul>li.op_excl').removeClass('disabled').on('click', function(event){FacetsComponents.apply_facet_url_manager(facetid_html, facetid_orig, 'EXCL'); event.stopPropagation();});
+		//I disable the and and or
+		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_and').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+'>ul>li.op_and').addClass('disabled').on('click', function(){return false;});
+		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_or').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+'>ul>li.op_or').addClass('disabled').on('click', function(){return false;});
+	}
+	//if the number is > 1 I enable the full menu
+	else if (Object.keys(cur_selection).length > 1)
+	{
+		if ($('#apply_menu_'+facetid_html+' >a').hasClass('disabled'))
+			$('#apply_menu_'+facetid_html+' >a').removeClass('disabled');
+		//I add the onclick to "and" and "or"
+		$('#apply_menu_'+facetid_html+'>ul>li.op_and').removeClass('disabled').on('click', function(event){FacetsComponents.apply_facet_url_manager(facetid_html, facetid_orig, 'AND'); event.stopPropagation();});
+		$('#apply_menu_'+facetid_html+'>ul>li.op_or').removeClass('disabled').on('click', function(event){FacetsComponents.apply_facet_url_manager(facetid_html, facetid_orig, 'OR'); event.stopPropagation();});
+	}
+};
+
+/*
+ * Function that manages the actual creation of a new url for the selected facets based on the kind of selection
+ */
+FacetsComponents.apply_facet_url_manager = function(facetid_html, facetid_orig, op_type)
+{
+	op_type = op_type.toUpperCase();
+	//I get the object containing the selected facets
+	var cur_selection = Object.keys($('#facetForm_'+facetid_html).data('selected_checkbox_facets'));
+	//then I create the url for the facets to apply
+	var location_url = window.location.href+'&';
+	if (facetid_orig == null)
+		location_url += facetid_html;
+	else
+		location_url += facetid_orig;
+	location_url += '=(';
+	for (var idx in cur_selection)
+	{
+		if (op_type != 'EXCL')
+			location_url += encodeURIComponent('"'+cur_selection[idx]+'"');
+		else
+			location_url += encodeURIComponent('-"'+cur_selection[idx]+'"');
+		if (idx < (cur_selection.length-1))
+		{
+			if ((op_type == 'AND') || (op_type == 'OR'))
+				location_url += '+' + op_type + '+';
+			else if (op_type == 'EXCL')
+				location_url += '+AND+';
+		}
+	}
+	location_url +=')';
+	window.location = location_url.replace('%20', '+').replace(' ', '+');
+};
 
 
 

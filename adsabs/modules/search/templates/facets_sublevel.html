@@ -26,9 +26,21 @@
 <ul class="unstyled subFacet">
 	{% for facet in facets_list %}
 		{% if facet[-2] != 'selected' %}
-			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{% if loop.index > 5 %} strHidden{% endif %}"><a href="{{ url_for('search.search') }}?{{ base_query_string|ins_par_url(facetid, facet[-1]) }}">{{ facet[-4] }} ({{ facet[-3] }})</a></li>
+			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{% if loop.index > 5 %} strHidden{% endif %}">
+			<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
+									type="checkbox" 
+									data-value="{{ facet[-1] }}" 
+									data-facetid_html="{{ facetid_html }}"
+									onchange="FacetsComponents.multiple_facet_selection(this);"/>
+			<a href="{{ url_for('search.search') }}?{{ base_query_string|ins_par_url(facetid, facet[-1]) }}">{{ facet[-4] }} ({{ facet[-3] }})</a></li>
 		{% else %}
-			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{#% if loop.index > 5 %} strHidden{% endif %#}">{{ facet[-4] }} ({{ facet[-3] }}) 
+			<li class="subelem_{{ facetid_html }}_{{ facet_group_id }}{#% if loop.index > 5 %} strHidden{% endif %#}">
+				<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
+									type="checkbox" 
+									data-value="{{ facet[-1] }}" 
+									data-facetid_html="{{ facetid_html }}"
+									onchange="FacetsComponents.multiple_facet_selection(this);"/>
+				{{ facet[-4] }} ({{ facet[-3] }}) 
 				<a href="{{ url_for('search.search') }}?{{ base_query_string|rem_par_url(facetid, facet[-1]) }}" title="remove &quot;{{ facet[-4] }}&quot;"><i class="icon-remove-sign"></i></a>
 			</li>
 		{% endif %}

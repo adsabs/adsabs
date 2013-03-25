@@ -34,6 +34,10 @@ div.centered {
 	margin-bottom:0px	
 }
 
+.hidden_elem {
+	display: none;	
+}
+
 /*********************/
 /*Debug section*/
 #debugSection {
@@ -199,6 +203,11 @@ input.checkboxfacet {
 	margin-bottom: 5px;	
 }
 
+div.apply_facets_menu{
+	
+}
+
+
 /*********************/
 /* Abstract*/
 div.bibcodeHeader {
@@ -281,5 +290,3 @@ div.absview div.row-fluid {
 div.absview div.row-fluid label {
 	font-weight: bold;
 }
-
-

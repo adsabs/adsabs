@@ -19,25 +19,46 @@
 		<div class="accordion-heading">
 			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
 				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong> 
+				<div id="apply_menu_{{ facetid_html }}" class="dropdown pull-right apply_facets_menu {% if not open and not resp.get_facet_param_field(facetid) %}hidden_elem{% endif %}">
+					<a class="btn btn-mini dropdown-toggle disabled" data-toggle="dropdown">apply <span class="caret"></span></a>
+					<ul class="dropdown-menu dropdown-menu-small">
+						<li class="disabled op_and"><a class="" onclick="">and</a></li>
+						<li class="disabled op_or"><a class="" onclick="">or</a></li>
+						<li class="disabled op_excl"><a onclick="">exclude</a></li>
+					</ul>
+				</div>
 			</div>
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 			<div class="accordion-inner">
-			  <ul id="facetList{{ facetid_html }}" class="unstyled">
-			  	{% for elem in resp.get_facets_fields(facetid) %}
-			  		{% if not limit_to %}
-				  		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
-				  		{% if elem[2] !='selected' %}
-				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
-				  		{% else %}
-				  			{{ elem[0] }} ({{ elem[1] }}) 
-				  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
-				  		{% endif %}
-				  		</li>
-				  	{% else %}
-				  		{% for limit in limit_to %}
-				  			{% if elem[0] == limit %}
-				  				<li>
+				<form id="facetForm_{{ facetid_html }}"
+						data-selected_checkbox_facets="{}">
+					<ul id="facetList{{ facetid_html }}" class="unstyled">
+						{% for elem in resp.get_facets_fields(facetid) %}
+						{% if not limit_to %}
+					 		<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
+					 			<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
+									type="checkbox" 
+									data-value="{{ elem[0] }}" 
+									data-facetid_html="{{ facetid_html }}"
+									onchange="FacetsComponents.multiple_facet_selection(this);"/>
+					 		{% if elem[2] !='selected' %}
+					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					 		{% else %}
+					 			{{ elem[0] }} ({{ elem[1] }}) 
+					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+					 		{% endif %}
+					 		</li>
+					 	{% else %}
+					 		{% for limit in limit_to %}
+					 			{% if elem[0] == limit %}
+					 				<li>
+					 					<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
+											type="checkbox" 
+											data-value="{{ elem[0] }}" 
+											data-facetid_html="{{ facetid_html }}"
+											data-facetid_original="{{ facetid }}"
+											onchange="FacetsComponents.multiple_facet_selection(this);"/>
 					  			{% if elem[2] !='selected' %}
 					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
 						  		{% else %}
@@ -45,12 +66,13 @@
 						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 						  		{% endif %}
 						  		</li>
-				  			{% endif %}
-				  		{% endfor %}
-				  	{% endif %}
-			  	{% endfor %}
-			  </ul>
-			  <a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
+					 			{% endif %}
+					 		{% endfor %}
+					 	{% endif %}
+						{% endfor %}
+					</ul>
+					<a class="less facetsMoreLess muted pull-left"><small>less...</small></a><a class="more facetsMoreLess muted pull-right"><small>more...</small></a>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -85,21 +107,34 @@
 		<div class="accordion-heading">
 			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
 				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong>
+				<div id="apply_menu_{{ facetid_html }}" class="dropdown pull-right apply_facets_menu {% if not open and not resp.get_facet_param_field(facetid) %}hidden_elem{% endif %}">
+					<a class="btn btn-mini dropdown-toggle disabled" data-toggle="dropdown">apply <span class="caret"></span></a>
+					<ul class="dropdown-menu dropdown-menu-small">
+						<li class="disabled op_and"><a class="" onclick="">and</a></li>
+						<li class="disabled op_or"><a class="" onclick="">or</a></li>
+						<li class="disabled op_excl"><a onclick="">exclude</a></li>
+					</ul>
+				</div>
 			</div>
 		</div>
 		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
 			<div class="accordion-inner">
-				<form action="">
+				<form id="facetForm_{{ facetid_html }}"
+						data-selected_checkbox_facets="{}">
 					<ul id="facetList{{ facetid_html }}" class="unstyled">
 					{% for elem in resp.get_facets_fields(facetid, hierarchical=True) %}
 						<li{% if loop.index > 5 %} class="strHidden"{% endif %}>
-							<span class="icon-plus-sign expCollSubFacet expCollSubFacet{{ facetid_html }}{% if elem[4] in facet_ids_to_open %} openByDefault{% endif %}" 
+							<span class="icon-chevron-right expCollSubFacet expCollSubFacet{{ facetid_html }}{% if elem[4] in facet_ids_to_open %} openByDefault{% endif %}" 
 								data-id_sublevel="second_level_{{ elem[4]|facet_to_id }}"
 								data-templ_facetid="{{ templ_facetid }}"
 								data-query_params_url="{{ request.query_string }}"
 								data-facet_prefix_next_level="{{ elem[4]|facet_next_level_prefix }}"
 								onclick="FacetsComponents.hierarchical_level_two_builder(this);"></span>
-							{# <input class="checkboxfacet checkboxclass_{{ facetid_html }}" type="checkbox" data-value="{{ elem[4] }}" onchange=""/> #}
+							<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
+									type="checkbox" 
+									data-value="{{ elem[4] }}" 
+									data-facetid_html="{{ facetid_html }}"
+									onchange="FacetsComponents.multiple_facet_selection(this);"/>
 							{% if elem[3] != 'selected' %}
 				  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
 				  			{% else %}
@@ -149,14 +184,14 @@
 						Data :
 					{% elif elem[0] == 'vizier_f' %}
 						Vizier :
-					{% elif elem[0] == 'prop_f' and elem[1] in ['refereed', 'not refereed'] %}
+					{% elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'not refereed' in elem[1]) %}
 						
 					{% else %}
 						{{ elem[0] }} :
 					{% endif %}
-					{{ elem[1]|format_ads_facet_str }} 
+					{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }} 
 					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" 
-					title="remove &quot;{{ elem[1]|format_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
+					title="remove &quot;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 				</span>
 			{% endfor %}
 		</div>
