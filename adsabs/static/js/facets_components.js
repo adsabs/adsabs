@@ -10,11 +10,12 @@ var FacetsComponents = new Object();
 FacetsComponents.sigle_level_manager = function(facetid_html)
 {
 	//Code to change the icon in the section containing the title of the facets 
-	$('#collapse'+facetid_html).on('hide', function () {
+	$('#collapse'+facetid_html).on('hide', function() {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-right');
 		$('#apply_menu_'+facetid_html).hide();
+		
 	});
-	$('#collapse'+facetid_html).on('show', function () {
+	$('#collapse'+facetid_html).on('show', function() {
 		$('#icon'+facetid_html).attr('class', 'icon-chevron-down');
 		$('#apply_menu_'+facetid_html).show();
 	});

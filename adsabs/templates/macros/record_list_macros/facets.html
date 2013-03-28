@@ -46,7 +46,7 @@
 					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
 					 		{% else %}
 					 			{{ elem[0] }} ({{ elem[1] }}) 
-					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 					 		{% endif %}
 					 		</li>
 					 	{% else %}
@@ -63,7 +63,7 @@
 					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
 						  		{% else %}
 						  			{{ elem[0] }} ({{ elem[1] }}) 
-						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
 						  		{% endif %}
 						  		</li>
 					 			{% endif %}
@@ -129,7 +129,9 @@
 								data-templ_facetid="{{ templ_facetid }}"
 								data-query_params_url="{{ request.query_string }}"
 								data-facet_prefix_next_level="{{ elem[4]|facet_next_level_prefix }}"
-								onclick="FacetsComponents.hierarchical_level_two_builder(this);"></span>
+								onclick="FacetsComponents.hierarchical_level_two_builder(this);"
+								data-rel="bootstrap_tooltip"
+								title="View all variations for &ldquo;{{ elem[1] }}&rdquo;"></span>
 							<input class="checkboxfacet checkboxclass_{{ facetid_html }}" 
 									type="checkbox" 
 									data-value="{{ elem[4] }}" 
@@ -139,7 +141,7 @@
 				  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
 				  			{% else %}
 				  				{{ elem[1] }} ({{ elem[2] }}) 
-							  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+							  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
 				  			{% endif %}
 							<div id="second_level_{{ elem[4]|facet_to_id }}" class="emptySubFacets collapse"></div>
 						</li>
@@ -190,8 +192,8 @@
 						{{ elem[0] }} :
 					{% endif %}
 					{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }} 
-					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" 
-					title="remove &quot;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
+					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" data-rel="bootstrap_tooltip" 
+					   title="remove &ldquo;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&rdquo;"><i class="icon-remove-sign"></i></a>
 				</span>
 			{% endfor %}
 		</div>
@@ -200,7 +202,7 @@
 			{% for elem in selected_facets %}
 				{% do base_remove_all.append(base_remove_all[-1]|rem_par_url(elem[0], elem[1])) %}				
 			{% endfor %}
-			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}" class="clearAll">Clear all</a>
+			<a href="{{ url_for('search.search') }}?{{ base_remove_all[-1] }}" class="clearAll"  data-rel="bootstrap_tooltip" title="Remove all applied facets">Clear all</a>
 		</div>
 	</div>
 {% endmacro %}

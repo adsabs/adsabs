@@ -41,7 +41,7 @@
 									data-facetid_html="{{ facetid_html }}"
 									onchange="FacetsComponents.multiple_facet_selection(this);"/>
 				{{ facet[-4] }} ({{ facet[-3] }}) 
-				<a href="{{ url_for('search.search') }}?{{ base_query_string|rem_par_url(facetid, facet[-1]) }}" title="remove &quot;{{ facet[-4] }}&quot;"><i class="icon-remove-sign"></i></a>
+				<a href="{{ url_for('search.search') }}?{{ base_query_string|rem_par_url(facetid, facet[-1]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ facet[-4] }}&quot;"><i class="icon-remove-sign"></i></a>
 			</li>
 		{% endif %}
 	{% endfor %}
@@ -53,7 +53,10 @@
 <script type="text/javascript">
 	$(document).ready(
 		function(){
+			//I force the opening of the second level after this content is back 
 			FacetsComponents.hierarchical_level_two_manager('subelem_{{ facetid_html }}_{{ facet_group_id }}');
+			//I enable the tooltip to the dynamically generated content 
+			TooltipManager.enable_tooltip('li.subelem_{{ facetid_html }}_{{ facet_group_id }} *[data-rel=bootstrap_tooltip]');
 		}	
 	);
 </script>
