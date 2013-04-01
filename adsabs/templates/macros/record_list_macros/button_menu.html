@@ -18,6 +18,7 @@
 			{% else %}
 			title="Re-sort list of results"
 			{% endif %}
+			data-rel="bootstrap_tooltip"
 			>
 			Re-sort
 			{% if re_sort_type and re_sort_dir %}
@@ -125,7 +126,7 @@
 
 {# ###Macro to render toggle all button #}
 {% macro render_toggle_all_paper_list() %}
-<span class="btn" title="Toggle all" onclick="$('input[type=checkbox][name=bibcode]').prop('checked', function() {return !$(this).prop('checked')});">
+<span class="btn" data-rel="bootstrap_tooltip" title="Toggle all" onclick="$('input[type=checkbox][name=bibcode]').prop('checked', function() {return !$(this).prop('checked')});">
 	<i class="icon icon-check"></i>
 </span>
 {% endmacro %}
