@@ -114,10 +114,10 @@ class SolrResponse(object):
         query_parameters = self.get_facet_param_field(facet_name)
         
         if not hierarchical:
-            return [(elem[0], elem[1], 'selected') if elem[0] in query_parameters else (elem[0], elem[1], '') for elem in facets_tuples_list]
+            return sorted([(elem[0], elem[1], 'selected') if elem[0] in query_parameters else (elem[0], elem[1], '') for elem in facets_tuples_list], key= lambda x: (-x[1], x[0]))
         else:
             return sorted([tuple(elem[0].split('/') + [elem[1], 'selected', elem[0]]) if elem[0] in query_parameters else tuple(elem[0].split('/') + [elem[1], '', elem[0]]) for elem in facets_tuples_list], key= lambda x: (-x[-3], x[-4]))
-    
+        
     def get_hier_facets_fields(self, facet_name):
         """
         Like get_facets_fields but returns a more complex structure for the hierarchical facets 

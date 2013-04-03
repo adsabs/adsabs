@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
 	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
 	<!-- bootstrap stuff -->
 	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
@@ -15,14 +15,21 @@
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
 	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
+	<!-- jQuery UI stuff -->
+	<link href="{{ url_for('static', filename='jquery-ui/css/smoothness/jquery-ui-1.10.2.custom.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
+	<script type="text/javascript" src="{{ url_for('static', filename='jquery-ui/js/jquery-ui-1.10.2.custom.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	
+	<!-- d3 stuff -->
+	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v3.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/vega.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	
+	<!-- BEER Specific stuff -->
 	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
 	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	
 	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/spin.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/spin.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/record_list_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip_manager.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	

@@ -11,6 +11,9 @@ import re
 from werkzeug import url_decode, url_encode
 from flask import Markup
 import dicttoxml
+import math
+import sys
+import itertools
 
 
 from config import config
@@ -68,7 +71,7 @@ def format_complex_ads_facet_str(value):
     """
     Returns a string that can be used as human readable facet
     """
-    value = value.strip('()')
+    value = value.strip('()[]')
     ret_value = []
     tmp_quoted_str = []
     quoted_section = False
@@ -208,7 +211,96 @@ def remove_param_url_query_str(url_query_string, param_name, param_val=None):
     else:
         query_params.setlist(param_name, [facet_val for facet_val in query_params.getlist(param_name) if facet_val != param_val])
         return url_encode(query_params)
+
+
+def boundaries_for_range_facets(first, last, num_div):
+    """
+    returns an array of 'boundaries' for producing approx num_div
+    segments between first and last.  The boundaries are 'nicefied'
+    to factors of 5 or 10, so exact number of segments may be more
+    or less than num_div. Algorithm copied from Flot.
     
+    Because of arithmetic issues with creating boundaries that will
+    be turned into inclusive ranges, the FINAL boundary will be one
+    unit more than the actual end of the last range later computed.
+    
+    Translated from the Ruby function in the blacklight_range_limit add on
+    """
+    #Cribbed from Flot.  Round to nearby lower multiple of base
+    def floor_in_base(n, base):
+        return base * math.floor(n / base)
+    # arithmetic issues require last to be one more than the actual
+    # last value included in our inclusive range
+    last += 1
+    # code cribbed from Flot auto tick calculating, but leaving out
+    # some of Flot's options becuase it started to get confusing. 
+    delta = float(last - first) / num_div
+    # Don't know what most of these variables mean, just copying
+    # from Flot. 
+    dec = int(-1 * ( math.log10(delta) ))
+    magn = float(10 ** (-1 * dec))
+    # norm is between 1.0 and 10.0
+    if magn == 0:
+        norm = delta
+    else:
+        norm = (delta / magn)
+    
+    size = 10
+    if (norm < 1.5):
+        size = 1
+    elif (norm < 3):
+        size = 2
+        # special case for 2.5, requires an extra decimal
+        if (norm > 2.25 ):
+            size = 2.5
+            dec = dec + 1                
+    elif (norm < 7.5):
+        size = 5
+    size = size * magn
+    boundaries = []     
+    start = floor_in_base(first, size)
+    i = 0
+    prev = sys.float_info.max
+    v = 0
+    while ( v < last and v != prev):
+        #at the first cycle invert the values to have the same situation there was in ruby
+        if i == 0:
+            prev, v = v, prev
+        prev = v
+        v = start + i * size
+        boundaries.append(int(v))
+        i += 1
+    boundaries = list(set(boundaries))
+    boundaries = [x for x in boundaries if first < x < last]
+    ret_boundaries = [first]
+    ret_boundaries.extend(boundaries)
+    ret_boundaries.append(last)
+    return sorted(ret_boundaries)
+
+def numeric_facets_to_histogram(facets_list):
+    """
+    Function to transform a list of numeric facets in a list of values useful for an histogram representation
+    """
+    if len(facets_list) == 0:
+        return {'min':0, 'max':0, 'histogram':[((0, 0), 0)]}
+    #Remove the "Easter egg" from the search result
+    if facets_list[-1][0] == '2314':
+        facets_list.pop()
+    #convert facets to a dictionary for easy access 
+    facets_dict = dict([ elem[:2] for elem in facets_list])
+    #approx max number of buckets to create
+    num_div = 10
+    #I get the min and max value from the list
+    facets_list.sort()
+    try:
+        first, last = int(facets_list[0][0]), int(facets_list[-1][0])
+    except (ValueError, IndexError):
+        first, last = 0, 0
+    #extract the boundaries of each group
+    boundaries = boundaries_for_range_facets(first, last, num_div)
+    #fill the histogram
+    histogram = [((couple[0], couple[1]-1), sum([facets_dict.get(str(fac_year), 0) for fac_year in xrange(couple[0], couple[1])])) for couple in itertools.izip(boundaries[:-1], boundaries[1:])]
+    return {'min':first, 'max':last, 'histogram':histogram}
     
 def configure_template_filters(app):
     """
@@ -267,4 +359,8 @@ def configure_template_filters(app):
     @app.template_filter('rem_par_url')
     def r_p_u_q_s(url_query_string, param_name, param_val=None):
         return remove_param_url_query_str(url_query_string, param_name, param_val)
+    
+    @app.template_filter('numeric_facets_to_histogram')
+    def n_f_t_h(facets_list):
+        return numeric_facets_to_histogram(facets_list)
     

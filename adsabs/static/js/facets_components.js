@@ -300,5 +300,186 @@ FacetsComponents.apply_facet_url_manager = function(facetid_html, facetid_orig, 
 	window.location = location_url.replace('%20', '+').replace(' ', '+');
 };
 
+/*
+ * Function that creates the slider and sets up the the date facet
+ */
+FacetsComponents.date_facet_manager = function(all_facets, facetid_html)
+{
+	//Code to change the icon in the section containing the title of the facets 
+	$('#collapse'+facetid_html).on('hide', function () {
+		$('#icon'+facetid_html).attr('class', 'icon-chevron-right');
+	});
+	$('#collapse'+facetid_html).on('show', function () {
+		$('#icon'+facetid_html).attr('class', 'icon-chevron-down');
+	});
+	//fill the min and max input with the proper values 
+	$('#facetForm_'+facetid_html+' input[name=mindate]').val(all_facets['min']);
+	$('#facetForm_'+facetid_html+' input[name=maxdate]').val(all_facets['max']);
+	//Attach a function to the the min and max inputs
+	$('#facetForm_'+facetid_html+' input').on('change keyup', function(){FacetsComponents.button_date_facet_manager(facetid_html);});
+	//build the slider 
+	$( "#slider_"+facetid_html ).slider({
+		range: true,
+		min: all_facets['min'],
+		max: all_facets['max'],
+		values: [ all_facets['min'], all_facets['max'] ],
+		slide: function(event, ui){
+			//set the min a max values
+			$('#facetForm_'+facetid_html+' input[name=mindate]').val(ui.values[0]);
+			$('#facetForm_'+facetid_html+' input[name=maxdate]').val(ui.values[1]);
+			//enable or disable the button to apply the facet
+			FacetsComponents.button_date_facet_manager(facetid_html);
+		},
+	});
+	//create a plot of the dates
+	if (all_facets.min != 0 && all_facets.max!=0)
+		FacetsComponents.plot_dates_histogram(all_facets, facetid_html);
+};
+
+/*
+ * Function that takes care of the behaviour of the limit button for the date facet
+ */
+FacetsComponents.button_date_facet_manager = function(facetid_html)
+{
+	//extract all the needed
+	var min_val = $("#slider_"+facetid_html).slider("option", "min");
+	var cur_min_val = $('#facetForm_'+facetid_html+' input[name=mindate]').val();
+	var max_val = $("#slider_"+facetid_html).slider("option", "max");
+	var cur_max_val = $('#facetForm_'+facetid_html+' input[name=maxdate]').val();
+	//If everything is fine
+	if (isInt(cur_min_val) && isInt(cur_max_val) && (parseInt(cur_min_val)>=min_val) && (parseInt(cur_max_val)<=max_val) && (parseInt(cur_min_val)<=parseInt(cur_max_val)))
+	{
+		//remove the error class
+		if ($('#facetForm_'+facetid_html+' input').hasClass('date_facet_input_error'))
+			$('#facetForm_'+facetid_html+' input').removeClass('date_facet_input_error');
+		//change the slider
+		$("#slider_"+facetid_html).slider("values", 0, cur_min_val).slider("values", 1, cur_max_val);
+		//enable or disable the button
+		if (cur_min_val > min_val || cur_max_val < max_val)
+		{
+			$('span[data-rel="date_range_limit_'+facetid_html+'"]').removeClass('disabled').on('click', function(event){FacetsComponents.apply_date_facet_url(facetid_html); event.stopPropagation();});
+		}
+		else
+		{
+			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').on('click', function(){return false;});
+		}
+	}
+	else
+	{
+		//disable the click on the button
+		if (!$('span[data-rel="date_range_limit_'+facetid_html+'"]').hasClass('disabled'))
+			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').on('click', function(){return false;});
+		//show the error
+		if (!isInt(cur_min_val) || !(parseInt(cur_min_val)>=min_val))
+			$('#facetForm_'+facetid_html+' input[name=mindate]').addClass('date_facet_input_error');
+		if (!isInt(cur_max_val) || !(parseInt(cur_max_val)<=max_val))
+			$('#facetForm_'+facetid_html+' input[name=maxdate]').addClass('date_facet_input_error');
+		if (!(parseInt(cur_min_val)<=parseInt(cur_max_val)))
+		{
+			if(!$(document.activeElement).hasClass('date_facet_input_error'))
+				$(document.activeElement).addClass('date_facet_input_error');
+		}	
+	}
+};
+
+/*
+ * Function that builds a facet for the dates facets
+ */
+FacetsComponents.apply_date_facet_url = function(facetid_html)
+{
+	//and the other values
+	var min_date = $('#facetForm_'+facetid_html+' input[name=mindate]').val();
+	var max_date = $('#facetForm_'+facetid_html+' input[name=maxdate]').val();
+	//create the url for the facets to apply
+	var location_url = window.location.href+'&'+facetid_html+'=['+min_date+' TO '+max_date+']';
+	window.location = location_url;
+};
+
+/*
+ * Function that creates a plot of the dates
+ */
+FacetsComponents.plot_dates_histogram = function(all_facets, facetid_html)
+{
+	//simplify the structure of the data in imput
+	var toplot = all_facets.histogram.map(function(d){
+		if (d[0][0] == d[0][1])
+			return {"x":d[0][1], "y":d[1]};
+		else
+			return {"x":d[0][0]+'-'+d[0][1], "y":d[1]};
+	});
+	
+	//define some dimensions
+	var padding  = {"top": 10, "left": 35, "bottom": 50, "right": 10},
+		width = $('#histogram_'+facetid_html).width() - padding.left,
+		height = 200;
+	
+	var plot_spec ={
+			"width": width,
+			"height": height,
+			"padding": padding,
+			"data": [
+			    {
+			      "name": "year_range",
+			      "values": toplot
+			    }
+			],
+			"scales": [
+			    {"name":"x", "type":"ordinal", "range":"width", "domain":{"data":"year_range", "field":"data.x"}},
+			    {"name":"y", "range":"height", "nice":true, "domain":{"data":"year_range", "field":"data.y"}}
+			],
+			"axes": [
+			    {
+			    	"type":"x", 
+			    	"scale":"x",
+			    	"properties": {
+			    		"labels": {
+			    			"angle": {"value": -55},
+			    			"align": {"value": "right"},
+			    			"baseline": {"value": "middle"},
+			    			"fontSize": {"value": 10},
+			    		},
+			    	},
+			    },
+			    {
+			    	"type":"y", 
+			    	"scale":"y",
+			    	"format": "s", //d3 format style
+			    	"properties": {
+			    		"labels": {
+			    			"fontSize": {"value": 10},
+			    		},
+			    	},
+			    }
+			],
+			"marks": [
+			    {
+			      "type": "rect",
+			      "from": {"data":"year_range"},
+			      "properties": {
+			        "enter": {
+			          "x": {"scale":"x", "field":"data.x"},
+			          "width": {"scale":"x", "band":true, "offset":-1},
+			          "y": {"scale":"y", "field":"data.y"},
+			          "y2": {"scale":"y", "value":0}
+			        },
+			        "update": { "fill": {"value":"steelblue"} },
+			        //"hover": { "fill": {"value":"red"} }
+			      }
+			    }
+			]
+		};
+	
+	//plot of the histogram using vega.js
+	vg.parse.spec(plot_spec, function(chart) { 
+		var view = chart({el:"#histogram_"+facetid_html, "renderer":"svg"});
+		view.update();
+	});
+};
+
+
+
+
+
+
 
 

@@ -78,6 +78,12 @@ $.fn.spin = function(opts, color) {
 };
 
 //###########################################################################################//
+//simple global functions
+function isInt(n) {
+   return n % 1 == 0;
+}
+
+//###########################################################################################//
 // Adds compatibility to the old browsers to the keys method of an object
 
 if (!Object.keys) {

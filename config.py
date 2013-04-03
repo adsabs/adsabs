@@ -91,7 +91,7 @@ class AppConfig(object):
         ('author_facet_hier', 200, 1, None, "0/"), 
         ('property',100, 1),
         ('keyword_facet',100, 1),
-        ('year',100, 1),
+        ('year', -1, 1),
         ('bibgroup_facet',100, 1),
         ('data_facet',100, 1),
         ('vizier_facet',100, 1),
@@ -122,7 +122,7 @@ class AppConfig(object):
                                  'templ_grant_f' : {'facetid':'grant_f', 'facet_title':'Grants', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_data_f' : {'facetid':'data_f', 'facet_title':'Data', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_vizier_f' : {'facetid':'vizier_f', 'facet_title':'Vizier Tables', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
-                                 'templ_year_f' : {'facetid':'year_f', 'facet_title':'Year', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},                                 
+                                 'templ_year_f' : {'facetid':'year_f', 'facet_title':'Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},                                 
                                 }
     
     # copy logging.conf.dist -> logging.conf and uncomment

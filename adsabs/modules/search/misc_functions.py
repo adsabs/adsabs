@@ -63,7 +63,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
         for elem in request_values.getlist(facet):
             #I have to distinguish between a simple facet and a complex one
-            if not (elem.startswith('(') or elem.startswith('-(')):
+            if not (elem.startswith('(') or elem.startswith('[') or elem.startswith('-(')):
                 search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
             else:
                 search_components['filters'].append(u'%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))            

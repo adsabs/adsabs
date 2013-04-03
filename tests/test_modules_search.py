@@ -169,6 +169,15 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'start': None}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+        with self.app.test_request_context('/search/?q=*&sort_type=DATE&db_key=ASTRONOMY&year_f=[2000 TO 2010]'):
+            out = {'filters': [u'database:ASTRONOMY',
+                               u'year:[2000 TO 2010]'],
+                    'q': u'*',
+                    'sort': u'DATE',
+                    'sort_direction': 'desc',
+                    'start': None}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
             
     def test_facets_components(self):
         with self.app.test_request_context('/search/facets?q=author%3A%22civano%22&aut_f=1%2FCivano%2C+F%2FCivano%2C+F.&sort_type=DATE&db_key=ASTRONOMY&facet_field=templ_aut_f&facet_prefix=1/Civano,%20F/'):
