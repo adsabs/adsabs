@@ -162,6 +162,55 @@
 {% endmacro %}
 
 
+{# ###Macro for facets with histogram #}
+{% macro render_facets_with_histogram(templ_facetid, resp) %}
+	{# Not sure yet if it can be used in a generic way or it is only for the year facet #}
+	{# I get the configuration for this facet #}
+	{% set facet_config = config.FACETS_IN_TEMPLATE_CONFIG[templ_facetid] %}
+	{# then I extract the configurations I need #}
+	{% set facetid=facet_config['facetid'] %} 
+	{% set facettitle=facet_config['facet_title'] %} 
+	{% set open=facet_config['open_by_default'] %} 
+	{% set limit_to=facet_config['value_limit_to'] %} 
+	{% set facetid_html=facet_config['facetid_html'] %}
+	
+	{# first of all I check which id to use to build the widget #}
+	{% if facetid_html == None %}
+		{% set facetid_html=facetid %}
+	{% endif %}
+	{% set current_page = resp.get_pagination()['current_page']%}
+	{# I get the list of applied facets for this level and I create a list of IDs of facets to be open by default #}
+	{% set facet_ids_to_open = (resp.get_facet_param_field(facetid)|get_prev_level_applied_facets(1)) %}
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
+				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or resp.get_facet_param_field(facetid) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong>
+			</div>
+		</div>
+		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or resp.get_facet_param_field(facetid) %}in{% endif %}">
+			<div class="accordion-inner">
+				<form id="facetForm_{{ facetid_html }}">
+					from <input type="text" name="mindate" autocomplete="off" maxlength="4" class="date_range"/> 
+					to <input type="text" name="maxdate" autocomplete="off" maxlength="4" class="date_range"/>
+					<span class="btn btn-mini date_range_limit disabled" data-rel="date_range_limit_{{ facetid_html }}">limit</span>
+					
+					<div id="slider_{{ facetid_html }}"></div>
+				</form>
+				<div id="histogram_{{ facetid_html }}" class="plot_facets"></div>				
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(
+			function(){
+				//Take all the elements 
+				var all_facets = {{ resp.get_facets_fields(facetid)|numeric_facets_to_histogram|tojson|safe }};
+				FacetsComponents.date_facet_manager(all_facets, "{{ facetid_html }}");
+			}	
+		);
+	</script>
+{% endmacro %}
+
 {# ###Macro to render the list of applied facets #}
 {% macro render_applied_facets_box(resp) %}
 	{% set selected_facets = resp.get_facet_parameters() %}

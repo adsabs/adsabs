@@ -1,6 +1,6 @@
 {# Global imports #}
 {% from "macros/record_list_macros/results.html" import render_search_result with context %}
-{% from "macros/record_list_macros/facets.html" import render_facet_box, render_2level_hier_facet_box, render_applied_facets_box with context %}
+{% from "macros/record_list_macros/facets.html" import render_facet_box, render_2level_hier_facet_box, render_applied_facets_box, render_facets_with_histogram with context %}
 {% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
 {% from "macros/record_list_macros/button_menu.html" import render_re_sort, render_export_menu, render_toggle_all_paper_list with context %}
 {% from "macros/search_macros.html" import render_search_form with context %}
@@ -36,7 +36,7 @@
 			{{ render_2level_hier_facet_box('templ_grant_f', resp) }}
 			{{ render_facet_box('templ_data_f', resp) }}
 			{{ render_facet_box('templ_vizier_f', resp) }}
-			{{ render_facet_box('templ_year_f', resp) }}
+			{{ render_facets_with_histogram('templ_year_f', resp) }}
 			</div>
 		</div>
 		<div class="span9 noMarginSpan" id="results">

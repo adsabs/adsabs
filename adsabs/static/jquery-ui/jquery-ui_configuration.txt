@@ -1,0 +1,4 @@
+jQuery UI version 1.10.2
+
+Selected only slider widget (plus whatever is required by the core) 
+because other widgets create conflict with the one from twitter bootstrap
