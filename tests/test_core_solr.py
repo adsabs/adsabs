@@ -95,6 +95,12 @@ class SolrTestCase(AdsabsBaseTestCase):
         self.assertEqual(req.params['f.author.facet.limit'], 10)
         self.assertEqual(req.params['f.author.facet.mincount'], 5)
         
+    def test_solr_request_add_facet_query(self):
+        req = solr.SolrRequest('foo')
+        req.add_facet_query('year:[2000 TO 2003]')
+        self.assertTrue(req.facets_on())
+        self.assertEqual(req.get_facet_queries(), ['year:[2000 TO 2003]'])
+        
     def test_solr_request_add_facet_output_key(self):
         
         req = solr.SolrRequest("foo")
@@ -213,6 +219,16 @@ class SolrTestCase(AdsabsBaseTestCase):
         self.assertEqual(req.params['facet.field'], ['bar'])
         self.assertIn("f.bar.facet.prefix", req.params)
         self.assertEqual(req.params["f.bar.facet.prefix"], "baz")
+    
+    def test_facet_content(self):
+        fixture = self.useFixture(SolrRawQueryFixture())
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            self.assertEqual(resp.get_all_facet_queries(), {'year:[2000 TO 2003]': 13})
+            self.assertEqual(resp.get_all_facet_fields(), {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8], 'year': ['2009', 3, '2008', 5]})
 
 if __name__ == '__main__':
     unittest2.main()
