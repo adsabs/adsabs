@@ -86,7 +86,13 @@ class SolrResponse(object):
     def get_all_facets(self):
         if not self.request.facets_on():
             return {}
-        return self.raw['facet_counts']['facet_fields']
+        return self.raw['facet_counts']
+    
+    def get_all_facet_fields(self):
+        return self.get_all_facets().get('facet_fields',{})
+    
+    def get_all_facet_queries(self):
+        return self.get_all_facets().get('facet_queries',{})
     
     def get_facets_fields(self, facet_name, hierarchical=False):
         """

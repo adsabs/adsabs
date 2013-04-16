@@ -97,6 +97,9 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
                     }],
         },
         'facet_counts': {
+            "facet_queries": {
+                 "year:[2000 TO 2003]": 13,
+             },
             "facet_fields": {
                 "year": [ 
                     "2009", 3,

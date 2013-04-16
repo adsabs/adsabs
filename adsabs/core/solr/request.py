@@ -97,6 +97,19 @@ class SolrRequest(object):
             self.params['f.%s.facet.prefix' % field] = prefix
         return self
             
+    def add_facet_query(self, query):
+        self.params['facet'] = "true"
+        self.params.setdefault('facet.query', [])
+        self.params.append('facet.query', query)
+        return self
+    
+    def get_facet_queries(self):
+        facet_queries = []
+        if self.facets_on():
+            for fq in self.params.get('facet.query', []):
+                facet_queries.append(fq)
+        return facet_queries
+        
     def facets_on(self):
         return self.params.facet and True or False
     

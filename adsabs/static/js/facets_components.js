@@ -332,7 +332,9 @@ FacetsComponents.date_facet_manager = function(all_facets, facetid_html)
 		},
 	});
 	//create a plot of the dates
-	FacetsComponents.plot_dates_histogram(all_facets, facetid_html);
+
+	if (all_facets.min != 0 && all_facets.max!=0)
+		FacetsComponents.plot_dates_histogram(all_facets, facetid_html);
 };
 
 /*
