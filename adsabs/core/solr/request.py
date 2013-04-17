@@ -72,6 +72,8 @@ class SolrRequest(object):
         return self
         
     def add_filter(self, filter_):
+        if config.SOLR_FILTER_QUERY_PARSER:
+            filter_ = "{!%s}%s" % (config.SOLR_FILTER_QUERY_PARSER, filter_)
         self.params.append('fq', filter_)
         return self
         

@@ -68,6 +68,7 @@ class AppConfig(object):
     SOLR_DEFAULT_FORMAT = 'json'
     SOLR_ARG_SEPARATOR = '#' # used to thwart the defaul solrpy behavior of replacing '_' with '.' in all solr params
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
+    SOLR_FILTER_QUERY_PARSER = 'aqp'
     
     SEARCH_DEFAULT_ROWS = '20'
     SEARCH_DEFAULT_SORT = 'DATE'

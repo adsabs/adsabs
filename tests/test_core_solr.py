@@ -115,12 +115,13 @@ class SolrTestCase(AdsabsBaseTestCase):
     def test_solr_request_add_filter(self):
         req = solr.SolrRequest("foo")   
         req.add_filter("bibstem:ApJ")
-        self.assertEqual(req.params.fq, ['bibstem:ApJ'])
+        fqp = '{!%s}' % config.SOLR_FILTER_QUERY_PARSER
+        self.assertEqual(req.params.fq, [fqp + 'bibstem:ApJ'])
         req.add_filter("author:Kurtz,M")
-        self.assertEqual(req.params.fq, ['bibstem:ApJ', 'author:Kurtz,M'])
-        self.assertIn('bibstem:ApJ', req.get_filters())
-        self.assertIn('author:Kurtz,M', req.get_filters())
-        self.assertEqual(req.get_filters(exclude_defaults=True), ['bibstem:ApJ','author:Kurtz,M'])
+        self.assertEqual(req.params.fq, [fqp + 'bibstem:ApJ', fqp + 'author:Kurtz,M'])
+        self.assertIn(fqp + 'bibstem:ApJ', req.get_filters())
+        self.assertIn(fqp + 'author:Kurtz,M', req.get_filters())
+        self.assertEqual(req.get_filters(exclude_defaults=True), [fqp + 'bibstem:ApJ', fqp + 'author:Kurtz,M'])
         
     def test_solr_request_add_highlight(self):
         req = solr.SolrRequest("foo")
