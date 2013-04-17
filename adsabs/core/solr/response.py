@@ -186,8 +186,13 @@ class SolrResponse(object):
             inverted_allowed_facet_dict = dict((v,k) for k,v in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.iteritems())
             for filter_val in search_filters:
                 filter_split = filter_val.split(':', 1)
-                if filter_split[0] in inverted_allowed_facet_dict:
-                    facet_name = inverted_allowed_facet_dict[filter_split[0]]
+                filter_query_name = filter_split[0]
+                #remove the filter query parser if present
+                if config.SOLR_FILTER_QUERY_PARSER:
+                    if filter_query_name.startswith(u"{!%s}" %  config.SOLR_FILTER_QUERY_PARSER):
+                        filter_query_name = filter_query_name[len(u"{!%s}" %  config.SOLR_FILTER_QUERY_PARSER):]
+                if filter_query_name in inverted_allowed_facet_dict:
+                    facet_name = inverted_allowed_facet_dict[filter_query_name]
                     facet_params.append((facet_name, filter_split[1].strip('"')))
                         
             self.request_facet_params = facet_params
