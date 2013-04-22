@@ -239,7 +239,7 @@ FacetsComponents.apply_facet_manager = function(facetid_html, facetid_orig)
 	if (Object.keys(cur_selection).length == 0)
 	{
 		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_excl').hasClass('disabled'))
-			$('#apply_menu_'+facetid_html+'>ul>li.op_excl').addClass('disabled').on('click', function(){return false;});
+			$('#apply_menu_'+facetid_html+'>ul>li.op_excl').addClass('disabled').off('click');
 		if (! $('#apply_menu_'+facetid_html+' >a').hasClass('disabled'))
 			$('#apply_menu_'+facetid_html+' >a').addClass('disabled');
 	}
@@ -252,9 +252,9 @@ FacetsComponents.apply_facet_manager = function(facetid_html, facetid_orig)
 			$('#apply_menu_'+facetid_html+'>ul>li.op_excl').removeClass('disabled').on('click', function(event){FacetsComponents.apply_facet_url_manager(facetid_html, facetid_orig, 'EXCL'); event.stopPropagation();});
 		//I disable the and and or
 		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_and').hasClass('disabled'))
-			$('#apply_menu_'+facetid_html+'>ul>li.op_and').addClass('disabled').on('click', function(){return false;});
+			$('#apply_menu_'+facetid_html+'>ul>li.op_and').addClass('disabled').off('click');
 		if (!$('#apply_menu_'+facetid_html+'>ul>li.op_or').hasClass('disabled'))
-			$('#apply_menu_'+facetid_html+'>ul>li.op_or').addClass('disabled').on('click', function(){return false;});
+			$('#apply_menu_'+facetid_html+'>ul>li.op_or').addClass('disabled').off('click');
 	}
 	//if the number is > 1 I enable the full menu
 	else if (Object.keys(cur_selection).length > 1)
@@ -347,9 +347,10 @@ FacetsComponents.button_date_facet_manager = function(facetid_html)
 	var cur_min_val = $('#facetForm_'+facetid_html+' input[name=mindate]').val();
 	var max_val = $("#slider_"+facetid_html).slider("option", "max");
 	var cur_max_val = $('#facetForm_'+facetid_html+' input[name=maxdate]').val();
-	//If everything is fine
+	//If everything looks fine
 	if (isInt(cur_min_val) && isInt(cur_max_val) && (parseInt(cur_min_val)>=min_val) && (parseInt(cur_max_val)<=max_val) && (parseInt(cur_min_val)<=parseInt(cur_max_val)))
 	{
+		console.log('looks fine')
 		//remove the error class
 		if ($('#facetForm_'+facetid_html+' input').hasClass('date_facet_input_error'))
 			$('#facetForm_'+facetid_html+' input').removeClass('date_facet_input_error');
@@ -357,19 +358,16 @@ FacetsComponents.button_date_facet_manager = function(facetid_html)
 		$("#slider_"+facetid_html).slider("values", 0, cur_min_val).slider("values", 1, cur_max_val);
 		//enable or disable the button
 		if (cur_min_val > min_val || cur_max_val < max_val)
-		{
 			$('span[data-rel="date_range_limit_'+facetid_html+'"]').removeClass('disabled').on('click', function(event){FacetsComponents.apply_date_facet_url(facetid_html); event.stopPropagation();});
-		}
 		else
-		{
-			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').on('click', function(){return false;});
-		}
+			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').off('click');
 	}
 	else
 	{
+		console.log('not fine')
 		//disable the click on the button
 		if (!$('span[data-rel="date_range_limit_'+facetid_html+'"]').hasClass('disabled'))
-			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').on('click', function(){return false;});
+			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').off('click');
 		//show the error
 		if (!isInt(cur_min_val) || !(parseInt(cur_min_val)>=min_val))
 			$('#facetForm_'+facetid_html+' input[name=mindate]').addClass('date_facet_input_error');
@@ -410,7 +408,7 @@ FacetsComponents.plot_dates_histogram = function(all_facets, facetid_html)
 	});
 	
 	//define some dimensions
-	var padding  = {"top": 10, "left": 35, "bottom": 50, "right": 10},
+	var padding  = {"top": 10, "left": 35, "bottom": 55, "right": 10},
 		width = $('#histogram_'+facetid_html).width() - padding.left,
 		height = 200;
 	

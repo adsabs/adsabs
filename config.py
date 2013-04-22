@@ -123,7 +123,7 @@ class AppConfig(object):
                                  'templ_grant_f' : {'facetid':'grant_f', 'facet_title':'Grants', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_data_f' : {'facetid':'data_f', 'facet_title':'Data', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_vizier_f' : {'facetid':'vizier_f', 'facet_title':'Vizier Tables', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
-                                 'templ_year_f' : {'facetid':'year_f', 'facet_title':'Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},                                 
+                                 'templ_year_f' : {'facetid':'year_f', 'facet_title':'Publication Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},                                 
                                 }
     
     # copy logging.conf.dist -> logging.conf and uncomment
