@@ -350,7 +350,6 @@ FacetsComponents.button_date_facet_manager = function(facetid_html)
 	//If everything looks fine
 	if (isInt(cur_min_val) && isInt(cur_max_val) && (parseInt(cur_min_val)>=min_val) && (parseInt(cur_max_val)<=max_val) && (parseInt(cur_min_val)<=parseInt(cur_max_val)))
 	{
-		console.log('looks fine')
 		//remove the error class
 		if ($('#facetForm_'+facetid_html+' input').hasClass('date_facet_input_error'))
 			$('#facetForm_'+facetid_html+' input').removeClass('date_facet_input_error');
@@ -364,7 +363,6 @@ FacetsComponents.button_date_facet_manager = function(facetid_html)
 	}
 	else
 	{
-		console.log('not fine')
 		//disable the click on the button
 		if (!$('span[data-rel="date_range_limit_'+facetid_html+'"]').hasClass('disabled'))
 			$('span[data-rel="date_range_limit_'+facetid_html+'"]').addClass('disabled').off('click');

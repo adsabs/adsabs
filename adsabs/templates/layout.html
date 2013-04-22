@@ -37,6 +37,13 @@
 </head>
 <body>
 
+{# Definition of variables needed in the body #}
+{% if request.query_string %}
+	{% set current_url = (request.path + '?' + request.query_string)|urlencode %}
+{% else %}
+	{% set current_url = request.path|urlencode %}
+{% endif %}
+
 <div id="wrap">
 	<div class="navbar navbar-inverse navbar-static-top navbar-small">
 		<div class="navbar-inner">
@@ -75,10 +82,10 @@
 					    		<li class="nav-header">Options</li>
 					            <li><a href="{{ url_for('user.index') }}">Settings</a></li>
 					            <li class="divider"></li>
-					            <li><a href="{{ url_for('user.logout') }}?next={{ url_for('index.index') }}">Sign off</a></li>
+					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}">Sign off</a></li>
 				            </ul>
 				            {% else %}
-							<li><a href="{{ url_for('user.login') }}?next={{ url_for('index.index') }}">Log in</a></li>
+							<li><a href="{{ url_for('user.login') }}?next={{ current_url }}">Log in</a></li>
 							{% endif %}
 						</li>
 					</ul>

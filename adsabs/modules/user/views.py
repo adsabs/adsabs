@@ -34,11 +34,13 @@ def index():
 @user_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     """
+    User login view
     """
     log.debug('Login form')
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
 
     if form.validate_on_submit():
+        log.debug('Authentication process')
         user, authenticated = authenticate(form.login.data, form.password.data)
         if user and authenticated:
             user.set_last_signon()
@@ -61,9 +63,15 @@ def reauth():
 @user_blueprint.route('/logout', methods=['GET'])
 @login_required
 def logout():
+    """
+    User logout view
+    """
+    log.debug('User logout')
+    form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
+
     logout_user()
     flash('You are now logged out', 'success')
-    return redirect(url_for('index.index'))
+    return redirect(form.next.data or url_for('user.index'))
 
 @user_blueprint.route('/signup', methods=['GET', 'POST'])
 def signup():
