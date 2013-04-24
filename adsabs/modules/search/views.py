@@ -1,6 +1,6 @@
 from flask import Blueprint, request, g, render_template
 
-from flask.ext.login import current_user #@UnresolvedImport
+#from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm, get_missing_defaults
 from adsabs.core import solr
 from adsabs.core.data_formatter import field_to_json

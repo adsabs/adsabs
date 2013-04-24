@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_04_22_v1'
+    APP_VERSION = '2013_04_24_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -43,6 +43,19 @@ class AppConfig(object):
     MONGOALCHEMY_SERVER_AUTH = False
     MONGOALCHEMY_USER = 'adsabs'
     MONGOALCHEMY_PASSWORD = ''
+    
+    COOKIE_ADSABS2_NAME = 'NASA_ADSABS2_ID'
+    COOKIE_ADS_CLASSIC_NAME = 'NASA_ADS_ID'
+    #cookies configurations
+    COOKIES_CONF = {COOKIE_ADS_CLASSIC_NAME :{
+                         'domain': ('adsabs.harvard.edu', '.adsabs.harvard.edu'),
+                         'max_age': 31356000
+                         },  
+                     COOKIE_ADSABS2_NAME :{
+                         'domain': ('adsabs.harvard.edu', '.adsabs.harvard.edu'),
+                         'max_age': 31356000
+                         },  
+                     }
     
     SOLR_URL = 'http://adswhy:9000/solr/collection1'
     SOLR_TIMEOUT = 300

@@ -7,6 +7,9 @@ from flask import Flask, send_from_directory
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import configure_template_filters
+from adsabs.core.before_request_funcs import configure_before_request_funcs
+from adsabs.core.after_request_funcs import configure_after_request_funcs
+
 
 # For import *
 __all__ = ['create_app']
@@ -30,10 +33,11 @@ def create_app(config=config, app_name=None):
 #    configure_hook(app)
     _configure_blueprints(app)
     _configure_extensions(app)
-    _configure_template_filters(app)
+    configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
-#    _configure_global_variables(app)
+    configure_before_request_funcs(app)
+    configure_after_request_funcs(app)
     
     if config.DEBUG:
         from flask_debugtoolbar import DebugToolbarExtension
@@ -130,12 +134,12 @@ def _configure_extensions(app):
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
     
-def _configure_template_filters(app):
-    """
-    Configuration of additional filters needed in the templates
-    (left a function here in case we need to have multiple configuration functions)
-    """
-    configure_template_filters(app)
+# def _configure_template_filters(app):
+#     """
+#     Configuration of additional filters needed in the templates
+#     (left a function here in case we need to have multiple configuration functions)
+#     """
+#     configure_template_filters(app)
     
     
 def _configure_error_handlers(app):
