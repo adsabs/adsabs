@@ -10,9 +10,7 @@ from adsabs.core.data_formatter import field_to_json
 from adsabs.modules.search.misc_functions import build_singledoc_components
 from config import config
 
-abs_blueprint = Blueprint('abs', __name__, template_folder="templates")
-
-__all__ = ['abs_blueprint']
+abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
 
 @abs_blueprint.after_request
 def add_caching_header(response):

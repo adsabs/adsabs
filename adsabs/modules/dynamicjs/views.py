@@ -6,9 +6,7 @@ Created on Feb 27, 2013
 from flask import Blueprint, g, render_template, make_response
 from config import config
 
-dynjs_blueprint = Blueprint('dynamicjs', __name__, template_folder="templates")
-
-__all__ = ['dynjs_blueprint']
+dynjs_blueprint = Blueprint('dynamicjs', __name__, template_folder="templates", url_prefix='/dynjs')
 
 @dynjs_blueprint.after_request
 def add_caching_header(response):

@@ -1,1 +1,1 @@
-from views import *
+from views import index_blueprint as blueprint

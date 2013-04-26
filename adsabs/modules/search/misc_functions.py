@@ -4,8 +4,11 @@ Created on Nov 30, 2012
 @author: dimilia
 '''
 
+import logging
+from adsabs.core.logevent import LogEvent
 from werkzeug.datastructures import CombinedMultiDict
 from config import config
+from flask import g, session
 
 
 def build_basicquery_components(form, request_values=CombinedMultiDict([]), facets_components=False):
@@ -130,4 +133,19 @@ def build_singledoc_components(request_values):
         if request_values.get('re_sort_dir') in ['asc', 'desc']:
             search_components['sort_direction'] = request_values.get('re_sort_dir')
     return search_components
+    
+def log_search(resp):
+    data = {
+        'q': resp.get_query(),
+        'hits': resp.get_hits(),
+        'count': resp.get_count(),
+        'start': resp.get_start_count(),
+        'qtime': resp.get_qtime(),
+#        'user_cookie_id': g.user_cookie_id,
+        }
+    event = LogEvent.new(**data)
+    logging.getLogger('search').info(event)
+    
+    
+    
     

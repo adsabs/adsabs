@@ -3,8 +3,7 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
-import logging
-from flask import g, request #@UnresolvedImport
+from flask import g, request, current_app as app #@UnresolvedImport
 from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
@@ -12,8 +11,6 @@ from .errors import ApiPermissionError,ApiSolrException
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
 
-log = logging.getLogger(__name__)
-            
 class ApiSearchRequest(object):
     
     def __init__(self, request_vals):

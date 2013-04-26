@@ -4,17 +4,13 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
-import logging
-from simplejson import loads,dumps
 from math import ceil
 from copy import deepcopy
-#from collections import defaultdict
 
 from config import config
 from .solrdoc import SolrDocument
 
-
-log = logging.getLogger(__name__)
+from flask import current_app as app
 
 class SolrResponse(object):
     
@@ -104,7 +100,7 @@ class SolrResponse(object):
         try:
             return self.get_docset()[idx]
         except IndexError:
-            log.debug("response has no doc at idx %d" % idx)
+            app.logger.debug("response has no doc at idx %d" % idx)
     
     def get_all_facets(self):
         if not self.request.facets_on():

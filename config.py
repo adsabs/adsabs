@@ -139,11 +139,16 @@ class AppConfig(object):
                                  'templ_year_f' : {'facetid':'year_f', 'facet_title':'Publication Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},                                 
                                 }
     
-    # copy logging.conf.dist -> logging.conf and uncomment
-    LOGGING_CONFIG = os.path.join(_basedir, 'logging.conf')
-    LOGGING_MONGO_ENABLED = True
-    LOGGING_MONGO_COLLECTION = 'log'
-    LOGGING_MONGO_LEVEL = 'ERROR'
+    LOGGING_LOG_PATH = os.path.join(_basedir, 'logs/adsabs.log')
+    LOGGING_LOG_LEVEL = 'WARN'
+    LOGGING_LOG_FORMAT = "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+    # dict of kwargs to use when creating a TimedRotationFileHandler
+    LOGGING_ROTATION_SETTINGS = {'when': 'D', 'interval': 7, 'backupCount': 8}
+    
+    REDIS_ENABLE = True
+    REDIS_HOST = 'localhost'
+    REDIS_PORT = 6378
+    REDIS_DATABASE = 0
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'

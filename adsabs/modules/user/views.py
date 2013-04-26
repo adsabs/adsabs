@@ -1,6 +1,6 @@
 #from datetime import datetime
 from flask import (Blueprint, request, flash, redirect, 
-                   url_for, render_template, g)
+                   url_for, render_template, g, current_app as app)
 from flask.ext.login import (login_required, login_user,                    #@UnresolvedImport
                 current_user, logout_user, )                                 #@UnresolvedImport
 #                confirm_login, fresh_login_required, login_fresh)           #@UnresolvedImport
@@ -10,15 +10,12 @@ from adsabs.core.after_request_funcs import after_this_request
 from config import config
 from .user import authenticate
 
-import logging
-
 # For import *
 __all__ = ['user_blueprint', 'index', 'login', 'reauth', 'logout', 'signup', 'change_password',]
 
 #definition of the blueprint for the user part
-user_blueprint = Blueprint('user', __name__, template_folder="templates", static_folder="static")
-
-log = logging.getLogger(__name__)
+user_blueprint = Blueprint('user', __name__, template_folder="templates", 
+                           static_folder="static", url_prefix='/user')
 
 def invalidate_user_cookie():
     @after_this_request
@@ -35,12 +32,12 @@ def index():
     """
     Index page of the User
     """
-    log.debug('Index of user page.')
+    app.logger.debug('Index of user page.')
     if current_user.is_authenticated():
-        log.debug('User already authenticated')
+        app.logger.debug('User already authenticated')
         return render_template('user_home_page.html')
     
-    log.debug('User not authenticated: redirect to authentication page.')
+    app.logger.debug('User not authenticated: redirect to authentication page.')
     return redirect(url_for('user.login'))
 
 @user_blueprint.route('/login', methods=['GET', 'POST'])
@@ -48,11 +45,11 @@ def login():
     """
     User login view
     """
-    log.debug('Login form')
+    app.logger.debug('Login form')
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
 
     if form.validate_on_submit():
-        log.debug('Authentication process')
+        app.logger.debug('Authentication process')
         user, authenticated = authenticate(form.login.data, form.password.data)
         if user and authenticated:
             user.set_last_signon()
@@ -79,7 +76,7 @@ def logout():
     """
     User logout view
     """
-    log.debug('User logout')
+    app.logger.debug('User logout')
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
     #actual logout
     logout_user()

@@ -1,1 +1,1 @@
-from views import *
+from views import dynjs_blueprint as blueprint

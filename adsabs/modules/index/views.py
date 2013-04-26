@@ -10,9 +10,7 @@ from adsabs.modules.search.forms import QueryForm
 from config import config
 
 #I define the blueprint
-index_blueprint = Blueprint('index', __name__)
-
-__all__ = ['index_blueprint']
+index_blueprint = Blueprint('index', __name__, url_prefix='')
 
 @index_blueprint.after_request
 def add_caching_header(response):

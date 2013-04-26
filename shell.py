@@ -18,8 +18,6 @@ logging.basicConfig(format='%(message)s', level=logging.INFO)
 app = create_app(config)
 manager = Manager(app)#, with_default_commands=False)
 
-log = logging.getLogger("shell")
-
 tools_manager = Manager("Tools commands")#, with_default_commands=False)
 
 @manager.command

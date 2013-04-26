@@ -14,9 +14,8 @@ from flask import Blueprint, request, g, render_template, abort
 from config import config
 from adsabs.core.solr import SolrRequest
 
-searchcompare_blueprint = Blueprint('searchcompare', __name__, template_folder="templates", static_folder="static")
-
-__all__ = ['searchcompare_blueprint']
+searchcompare_blueprint = Blueprint('searchcompare', __name__, template_folder="templates", 
+                                    static_folder="static", url_prefix='/searchcompare')
 
 @searchcompare_blueprint.route('/classic', methods=['GET'])
 def classic_search():

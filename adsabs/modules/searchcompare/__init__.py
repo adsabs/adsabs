@@ -1,1 +1,1 @@
-from views import *
+from views import searchcompare_blueprint as blueprint

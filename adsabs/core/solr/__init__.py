@@ -3,7 +3,7 @@ from .request import *
 from .response import *
 from .solrdoc import *
 
-import logging
+from flask import current_app as app
 
 __all__ = [
     'SolrRequest',
@@ -14,7 +14,6 @@ __all__ = [
     'get_document',
     ]
 
-log = logging.getLogger(__name__)
 
 def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, \
           rows=config.SEARCH_DEFAULT_ROWS, start=None, **kwargs):
@@ -29,7 +28,7 @@ def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_directio
             sort_field = config.SOLR_SORT_OPTIONS[sort]
             req.add_sort(sort_field, sort_direction)
         except KeyError:
-            log.error("Invalid sort option: %s" % sort)
+            app.logger.error("Invalid sort option: %s" % sort)
                 
     for filter_ in filters:
         req.add_filter(filter_)

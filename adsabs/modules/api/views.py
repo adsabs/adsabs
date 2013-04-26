@@ -1,26 +1,19 @@
 import sys
 sys.path.append('..')
 
-from flask import Blueprint, request, g
+from flask import Blueprint, request, g, current_app as app
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 
 from functools import wraps
-import logging
 
 import errors
 from .user import AdsApiUser
-from adsabs.core import solr
 from .request import ApiSearchRequest, ApiRecordRequest
 from config import config
 
-# For import *
-__all__ = ['api_blueprint']
-
 #definition of the blueprint for the user part
-api_blueprint = Blueprint('api', __name__,template_folder="templates")
+api_blueprint = Blueprint('api', __name__,template_folder="templates", url_prefix='/api')
 errors.init_error_handlers(api_blueprint)
-
-log = logging.getLogger(__name__)
 
 def api_user_required(func):
     @wraps(func)
@@ -33,7 +26,7 @@ def api_user_required(func):
         except Exception, e:
             import traceback
             exc_info = sys.exc_info()
-            log.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+            app.logger.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
             user = None
         if not user:
             raise errors.ApiNotAuthenticatedError("unknown user")

@@ -5,16 +5,13 @@ from urllib import urlencode
 
 from .inveniodoc import InvenioDoc
 
-import logging
-log = logging.getLogger(__name__)
-
 try:
     from invenio.search_engine import get_record #@UnresolvedImport
     from invenio.bibrecord import record_xml_output #@UnresolvedImport
     from invenio.dbquery import run_sql #@UnresolvedImport
 except ImportError:
-    log.warn("Invenio import failure! Invenio data layer functions will not work!")
-    
+    from flask import current_app as app
+    app.logger.warn("Invenio import failure! Invenio data layer functions will not work!")
 
 __all__ = ['record_url', 'get_abstract_xml_from_ads_id', 'get_records', 'get_metadata', 'get_invenio_metadata']
 

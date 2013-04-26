@@ -4,9 +4,8 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 import re
-import logging
 
-from flask import g
+from flask import g, current_app as app
 from urllib import urlencode
 from copy import deepcopy
 from simplejson import loads
@@ -14,8 +13,6 @@ from config import config
 from .response import SolrResponse
 from solr import SolrException
 
-log = logging.getLogger(__name__)
-        
 class SolrRequest(object):
     
     def __init__(self, q, **kwargs):
@@ -168,7 +165,7 @@ class SolrRequest(object):
             log.error("SolrException error. Request url: %s" % self.get_raw_request_url())
             json =  se.body
         except:
-            log.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())
+            app.logger.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())
             raise
         
         data = loads(json)
