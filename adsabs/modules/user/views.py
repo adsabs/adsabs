@@ -1,6 +1,6 @@
 #from datetime import datetime
 from flask import (Blueprint, request, flash, redirect, 
-                   url_for, render_template)
+                   url_for, render_template, g)
 from flask.ext.login import (login_required, login_user,                    #@UnresolvedImport
                 current_user, logout_user, )                                 #@UnresolvedImport
 #                confirm_login, fresh_login_required, login_fresh)           #@UnresolvedImport
@@ -26,7 +26,8 @@ def invalidate_user_cookie():
         #set the ads cookie to expire
         for cookie_name, cookie_conf in config.COOKIES_CONF.items():
             for domain in cookie_conf['domain']:
-                response.set_cookie(cookie_name, '', expires=0, domain=domain)
+                response.delete_cookie(cookie_name, domain=domain)
+                #response.set_cookie(cookie_name, '', expires=0, domain=domain)
         return response
 
 @user_blueprint.route('/', methods=['GET'])
@@ -80,7 +81,11 @@ def logout():
     """
     log.debug('User logout')
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
+    #actual logout
     logout_user()
+    #set a variable in g to skip the general after_request cookie set up
+    g.skip_general_cookie_setup = True
+    #call of the function that runs a specific after_request to invalidate the user cookies
     invalidate_user_cookie()
     flash('You are now logged out', 'success')
     return redirect(form.next.data or url_for('user.index'))

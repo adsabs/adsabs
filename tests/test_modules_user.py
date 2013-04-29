@@ -9,6 +9,8 @@ import unittest2
 import uuid
 import pytz
 from datetime import datetime#, timedelta
+from urlparse import urlparse
+from urllib import quote_plus
 from flask import g
 from werkzeug.datastructures import Headers
 
@@ -113,6 +115,21 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(adsabs2_cookies, 0)
         self.assertEqual(ads_cookies, 0)
         
+    def test_anonymous_user_cookie_5(self):
+        """sending a wrong anonymous cookie: 2 set cookie expected"""
+        cookie_value = 'wrong_cookie'
+        headers = Headers({'Cookie':'NASA_ADSABS2_ID=%s;' % cookie_value})
+        rv = self.client.get('/', headers=headers)
+        adsabs2_cookies = 0
+        ads_cookies = 0
+        for elem in rv.headers.get_all('Set-Cookie'):
+            if elem.startswith(config.COOKIE_ADSABS2_NAME):
+                adsabs2_cookies +=1
+            elif elem.startswith(config.COOKIE_ADS_CLASSIC_NAME):
+                ads_cookies += 1
+        self.assertEqual(adsabs2_cookies, 2)
+        self.assertEqual(ads_cookies, 0)
+        
     def test_user_cookie_at_login_1(self):
         """ test that when the user logs in, 4 set-cookie headers are sent back"""
         fix = ClassicADSSignonFixture()
@@ -152,19 +169,117 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(adsabs2_cookies, 2)
         self.assertEqual(ads_cookies, 2)
      
-#     def test_user_logged_in_cookie_1(self):
-#         """test that if the user is logged in and the cookies are not right, some new cookies are sent back"""
-#         
-#         #cookie_value = '4d2203d39f'
-#         #headers = Headers({'Cookie':'NASA_ADSABS2_ID=%s;' % cookie_value})
-#         print "between here"
-#         with self.app.test_client() as c:
-#             with c.session_transaction() as sess:
-#                 sess['user_id'] = u'4d2203d39f'
-#                 sess['_fresh'] = True
-#             resp = c.get('/')
-#             #print resp.headers
-#         print "and here"
+    def test_user_logged_in_cookie_1(self):
+        """test that if the user is logged in and the cookies are not right, some new cookies are sent back"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        #first the user logs in
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next="blah",remember=1,submit=1))
+        #request with wrong cookies
+        self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'wrong_cookie')
+        self.client.set_cookie('localhost', 'NASA_ADS_ID', 'wrong_cookie')
+        rv = self.client.get('/')
+        #count that there are 2 ADS2 and 2 ads classic cookies
+        adsabs2_cookies = 0
+        ads_cookies = 0
+        for elem in rv.headers.get_all('Set-Cookie'):
+            if elem.startswith(config.COOKIE_ADSABS2_NAME):
+                adsabs2_cookies +=1
+            elif elem.startswith(config.COOKIE_ADS_CLASSIC_NAME):
+                ads_cookies += 1
+        self.assertEqual(adsabs2_cookies, 2)
+        self.assertEqual(ads_cookies, 2)
+    
+    def test_user_logged_in_cookie_2(self):
+        """test that if the user is logged in and the cookies are right, not set cookies are sent back"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        #first the user logs in
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next="blah",remember=1,submit=1))
+        #set cookies for the next request
+        self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'abc123')
+        self.client.set_cookie('localhost', 'NASA_ADS_ID', 'abc123')
+        #request with right cookies
+        rv = self.client.get('/')
+        #count that there are 0 ADS2 and 0 ads classic cookies
+        adsabs2_cookies = 0
+        ads_cookies = 0
+        for elem in rv.headers.get_all('Set-Cookie'):
+            if elem.startswith(config.COOKIE_ADSABS2_NAME):
+                adsabs2_cookies +=1
+            elif elem.startswith(config.COOKIE_ADS_CLASSIC_NAME):
+                ads_cookies += 1
+        self.assertEqual(adsabs2_cookies, 0)
+        self.assertEqual(ads_cookies, 0)
+        
+    def test_user_cookie_at_logout_1(self):
+        """test that at the logout the cookies are invalidated"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        #first the user logs in
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next="blah",remember=1,submit=1))
+        #set cookies for the next request
+        self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'abc123')
+        self.client.set_cookie('localhost', 'NASA_ADS_ID', 'abc123')
+        rv = self.client.get('/user/logout')
+        #count that there are 2 ADS2 and 2 ads classic cookies invalidations
+        adsabs2_cookies = 0
+        ads_cookies = 0
+        for elem in rv.headers.get_all('Set-Cookie'):
+            if elem.startswith(config.COOKIE_ADSABS2_NAME +'=;'):
+                adsabs2_cookies +=1
+            elif elem.startswith(config.COOKIE_ADS_CLASSIC_NAME +'=;'):
+                ads_cookies += 1
+        self.assertEqual(adsabs2_cookies, 2)
+        self.assertEqual(ads_cookies, 2)
+    
+    def test_redirect_after_login_1(self):
+        """Tests that the redirect after the login works properly"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        next_path = "/search"
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next=next_path,remember=1,submit=1))
+        self.assertEqual(rv.status_code, 302)
+        self.assertNotEqual(rv.headers.get('Location'), None)
+        self.assertEqual(urlparse(rv.headers.get('Location')).path, next_path)
+        
+    def test_redirect_after_login_2(self):
+        """Tests that the redirect after the login works properly even with a query string"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        next_path = "/search?param=foo&param2=bar+bar&nil=nal"
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next=next_path,remember=1,submit=1))
+        self.assertEqual(rv.status_code, 302)
+        self.assertNotEqual(rv.headers.get('Location'), None)
+        parsed_location_header = urlparse(rv.headers.get('Location'))
+        self.assertEqual('%s?%s' % (parsed_location_header.path, parsed_location_header.query), next_path)
+        
+    def test_redirect_after_logout_1(self):
+        """Tests that the redirect after the logout works properly"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        #first the user logs in
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next='foo',remember=1,submit=1))
+        #then he logs out
+        next_path = "/search"
+        rv = self.client.get('/user/logout?next=%s' % quote_plus(next_path))
+        self.assertEqual(rv.status_code, 302)
+        self.assertNotEqual(rv.headers.get('Location'), None)
+        self.assertEqual(urlparse(rv.headers.get('Location')).path, next_path)
+        
+    def test_redirect_after_logout_2(self):
+        """Tests that the redirect after the logout works properly even with a query string"""
+        fix = ClassicADSSignonFixture()
+        self.useFixture(fix)
+        #first the user logs in
+        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next='foo',remember=1,submit=1))
+        #then he logs out
+        next_path = "/search?param=foo&param2=bar+bar&nil=nal"
+        rv = self.client.get('/user/logout?next=%s' % quote_plus(next_path))
+        self.assertEqual(rv.status_code, 302)
+        self.assertNotEqual(rv.headers.get('Location'), None)
+        parsed_location_header = urlparse(rv.headers.get('Location'))
+        self.assertEqual('%s?%s' % (parsed_location_header.path, parsed_location_header.query), next_path)
         
 class ApiUserTests(AdsabsBaseTestCase):
     

@@ -5,7 +5,7 @@ Created on Apr 24, 2013
 '''
 
 import uuid
-from flask import request, g, session
+from flask import request, g
 from flask.ext.login import current_user #@UnresolvedImport
 from config import config
 
@@ -24,7 +24,14 @@ def set_user_cookie_id():
     #the user has already visited the web site
     else:
         if current_user.is_anonymous():
-            g.user_cookie_id = request.cookies.get(config.COOKIE_ADSABS2_NAME)
+            #if the cookie is a valid UUID it's ok
+            curr_cookie = request.cookies.get(config.COOKIE_ADSABS2_NAME)
+            try:
+                uuid.UUID(curr_cookie)
+                g.user_cookie_id = curr_cookie
+            #otherwise the app generates a new one
+            except ValueError:
+                g.user_cookie_id = unicode(uuid.uuid4())
         else:
             g.user_cookie_id = current_user.get_id()
         
@@ -37,8 +44,3 @@ def configure_before_request_funcs(app):
     @app.before_request
     def conf_set_user_cookie_id():
         return set_user_cookie_id()
-    
-#     @app.before_request
-#     def print_session():
-#         print session
-#         print request.cookies.get(config.COOKIE_ADSABS2_NAME)

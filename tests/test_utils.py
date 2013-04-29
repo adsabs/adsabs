@@ -34,6 +34,8 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         config.MONGOALCHEMY_PASSWORD = 'test'
         config.LOGGING_CONFIG = None
         config.CSRF_ENABLED = False
+        config.DEBUG = False
+        config.PRINT_DEBUG_TEMPLATE = False
         
         self.app = create_app(config)
         self.client = self.app.test_client()
