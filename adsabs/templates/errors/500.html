@@ -1,5 +1,15 @@
 {% extends "layout.html" %}
 
+{% block titlehead %}500 Error{% endblock %}
+
 {% block body %}
-500 - Internal Server Error (custom page error)
+<h3>Well, this is embarrassing.</h3>
+
+<p>The application has generated an error.<br/>
+We logged the error and we will read it soon, but if you want us to know about it immediately, please send us an <a href="mailto:ads@cfa.harvard.edu?subject=ADSLABS ADS2 Error">email</a>.
+</p>
+
+<p>Please, be patient with this application: it's still in &quot;alpha&quot; stage. We are working hard on making improvements.</p>
+
+<p><small><small>500 - Internal Server Error</small></small></p>
 {% endblock %}

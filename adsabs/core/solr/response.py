@@ -8,7 +8,7 @@ import logging
 from simplejson import loads,dumps
 from math import ceil
 from copy import deepcopy
-from collections import defaultdict
+#from collections import defaultdict
 
 from config import config
 from .solrdoc import SolrDocument
@@ -52,9 +52,29 @@ class SolrResponse(object):
             return self.get_docset()[idx]
         except IndexError:
             return None
-        
+    
+    def get_error_components(self):
+        """Extracts all the components of an error from the response object"""
+        if self.is_error():
+            return self.raw['error']
+        else:
+            return {}
+    
     def get_error(self):
-        return self.raw['error']['msg']
+        """Function that returns the raw error message"""
+        error_components = self.get_error_components()
+        return error_components.get('msg', None)
+    
+    def get_error_message(self):
+        """Function to remove the useless part of the error message coming from SOLR"""
+        error_message = self.get_error()
+        if error_message:
+            if error_message.startswith('org.apache.lucene'):
+                return (''.join(error_message.split(':', 1)[1])).strip()
+            else:
+                return error_message
+        else:
+            return None
     
     def add_meta(self, key, value):
         self.meta[key] = value
@@ -63,11 +83,14 @@ class SolrResponse(object):
         return self.raw
     
     def get_docset(self):
-        docset = self.raw['response'].get('docs', [])
-        if self.request.highlights_on() and self.raw.has_key('highlighting'):
-            for doc in docset:
-                doc['highlights'] = self.raw['highlighting'][doc['id']]
-        return self.raw['response'].get('docs', [])
+        if self.raw.has_key('response'):
+            docset = self.raw['response'].get('docs', [])
+            if self.request.highlights_on() and self.raw.has_key('highlighting'):
+                for doc in docset:
+                    doc['highlights'] = self.raw['highlighting'][doc['id']]
+            return self.raw['response'].get('docs', [])
+        else:
+            return []
     
     def get_docset_objects(self):
         return [SolrDocument(x) for x in self.get_docset()]
@@ -104,7 +127,10 @@ class SolrResponse(object):
         solr_field_name = config.ALLOWED_FACETS_FROM_WEB_INTERFACE.get(facet_name, None)
         
         #I extract the facets from the raw response
-        raw_facet_fields = self.raw['facet_counts']['facet_fields']
+        if self.raw.has_key('facet_counts'):
+            raw_facet_fields = self.raw['facet_counts']['facet_fields']
+        else:
+            raw_facet_fields = {}
         facets_list = raw_facet_fields.get(solr_field_name, [])
         
         #I split the list in tuples
@@ -205,20 +231,29 @@ class SolrResponse(object):
         """
         Returns number of documents in current response
         """
-        return len(self.raw['response']['docs'])
+        if self.raw.has_key('response'):
+            return len(self.raw['response']['docs'])
+        else:
+            return 0
     
     def get_hits(self):
         """
         Returns the total number of record found
         """
-        return int(self.raw['response']['numFound'])
+        if self.raw.has_key('response'):
+            return int(self.raw['response']['numFound'])
+        else:
+            return 0
     
     def get_start_count(self):
         """
         Returns the number of the first record in the 
         response compared to the total number
         """
-        return int(self.raw['response']['start'])
+        if self.raw.has_key('response'):
+            return int(self.raw['response']['start'])
+        else:
+            return 0
     
     def get_pagination(self):
         """

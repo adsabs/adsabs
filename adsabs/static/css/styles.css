@@ -49,6 +49,12 @@ div.centered {
 }
 
 /*********************/
+/*css for the alerts */
+#flashmsg {
+
+}
+
+/*********************/
 /*css for query forms*/
 .link_only_js {
 	cursor: pointer;

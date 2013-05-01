@@ -9,13 +9,13 @@ tests_dir = os.path.dirname(os.path.abspath(__file__))
 site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
 site.addsitedir(tests_dir) #@UndefinedVariable
 
-import fixtures
+#import fixtures
 import unittest2
 
-from adsabs.app import create_app
+#from adsabs.app import create_app
 from adsabs.core import solr
 from config import config
-from test_utils import *
+from test_utils import (AdsabsBaseTestCase, SolrRawQueryFixture, SolrRequestPostMP)
 
 import solr as solrpy
 SOLR_AVAILABLE = False
@@ -230,6 +230,230 @@ class SolrTestCase(AdsabsBaseTestCase):
             resp = req.get_response()
             self.assertEqual(resp.get_all_facet_queries(), {'year:[2000 TO 2003]': 13})
             self.assertEqual(resp.get_all_facet_fields(), {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8], 'year': ['2009', 3, '2008', 5]})
+    
 
+class SolrResponseCaseAdv(AdsabsBaseTestCase):
+
+    def setUp(self):
+        super(SolrResponseCaseAdv, self).setUp()
+        config.SOLR_MISC_DEFAULT_PARAMS = []
+        config.SEARCH_DEFAULT_ROWS = '5'
+        
+    def test_get_pag_funcs_with_response_1(self):
+        """Tests the pagination function with many results"""
+        solr_response = {'facet_counts': {'facet_fields': {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8],
+                           'year': ['2009', 3, '2008', 5]},
+                          'facet_queries': {'year:[2000 TO 2003]': 13}},
+                         'highlighting': {'1234': {'abstract': ['lorem <em>ipsum</em> lorem']}},
+                         'response': {'docs': [{'abstract': 'lorem ipsum %s' % x, 'bibcode': 'xyz_%s' % x ,'id': '1234%s' % x } for x in xrange(int(config.SEARCH_DEFAULT_ROWS))],
+                          'numFound': 46,
+                          'start': 0},
+                         'responseHeader': {'QTime': 100, 'params': {'q': 'abc'}, 'status': 0}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertEqual(resp.get_count(), 5)
+            self.assertEqual(resp.get_hits(), 46)
+            self.assertEqual(resp.get_start_count(), 0)
+            
+            #pagination dictionary
+            pag_dict = {
+                   'max_pagination_len': 5 ,
+                   'num_total_pages': 10,
+                   'current_page': 1,
+                   'pages_before': [],
+                   'pages_after': [2, 3, 4, 5],       
+            }
+            self.assertEqual(resp.get_pagination(), pag_dict)
+            
+    def test_get_pag_funcs_with_response_2(self):
+        """Tests the pagination function with few results"""
+        solr_response = {'facet_counts': {'facet_fields': {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8],
+                           'year': ['2009', 3, '2008', 5]},
+                          'facet_queries': {'year:[2000 TO 2003]': 13}},
+                         'highlighting': {'1234': {'abstract': ['lorem <em>ipsum</em> lorem']}},
+                         'response': {'docs': [{'abstract': 'lorem ipsum %s' % x, 'bibcode': 'xyz_%s' % x ,'id': '1234%s' % x } for x in xrange(int(config.SEARCH_DEFAULT_ROWS))],
+                          'numFound': 8,
+                          'start': 0},
+                         'responseHeader': {'QTime': 100, 'params': {'q': 'abc'}, 'status': 0}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertEqual(resp.get_count(), 5)
+            self.assertEqual(resp.get_hits(), 8)
+            self.assertEqual(resp.get_start_count(), 0)
+            
+            #pagination dictionary
+            pag_dict = {
+                   'max_pagination_len': 5,
+                   'num_total_pages': 2,
+                   'current_page': 1,
+                   'pages_before': [],
+                   'pages_after': [2],       
+            }
+            self.assertEqual(resp.get_pagination(), pag_dict)
+            
+    def test_get_pag_funcs_with_response_3(self):
+        """Tests the pagination function with few results starting from second page"""
+        solr_response = {'facet_counts': {'facet_fields': {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8],
+                           'year': ['2009', 3, '2008', 5]},
+                          'facet_queries': {'year:[2000 TO 2003]': 13}},
+                         'highlighting': {'1234': {'abstract': ['lorem <em>ipsum</em> lorem']}},
+                         'response': {'docs': [{'abstract': 'lorem ipsum %s' % x, 'bibcode': 'xyz_%s' % x ,'id': '1234%s' % x } for x in xrange(8 - int(config.SEARCH_DEFAULT_ROWS))],
+                          'numFound': 8,
+                          'start': 6},
+                         'responseHeader': {'QTime': 100, 'params': {'q': 'abc'}, 'status': 0}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertEqual(resp.get_count(), 3)
+            self.assertEqual(resp.get_hits(), 8)
+            self.assertEqual(resp.get_start_count(), 6)
+            
+            #pagination dictionary
+            pag_dict = {
+                   'max_pagination_len': 5,
+                   'num_total_pages': 2,
+                   'current_page': 2,
+                   'pages_before': [1],
+                   'pages_after': [],       
+            }
+            self.assertEqual(resp.get_pagination(), pag_dict)
+    
+    def test_get_pag_funcs_with_response_4(self):
+        """Tests the pagination function with many results starting from following page"""
+        solr_response = {'facet_counts': {'facet_fields': {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8],
+                           'year': ['2009', 3, '2008', 5]},
+                          'facet_queries': {'year:[2000 TO 2003]': 13}},
+                         'highlighting': {'1234': {'abstract': ['lorem <em>ipsum</em> lorem']}},
+                         'response': {'docs': [{'abstract': 'lorem ipsum %s' % x, 'bibcode': 'xyz_%s' % x ,'id': '1234%s' % x } for x in xrange(int(config.SEARCH_DEFAULT_ROWS))],
+                          'numFound': 46,
+                          'start': 16},
+                         'responseHeader': {'QTime': 100, 'params': {'q': 'abc'}, 'status': 0}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertEqual(resp.get_count(), 5)
+            self.assertEqual(resp.get_hits(), 46)
+            self.assertEqual(resp.get_start_count(), 16)
+            
+            #pagination dictionary
+            pag_dict = {
+                   'max_pagination_len': 5 ,
+                   'num_total_pages': 10,
+                   'current_page': 4,
+                   'pages_before': [2, 3],
+                   'pages_after': [5, 6],       
+            }
+            self.assertEqual(resp.get_pagination(), pag_dict)
+    
+    def test_get_pag_funcs_with_response_5(self):
+        """Tests the get functions in case of an error coming from SOLR"""
+        solr_response = {"responseHeader":{
+                            "status":400,
+                            "QTime":1,},
+                          "error":{
+                            "msg":"org.apache.lucene.queryparser.classic.ParseException: undefined field authsorfsd",
+                            "code":400}}
+        
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertEqual(resp.get_count(), 0)
+            self.assertEqual(resp.get_hits(), 0)
+            self.assertEqual(resp.get_start_count(), 0)
+            
+            #pagination dictionary
+            pag_dict = {
+                   'max_pagination_len': 5 ,
+                   'num_total_pages': 0,
+                   'current_page': 1,
+                   'pages_before': [],
+                   'pages_after': [],       
+            }
+            self.assertEqual(resp.get_pagination(), pag_dict)
+      
+    def test_get_err_funcs_with_response_1(self):
+        """Tests the get functions in case of an error coming from SOLR"""
+        #error coming from query parser on SOLR
+        solr_response = {"responseHeader":{
+                            "status":400,
+                            "QTime":1,},
+                          "error":{"msg":"org.apache.lucene.queryparser.classic.ParseException: undefined field authsorfsd",
+                            "code":400}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()  
+    
+            self.assertTrue(resp.is_error())
+            self.assertEqual(resp.get_error_components(), {"msg":"org.apache.lucene.queryparser.classic.ParseException: undefined field authsorfsd", "code":400})
+            self.assertEqual(resp.get_error(), "org.apache.lucene.queryparser.classic.ParseException: undefined field authsorfsd")
+            self.assertEqual(resp.get_error_message(), "undefined field authsorfsd")
+        
+        #case of possible error string not containg solr class exception    
+        solr_response = {"responseHeader":{
+                            "status":500,
+                            "QTime":1,},
+                          "error":{"msg":"random string here",
+                            "code":500}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()  
+    
+            self.assertTrue(resp.is_error())
+            self.assertEqual(resp.get_error_components(), {"msg":"random string here", "code":500})
+            self.assertEqual(resp.get_error(), "random string here")
+            self.assertEqual(resp.get_error_message(), "random string here")
+
+    def test_get_err_funcs_with_response_2(self):
+        """Tests the get functions in case of a normal response coming from SOLR"""
+        solr_response = {'facet_counts': {'facet_fields': {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8],
+                           'year': ['2009', 3, '2008', 5]},
+                          'facet_queries': {'year:[2000 TO 2003]': 13}},
+                         'highlighting': {'1234': {'abstract': ['lorem <em>ipsum</em> lorem']}},
+                         'response': {'docs': [{'abstract': 'lorem ipsum', 'bibcode': 'xyz','id': '1234'}],
+                          'numFound': 1,
+                          'start': 1},
+                         'responseHeader': {'QTime': 100, 'params': {'q': 'abc'}, 'status': 0}}
+        fixture = self.useFixture(SolrRawQueryFixture(data=solr_response))
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            req = solr.SolrRequest("foo")
+            req.params.facet = True
+            resp = req.get_response()
+            
+            self.assertFalse(resp.is_error())
+            self.assertEqual(resp.get_error_components(), {})
+            self.assertIsNone(resp.get_error())
+            self.assertIsNone(resp.get_error_message())
+            
+            
+            
 if __name__ == '__main__':
     unittest2.main()

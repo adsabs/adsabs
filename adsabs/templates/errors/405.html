@@ -1,5 +1,10 @@
 {% extends "layout.html" %}
 
+{% block titlehead %}405 Error{% endblock %}
+
 {% block body %}
-405 - Method not allowed (custom page error)
+<h3>Method not allowed.</h3>
+<p>The request method is not supported by this resource.</p>
+
+<p><small><small>405 - Method not allowed</small></small></p>
 {% endblock %}

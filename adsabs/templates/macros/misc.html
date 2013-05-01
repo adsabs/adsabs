@@ -28,13 +28,31 @@
     {% block flash_message %}
         {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
-            <div id='flash_message_container'>
+            	<div class="container">
                 {% for category, msg in messages %}
-                    <div class="alert-message {{ category }}" data-alert>
-                      <p>{{ msg }}</p>
+                	{% if category == 'success' %}
+                		{% set alert_class = 'alert-success' %}
+                		{% set pre_text = 'Success! ' %}
+                	{% elif category == 'error' %}
+                		{% set alert_class = 'alert-error' %}
+                		{% set pre_text = 'Error! ' %}
+                	{% elif category == 'info' %}
+                		{% set alert_class = 'alert-info' %}
+                		{% set pre_text = 'Info! ' %}
+                	{% else %}
+                		{% set alert_class = 'alert-block' %}
+                		{% set pre_text = 'Warning! ' %}
+                	{% endif %}
+                	<div class="row">
+                		<div class="span12">
+		                    <div class="alert {{ alert_class }}">
+		                    	<button type="button" class="close" data-dismiss="alert">&times;</button>
+		                    	<strong>{{ pre_text }}</strong>{{ msg }}
+		                    </div>
+	                    </div>
                     </div>
                 {% endfor %}
-            </div>
+                </div>
             {% endif %}
         {% endwith %}
     {% endblock %}

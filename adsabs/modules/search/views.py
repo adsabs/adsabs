@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g, render_template
+from flask import (Blueprint, request, g, render_template, flash)
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm, get_missing_defaults
@@ -52,6 +52,8 @@ def search():
                      start=query_components['start'], 
                      sort_direction=query_components['sort_direction']
                      )
+        if resp.is_error():
+            flash(resp.get_error_message(), 'error')
         return render_template('search_results.html', resp=resp, form=form)
     
     return render_template('search.html', form=form)

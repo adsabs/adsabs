@@ -12,6 +12,7 @@ from copy import deepcopy
 from simplejson import loads
 from config import config
 from .response import SolrResponse
+from solr import SolrException
 
 log = logging.getLogger(__name__)
         
@@ -163,6 +164,9 @@ class SolrRequest(object):
     def get_response(self):
         try:
             json = g.solr.select.raw(**self.params)
+        except SolrException as se:
+            log.error("SolrException error. Request url: %s" % self.get_raw_request_url())
+            json =  se.body
         except:
             log.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())
             raise
