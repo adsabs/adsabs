@@ -54,6 +54,10 @@ div.centered {
 
 }
 
+.flash_message {
+	margin-bottom:5px;
+}
+
 /*********************/
 /*css for query forms*/
 .link_only_js {
