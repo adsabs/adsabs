@@ -3,7 +3,9 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
-from flask import g, request, current_app as app #@UnresolvedImport
+import logging
+from adsabs.core.logevent import LogEvent
+from flask import g #@UnresolvedImport
 from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
@@ -90,6 +92,7 @@ class ApiSearchRequest(object):
         
         solr_resp.add_meta('api-version', g.api_version)
         self.resp = solr_resp
+        solr_resp.log_search('api', dev_key=g.api_user.get_dev_key())
         return self.resp
 
     def query(self):

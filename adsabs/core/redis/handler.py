@@ -7,6 +7,7 @@ Created on Apr 25, 2013
 import redis
 import logging
 import simplejson as json
+from flask import current_app as app
 
 class RedisLogFormatter(logging.Formatter):
 
@@ -21,11 +22,6 @@ class RedisLogHandler(logging.Handler):
     """
     Publish messages to a redis list.
     """
-
-    @classmethod
-    def create(klass, key, host='localhost', port=6379, level=logging.NOTSET, db=0):
-        rc = redis.Redis(host=host, port=port, db=db)
-        return klass(key, rc, level=level)
 
     def __init__(self, key, redis_client, level=logging.NOTSET):
         """
@@ -42,5 +38,5 @@ class RedisLogHandler(logging.Handler):
         """
         try:
             self.redis_client.rpush(self.key, self.format(record))
-        except redis.RedisError:
-            pass
+        except redis.RedisError, e:
+            app.logger.error("Failed to push log event to redis: %s" % e)

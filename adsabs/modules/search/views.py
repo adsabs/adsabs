@@ -4,9 +4,8 @@ from flask import (Blueprint, request, g, render_template, flash)
 from .forms import QueryForm, get_missing_defaults
 from adsabs.core import solr
 from adsabs.core.data_formatter import field_to_json
-from misc_functions import (build_basicquery_components, log_search)
+from misc_functions import build_basicquery_components
 from config import config
-#import logging
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
@@ -56,7 +55,7 @@ def search():
                      )
         if resp.is_error():
             flash(resp.get_error_message(), 'error')
-        log_search(resp)
+        resp.log_search('search', user_cookie_id=g.user_cookie_id)
         return render_template('search_results.html', resp=resp, form=form)
     else:
         for field_name, errors_list in form.errors.iteritems():

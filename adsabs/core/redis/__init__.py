@@ -1,5 +1,6 @@
 
 import logging
+import redis
 from handler import *
 
 def createLogger(app, logger_name, key=None, level=logging.INFO, propagate=0):
@@ -18,6 +19,11 @@ def createLogger(app, logger_name, key=None, level=logging.INFO, propagate=0):
         host = app.config['REDIS_HOST']
         port = app.config['REDIS_PORT']
         db = app.config['REDIS_DATABASE']
-        handler = RedisLogHandler.create(key, host, port, level, db)
-        logger.addHandler(handler)
+        try:
+            rc = redis.Redis(host=host, port=port, db=db)
+            rc.info() # call this just to establish that connection is valid
+            logger.addHandler(RedisLogHandler(key, rc, level))
+        except redis.ConnectionError, e:
+            app.logger.error("Redis connection failure! '%s' events will not be logged!: %s" \
+                             % (logger_name, e))
     return logger

@@ -83,7 +83,7 @@ class AppConfig(object):
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     SOLR_FILTER_QUERY_PARSER = 'aqp'
     
-    SEARCH_DEFAULT_ROWS = '20'
+    SEARCH_DEFAULT_ROWS = 20
     SEARCH_DEFAULT_SORT = 'DATE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     

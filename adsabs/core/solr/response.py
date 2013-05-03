@@ -4,6 +4,8 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
+import logging
+from adsabs.core.logevent import LogEvent
 from math import ceil
 from copy import deepcopy
 
@@ -101,6 +103,10 @@ class SolrResponse(object):
             return self.get_docset()[idx]
         except IndexError:
             app.logger.debug("response has no doc at idx %d" % idx)
+            
+    def get_doc_values(self, field, start=0, stop=None):
+        docs = self.get_docset()
+        return [x.get(field, None) for x in docs[int(start):int(stop)]]
     
     def get_all_facets(self):
         if not self.request.facets_on():
@@ -284,5 +290,21 @@ class SolrResponse(object):
     def get_qtime(self):
         return self.raw['responseHeader']['QTime']
     
+    def log_search(self, logger_name, **xtra):
+        """
+        extracts some data from the response for log/analytics purposes
+        """
+        data = {
+            'q': self.get_query(),
+            'hits': self.get_hits(),
+            'count': self.get_count(),
+            'start': self.get_start_count(),
+            'qtime': self.get_qtime(),
+            'results': self.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
+            'solr_url': self.request.get_raw_request_url(),
+            }
+        data.update(xtra)
+        event = LogEvent.new(**data)
+        logging.getLogger(logger_name).info(event)        
         
         

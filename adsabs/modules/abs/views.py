@@ -10,8 +10,15 @@ from adsabs.core.data_formatter import field_to_json
 from adsabs.modules.search.misc_functions import build_singledoc_components
 from config import config
 
+import logging
+from adsabs.core.logevent import LogEvent
+
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
 
+def log_abstract_view(bibcode):
+    event = LogEvent.new(bibcode=bibcode, user_cookie_id=g.user_cookie_id)
+    logging.getLogger('abs').info(event)
+    
 @abs_blueprint.after_request
 def add_caching_header(response):
     """
@@ -32,6 +39,10 @@ def abstract(bibcode):
     inveniodoc = invenio.get_invenio_metadata(bibcode)
     #I append to the g element a dictionary of functions I need in the template
     g.formatter_funcs = {'field_to_json':field_to_json}
+    
+    # log the request
+    log_abstract_view(bibcode)
+    
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='abstract')
     
 @abs_blueprint.route('/<bibcode>/references', methods=['GET'])
