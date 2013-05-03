@@ -162,7 +162,7 @@ class SolrRequest(object):
         try:
             json = g.solr.select.raw(**self.params)
         except SolrException as se:
-            log.error("SolrException error. Request url: %s" % self.get_raw_request_url())
+            app.logger.error("SolrException error. Request url: %s" % self.get_raw_request_url())
             json =  se.body
         except:
             app.logger.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())

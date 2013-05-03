@@ -4,9 +4,9 @@ from flask import (Blueprint, request, g, render_template, flash)
 from .forms import QueryForm, get_missing_defaults
 from adsabs.core import solr
 from adsabs.core.data_formatter import field_to_json
-from misc_functions import build_basicquery_components, log_search
+from misc_functions import (build_basicquery_components, log_search)
 from config import config
-import logging
+#import logging
 
 #I define the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
