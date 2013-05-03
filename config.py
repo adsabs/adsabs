@@ -147,7 +147,7 @@ class AppConfig(object):
     
     REDIS_ENABLE = True
     REDIS_HOST = 'localhost'
-    REDIS_PORT = 6378
+    REDIS_PORT = 6379
     REDIS_DATABASE = 0
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
