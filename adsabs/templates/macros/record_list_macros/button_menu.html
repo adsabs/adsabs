@@ -20,13 +20,14 @@
 			{% endif %}
 			data-rel="bootstrap_tooltip"
 			>
+			<i class="icon-random"></i>
 			Re-sort
 			{% if re_sort_type and re_sort_dir %}
 			<i class="icon-ok-sign"></i>
 			{% else %}
 			<i class="icon-white"></i>
 			{% endif %}
-			<span class="caret"></span>
+			<i class="caret"></i>
 		</a>
 		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
 			<li class="dropdown-submenu pull-left">
@@ -116,7 +117,7 @@
 {# ###Macro to render view/export menu #}
 {% macro render_export_menu() %}
 <div class="export_view_menu dropdown pull-right">
-	<a class="btn dropdown-toggle" data-toggle="dropdown" >View <span class="caret"></span></a>
+	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> View <i class="caret"></i></a>
 	<ul class="dropdown-menu">
 		<li class="nav-header">selected records:</li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
