@@ -81,25 +81,25 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             
     def test_query_with_date_range_1(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=12&year_from=2010'):
-            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[20101200 TO *]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
+            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate:[2010-12-00 TO 9999-00-00]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
             
     def test_query_with_date_range_2(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_to=12&year_to=2010'):
-            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[* TO 20101200]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
+            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate:[0001-00-00 TO 2010-12-00]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
             
     def test_query_with_date_range_3(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=09&year_from=2009&month_to=12&year_to=2010'):
-            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[20090900 TO 20101200]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
+            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate:[2009-09-00 TO 2010-12-00]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
             
     def test_query_with_date_range_4(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=09&year_from=2009&year_to=2010'):
-            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate_sort:[20090900 TO 20101300]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
+            out = {'q' : u' author:"civano"', 'filters': [u'database:ASTRONOMY', u'pubdate:[2009-09-00 TO 2010-12-00]'], 'sort': u'DATE', 'start': None, 'sort_direction': 'desc' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form), out)
        

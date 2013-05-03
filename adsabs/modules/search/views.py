@@ -58,7 +58,9 @@ def search():
             flash(resp.get_error_message(), 'error')
         log_search(resp)
         return render_template('search_results.html', resp=resp, form=form)
-    
+    else:
+        for field_name, errors_list in form.errors.iteritems():
+            flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)
 
 @search_blueprint.route('/facets', methods=('GET', 'POST'))

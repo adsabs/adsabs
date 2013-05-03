@@ -37,19 +37,19 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
         search_components['sort'] = None
     #date range
     if form.year_from.data or form.year_to.data:
-        mindate = '*'
-        maxdate = '*'
+        mindate = '0001-00-00' #'*' the * has a bug
+        maxdate = '9999-00-00' #'*' the * has a bug
         if form.year_from.data:
             if form.month_from.data:
-                mindate = u'%s%s00' % (form.year_from.data, unicode(form.month_from.data).zfill(2))
+                mindate = u'%s-%s-00' % (form.year_from.data, unicode(form.month_from.data).zfill(2))
             else:
-                mindate = u'%s%s00' % (form.year_from.data, u'00')
+                mindate = u'%s-%s-00' % (form.year_from.data, u'00')
         if form.year_to.data:
             if form.month_to.data:
-                maxdate = u'%s%s00' % (form.year_to.data, unicode(form.month_to.data).zfill(2))
+                maxdate = u'%s-%s-00' % (form.year_to.data, unicode(form.month_to.data).zfill(2))
             else:
-                maxdate = u'%s%s00' % (form.year_to.data, u'13')
-        search_components['filters'].append(u'pubdate_sort:[%s TO %s]' % (mindate, maxdate))
+                maxdate = u'%s-%s-00' % (form.year_to.data, u'12')
+        search_components['filters'].append(u'pubdate:[%s TO %s]' % (mindate, maxdate))
     #refereed
     if form.refereed.data:
         search_components['filters'].append(u'property:REFEREED')
