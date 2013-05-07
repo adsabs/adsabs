@@ -1,4 +1,5 @@
 import os
+import sys
 import pytz
 
 import logging
@@ -8,13 +9,14 @@ from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import configure_template_filters
 from adsabs.core.before_request_funcs import configure_before_request_funcs
 from adsabs.core.after_request_funcs import configure_after_request_funcs
-
+from adsabs.core.exceptions import ConfigurationError
 
 # For import *
 __all__ = ['create_app']
 
 import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo") 
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo")
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="invenio")
 
 def create_app(config=config, app_name=None):
     """Create a Flask app."""
@@ -22,8 +24,12 @@ def create_app(config=config, app_name=None):
     if app_name is None:
         app_name = APP_NAME
 
+    if not hasattr(config, 'SECRET_KEY'):
+        raise ConfigurationError("config is missing SECRET_KEY value")
+    
     app = Flask(app_name)
-    _configure_app(app, config)
+    app.config.from_object(config)
+    
     _configure_logging(app)
     if not config.TESTING:
         _configure_wsgi_middleware(app)
@@ -42,16 +48,6 @@ def create_app(config=config, app_name=None):
 
     return app
 
-def _configure_app(app, config):
-    """
-    configuration of the flask application
-    """
-    app.config.from_object(config)
-    if config is not None:
-        app.config.from_object(config)
-    # Override setting by env var without touch_import)
-    pass
-
 def _configure_logging(app):
     
     from logging.handlers import TimedRotatingFileHandler
@@ -59,17 +55,21 @@ def _configure_logging(app):
     # create a rotating log handler
     level = getattr(logging, app.config['LOGGING_LOG_LEVEL'])
     app.logger.setLevel(level)
-    handler = TimedRotatingFileHandler(app.config['LOGGING_LOG_PATH'], **app.config['LOGGING_ROTATION_SETTINGS'])
-    handler.setLevel(level)
-    handler.setFormatter(logging.Formatter(app.config['LOGGING_LOG_FORMAT']))
-    # add it to the flask app logger
-    app.logger.addHandler(handler)
-    # and the root logger
-    logging.getLogger().addHandler(handler)
+    app.logger.propagate = 0
+    
+    if app.config['LOGGING_LOG_TO_FILE']:
+        handler = TimedRotatingFileHandler(app.config['LOGGING_LOG_PATH'], **app.config['LOGGING_ROTATION_SETTINGS'])
+        handler.setLevel(level)
+        handler.setFormatter(logging.Formatter(app.config['LOGGING_LOG_FORMAT']))
+        # add it to the flask app logger
+        app.logger.addHandler(handler)
+        # and the root logger
+        logging.getLogger().addHandler(handler)
+        
     # add console output if log level is >= DEBUG
-    if level <= logging.DEBUG:
+    if level <= logging.DEBUG or app.config['LOGGING_LOG_TO_CONSOLE']:
         from logging import StreamHandler
-        app.logger.addHandler(StreamHandler())
+        app.logger.addHandler(StreamHandler(sys.stdout))
     
 def _configure_wsgi_middleware(app):
     app.wsgi_app = DeploymentPathMiddleware(app.wsgi_app)
@@ -108,6 +108,7 @@ def _configure_extensions(app):
     login_manager.init_app(app) #@UndefinedVariable
     
     #mongo db
+    
     try:
         app.logger.debug("initializing mongodb")
         mongodb.init_app(app) #@UndefinedVariable

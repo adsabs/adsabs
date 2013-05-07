@@ -1,0 +1,1 @@
+from .config import config, APP_NAME

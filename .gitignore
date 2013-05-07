@@ -39,3 +39,4 @@ man
 #logging local configuration
 logging.conf
 
+local_config.py

@@ -1,0 +1,12 @@
+import os
+
+_basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+class LocalConfig(object):
+{% if config_items|length -%}
+    {% for k,v in config_items.items() %}
+    {{ k }} = "{{ v }}"
+    {% endfor %}
+{% else %}
+    pass
+{% endif -%}

@@ -1,6 +1,6 @@
 import os
 
-_basedir = os.path.abspath(os.path.dirname(__file__))
+_basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 APP_NAME = "adsabs"
 
@@ -17,8 +17,8 @@ class AppConfig(object):
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
     
-    ADMINS = frozenset(['youremail@yourdomain.com'])
-    SECRET_KEY = 'SecretKeyForSessionSigning'
+    # run shell.py create_local_config to generate this value in local_config.py
+    SECRET_KEY = "SooperSekritKeyValue"
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
     DATABASE_CONNECT_OPTIONS = {}
@@ -26,13 +26,7 @@ class AppConfig(object):
     THREADS_PER_PAGE = 8
 
     CSRF_ENABLED=True
-    CSRF_SESSION_KEY="somethingimpossibletoguess"
 
-    RECAPTCHA_USE_SSL = False
-    RECAPTCHA_PUBLIC_KEY = 'blahblahblahblahblahblahblahblahblah'
-    RECAPTCHA_PRIVATE_KEY = 'blahblahblahblahblahblahprivate'
-    RECAPTCHA_OPTIONS = {'theme': 'white'}
-    
     ANALYTICS_ENABLED = True
     ANALYTICS_ACCOUNT_ID = 'UA-37369750-1'
     
@@ -41,8 +35,8 @@ class AppConfig(object):
     MONGOALCHEMY_PORT = 27017
     MONGOALCHEMY_SAFE_SESSION = False
     MONGOALCHEMY_SERVER_AUTH = False
-    MONGOALCHEMY_USER = 'adsabs'
-    MONGOALCHEMY_PASSWORD = ''
+    MONGOALCHEMY_USER = None
+    MONGOALCHEMY_PASSWORD = None
     
     COOKIE_ADSABS2_NAME = 'NASA_ADSABS2_ID'
     COOKIE_ADS_CLASSIC_NAME = 'NASA_ADS_ID'
@@ -139,8 +133,10 @@ class AppConfig(object):
                                  'templ_year_f' : {'facetid':'year_f', 'facet_title':'Publication Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},                                 
                                 }
     
-    LOGGING_LOG_PATH = os.path.join(_basedir, 'logs/adsabs.log')
     LOGGING_LOG_LEVEL = 'WARN'
+    LOGGING_LOG_TO_FILE = True
+    LOGGING_LOG_TO_CONSOLE = False
+    LOGGING_LOG_PATH = os.path.join(_basedir, 'logs/adsabs.log')
     LOGGING_LOG_FORMAT = "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
     # dict of kwargs to use when creating a TimedRotationFileHandler
     LOGGING_ROTATION_SETTINGS = {'when': 'D', 'interval': 7, 'backupCount': 8}
