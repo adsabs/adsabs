@@ -24,7 +24,7 @@ def create_app(config=config, app_name=None):
     if app_name is None:
         app_name = APP_NAME
 
-    if not hasattr(config, 'SECRET_KEY'):
+    if not hasattr(config, 'SECRET_KEY') or config.SECRET_KEY is None:
         raise ConfigurationError("config is missing SECRET_KEY value")
     
     app = Flask(app_name)

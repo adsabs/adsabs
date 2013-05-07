@@ -37,6 +37,7 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         config.DEBUG = False
         config.PRINT_DEBUG_TEMPLATE = False
         config.REDIS_ENABLE = False
+        config.SECRET_KEY = 'abcd1234'
         
         try:
             self.app = create_app(config)

@@ -18,7 +18,8 @@ class AppConfig(object):
     DEPLOYMENT_PATH = None
     
     # run shell.py create_local_config to generate this value in local_config.py
-    SECRET_KEY = "SooperSekritKeyValue"
+    # or generate_secret_key to do it manually
+    SECRET_KEY = None
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
     DATABASE_CONNECT_OPTIONS = {}
