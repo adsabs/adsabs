@@ -17,6 +17,10 @@ config.LOGGING_LOG_TO_FILE = False
 config.LOGGING_LOG_TO_CONSOLE = True
 config.LOGGING_LOG_LEVEL = 'INFO'
 
+if not getattr(config, 'SECRET_KEY', None):
+    # set a fake one to keep the create_app from barfing
+    config.SECRET_KEY = "foo"
+
 app = create_app(config)
 manager = Manager(app)#, with_default_commands=False)
 
