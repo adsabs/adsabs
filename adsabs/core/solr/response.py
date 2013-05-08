@@ -264,8 +264,12 @@ class SolrResponse(object):
         """
         if not hasattr(self, 'pagination'):
             max_pagination_len = 5 #maybe we want to put this in the configuration
-            num_total_pages = int(ceil(float(self.get_hits()) / float(config.SEARCH_DEFAULT_ROWS)))
-            current_page = (int(self.get_start_count()) / int(config.SEARCH_DEFAULT_ROWS)) + 1
+            try:
+                num_rows = int(self.request.params.rows)
+            except (ValueError, TypeError):
+                num_rows = int(config.SEARCH_DEFAULT_ROWS)
+            num_total_pages = int(ceil(float(self.get_hits()) / float(num_rows)))
+            current_page = (int(self.get_start_count()) / num_rows) + 1
             max_num_pages_before = int(ceil(min(max_pagination_len, num_total_pages) / 2.0)) - 1
             max_num_pages_after = int(min(max_pagination_len, num_total_pages)) / 2
             distance_to_1 = current_page - 1

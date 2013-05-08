@@ -21,8 +21,34 @@
 			        	title="more options" data-rel="bootstrap_tooltip"><i class="icon-plus"></i></span>
 			        {{ form.db_key(class="span autoWidth") }}
 			        {{ form.sort_type(class="span autoWidth") }}
-			        <button class="btn btn-primary">Search</button>
-			        
+			        <button class="btn btn-primary"><i class="icon-search icon-white"></i> Search</button>
+			        <div class="dropdown pull-right">
+			        	<a class="btn dropdown-toggle add-open-permanent" data-toggle="dropdown"  data-rel="bootstrap_tooltip" title="Search settings">
+			        		<i class="icon-cog"></i> <i class="caret"></i>
+			        	</a>
+			        	<ul style="min-width: 300px; padding-bottom: 0px;" class="dropdown-menu donothide clearfix">
+							<li class="nav-header">Search settings</li>
+							
+							<li class="divider"></li>
+							<li class="clearfix nav-list">
+								<div class="control-group clearfix">
+									<label class="control-label pull-left">Display on page</label>
+									<div class="controls pull-right">
+										<!-- select class="btn-small span2" style="height: inherit; line-height: inherit; display: none;" name="rg">
+											<option value="10">10 results</option>
+											<option selected="selected" value="25">25 results</option>
+											<option value="50">50 results</option>
+											<option value="100">100 results</option>
+										</select-->
+										{{ form.nr(class="btn-small span2 hidden_elem") }}
+									</div>
+								</div>
+							</li>
+							<!--li class="modal-footer nav-list clearfix"><button class="btn btn-small pull-right" data-placement="bottom" data-rel="bootstrap_tooltip" title="use settings in current search">
+							    <i class="icon-ok"></i> Apply </button>
+							</li-->
+						</ul>
+			        </div>
 		        </div>
 	        </div>
 	        <div id="advanced_options" class="row">

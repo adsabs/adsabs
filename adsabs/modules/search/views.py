@@ -51,7 +51,8 @@ def search():
                      filters=query_components['filters'], 
                      sort=query_components['sort'], 
                      start=query_components['start'], 
-                     sort_direction=query_components['sort_direction']
+                     sort_direction=query_components['sort_direction'],
+                     rows=query_components['rows']
                      )
         if resp.is_error():
             flash(resp.get_error_message(), 'error')

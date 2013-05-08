@@ -6,7 +6,7 @@ Created on Nov 30, 2012
 
 from werkzeug.datastructures import CombinedMultiDict
 from config import config
-from flask import g, session
+#from flask import g, session
 
 
 def build_basicquery_components(form, request_values=CombinedMultiDict([]), facets_components=False):
@@ -20,6 +20,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
             'sort': config.SEARCH_DEFAULT_SORT,
             'start': None,
             'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
+            'rows':config.SEARCH_DEFAULT_ROWS,
     }
     #one box query
     search_components['q'] = form.q.data
@@ -60,6 +61,11 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
         for bibstem in form.journal_abbr.data.split(','):
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
         search_components['filters'].append(journal_abbr_string[:-4]) 
+        
+    #number of rows
+    if form.nr.data and form.nr.data != 'None':
+        search_components['rows'] = form.nr.data
+    
     #the facets that are not included in the form
     for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
         for elem in request_values.getlist(facet):
@@ -76,7 +82,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
         except ValueError:
             int_page = None
         if int_page >0:
-            search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
+            search_components['start'] = str((int(page) - 1) * int(search_components['rows']))
     #re-sorting options
     if request_values.get('re_sort_type') in config.RE_SORT_OPTIONS.keys():
         search_components['sort'] = request_values.get('re_sort_type')

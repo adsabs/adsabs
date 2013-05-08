@@ -76,6 +76,10 @@ div.centered {
 	margin-left:10px;
 }
 
+.open-permanent .donothide {
+  display: block!important;
+}
+
 /*********************/
 /*Search result page */
 

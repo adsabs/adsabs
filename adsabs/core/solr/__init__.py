@@ -3,7 +3,7 @@ from .request import *
 from .response import *
 from .solrdoc import *
 
-from flask import current_app as app
+#from flask import current_app as app
 
 __all__ = [
     'SolrRequest',

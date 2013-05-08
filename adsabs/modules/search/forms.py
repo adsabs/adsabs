@@ -4,13 +4,13 @@ Created on Sep 19, 2012
 @author: jluker
 '''
 
-from flask.ext.wtf import (Form, SubmitField, TextField, SelectField, HiddenField, IntegerField, BooleanField,#RadioField, #@UnresolvedImport
-                          ValidationError, validators, required, optional, equal_to, email, #@UnresolvedImport
+from flask.ext.wtf import (Form, TextField, SelectField, IntegerField, BooleanField,#SubmitField, HiddenField, RadioField, #@UnresolvedImport
+                          validators, required, optional, #ValidationError, equal_to, email, #@UnresolvedImport
                           length) #@UnresolvedImport
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 #from flask.ext.wtf.html5 import RangeInput #@UnresolvedImport
 
-from config import config
+#from config import config
 #from custom_wtform import SelectFieldCssClass
 
 __all__ = ["get_missing_defaults", "QueryForm", "AdvancedQueryForm"]
@@ -51,6 +51,9 @@ class QueryForm(Form):
     journal_abbr = TextField(u'Bibstems', [optional(), length(min=2, max=2048)], description=u'Journal Abbreviation(s)')
     refereed = BooleanField(u'Refereed', description=u'Refereed only')
     article = BooleanField(u'Articles', description=u'Articles only')
+    nr = SelectField(u'Number to return', [optional()], choices=[('', 'default results'), 
+                                                        ('20', '20 results'), ('50', '50 results'), ('50', '50 results'), ('100', '100 results'), 
+                                                        ('200', '200 results')] )
     
     default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', 'DATE')])
     

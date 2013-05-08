@@ -31,7 +31,7 @@ $(document).ready(function(){
 	//I add a function on the forms
 	$("form").submit(function()
 	{
-		$(this).find('input').filter(function() { return $(this).val() == ""; }).attr("disabled", "disabled");
+		$(this).find('input, select').filter(function() { return $(this).val() == ""; }).attr("disabled", "disabled");
 	    return true; // ensure form still submits 
 	});
 	
@@ -54,4 +54,24 @@ $(document).ready(function(){
 			break;
 		}
 	}
+	
+	//code for the "search settings" menu
+	$('.add-open-permanent').on('click', function(e) {
+		$(this).parents('.dropdown').addClass('open-permanent')
+	});
+		
+	$(document).on('click', function(e) {
+		if ($(e.target).parents('.donothide').length <= 0) 
+		{
+			$('.open-permanent').removeClass('open-permanent')
+		}
+	});
+
+	$('select[name="nr"]').buttonSelect({
+		button: '<div class="btn btn-mini" />', 
+		span: '<span class="btn btn-mini" style="width: 80px;" />',
+		next: '<i class="icon icon-plus"></i>',
+		prev: '<i class="icon icon-minus"></i>',
+	});
+	
 });
