@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_05_07_v1'
+    APP_VERSION = '2013_05_13_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -168,8 +168,25 @@ class AppConfig(object):
         'year': 'year'
     }
     
+    #sendmail configuration
     SMTP_HOST = 'localhost'
     API_WELCOME_FROM_EMAIL = 'jluker@cfa.harvard.edu'
+    
+    #flask-mail configuration
+    MAIL_SERVER = 'localhost'
+    MAIL_PORT = 25
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = False
+    MAIL_USERNAME = None
+    MAIL_PASSWORD = None
+    DEFAULT_MAIL_SENDER = None
+    
+    FEEDBACK_RECIPIENTS = ['name@ema.il',]
+    
+    RECAPTCHA_USE_SSL = True
+    RECAPTCHA_PUBLIC_KEY = ''
+    RECAPTCHA_PRIVATE_KEY = ''
+    RECAPTCHA_OPTIONS = {'theme' : 'white'}
 
 try:
     from local_config import LocalConfig

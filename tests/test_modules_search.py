@@ -11,11 +11,11 @@ site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
 site.addsitedir(tests_dir) #@UndefinedVariable
 
 #import fixtures
-#import unittest2
+import unittest2
 
 #from adsabs.app import create_app
 from config import config
-from test_utils import *
+from test_utils import (AdsabsBaseTestCase, SolrRawQueryFixture)
 
 from flask import request
 from werkzeug.datastructures import ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport

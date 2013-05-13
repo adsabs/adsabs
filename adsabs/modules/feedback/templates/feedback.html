@@ -1,0 +1,23 @@
+{#Macro imports -#}
+{% from "feedback_macro.html" import render_feedback_form, render_success_message with context %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}Feedback form{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+	<div class="container">
+		<div class="row">
+			<div class="span8 offset2">
+			{% if status == 'sent' %}
+				{{ render_success_message() }}
+			{% else %}
+				{{ render_feedback_form(form) }}
+			{% endif %}
+			
+			</div>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% macro render_feedback_form(form) %}
+<div class="container-fluid custom-well-small">
+	<div class="row-fluid">
+		<div class="span12">
+			<form class="form-horizontal" method="POST" action="{{ url_for('feedback.feedback') }}">
+				<fieldset>
+					<legend>Feedback.</legend>
+					<div class="control-group">
+						<label class="control-label">Name</label>
+						<div class="controls">
+						{% if current_user.is_authenticated() and form.name.data == None %}
+							{{ form.name(class="span10", placeholder=form.name.description, value=current_user.name) }}
+						{% else %}
+							{{ form.name(class="span10", placeholder=form.name.description) }}
+						{% endif %}
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">E-Mail</label>
+						<div class="controls">
+						{% if current_user.is_authenticated() and form.email.data == None %}
+							{{ form.email(class="span10", placeholder=form.email.description, value=current_user.get_username()) }}
+						{% else %}
+							{{ form.email(class="span10", placeholder=form.email.description) }}
+						{% endif %}
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Feedback type</label>
+						<div class="controls">
+							{% for subfield in form.feedback_type %}
+							<label class="radio inline">
+								{{ subfield }}
+								{{ subfield.label }}
+							</label>
+							{% endfor %}
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Message</label>
+						<div class="controls">
+							{{ form.feedback_text(class="span10", rows="6") }}
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							{{ form.recaptcha() }}
+						</div>
+					</div>
+					<div class="control-group">
+						<div class="controls">
+							<button class="btn btn-success">Submit</button>
+						</div>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+{% endmacro %}
+
+
+{% macro render_success_message() %}
+<div class="container-fluid custom-well-small">
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="feedback_success">Thanks, your feedback has been successfully submitted.</div>
+		</div>
+	</div>
+</div>	
+{% endmacro %}

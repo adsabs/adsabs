@@ -30,10 +30,6 @@ div.centered {
 	margin-top:2px;
 }
 
-#advanced_options .well {
-	margin-bottom:0px	
-}
-
 .hidden_elem {
 	display: none;	
 }
@@ -58,6 +54,14 @@ div.centered {
 	margin-bottom:5px;
 }
 
+/*********************/
+/*css for the feedback */
+.feedback_success {
+	font-size: 21px;
+	min-height: 200px;
+	padding: 20px;
+	line-height:6em;
+}
 /*********************/
 /*css for query forms*/
 .link_only_js {

@@ -1,3 +1,5 @@
+{% from "macros/search_macros.html" import render_search_form with context %}
+
 {% extends "layout.html" %}
 
 {% block titlehead %}Search{% endblock %}
@@ -5,8 +7,6 @@
 {% block head%}{% endblock %}
 
 {% block body %}
-
-{# The search form is rendered in a global template, because in this way I can have it global #}
-{% include 'search/search_form.html' %}
+{{ render_search_form(form) }}
 
 {% endblock %}

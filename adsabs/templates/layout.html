@@ -72,13 +72,13 @@
 						<li class="divider-vertical"></li>
 						<li><a href="{{ url_for('index.index') }}">Home</a></li>
 						<li><a href="{{ url_for('search.search') }}">Search</a></li>
+						<li><a href="{{ url_for('feedback.feedback') }}">Feedback</a></li>
 						<li><a href="#about">About</a></li>
-						<li><a href="#contact">Contact</a></li>
 					</ul>
 					<ul class="nav pull-right">
 						<li class="dropdown">
 							{% if current_user.is_authenticated() %}
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown">Logged in as {{ current_user.name }} <b class="caret"></b></a>
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> {{ current_user.name }} <b class="caret"></b></a>
 							<ul class="dropdown-menu">
 					    		<li class="nav-header">Options</li>
 					            <li><a href="{{ url_for('user.index') }}">Settings</a></li>
@@ -86,7 +86,7 @@
 					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}">Sign off</a></li>
 				            </ul>
 				            {% else %}
-							<li><a href="{{ url_for('user.login') }}?next={{ current_url }}">Log in</a></li>
+							<li><a href="{{ url_for('user.login') }}?next={{ current_url }}"><i class="icon-user"></i> Log in</a></li>
 							{% endif %}
 						</li>
 					</ul>

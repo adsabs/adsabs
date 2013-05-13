@@ -10,7 +10,7 @@ from adsabs.modules.search.forms import QueryForm
 from config import config
 
 #I define the blueprint
-index_blueprint = Blueprint('index', __name__, url_prefix='')
+index_blueprint = Blueprint('index', __name__, template_folder="templates", url_prefix='')
 
 @index_blueprint.after_request
 def add_caching_header(response):
@@ -38,4 +38,4 @@ def index():
             static_content = f.read()
     except:
         static_content = ''
-    return render_template('index/main_page.html', form=search_form, static_content=static_content)
+    return render_template('main_page.html', form=search_form, static_content=static_content)

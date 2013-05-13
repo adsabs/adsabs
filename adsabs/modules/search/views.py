@@ -4,10 +4,11 @@ from flask import (Blueprint, request, g, render_template, flash)
 from .forms import QueryForm, get_missing_defaults
 from adsabs.core import solr
 from adsabs.core.data_formatter import field_to_json
+from adsabs.core.form_functs import is_submitted_cust
 from misc_functions import build_basicquery_components
 from config import config
 
-#I define the blueprint
+#Definition of the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
                              static_folder="static", url_prefix='/search')
 
@@ -44,23 +45,24 @@ def search():
     returns the results of a search
     """
     form = init_search_form()
-    if form.validate():
-        #I append to the g element a dictionary of functions I need in the template
-        query_components = build_basicquery_components(form, request.values)
-        resp = solr.query(query_components['q'], 
-                     filters=query_components['filters'], 
-                     sort=query_components['sort'], 
-                     start=query_components['start'], 
-                     sort_direction=query_components['sort_direction'],
-                     rows=query_components['rows']
-                     )
-        if resp.is_error():
-            flash(resp.get_error_message(), 'error')
-        resp.log_search('search', user_cookie_id=g.user_cookie_id)
-        return render_template('search_results.html', resp=resp, form=form)
-    else:
-        for field_name, errors_list in form.errors.iteritems():
-            flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
+    if is_submitted_cust(form):
+        if form.validate():
+            #I append to the g element a dictionary of functions I need in the template
+            query_components = build_basicquery_components(form, request.values)
+            resp = solr.query(query_components['q'], 
+                         filters=query_components['filters'], 
+                         sort=query_components['sort'], 
+                         start=query_components['start'], 
+                         sort_direction=query_components['sort_direction'],
+                         rows=query_components['rows']
+                         )
+            if resp.is_error():
+                flash(resp.get_error_message(), 'error')
+            resp.log_search('search', user_cookie_id=g.user_cookie_id)
+            return render_template('search_results.html', resp=resp, form=form)
+        else:
+            for field_name, errors_list in form.errors.iteritems():
+                flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)
 
 @search_blueprint.route('/facets', methods=('GET', 'POST'))

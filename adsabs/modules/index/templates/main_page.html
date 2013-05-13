@@ -1,3 +1,5 @@
+{% from "macros/search_macros.html" import render_search_form with context %}
+
 {% extends "layout.html" %}
 
 {% block titlehead %}index{% endblock %}
@@ -8,21 +10,22 @@
 
 <h3>The SAO/NASA Astrophysics Data System</h3>
 
-<div class="tabbable">
+<div class="tabbable container">
 	<ul class="nav nav-tabs">
 		<li class="active"><a href="#tab1" data-toggle="tab"> Search the ADS </a></li>
 		<!-- li><a href="#tab2" data-toggle="tab"> Dashboard </a></li-->
 		<li><a class="disabled"> Dashboard </a></li>
 	</ul>
-	<div class="tab-content">
+	{# <div class="tab-content">
 		<div class="tab-pane active" id="tab1">
-    		{% include 'search/search_form.html' %}
+    		The search form here creates problems
 		</div>
     	<div class="tab-pane" id="tab2">
       		<p>All the personalized info</p>
     	</div>
-  	</div>
+  	</div> -#}
 </div>
+{{ render_search_form(form) }}
 
 <div id="text_welcome">
 	{% if static_content %}
