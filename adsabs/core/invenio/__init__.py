@@ -10,8 +10,8 @@ try:
     from invenio.bibrecord import record_xml_output #@UnresolvedImport
     from invenio.dbquery import run_sql #@UnresolvedImport
 except ImportError:
-    from flask import current_app as app
-    app.logger.warn("Invenio import failure! Invenio data layer functions will not work!")
+    import sys
+    print >>sys.stderr, "Invenio import failure! Invenio data layer functions will not work!"
 
 __all__ = ['record_url', 'get_abstract_xml_from_ads_id', 'get_records', 'get_metadata', 'get_invenio_metadata']
 
