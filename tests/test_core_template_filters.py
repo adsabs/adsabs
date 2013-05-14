@@ -13,7 +13,7 @@ site.addsitedir(tests_dir) #@UndefinedVariable
 import unittest2
 
 from config import config
-from test_utils import *
+from test_utils import (AdsabsBaseTestCase)
 
 import adsabs.core.template_filters as tf
 

@@ -19,6 +19,7 @@ testtools
 nose==1.2.1
 scrubber>=1.6.1
 BeautifulSoup>=3.2.1
+beautifulsoup4>=4.2.0
 flask-debugtoolbar
 MySQL-python
 dicttoxml >= 0.8
