@@ -6,7 +6,7 @@
 				<fieldset>
 					<legend>Feedback.</legend>
 					<div class="control-group">
-						<label class="control-label">Name</label>
+						<label class="control-label required">Name</label>
 						<div class="controls">
 						{% if current_user.is_authenticated() and form.name.data == None %}
 							{{ form.name(class="span10", placeholder=form.name.description, value=current_user.name) }}
@@ -16,7 +16,7 @@
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">E-Mail</label>
+						<label class="control-label required">E-Mail</label>
 						<div class="controls">
 						{% if current_user.is_authenticated() and form.email.data == None %}
 							{{ form.email(class="span10", placeholder=form.email.description, value=current_user.get_username()) }}
@@ -26,7 +26,7 @@
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">Feedback type</label>
+						<label class="control-label required">Feedback type</label>
 						<div class="controls">
 							{% for subfield in form.feedback_type %}
 							<label class="radio inline">
@@ -37,18 +37,20 @@
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">Message</label>
+						<label class="control-label required">Message</label>
 						<div class="controls">
 							{{ form.feedback_text(class="span10", rows="6") }}
 						</div>
 					</div>
 					<div class="control-group">
+						<label class="control-label required"> </label>
 						<div class="controls">
 							{{ form.recaptcha() }}
 						</div>
 					</div>
 					<div class="control-group">
 						<div class="controls">
+							<span class="required_string">* Required fields</span>
 							<button class="btn btn-success">Submit</button>
 						</div>
 					</div>

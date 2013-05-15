@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_05_13_v1'
+    APP_VERSION = '2013_05_15_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
