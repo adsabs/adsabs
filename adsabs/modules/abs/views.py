@@ -16,7 +16,7 @@ from adsabs.core.logevent import LogEvent
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
 
 def log_abstract_view(bibcode):
-    event = LogEvent.new(bibcode=bibcode, user_cookie_id=g.user_cookie_id)
+    event = LogEvent.new(request.url, bibcode=bibcode, user_cookie_id=g.user_cookie_id)
     logging.getLogger('abs').info(event)
     
 @abs_blueprint.after_request
@@ -60,6 +60,10 @@ def references(bibcode):
     solr_reference_list = solrdoc.get_references(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
     #I append to the g element a dictionary of functions I need in the template
     g.formatter_funcs = {'field_to_json':field_to_json}
+    
+    # log the request
+    log_abstract_view(bibcode)
+    
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='references', reference_list=solr_reference_list)
 
 @abs_blueprint.route('/<bibcode>/citations', methods=['GET'])
@@ -77,6 +81,10 @@ def citations(bibcode):
     solr_citation_list = solrdoc.get_citations(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
     #I append to the g element a dictionary of functions I need in the template
     g.formatter_funcs = {'field_to_json':field_to_json}
+    
+    # log the request
+    log_abstract_view(bibcode)
+    
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='citations', citation_list=solr_citation_list)
 
 @abs_blueprint.route('/<bibcode>/toc', methods=['GET'])
@@ -93,6 +101,10 @@ def toc(bibcode):
     solr_toc_list = solrdoc.get_toc(sort=query_components['sort'], start=query_components['start'], sort_direction=query_components['sort_direction'])
     #I append to the g element a dictionary of functions I need in the template
     g.formatter_funcs = {'field_to_json':field_to_json}
+    
+    # log the request
+    log_abstract_view(bibcode)
+    
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='toc', toc_list=solr_toc_list)
 
 

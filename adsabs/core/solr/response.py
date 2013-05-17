@@ -12,7 +12,7 @@ from copy import deepcopy
 from config import config
 from .solrdoc import SolrDocument
 
-from flask import current_app as app
+from flask import request, current_app as app
 
 class SolrResponse(object):
     
@@ -308,7 +308,7 @@ class SolrResponse(object):
             'solr_url': self.request.get_raw_request_url(),
             }
         data.update(xtra)
-        event = LogEvent.new(**data)
+        event = LogEvent.new(request.url, **data)
         logging.getLogger(logger_name).info(event)        
         
         

@@ -10,8 +10,9 @@ import datetime
 class LogEvent(dict):
     
     @classmethod
-    def new(cls, **fields):
+    def new(cls, msg, **fields):
         event = cls()
+        event['@message'] = msg
         event['@fields'] = fields
         event.init()
         return event
@@ -25,4 +26,4 @@ class LogEvent(dict):
         """
         now = datetime.datetime.utcnow()
         self['@timestamp'] = now.isoformat()
-        self['@source_host'] = socket.gethostname()
+        self['@source'] = socket.gethostname()
