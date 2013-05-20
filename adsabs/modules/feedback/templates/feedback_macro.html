@@ -1,14 +1,14 @@
-{% macro render_feedback_form(form) %}
-<div class="container-fluid custom-well-small">
+{% macro render_feedback_form(form, feedb_req_mode) %}
+<div class="container-fluid">
 	<div class="row-fluid">
 		<div class="span12">
-			<form class="form-horizontal" method="POST" action="{{ url_for('feedback.feedback') }}">
+			<form class="form-horizontal" method="POST" action="{{ url_for('feedback.feedback') }}{% if feedb_req_mode == 'nolayout' %}?feedb_req_mode=nolayout{% endif %}">
 				<fieldset>
-					<legend>Feedback.</legend>
+					<legend>Feedback</legend>
 					<div class="control-group">
 						<label class="control-label required">Name</label>
 						<div class="controls">
-						{% if current_user.is_authenticated() and form.name.data == None %}
+						{% if current_user.is_authenticated() and form.name.data in (None, '') %}
 							{{ form.name(class="span10", placeholder=form.name.description, value=current_user.name) }}
 						{% else %}
 							{{ form.name(class="span10", placeholder=form.name.description) }}
@@ -18,7 +18,7 @@
 					<div class="control-group">
 						<label class="control-label required">E-Mail</label>
 						<div class="controls">
-						{% if current_user.is_authenticated() and form.email.data == None %}
+						{% if current_user.is_authenticated() and form.email.data in (None, '') %}
 							{{ form.email(class="span10", placeholder=form.email.description, value=current_user.get_username()) }}
 						{% else %}
 							{{ form.email(class="span10", placeholder=form.email.description) }}
@@ -45,13 +45,13 @@
 					<div class="control-group">
 						<label class="control-label required"> </label>
 						<div class="controls">
-							{{ form.recaptcha() }}
+							{{ form.recaptcha()|safe }}
 						</div>
 					</div>
 					<div class="control-group">
 						<div class="controls">
 							<span class="required_string">* Required fields</span>
-							<button class="btn btn-success">Submit</button>
+							<button class="btn btn-info">Submit</button>
 						</div>
 					</div>
 				</fieldset>
@@ -62,11 +62,14 @@
 {% endmacro %}
 
 
-{% macro render_success_message() %}
-<div class="container-fluid custom-well-small">
+{% macro render_success_message(feedb_req_mode) %}
+<div class="container-fluid">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="feedback_success">Thanks, your feedback has been successfully submitted.</div>
+			{% if feedb_req_mode=='nolayout' %}
+				<a class="btn btn-info pull-right" href="javascript:parent.jQuery.fancybox.close();">Close</a>
+			{% endif %}
 		</div>
 	</div>
 </div>	

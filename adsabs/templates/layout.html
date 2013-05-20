@@ -26,6 +26,16 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v3.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/vega.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
+	<!-- Fancybox stuff -->
+	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/jquery.mousewheel-3.0.6.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/jquery.fancybox.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/jquery.fancybox.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-media.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	
 	<!-- BEER Specific stuff -->
 	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
 	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
@@ -33,6 +43,7 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/spin.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/record_list_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip_manager.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/feedback_components.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
 	{% block head%}{% endblock %}
 </head>
@@ -106,7 +117,7 @@
 		</div>
 	
 	</div> <!-- Container -->
-	<div id="push"></div>
+	<div id="push"></div> <!-- Div used to push to the bottom the footer -->
 </div><!-- Wrap -->
 
 <div id="footer">
@@ -132,6 +143,13 @@
 {% include 'analytics.html' %}
 {% endblock %}
 {% endif %}
+
+<!-- Widgets on the edge of the page -->
+<div id="feedback_widget" class="feedback_widget_container hidden_elem">
+	<div id="button_feedback_widget" class="btn btn-info feedback_widget_button rotate" 
+		data-fancybox-href="{{ url_for('feedback.feedback') }}?feedb_req_mode=nolayout" data-fancybox-type="iframe">Feedback</div>
+</div>
+
 
 </body>
 </html>

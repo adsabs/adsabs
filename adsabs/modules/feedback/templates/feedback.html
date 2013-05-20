@@ -1,23 +1,36 @@
 {#Macro imports -#}
 {% from "feedback_macro.html" import render_feedback_form, render_success_message with context %}
 
-{% extends "layout.html" %}
+{# If there is no need of the layout this template doesn't extend it #}
+{% if feedb_req_mode != 'nolayout' %}
+	{% extends "layout.html" %}
+	{% block titlehead %}Feedback form{% endblock %}
 
-{% block titlehead %}Feedback form{% endblock %}
-
-{% block head%}{% endblock %}
-
-{% block body %}
-	<div class="container">
-		<div class="row">
-			<div class="span8 offset2">
-			{% if status == 'sent' %}
-				{{ render_success_message() }}
-			{% else %}
-				{{ render_feedback_form(form) }}
-			{% endif %}
-			
+	{% block body %}
+		<div class="container">
+			<div class="row">
+				<div class="span8 offset2">
+				{% if status == 'sent' %}
+					{{ render_success_message(feedb_req_mode) }}
+				{% else %}
+					{{ render_feedback_form(form, feedb_req_mode) }}
+				{% endif %}
+				
+				</div>
 			</div>
 		</div>
-	</div>
-{% endblock %}
+	{% endblock %}
+{% else %}
+	{% extends "layout_empty.html" %}
+	{% block titlehead_el %}Feedback form{% endblock %}
+	{% block body_el %}
+		<div class="inline_form">
+		{% if status == 'sent' %}
+			{{ render_success_message(feedb_req_mode) }}
+		{% else %}
+			{{ render_feedback_form(form, feedb_req_mode) }}
+		{% endif %}
+		</div>
+	{% endblock %}
+{% endif %}
+

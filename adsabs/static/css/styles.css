@@ -75,6 +75,34 @@ span.required_string {
 	padding: 20px;
 	line-height:6em;
 }
+
+div.feedback_widget_container{
+	position:fixed; 
+	z-index:100; 
+	top:50%; 
+	left:0;
+}
+
+div.feedback_widget_button{
+	position:relative; 
+	left:-35px;
+	width:70px;
+}
+
+.rotate {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform-origin: 50% 50%;
+    -ms-transform-origin: 50% 50%;
+    -o-transform-origin: 50% 50%;
+    transform-origin: 500 50%;
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
 /*********************/
 /*css for query forms*/
 .link_only_js {

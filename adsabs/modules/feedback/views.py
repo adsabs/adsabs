@@ -12,7 +12,7 @@ from config import config
 #Definition of the blueprint
 feedback_blueprint = Blueprint('feedback', __name__, template_folder="templates", url_prefix='/feedback')
 
-__all__ = ['feedback_blueprint', 'feedback', 'ajax_endpoint']
+__all__ = ['feedback_blueprint', 'feedback']
 
 def send_feedback(form):
     """function that actually sends the email"""
@@ -26,20 +26,15 @@ def send_feedback(form):
 def feedback():
     """HTML interface integrated in the web site"""
     form = FeedbackForm(request.values, csrf_enabled=False)
+    feedb_req_mode = request.values.get('feedb_req_mode')
     if form.is_submitted():
         if form.validate():
             try:
                 send_feedback(form)
-                return render_template('feedback.html', form=None, status='sent')
+                return render_template('feedback.html', form=None, status='sent', feedb_req_mode=feedb_req_mode)
             except:
                 flash('There has been a technical problem. Please retry.', 'error')
         else:
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
-    return render_template('feedback.html', form=form, status=None)
-        
-    
-@feedback_blueprint.route('/', methods=('GET', 'POST'))
-def ajax_endpoint():
-    """AJAX endpoint"""
-    pass
+    return render_template('feedback.html', form=form, status=None, feedb_req_mode=feedb_req_mode)
