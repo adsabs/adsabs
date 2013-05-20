@@ -4,6 +4,7 @@ Created on May 9, 2013
 @author: dimilia
 '''
 from flask import (Blueprint, request, render_template, flash)
+from urllib import unquote_plus
 from .forms import FeedbackForm
 from flask.ext.mail import Message #@UnresolvedImport
 from adsabs.extensions import mail
@@ -16,8 +17,13 @@ __all__ = ['feedback_blueprint', 'feedback']
 
 def send_feedback(form):
     """function that actually sends the email"""
+    try:
+        url_from = unquote_plus(form.page_url_hidden.data)
+    except:
+        url_from = ''
+    message_body = "Sent from url: %s \n\nMessage:\n%s" % (url_from, form.feedback_text.data)
     msg = Message(u"ADSABS2 feedback: %s" % form.feedback_type.data,
-                  body=form.feedback_text.data,
+                  body=message_body,
                   sender=form.email.data,
                   recipients=config.FEEDBACK_RECIPIENTS)
     mail.send(msg)

@@ -51,6 +51,11 @@
 					<div class="control-group">
 						<div class="controls">
 							<span class="required_string">* Required fields</span>
+							{% if request.values.get('current_url') -%}
+								{{ form.page_url_hidden(value=request.values.get('current_url')) }}
+							{% else -%}
+								{{ form.page_url_hidden(value=url_for('feedback.feedback')) }}
+							{% endif -%}
 							<button class="btn btn-info">Submit</button>
 						</div>
 					</div>
