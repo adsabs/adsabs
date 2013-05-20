@@ -31,7 +31,7 @@ class FeedbackTests(AdsabsBaseTestCase):
         #the checked input radio is the one with value comment
         tag = soup.find_all('input', type='radio', value='comment')
         self.assertEqual(len(tag), 1)
-        self.assertEqual(tag[0]['checked'], '')
+        self.assertIn(tag[0]['checked'], ['', 'checked'])
         #the other radio doesn't have the checked attribute
         tag = soup.find_all('input', type='radio', value='bug')
         self.assertEqual(len(tag), 1)
@@ -63,7 +63,7 @@ class FeedbackTests(AdsabsBaseTestCase):
         #the checked input radio is the one with value comment
         tag = soup.find_all('input', type='radio', value='comment')
         self.assertEqual(len(tag), 1)
-        self.assertEqual(tag[0]['checked'], '')
+        self.assertIn(tag[0]['checked'], ['', 'checked'])
         #the other radio doesn't have the checked attribute
         tag = soup.find_all('input', type='radio', value='bug')
         self.assertEqual(len(tag), 1)
