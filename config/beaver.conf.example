@@ -1,0 +1,16 @@
+[beaver]
+transport: redis
+redis_url: redis://localhost:6379/0
+redis_namespace: adsabs:<hostname>:logs
+
+[/path/to/apache.log]
+type: ads
+tags: beer,apache,access
+
+[/path/to/apache.err]
+type: ads
+tags: beer,apache,error
+
+[/path/to/adsabs.log]
+type: ads
+tags: beer,app

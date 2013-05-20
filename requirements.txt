@@ -26,3 +26,4 @@ dicttoxml >= 0.8
 pytz
 -e git+https://github.com/theorm/mongobox.git#egg=mongobox
 redis
+beaver

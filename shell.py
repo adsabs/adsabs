@@ -5,7 +5,7 @@ import sys
 
 import tempfile
 import subprocess
-import logging
+from time import sleep
 
 from flask.ext.script import Manager, Command, prompt, prompt_pass, prompt_bool #@UnresolvedImport
 from flask import render_template
@@ -53,6 +53,51 @@ def create_local_config():
 def generate_secret_key():
     """Generate a random string suitable for using a the SECRET_KEY value"""
     app.logger.info("SECRET_KEY = '%s'" % os.urandom(24).encode('hex'))
+    
+@manager.command
+def start_beaver():
+    """
+    starts a beaver daemon for transmitting log files to the redis/logstash
+    """
+    pid_path = os.path.join(app.root_path, '../.beaver.pid')
+    if os.path.exists(pid_path):
+        with open(pid_path, 'r') as pid:
+            raise Exception("looks like another beaver process is running: %s" % pid.read())
+            
+    config_path = os.path.join(app.root_path, '../config/beaver.conf')
+    if not os.path.exists(config_path):
+        raise Exception("no config file found at %s" % config_path)
+    
+    beaver_log = os.path.join(app.root_path, '../logs/beaver.log')
+    p = subprocess.Popen(["beaver",
+                          "-D", # daemonize
+                          "-c", config_path,
+                          "-P", pid_path,
+                          "-l", beaver_log
+                          ])
+    sleep(1)
+    with open(pid_path, 'r') as pid:
+        app.logger.info("beaver daemon started with pid %s" % pid.read())
+
+@manager.command
+def stop_beaver():
+    """
+    stops a running beaver daemon identified by the pid in app.root_path/.beaver.pid
+    """
+    import signal
+    pid_path = os.path.join(app.root_path, '../.beaver.pid')
+    if not os.path.exists(pid_path):
+        raise Exception("There doesn't appear to be a pid file for a running beaver instance")
+    pid = int(open(pid_path,'r').read())
+    os.kill(pid, signal.SIGTERM)
+    sleep(1)
+    # Check that we really killed it
+    try: 
+        os.kill(pid, 0)
+        raise Exception("""wasn't able to kill the process 
+                        HINT:use signal.SIGKILL or signal.SIGABORT""")
+    except OSError:
+        app.logger.info("killed beaver process with pid %d" % pid)
 
 @tools_manager.command
 def tools():
