@@ -81,10 +81,10 @@
 				<div class="nav-collapse collapse">
 					<ul class="nav">
 						<li class="divider-vertical"></li>
-						<li><a href="{{ url_for('index.index') }}">Home</a></li>
-						<li><a href="{{ url_for('search.search') }}">Search</a></li>
-						<li><a href="{{ url_for('feedback.feedback') }}">Feedback</a></li>
-						<li><a href="#about">About</a></li>
+						<li><a href="{{ url_for('index.index') }}"><i class="icon-home"></i> Home</a></li>
+						<li><a href="{{ url_for('search.search') }}"><i class="icon-search"></i> Search</a></li>
+						<li><a href="{{ url_for('feedback.feedback') }}"><i class="icon-envelope"></i> Feedback</a></li>
+						<!-- li><a href="#about">About</a></li-->
 					</ul>
 					<ul class="nav pull-right">
 						<li class="dropdown">
@@ -92,9 +92,9 @@
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> {{ current_user.name }} <b class="caret"></b></a>
 							<ul class="dropdown-menu">
 					    		<li class="nav-header">Options</li>
-					            <li><a href="{{ url_for('user.index') }}">Settings</a></li>
+					            <li><a href="{{ url_for('user.index') }}"><i class="icon-wrench"></i> Settings</a></li>
 					            <li class="divider"></li>
-					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}">Sign off</a></li>
+					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}"><i class="icon-off"></i> Sign off</a></li>
 				            </ul>
 				            {% else %}
 							<li><a href="{{ url_for('user.login') }}?next={{ current_url }}"><i class="icon-user"></i> Log in</a></li>
