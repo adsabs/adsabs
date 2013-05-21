@@ -36,12 +36,8 @@ class SolrRequest(object):
         return self
         
     def set_fields(self, fields):
-        if isinstance(fields, list):
-            self.params.fl = ','.join(fields)
-        elif isinstance(fields, basestring):
-            self.params.fl = fields
-        else:
-            raise Exception("fields must be expressed as a list or comma-separated string")
+        fields.extend(config.SOLR_SEARCH_REQUIRED_FIELDS)
+        self.params.fl = ','.join(fields)
         return self
         
     def get_fields(self):

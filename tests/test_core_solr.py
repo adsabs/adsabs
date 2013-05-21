@@ -45,12 +45,11 @@ class SolrTestCase(AdsabsBaseTestCase):
         
     def test_solr_request_setters(self):
         req = solr.SolrRequest("foo")   
-        req.set_fields("bar,baz")
-        self.assertEqual(req.params.fl, 'bar,baz')
-        self.assertEqual(req.get_fields(), ['bar','baz'])
         req.set_fields(['foo','bar'])
-        self.assertEqual(req.params.fl, 'foo,bar')
-        self.assertEqual(req.get_fields(), ['foo','bar'])
+        expected = ['foo','bar']
+        expected.extend(config.SOLR_SEARCH_REQUIRED_FIELDS)
+        self.assertEqual(req.params.fl, ','.join(expected))
+        self.assertEqual(req.get_fields(), expected)
         req.set_rows(100)
         self.assertEqual(req.params.rows, 100)
         req.set_start(10)

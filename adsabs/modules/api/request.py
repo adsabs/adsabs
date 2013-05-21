@@ -31,7 +31,7 @@ class ApiSearchRequest(object):
         req = SolrRequest(self.form.q.data)
         
         if self.form.fl.data:
-            req.set_fields(self.form.fl.data)
+            req.set_fields(self.form.fl.data.split(','))
         else:
             req.set_fields(self.user.get_allowed_fields())
             
@@ -109,7 +109,7 @@ class ApiRecordRequest(ApiSearchRequest):
         req = SolrRequest(q, rows=1)
         
         if self.form.fl.data:
-            req.set_fields(self.form.fl.data)
+            req.set_fields(self.form.fl.data.split(','))
         else:
             req.set_fields(self.user.get_allowed_fields())
             
