@@ -1,3 +1,5 @@
+{% from "macros/misc.html" import render_input_controlgroup, render_textarea_controlgroup, render_action_controlgroup %}
+
 {% macro render_feedback_form(form, feedb_req_mode) %}
 <div class="container-fluid">
 	<div class="row-fluid">
@@ -5,26 +7,20 @@
 			<form class="form-horizontal" method="POST" action="{{ url_for('feedback.feedback') }}{% if feedb_req_mode == 'nolayout' %}?feedb_req_mode=nolayout{% endif %}">
 				<fieldset>
 					<legend>Feedback</legend>
-					<div class="control-group">
-						<label class="control-label required">Name</label>
-						<div class="controls">
-						{% if current_user.is_authenticated() and form.name.data in (None, '') %}
-							{{ form.name(class="span10", placeholder=form.name.description, value=current_user.name) }}
-						{% else %}
-							{{ form.name(class="span10", placeholder=form.name.description) }}
-						{% endif %}
-						</div>
-					</div>
-					<div class="control-group">
-						<label class="control-label required">E-Mail</label>
-						<div class="controls">
-						{% if current_user.is_authenticated() and form.email.data in (None, '') %}
-							{{ form.email(class="span10", placeholder=form.email.description, value=current_user.get_username()) }}
-						{% else %}
-							{{ form.email(class="span10", placeholder=form.email.description) }}
-						{% endif %}
-						</div>
-					</div>
+					{# Name -#}
+					{% if current_user.is_authenticated() and form.name.data in (None, '') -%}
+						{{ render_input_controlgroup(form.name, field_cls='span10', placeholder=form.name.description, value=current_user.name) }}
+					{% else -%}
+						{{ render_input_controlgroup(form.name, field_cls='span10', placeholder=form.name.description) }}
+					{% endif -%}
+					
+					{# Email -#}
+					{% if current_user.is_authenticated() and form.name.data in (None, '') -%}
+						{{ render_input_controlgroup(form.email, field_cls='span10', placeholder=form.email.description, value=current_user.get_username()) }}
+					{% else -%}
+						{{ render_input_controlgroup(form.email, field_cls='span10', placeholder=form.email.description) }}
+					{% endif -%}
+					
 					<div class="control-group">
 						<label class="control-label required">Feedback type</label>
 						<div class="controls">
@@ -36,16 +32,19 @@
 							{% endfor %}
 						</div>
 					</div>
-					<div class="control-group">
-						<label class="control-label required">Message</label>
-						<div class="controls">
-							{{ form.feedback_text(class="span10", rows="6") }}
-						</div>
-					</div>
-					<div class="control-group">
+					
+					{# Message -#}
+					{{ render_textarea_controlgroup(form.feedback_text, field_cls='span10', rows="6", placeholder="Your message") }}
+					
+					<div class="control-group{% if form.recaptcha.errors %} error{% endif %}">
 						<label class="control-label required"> </label>
 						<div class="controls">
 							{{ form.recaptcha()|safe }}
+							<span class="help-inline">
+					            {% for error in form.recaptcha.errors %}
+					            <span>{{ error }}</span>
+					            {% endfor %}
+					        </span>
 						</div>
 					</div>
 					<div class="control-group">

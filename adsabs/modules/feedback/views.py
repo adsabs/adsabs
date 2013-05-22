@@ -33,14 +33,10 @@ def feedback():
     """HTML interface integrated in the web site"""
     form = FeedbackForm(request.values, csrf_enabled=False)
     feedb_req_mode = request.values.get('feedb_req_mode')
-    if form.is_submitted():
-        if form.validate():
-            try:
-                send_feedback(form)
-                return render_template('feedback.html', form=None, status='sent', feedb_req_mode=feedb_req_mode)
-            except:
-                flash('There has been a technical problem. Please retry.', 'error')
-        else:
-            for field_name, errors_list in form.errors.iteritems():
-                flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
+    if form.validate_on_submit():
+        try:
+            send_feedback(form)
+            return render_template('feedback.html', form=None, status='sent', feedb_req_mode=feedb_req_mode)
+        except:
+            flash('There has been a technical problem. Please retry.', 'error')
     return render_template('feedback.html', form=form, status=None, feedb_req_mode=feedb_req_mode)

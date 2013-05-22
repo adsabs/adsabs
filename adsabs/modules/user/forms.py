@@ -5,8 +5,8 @@ from flask.ext.wtf import (Form, HiddenField, BooleanField, #@UnresolvedImport
 from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
 
 class LoginForm(Form):
-    login = EmailField(u'Email address', [required(), length(min=5, max=2048), validators.Email()])
-    password = PasswordField(u'Password', [required(), length(min=6, max=50)])
+    login = EmailField(u'Email address', [required(), length(min=5, max=2048), validators.Email()], description=u"Your login email")
+    password = PasswordField(u'Password', [required(), length(min=6, max=50)], description=u"Your password")
     remember = BooleanField('Remember me')
     next = HiddenField()
     submit = SubmitField('Login')

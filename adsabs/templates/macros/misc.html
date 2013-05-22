@@ -22,16 +22,54 @@
     </div>
 {% endmacro %}
 
-{% macro render_input_controlgroup(field, field_cls='', value=None, label_cls='') %}
+{% macro render_input_controlgroup(field, field_cls='', label_cls='', value=None, placeholder=None) %}
+	{# Set up the CSS classes for the label -#}
 	{% if field.flags.required -%}
-		{% set label_complete_class = ['required', label_cls]|join(' ') %}
+		{% set label_complete_class = ['control-label', 'required', label_cls]|join(' ') -%}
 	{% else -%}
-		{% set label_complete_class = label_cls %}
+		{% set label_complete_class = ['control-label', label_cls]|join(' ') -%}
 	{% endif -%}
+	{# Set up all the parameters for the label function call -#}
+	{% set label_params = {} -%}
+	{% if label_complete_class %}{% do label_params.update({'class_':label_complete_class}) %}{% endif -%}
+	{# Set up all the parameters for the field function call- #}
+	{% set field_params = {} -%}
+	{% if field_cls %}{% do field_params.update({'class_':field_cls}) %}{% endif -%}
+	{% if value %}{% do field_params.update({'value':value}) %}{% endif -%}
+	{% if placeholder %}{% do field_params.update({'placeholder':placeholder}) %}{% endif -%}
 	<div class="control-group{% if field.errors %} error{% endif %}">
-		{{ field.label(class_= ['control-label', label_complete_class]|join(' ')) }}
+		{{ field.label(**label_params) }}
 		<div class="controls">
-	        {{ field(class_=field_cls) }}
+	        {{ field(**field_params) }}
+	        <span class="help-inline">
+	            {% for error in field.errors %}
+	            <span>{{ error }}</span>
+	            {% endfor %}
+	        </span>
+	    </div>
+	</div>
+{% endmacro %}
+
+{% macro render_textarea_controlgroup(field, field_cls='', label_cls='', placeholder=None, rows=None, cols=None) %}
+	{# Set up the CSS classes for the label -#}
+	{% if field.flags.required -%}
+		{% set label_complete_class = ['control-label', 'required', label_cls]|join(' ') -%}
+	{% else -%}
+		{% set label_complete_class = ['control-label', label_cls]|join(' ') -%}
+	{% endif -%}
+	{# Set up all the parameters for the label function call -#}
+	{% set label_params = {} -%}
+	{% if label_complete_class %}{% do label_params.update({'class_':label_complete_class}) %}{% endif -%}
+	{# Set up all the parameters for the field function call- #}
+	{% set field_params = {} -%}
+	{% if field_cls %}{% do field_params.update({'class_':field_cls}) %}{% endif -%}
+	{% if placeholder %}{% do field_params.update({'placeholder':placeholder}) %}{% endif -%}
+	{% if rows %}{% do field_params.update({'rows':rows}) %}{% endif -%}
+	{% if cols %}{% do field_params.update({'cols':cols}) %}{% endif -%}
+	<div class="control-group{% if field.errors %} error{% endif %}">
+		{{ field.label(**label_params) }}
+		<div class="controls">
+	        {{ field(**field_params) }}
 	        <span class="help-inline">
 	            {% for error in field.errors %}
 	            <span>{{ error }}</span>

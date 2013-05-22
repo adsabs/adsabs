@@ -108,6 +108,11 @@ label.label_inline {
 	margin-bottom:0;
 }
 
+span.help-inline {
+	font-size:.9em;
+	color: #B94A48;
+}
+
 /*********************/
 /*css for query forms*/
 .link_only_js {

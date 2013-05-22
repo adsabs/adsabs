@@ -10,7 +10,7 @@
 
 <div class="container">
 	<div class="row">
-		<div class="span8 offset2">
+		<div class="span9 offset1">
 			<div class="container-fluid">
 				<div class="row-fluid">
 					<div class="span12">
@@ -19,8 +19,8 @@
 					        	{{ form.hidden_tag() }}
 					        	{{ form.next }}
 					            <legend>Log In - Not a member? <a href="http://adsabs.harvard.edu/cgi-bin/nph-manage_account?man_cmd=new">Sign up</a></legend>
-					            {{ render_input_controlgroup(form.login, field_cls='span7') }}
-					            {{ render_input_controlgroup(form.password, field_cls='span7') }}
+					            {{ render_input_controlgroup(form.login, field_cls='span10', placeholder=form.login.description) }}
+					            {{ render_input_controlgroup(form.password, field_cls='span10', placeholder=form.password.description) }}
 					            <div class='control-group'>
 					                <div class="controls">
 					                    <label class="checkbox">{{ form.remember() }} {{ form.remember.label}}</label>
