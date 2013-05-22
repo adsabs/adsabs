@@ -48,14 +48,17 @@
 	{% block head%}{% endblock %}
 </head>
 <body>
-
-{# Definition of variables needed in the body #}
-{% if request.query_string %}
-	{% set current_url = (request.path + '?' + request.query_string)|urlencode %}
-{% else %}
-	{% set current_url = request.path|urlencode %}
-{% endif %}
-
+{# Definition of variables needed in the body -#}
+{% if config.DEPLOYMENT_PATH -%}
+	{% set prefix_deployment = config.DEPLOYMENT_PATH -%}
+{% else -%}
+	{% set prefix_deployment = '' -%}
+{% endif -%}
+{% if request.query_string -%}
+	{% set current_url = [prefix_deployment, request.path, '?', request.query_string]|join('')|urlencode -%}
+{% else -%}
+	{% set current_url = [prefix_deployment, request.path]|join('')|urlencode -%}
+{% endif -%}
 <div id="wrap">
 	<div class="navbar navbar-inverse navbar-static-top navbar-small">
 		<div class="navbar-inner">

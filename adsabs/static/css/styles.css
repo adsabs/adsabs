@@ -55,15 +55,15 @@ div.centered {
 }
 
 /*********************/
-/*css for the feedback */
-form label.required:after {
-    color: #e32;
+/*css for the feedback and login */
+label.required:after {
+    color: #B94A48;
     content: ' *';
     display:inline;
 }
 
 span.required_string {
-	color: #e32;
+	color: #B94A48;
 	font-size:.9em;
 	display:block;
 	margin-bottom: 10px;
@@ -101,6 +101,11 @@ div.feedback_widget_button{
     -o-transform-origin: 50% 50%;
     transform-origin: 500 50%;
     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+}
+
+label.label_inline {
+	display:inline;
+	margin-bottom:0;
 }
 
 /*********************/

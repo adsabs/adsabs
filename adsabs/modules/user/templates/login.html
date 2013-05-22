@@ -1,4 +1,4 @@
-{% from "macros/misc.html" import render_input, render_action %}
+{% from "macros/misc.html" import render_input_controlgroup, render_action_controlgroup %}
 
 {% extends "layout.html" %}
 
@@ -8,23 +8,37 @@
 
 {% block body %}
 
-<div>
-    <form method="POST" action="{{ url_for('user.login') }}">
-        {{ form.hidden_tag() }}
-        {{ form.next }}
-        <fieldset>
-            <legend>Not a member? <a href="http://adsabs.harvard.edu/cgi-bin/nph-manage_account?man_cmd=new">Sign up</a> please.</legend>
-            {{ render_input(form.login, 'xlarge') }}
-            {{ render_input(form.password, 'xlarge') }}
-            <div class='clearfix'>
-                <label></label>
-                <div class="input">
-                    {{ form.remember() }}<span class='remember_me'>Remember me</span>
-                </div>
-            </div>
-            {{ render_action(form.submit) }}
-        </fieldset>
-    </form>
+<div class="container">
+	<div class="row">
+		<div class="span8 offset2">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span12">
+						<form class="form-horizontal" method="POST" action="{{ url_for('user.login') }}">
+					        <fieldset>
+					        	{{ form.hidden_tag() }}
+					        	{{ form.next }}
+					            <legend>Log In - Not a member? <a href="http://adsabs.harvard.edu/cgi-bin/nph-manage_account?man_cmd=new">Sign up</a></legend>
+					            {{ render_input_controlgroup(form.login, field_cls='span7') }}
+					            {{ render_input_controlgroup(form.password, field_cls='span7') }}
+					            <div class='control-group'>
+					                <div class="controls">
+					                    <label class="checkbox">{{ form.remember() }} {{ form.remember.label}}</label>
+					                </div>
+					            </div>
+					            <div class="control-group">
+									<div class="controls">
+										<span class="required_string">* Required fields</span>
+									</div>
+								</div>
+								{{ render_action_controlgroup(form.submit, form.next.data) }}
+					        </fieldset>
+						</form>
+					</div>
+		    	</div>
+		    </div>
+		</div>
+	</div>
 </div>
 
 {% endblock %}

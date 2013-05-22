@@ -22,7 +22,32 @@
     </div>
 {% endmacro %}
 
+{% macro render_input_controlgroup(field, field_cls='', value=None, label_cls='') %}
+	{% if field.flags.required -%}
+		{% set label_complete_class = ['required', label_cls]|join(' ') %}
+	{% else -%}
+		{% set label_complete_class = label_cls %}
+	{% endif -%}
+	<div class="control-group{% if field.errors %} error{% endif %}">
+		{{ field.label(class_= ['control-label', label_complete_class]|join(' ')) }}
+		<div class="controls">
+	        {{ field(class_=field_cls) }}
+	        <span class="help-inline">
+	            {% for error in field.errors %}
+	            <span>{{ error }}</span>
+	            {% endfor %}
+	        </span>
+	    </div>
+	</div>
+{% endmacro %}
 
+{% macro render_action_controlgroup(field, next_url='') %}
+    <div class='control-group'>
+    	<div class="controls">
+        	{{ field(class_='btn btn-info') }}&nbsp;&nbsp;&nbsp;&nbsp;<a class="btn" href='{% if next_url %}{{ next_url }}{% else %}{{ url_for("index.index") }}{% endif %}'>Cancel</a>
+        </div>
+    </div>
+{% endmacro %}
 
 {% macro render_flash_message() %}
     {% block flash_message %}

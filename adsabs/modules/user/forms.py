@@ -1,14 +1,14 @@
 from flask.ext.wtf import (Form, HiddenField, BooleanField, #@UnresolvedImport
-                          PasswordField, SubmitField, TextField, #@UnresolvedImport
-                          ValidationError, required, equal_to, email, #@UnresolvedImport
-                          length) #@UnresolvedImport
+                          PasswordField, SubmitField, #TextField, @UnresolvedImport
+                          required, length, validators)#ValidationError, equal_to, email, @UnresolvedImport
 
+from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
 
 class LoginForm(Form):
-    next = HiddenField()
+    login = EmailField(u'Email address', [required(), length(min=5, max=2048), validators.Email()])
+    password = PasswordField(u'Password', [required(), length(min=6, max=50)])
     remember = BooleanField('Remember me')
-    login = TextField('Email address', [required()])
-    password = PasswordField('Password', [required(), length(min=6, max=50)])
+    next = HiddenField()
     submit = SubmitField('Login')
     
 class ReauthForm(Form):
