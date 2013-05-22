@@ -42,7 +42,7 @@ class FeedbackTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
         #then the user goes to the feedback page
         rv = self.client.get('/feedback/')
         soup = BeautifulSoup(rv.data)
