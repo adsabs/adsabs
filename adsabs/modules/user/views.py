@@ -4,6 +4,7 @@ from flask import (Blueprint, request, flash, redirect,
 from flask.ext.login import (login_required, login_user,                    #@UnresolvedImport
                 current_user, logout_user, )                                 #@UnresolvedImport
 #                confirm_login, fresh_login_required, login_fresh)           #@UnresolvedImport
+from time import time
 from .forms import (SignupForm, LoginForm, RecoverPasswordForm, 
                    ChangePasswordForm, ReauthForm)
 from adsabs.core.after_request_funcs import after_this_request
@@ -56,7 +57,12 @@ def login():
             remember = request.form.get('remember') == 'y'
             if login_user(user, remember=remember):
                 flash("Successfully logged in!", 'success')
-            return redirect(form.next.data or url_for('user.index'))
+            #build redirect url
+            base_redirect_url = form.next.data or url_for('user.index')
+            if base_redirect_url.find('?') == -1:
+                return redirect("%s?refresh=%s" % (base_redirect_url, time()))
+            else:
+                return redirect("%s&refresh=%s" % (base_redirect_url, time()))
         else:
             flash('Sorry, invalid login parameters', 'error')
 
@@ -85,7 +91,12 @@ def logout():
     #call of the function that runs a specific after_request to invalidate the user cookies
     invalidate_user_cookie()
     flash('You are now logged out', 'success')
-    return redirect(form.next.data or url_for('user.index'))
+    #build redirect url
+    base_redirect_url = form.next.data or url_for('user.index')
+    if base_redirect_url.find('?') == -1:
+        return redirect("%s?refresh=%s" % (base_redirect_url, time()))
+    else:
+        return redirect("%s&refresh=%s" % (base_redirect_url, time()))
 
 @user_blueprint.route('/signup', methods=['GET', 'POST'])
 def signup():

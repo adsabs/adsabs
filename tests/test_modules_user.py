@@ -11,6 +11,7 @@ import pytz
 from datetime import datetime#, timedelta
 from urlparse import urlparse
 from urllib import quote_plus
+import re
 from flask import g
 from werkzeug.datastructures import Headers
 
@@ -21,7 +22,11 @@ from config import config
 from test_utils import (AdsabsBaseTestCase, ClassicADSSignonFixture, AdsApiUser)
 
 class UserTests(AdsabsBaseTestCase):
-
+    
+    def setUp(self):
+        super(UserTests, self).setUp()
+        self.REFRESH_REGEX_PATTERN = '\&?refresh=[0-9]+\.[0-9]+'
+    
     def test_ads_user(self):
         
         u = user.AdsUser.from_id("a_cookie_id")
@@ -242,6 +247,7 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         self.assertEqual(urlparse(rv.headers.get('Location')).path, next_path)
+        self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
     def test_redirect_after_login_2(self):
         """Tests that the redirect after the login works properly even with a query string"""
@@ -252,7 +258,8 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         parsed_location_header = urlparse(rv.headers.get('Location'))
-        self.assertEqual('%s?%s' % (parsed_location_header.path, parsed_location_header.query), next_path)
+        self.assertEqual('%s?%s' % (parsed_location_header.path, re.sub(self.REFRESH_REGEX_PATTERN, '', parsed_location_header.query)), next_path)
+        self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
     def test_redirect_after_logout_1(self):
         """Tests that the redirect after the logout works properly"""
@@ -266,6 +273,7 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         self.assertEqual(urlparse(rv.headers.get('Location')).path, next_path)
+        self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
     def test_redirect_after_logout_2(self):
         """Tests that the redirect after the logout works properly even with a query string"""
@@ -279,7 +287,8 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         parsed_location_header = urlparse(rv.headers.get('Location'))
-        self.assertEqual('%s?%s' % (parsed_location_header.path, parsed_location_header.query), next_path)
+        self.assertEqual('%s?%s' % (parsed_location_header.path, re.sub(self.REFRESH_REGEX_PATTERN, '', parsed_location_header.query)), next_path)
+        self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
 class ApiUserTests(AdsabsBaseTestCase):
     
