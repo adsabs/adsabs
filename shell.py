@@ -42,6 +42,7 @@ def create_local_config():
     config_items = {}
     if prompt_bool("Generate SECRET_KEY", True):
         config_items['SECRET_KEY'] = os.urandom(24).encode('hex')
+        config_items['ACCOUNT_VERIFICATION_SECRET'] = os.urandom(24).encode('hex')
     else:
         app.logger.warn("OK. You'll need to include a SECRET_KEY in local_config.py for the app to run.")
     output = render_template('config/local_config.py.tmpl', config_items=config_items)
@@ -53,6 +54,7 @@ def create_local_config():
 def generate_secret_key():
     """Generate a random string suitable for using a the SECRET_KEY value"""
     app.logger.info("SECRET_KEY = '%s'" % os.urandom(24).encode('hex'))
+    app.logger.info("ACCOUNT_VERIFICATION_SECRET = '%s'" % os.urandom(24).encode('hex'))
     
 @manager.command
 def start_beaver():

@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_05_23_v1'
+    APP_VERSION = '2013_05_28_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -20,6 +20,9 @@ class AppConfig(object):
     # run shell.py create_local_config to generate this value in local_config.py
     # or generate_secret_key to do it manually
     SECRET_KEY = None
+    
+    # account verification secret key. Generate it in the same way you generate SECRET KEY
+    ACCOUNT_VERIFICATION_SECRET = None
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(_basedir, 'app.db')
     DATABASE_CONNECT_OPTIONS = {}
@@ -184,6 +187,7 @@ class AppConfig(object):
     MAIL_PASSWORD = None
     DEFAULT_MAIL_SENDER = None
     
+    MAIL_CONTENT_REDIRECT_BASE_URL = 'http://adslabs.org/adsabs'
     FEEDBACK_RECIPIENTS = ['name@ema.il',]
     
     RECAPTCHA_USE_SSL = True

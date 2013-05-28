@@ -100,6 +100,8 @@ def _configure_extensions(app):
     # login.
     login_manager.login_view = 'user.login'
     login_manager.refresh_view = 'user.reauth'
+    login_manager.needs_refresh_message = (u"To protect your account, please re-authenticate to access this page.")
+    login_manager.needs_refresh_message_category = "info"
     
     @login_manager.user_loader
     def load_user(id):

@@ -24,6 +24,12 @@
 	padding: 2px 10px;	
 }
 
+.nav_multiple_link {
+	display: inline-block !important;
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+}
+
 /* pagination */
 a.disabled {
     background-color: transparent;

@@ -1,4 +1,4 @@
-{% from "macros/misc.html" import render_input_controlgroup, render_textarea_controlgroup, render_action_controlgroup %}
+{% from "macros/misc.html" import render_input_controlgroup, render_textarea_controlgroup, render_recaptcha_controlgroup, render_action_controlgroup %}
 
 {% macro render_feedback_form(form, feedb_req_mode) %}
 <div class="container-fluid">
@@ -36,17 +36,9 @@
 					{# Message -#}
 					{{ render_textarea_controlgroup(form.feedback_text, field_cls='span10', rows="6", placeholder="Your message") }}
 					
-					<div class="control-group{% if form.recaptcha.errors %} error{% endif %}">
-						<label class="control-label required"> </label>
-						<div class="controls">
-							{{ form.recaptcha()|safe }}
-							<span class="help-inline">
-					            {% for error in form.recaptcha.errors %}
-					            <span>{{ error }}</span>
-					            {% endfor %}
-					        </span>
-						</div>
-					</div>
+					{# reCaptcha #}
+					{{ render_recaptcha_controlgroup(form.recaptcha) }}
+
 					<div class="control-group">
 						<div class="controls">
 							<span class="required_string">* Required fields</span>

@@ -40,10 +40,11 @@ class UserTests(AdsabsBaseTestCase):
     def test_classic_signon(self):
         
         self.useFixture(ClassicADSSignonFixture())
+        
         classic_user = user.get_classic_user(None, None)
         self.assertEqual(classic_user['cookie'], 'abc123')
         
-        u, authenticated = user.authenticate(None, None)
+        u, authenticated = user.authenticate('foo@bar.com', 'bla')
         self.assertTrue(authenticated)
         self.assertEqual(u.get_username(), 'foo@example.com')
         # check that the new registered datetime is less than a few seconds diff
@@ -55,7 +56,7 @@ class UserTests(AdsabsBaseTestCase):
         
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
-        u, authenticated = user.authenticate(None, None)
+        u, authenticated = user.authenticate('foo@bar.com', 'bla')
         self.assertIsNone(u.user_rec.last_signon)
         
         # user/password doesn't matter here since we've monkeypatched the auth method
@@ -254,11 +255,12 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         next_path = "/search?param=foo&param2=bar+bar&nil=nal"
+        next_path_out = "/search?param=foo&param2=bar%20bar&nil=nal"
         rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next=next_path,remember=1,submit=1))
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         parsed_location_header = urlparse(rv.headers.get('Location'))
-        self.assertEqual('%s?%s' % (parsed_location_header.path, re.sub(self.REFRESH_REGEX_PATTERN, '', parsed_location_header.query)), next_path)
+        self.assertEqual('%s?%s' % (parsed_location_header.path, re.sub(self.REFRESH_REGEX_PATTERN, '', parsed_location_header.query)), next_path_out)
         self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
     def test_redirect_after_logout_1(self):

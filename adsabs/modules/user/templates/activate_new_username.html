@@ -1,0 +1,38 @@
+{% from "macros/misc.html" import render_input_controlgroup, render_action_controlgroup %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}User Activation New Email{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row">
+		<div class="span9 offset1">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span12">
+						<form class="form-horizontal" method="POST" action="{{ url_for('user.activate_new_email') }}" autocomplete="off">
+					        <fieldset>
+					        	{{ form.hidden_tag() }} {# takes care of all hidden fields #}
+					            <legend>Activate New Email</legend>
+					            {{ render_input_controlgroup(form.id, field_cls='span10', placeholder=form.id.description) }}
+					            {{ render_input_controlgroup(form.password, field_cls='span10', placeholder=form.password.description) }}
+					            <div class="control-group">
+									<div class="controls">
+										<span class="required_string">* Required fields</span>
+									</div>
+								</div>
+								{{ render_action_controlgroup(form.submit) }}
+					        </fieldset>
+						</form>
+					</div>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

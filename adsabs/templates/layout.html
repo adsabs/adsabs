@@ -90,19 +90,20 @@
 						<!-- li><a href="#about">About</a></li-->
 					</ul>
 					<ul class="nav pull-right">
+						{% if current_user.is_authenticated() %}
 						<li class="dropdown">
-							{% if current_user.is_authenticated() %}
+							
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-user"></i> {{ current_user.name }} <b class="caret"></b></a>
 							<ul class="dropdown-menu">
 					    		<li class="nav-header">Options</li>
-					            <li><a href="{{ url_for('user.index') }}"><i class="icon-wrench"></i> Settings</a></li>
+					            <li><a href="{{ url_for('user.index') }}"><i class="icon-wrench"></i> Your Account</a></li>
 					            <li class="divider"></li>
 					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}"><i class="icon-off"></i> Sign off</a></li>
 				            </ul>
-				            {% else %}
-							<li><a href="{{ url_for('user.login') }}?next={{ current_url }}"><i class="icon-user"></i> Log in</a></li>
-							{% endif %}
 						</li>
+						{% else %}
+						<li><i class="icon-user"></i><a class="nav_multiple_link" href="{{ url_for('user.login') }}?next={{ current_url }}">Log in</a>/<a class="nav_multiple_link" href="{{ url_for('user.signup') }}">Sign up</a></li>
+						{% endif %}
 					</ul>
 				</div><!--/.nav-collapse -->
 			</div>

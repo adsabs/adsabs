@@ -79,6 +79,20 @@
 	</div>
 {% endmacro %}
 
+{% macro render_recaptcha_controlgroup(field) %}
+	<div class="control-group{% if field.errors %} error{% endif %}">
+		<label class="control-label required"> </label>
+		<div class="controls">
+			{{ field()|safe }}
+			<span class="help-inline">
+	            {% for error in field.errors %}
+	            <span>{{ error }}</span>
+	            {% endfor %}
+	        </span>
+		</div>
+	</div>
+{% endmacro %}
+
 {% macro render_action_controlgroup(field, next_url='') %}
     <div class='control-group'>
     	<div class="controls">
@@ -110,7 +124,7 @@
                 		<div class="span12">
 		                    <div class="alert {{ alert_class }} flash_message">
 		                    	<button type="button" class="close" data-dismiss="alert">&times;</button>
-		                    	<strong>{{ pre_text }}</strong>{{ msg }}
+		                    	<strong>{{ pre_text }}</strong>{{ msg|safe }}
 		                    </div>
 	                    </div>
                     </div>

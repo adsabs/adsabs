@@ -42,7 +42,7 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         try:
             self.app = create_app(config)
             self.client = self.app.test_client()
-            self.insert_user = user_creator()
+            self.insert_user = user_creator
         except:
             # otherwise exceptions in create_app could leave a ton of mongobox procs layting around
             self.box.stop()
@@ -51,17 +51,16 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
     def tearDown(self):
         self.box.stop()
         
-def user_creator():
-    def func(username, developer=False, dev_perms=None, level=None):
-        from adsabs.extensions import mongodb
-        user_collection = mongodb.session.db.ads_users #@UndefinedVariable
+def user_creator(username, developer=False, dev_perms=None, level=None, user_data=None):
+    from adsabs.extensions import mongodb
+    user_collection = mongodb.session.db.ads_users #@UndefinedVariable
+    if not user_data:
         user_data = {
             "username": username + "_name",
             "myads_id": username + "_myads_id",
             "cookie_id": username + "_cookie_id",
             "registered": datetime.utcnow(),
         }
-        
         if developer:
             user_data['developer_key'] = username + "_dev_key"
             
@@ -69,9 +68,8 @@ def user_creator():
             user_data['developer_perms'] = dev_perms
         elif level:
             user_data['developer_perms'] = PERMISSION_LEVELS[level].copy()
-            
-        user_collection.insert(user_data)
-    return func
+        
+    user_collection.insert(user_data)
     
 class GlobalApiUserFixture(fixtures.Fixture):
     
@@ -158,13 +156,23 @@ class ClassicADSSignonFixture(fixtures.MonkeyPatch):
     DEFAULT_USER_DATA = {
          'cookie': 'abc123',
          'email': 'foo@example.com',
-         'firstname': 'Foo',
-         'lastname': 'Bar',
+         'firstname': '',
+         'lastname': '',
+         'fullname': 'Foo|Bar',
          'loggedin': '1',
          'message': 'LOGGED_IN',
          'myadsid': '123456',
          'openurl_icon': '',
-         'openurl_srv': ''
+         'openurl_srv': '',
+         'request': {'man_cmd': '4',
+                      'man_cookie': '',
+                      'man_email': 'foo@example.com',
+                      'man_name': '',
+                      'man_nemail': '',
+                      'man_npasswd': '',
+                      'man_passwd': '******',
+                      'man_url': 'http://adsduo.cfa.harvard.edu',
+                      'man_vpasswd': ''}
     }
 
     def __init__(self, user_data=None):

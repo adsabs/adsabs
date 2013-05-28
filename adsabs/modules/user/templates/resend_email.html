@@ -1,0 +1,36 @@
+{% from "macros/misc.html" import render_input_controlgroup, render_action_controlgroup %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}Re send activation user account activation code{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row">
+		<div class="span9 offset1">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span12">
+						<form class="form-horizontal" method="POST" action="{{ url_for('user.resend_activation_code_email') }}" autocomplete="off">
+					        <fieldset>
+					            <legend>Re-Send Activation Code</legend>
+					            {{ render_input_controlgroup(form.act_em, field_cls='span10', placeholder=form.act_em.description) }}
+					            <div class="control-group">
+									<div class="controls">
+										<span class="required_string">* Required fields</span>
+									</div>
+								</div>
+								{{ render_action_controlgroup(form.submit_act_email, None) }}
+					        </fieldset>
+						</form>
+					</div>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

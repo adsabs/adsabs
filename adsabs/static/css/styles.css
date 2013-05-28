@@ -380,3 +380,68 @@ div.absview div.row-fluid {
 div.absview div.row-fluid label {
 	font-weight: bold;
 }
+
+/*********************/
+/* Boxes table-like */
+.rounded {
+	border: 1px solid #DCDCDC;
+	border-radius: 6px 6px 6px 6px;
+}
+
+.action-box {
+	margin: 0 0 10px;
+	min-width: 668px;
+	position: relative;
+}
+
+.action-box .titlebar {
+	float: left;
+	margin:0;
+	padding: 12px 14px;
+	width:200px;
+}
+
+.action-box .titlebar h2 {
+	display: block;
+	font-size: 18px;
+	font-weight: normal;
+	line-height: 1.167;
+	margin: 0;
+}
+
+.action-box .titlebar h3 {
+	color: #999;
+	display: block;
+	font-size:12px;
+	font-weight: normal;
+	margin: 0;
+	padding-top: 3px;
+}
+
+.action-box .listbar {
+	border-left: 1px dotted #DCDCDC;
+	height: 1%;
+	margin: 0 0 0 220px;
+	padding: 12px 0 12px 10px;
+}
+
+.action-box .listbox {
+	float: left;
+	padding: 0 1em 1em 0.8em;
+	width: 280px;
+}
+
+.action-box .listbox h4 {
+	display: block;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 1.39em;
+	margin: 0 0 4px;
+}
+
+.action-box .listbox ul li span.listbox-inline-help {
+	font-size: .9em;
+	color: #666;
+	display: block;
+	margin-bottom: 10px;
+}

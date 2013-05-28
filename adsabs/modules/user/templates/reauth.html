@@ -2,7 +2,7 @@
 
 {% extends "layout.html" %}
 
-{% block titlehead %}User Login{% endblock %}
+{% block titlehead %}User Re Authentication{% endblock %}
 
 {% block head%}{% endblock %}
 
@@ -14,28 +14,17 @@
 			<div class="container-fluid">
 				<div class="row-fluid">
 					<div class="span12">
-						<form class="form-horizontal" method="POST" action="{{ url_for('user.login') }}">
+						<form class="form-horizontal" method="POST" action="{{ url_for('user.reauth') }}">
 					        <fieldset>
 					        	{{ form.hidden_tag() }} {# takes care of the next hidden and of the csfr_token #}
-					            <legend>Log In</legend>
-					            {{ render_input_controlgroup(form.login, field_cls='span10', placeholder=form.login.description) }}
+					            <legend>Re-Authenticate</legend>
 					            {{ render_input_controlgroup(form.password, field_cls='span10', placeholder=form.password.description) }}
-					            <div class='control-group'>
-					                <div class="controls">
-					                    <label class="checkbox">{{ form.remember() }} {{ form.remember.label}}</label>
-					                </div>
-					            </div>
 					            <div class="control-group">
 									<div class="controls">
 										<span class="required_string">* Required fields</span>
 									</div>
 								</div>
 								{{ render_action_controlgroup(form.submit, form.next.data) }}
-								<div class="control-group">
-									<div class="controls">
-										<span><a href="{{ url_for('user.reset_password') }}">Forgot your password?</a></span>
-									</div>
-								</div>
 					        </fieldset>
 						</form>
 					</div>

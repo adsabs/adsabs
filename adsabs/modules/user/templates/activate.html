@@ -1,0 +1,56 @@
+{% from "macros/misc.html" import render_input_controlgroup, render_action_controlgroup %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}User Activation{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+	<div class="row">
+		<div class="span9 offset1">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<div class="span12">
+						<form class="form-horizontal" method="POST" action="{{ url_for('user.activate') }}" autocomplete="off">
+					        <fieldset>
+					            <legend>Activate User: {% if pre_activation %}email to activate{% else %}activation code{% endif %}</legend>
+					            {% if pre_activation -%}
+					            	{{ render_input_controlgroup(form.act_em, field_cls='span10', placeholder=form.act_em.description) }}
+					            {% else -%}
+					            	<div class="control-group">
+					            		<label class="control-label">Email to activate</label>
+										<div class="controls">
+											<input class="span10" type="text" value="{{ session['user_login_email'] }}" disabled="disabled" />
+										</div>
+									</div>
+						            {{ render_input_controlgroup(form.id, field_cls='span10', placeholder=form.id.description) }}
+						        {% endif -%}
+						        
+					            <div class="control-group">
+									<div class="controls">
+										<span class="required_string">* Required fields</span>
+									</div>
+								</div>
+								{% if pre_activation -%}
+									{{ render_action_controlgroup(form.submit_act_email, None) }}
+								{% else %}
+									{{ render_action_controlgroup(form.submit, None) }}
+									<div class="control-group">
+										<div class="controls">
+											<span><a href="{{ url_for('user.resend_activation_code_email') }}">Lost your activation code?</a></span>
+										</div>
+									</div>
+								{% endif %}
+					        </fieldset>
+						</form>
+					</div>
+		    	</div>
+		    </div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
