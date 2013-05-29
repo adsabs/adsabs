@@ -70,7 +70,7 @@ class AppConfig(object):
     SEARCH_SECOND_ORDER_OPERATORS_OPTIONS = ['hot', 'useful', 'instructive']
     SOLR_MISC_DEFAULT_PARAMS = [
         ('hl.maxAnalyzedChars', '150000'), 
-        ('hl.requireFieldMatch', 'true'),
+        ('hl.useFastVectorHighlighter', 'true'),
         #('fq', ['pubdate_sort:[* TO 20140000]']),
         ('indent', 'true')
     ]
