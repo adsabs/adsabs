@@ -158,6 +158,11 @@ class SolrRequest(object):
         return highlights
     
     def get_response(self):
+        raw = self.get_raw_response()
+        data = loads(raw)
+        return SolrResponse(data, self)
+    
+    def get_raw_response(self):
         self._request = requests.Request('GET', config.SOLR_URL + '/select', params=self.params.get_dict()).prepare()
         
         try:
@@ -166,10 +171,8 @@ class SolrRequest(object):
             app.logger.error("Something blew up when querying solr: %s; request url: %s" % \
                              (e, self._request.url))
             raise
+        return self.http_resp.text
         
-        data = loads(self.http_resp.text)
-        return SolrResponse(data, self)
-    
     def get_raw_request_url(self):
         if hasattr(self, '_request'):
             return self._request.url

@@ -7,7 +7,7 @@ Created on Nov 12, 2012
 import mongobox
 import fixtures
 import unittest2
-from simplejson import dumps
+import simplejson as json
 from copy import deepcopy
 from datetime import datetime
 
@@ -85,14 +85,14 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
     
     @classmethod
     def default_response(cls):
-        return deepcopy(cls.DEFAULT_RESPONSE)
+        return json.loads(cls.DEFAULT_RESPONSE)
     
-    DEFAULT_RESPONSE = {
+    DEFAULT_RESPONSE = """{
         'responseHeader': {
             'QTime': 100,
             'status': 0,
             'params': {
-                'q': 'abc',
+                'q': 'abc'
             }
         },
         'response': {
@@ -102,20 +102,20 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
                       'id': '1234',
                       'bibcode': 'xyz',
                       'abstract': 'lorem ipsum'
-                    }],
+                    }]
         },
         'facet_counts': {
             "facet_queries": {
-                 "year:[2000 TO 2003]": 13,
+                 "year:[2000 TO 2003]": 13
              },
             "facet_fields": {
                 "year": [ 
                     "2009", 3,
-                    "2008", 5,
+                    "2008", 5
                 ],
                 "bibstem_facet": [
                     "ApJ", 10,
-                    "ArXiv", 8,
+                    "ArXiv", 8
                 ]
             }
         },
@@ -126,17 +126,17 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
                 ]
             }
         }
-    }
+    }"""
     
     def __init__(self, data=None, **kwargs):
         if data is None:
-            data = self.DEFAULT_RESPONSE
+            data = json.loads(self.DEFAULT_RESPONSE)
         self.resp_data = data
         
         def raw(*args_, **kwargs_):
-            return dumps(self.resp_data)
+            return json.dumps(self.resp_data)
         
-        fixtures.MonkeyPatch.__init__(self, 'solr.SearchHandler.raw', raw)
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.core.solr.request.get_raw_response', raw)
         
     def set_data(self, data):
         self.resp_data = data

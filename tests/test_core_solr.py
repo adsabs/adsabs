@@ -17,11 +17,11 @@ from adsabs.core import solr
 from config import config
 from test_utils import (AdsabsBaseTestCase, SolrRawQueryFixture, SolrRequestPostMP)
 
-import solr as solrpy
+import requests
 SOLR_AVAILABLE = False
 try:
-    s = solrpy.SolrConnection(config.SOLR_URL, timeout=3)
-    rv = s.query("*", rows=0)
+    r = requests.get(config.SOLR_URL + '/select?q=id:0')
+    assert r.status_code == 200
     SOLR_AVAILABLE = True
 except:
     pass
