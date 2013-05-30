@@ -10,7 +10,9 @@ __all__ = [
     'SolrResponse',
     'SolrDocument',
     'query',
-    'request',
+    'search_request',
+    'facet_request',
+    'document_request',
     'get_document',
     ]
 

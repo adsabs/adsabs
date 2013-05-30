@@ -94,7 +94,7 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
-    from adsabs.extensions import login_manager, mongodb, solr, pushrod, mail
+    from adsabs.extensions import login_manager, mongodb, pushrod, mail
     from adsabs.modules.user import AdsUser
     
     # login.
@@ -121,9 +121,6 @@ def _configure_extensions(app):
         app.logger.error("Failed to initialize mongoalchemy session: %s" % e.message)
         raise
         
-    app.logger.debug("initializing solr connection")
-    solr.init_app(app) #@UndefinedVariable
-    
     app.logger.debug("initializing pushrod")
     pushrod.init_app(app)  #@UndefinedVariable
     
@@ -134,9 +131,6 @@ def _configure_extensions(app):
     app.jinja_env.add_extension('jinja2.ext.with_')
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-    
-    
-    
     
 def _configure_error_handlers(app):
     """

@@ -15,13 +15,13 @@ import unittest2
 #from adsabs.app import create_app
 from adsabs.core import solr
 from config import config
-from test_utils import (AdsabsBaseTestCase, SolrRawQueryFixture, SolrRequestPostMP)
+from test_utils import (AdsabsBaseTestCase, SolrRawQueryFixture)
 
-import solr as solrpy
+import requests
 SOLR_AVAILABLE = False
 try:
-    s = solrpy.SolrConnection(config.SOLR_URL, timeout=3)
-    rv = s.query("*", rows=0)
+    r = requests.get(config.SOLR_URL + '/select?q=id:0')
+    assert r.status_code == 200
     SOLR_AVAILABLE = True
 except:
     pass
@@ -181,31 +181,6 @@ class SolrTestCase(AdsabsBaseTestCase):
             resp = query("foo", start=11)
             self.assertEquals(resp.request.params.start, 11)
         
-    def test_facet_arg_separator(self):
-        """
-        tests that our config.SOLR_ARG_SEPARATOR successfully works around
-        solrpy's replacing of '_' with '.' in our field-specific params
-        """ 
-        self._solr_request_params = None
-        
-        class MockResp(object):
-            """callback needs to return an object with a read() method"""
-            def read(self):
-                return '{}'
-            
-        def post_callback(*args):
-            self._solr_request_params = args[2]
-            return MockResp()
-        fixture = self.useFixture(SolrRequestPostMP(post_callback))
-        
-        with self.app.test_request_context('/'):
-            self.app.preprocess_request()
-            req = solr.SolrRequest("foo")
-            req.add_facet("bar_baz", 1, 1);
-            resp = req.get_response()
-            
-        self.assertIn("f.bar_baz.facet.mincount=1", self._solr_request_params)
-        
     def test_facet_request(self):
         from adsabs.core.solr import facet_request
         
@@ -230,6 +205,26 @@ class SolrTestCase(AdsabsBaseTestCase):
             self.assertEqual(resp.get_all_facet_queries(), {'year:[2000 TO 2003]': 13})
             self.assertEqual(resp.get_all_facet_fields(), {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8], 'year': ['2009', 3, '2008', 5]})
     
+class SolrHAProxyTest(AdsabsBaseTestCase):
+    
+    def test_haproxy_cookie(self):
+        """
+        Uses the http://httpbin.org/ service to check that 
+        the haproxy "sticky session" cookie is included in solr requests
+        """
+        from flask import g
+        
+        def reset_solr_url(url):
+            config.SOLR_URL = url
+        self.addCleanup(reset_solr_url, config.SOLR_URL)
+        
+        config.SOLR_URL = 'http://httpbin.org/cookies?' # bit of a hack adding the '?' at the end but otherwise the '/select' added later messes things up
+        
+        with self.app.test_request_context('/'):
+            self.app.preprocess_request()
+            resp = solr.SolrRequest("foo").get_response()
+            expected = { config.SOLR_HAPROXY_SESSION_COOKIE_NAME: g.user_cookie_id }
+            self.assertDictContainsSubset(expected, resp.raw['cookies'])
 
 class SolrResponseCaseAdv(AdsabsBaseTestCase):
 
@@ -451,7 +446,6 @@ class SolrResponseCaseAdv(AdsabsBaseTestCase):
             self.assertEqual(resp.get_error_components(), {})
             self.assertIsNone(resp.get_error())
             self.assertIsNone(resp.get_error_message())
-            
             
             
 if __name__ == '__main__':

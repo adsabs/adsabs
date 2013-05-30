@@ -29,11 +29,11 @@ from adsabs.core.solr import SolrResponse
 from config import config
 from test_utils import *
 
-import solr
+import requests
 SOLR_AVAILABLE = False
 try:
-    s = solr.SolrConnection(config.SOLR_URL, timeout=3)
-    rv = s.query("*", rows=0)
+    r = requests.get(config.SOLR_URL + '/select?q=id:0')
+    assert r.status_code == 200
     SOLR_AVAILABLE = True
 except:
     pass

@@ -136,15 +136,10 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
         def raw(*args_, **kwargs_):
             return dumps(self.resp_data)
         
-        fixtures.MonkeyPatch.__init__(self, 'solr.SearchHandler.raw', raw)
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.core.solr.request.SolrRequest.get_raw_response', raw)
         
     def set_data(self, data):
         self.resp_data = data
-        
-class SolrRequestPostMP(fixtures.MonkeyPatch):
-    
-    def __init__(self, callback):
-        fixtures.MonkeyPatch.__init__(self, 'solr.Solr._post', callback)
         
 class SolrNotAvailableFixture(fixtures.MonkeyPatch):
     
@@ -155,7 +150,7 @@ class SolrNotAvailableFixture(fixtures.MonkeyPatch):
         def raise_ex(*args, **kwargs):
             raise self.exc_class(self.exc_msg)
         
-        fixtures.MonkeyPatch.__init__(self, 'solr.SearchHandler.raw', raise_ex)
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.core.solr.request.SolrRequest.get_raw_response', raise_ex)
         
 class ClassicADSSignonFixture(fixtures.MonkeyPatch):
     

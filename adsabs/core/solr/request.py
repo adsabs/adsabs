@@ -11,7 +11,14 @@ from copy import deepcopy
 from simplejson import loads
 from config import config
 from .response import SolrResponse
+from .adapter import SolrRequestAdapter
 from solr import SolrException
+import requests
+
+__all__ = ['SolrRequest','SolrParams']
+
+requests_session = requests.Session()
+requests_session.mount('http://', SolrRequestAdapter())
 
 class SolrRequest(object):
     
@@ -155,30 +162,24 @@ class SolrRequest(object):
         return highlights
     
     def get_response(self):
-        try:
-            json = g.solr.select.raw(**self.params)
-        except SolrException as se:
-            app.logger.error("SolrException error. Request url: %s" % self.get_raw_request_url())
-            json =  se.body
-        except:
-            app.logger.error("Something blew up when querying solr. Request url: %s" % self.get_raw_request_url())
-            raise
-        
-        data = loads(json)
+        raw = self.get_raw_response()
+        data = loads(raw)
         return SolrResponse(data, self)
     
+    def get_raw_response(self):
+        self._request = requests.Request('GET', config.SOLR_URL + '/select', params=self.params.get_dict()).prepare()
+        
+        try:
+            self.http_resp = requests_session.send(self._request)
+        except requests.RequestException, e:
+            app.logger.error("Something blew up when querying solr: %s; request url: %s" % \
+                             (e, self._request.url))
+            raise
+        return self.http_resp.text
+        
     def get_raw_request_url(self):
-        qstring = []
-        to_str = lambda s: s.encode('utf-8') if isinstance(s, unicode) else s
-        for key, value in self.params.items():
-#            key = key.replace(self.arg_separator, '.')
-            if isinstance(value, (list, tuple)):
-                qstring.extend([(key, to_str(v)) for v in value])
-            else:
-                qstring.append((key, to_str(value)))
-        qstring = urlencode(qstring, doseq=True)
-        return "%s/select?%s" % (g.solr.url, qstring)
-    
+        if hasattr(self, '_request'):
+            return self._request.url
         
 class SolrParams(dict):
     
@@ -202,7 +203,10 @@ class SolrParams(dict):
     def __repr__(self):
         dictrepr = dict.__repr__(self)
         return '%s(%s)' % (type(self).__name__, dictrepr)
-
+    
+    def get_dict(self):
+        return dict.copy(self)
+    
     def update(self, *args, **kwargs):
         for k, v in dict(*args, **kwargs).iteritems():
             self[k] = v
