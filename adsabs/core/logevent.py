@@ -4,6 +4,7 @@ Created on Apr 30, 2013
 @author: jluker
 '''
 
+import pytz
 import socket
 import datetime
 
@@ -24,6 +25,6 @@ class LogEvent(dict):
         """
         this method should be overridden in subclasses
         """
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         self['@timestamp'] = now.isoformat()
-        self['@source'] = socket.gethostname()
+        self['@source'] = self['@source_host'] = socket.gethostname()
