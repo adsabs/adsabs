@@ -11,13 +11,10 @@ from adsabs.modules.search.misc_functions import build_singledoc_components
 from config import config
 
 import logging
+from .signals import abstract_view_signal
 from adsabs.core.logevent import LogEvent
 
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
-
-def log_abstract_view(bibcode):
-    event = LogEvent.new(request.url, bibcode=bibcode, user_cookie_id=g.user_cookie_id)
-    logging.getLogger('abs').info(event)
     
 @abs_blueprint.after_request
 def add_caching_header(response):
@@ -41,7 +38,7 @@ def abstract(bibcode):
     g.formatter_funcs = {'field_to_json':field_to_json}
     
     # log the request
-    log_abstract_view(bibcode)
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="abstract")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='abstract')
     
@@ -62,7 +59,7 @@ def references(bibcode):
     g.formatter_funcs = {'field_to_json':field_to_json}
     
     # log the request
-    log_abstract_view(bibcode)
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="references")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='references', reference_list=solr_reference_list)
 
@@ -83,7 +80,7 @@ def citations(bibcode):
     g.formatter_funcs = {'field_to_json':field_to_json}
     
     # log the request
-    log_abstract_view(bibcode)
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="citations")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='citations', citation_list=solr_citation_list)
 
@@ -103,9 +100,12 @@ def toc(bibcode):
     g.formatter_funcs = {'field_to_json':field_to_json}
     
     # log the request
-    log_abstract_view(bibcode)
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="toc")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='toc', toc_list=solr_toc_list)
 
-
-
+@abstract_view_signal.connect
+def log_abstract_view(sender, **kwargs):
+    kwargs['user_cookie_id'] = g.user_cookie_id
+    event = LogEvent.new(request.url, **kwargs)
+    logging.getLogger('abs').info(event)

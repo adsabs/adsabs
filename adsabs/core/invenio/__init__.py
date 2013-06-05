@@ -126,7 +126,7 @@ def get_invenio_metadata(ads_id):
     WHERE bib03x.value="%s"' % ads_id
     try:
         record_id = run_sql(query_record_id)[0][0]
-    except IndexError:
+    except (IndexError,NameError):
         return InvenioDoc({})
     
     metadata = get_metadata([record_id])

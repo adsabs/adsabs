@@ -205,6 +205,38 @@ class SolrTestCase(AdsabsBaseTestCase):
             self.assertEqual(resp.get_all_facet_queries(), {'year:[2000 TO 2003]': 13})
             self.assertEqual(resp.get_all_facet_fields(), {'bibstem_facet': ['ApJ', 10, 'ArXiv', 8], 'year': ['2009', 3, '2008', 5]})
     
+    def test_search_signal(self):
+        from adsabs.core.solr import signals
+        fixture = self.useFixture(SolrRawQueryFixture())
+        
+        @signals.search_signal.connect
+        def catch_search(request, **kwargs):
+            self._signal_test = request.q
+            
+        self.get_resp(solr.SolrRequest("foo"))
+        self.assertEqual(self._signal_test, "foo") 
+        
+    def test_error_signal(self):
+        from adsabs.core.solr import signals
+        
+        def reset_config(url, timeout):
+            config.SOLR_URL = url
+            config.SOLR_TIMEOUT = timeout
+        self.addCleanup(reset_config, config.SOLR_URL, config.SOLR_TIMEOUT)
+        config.SOLR_TIMEOUT = 1
+        config.SOLR_URL = 'http://httpbin.org/delay/3?' # see http://httpbin.org
+        
+        @signals.error_signal.connect
+        def catch_error(request, **kwargs):
+            self._signal_error = kwargs['error_msg']
+            
+        try:
+            self.get_resp(solr.SolrRequest("foo"))
+        except:
+            pass
+        self.assertTrue(hasattr(self, '_signal_error'))
+        self.assertTrue(self._signal_error.startswith("Something blew up"))
+        
 class SolrHAProxyTest(AdsabsBaseTestCase):
     
     def test_haproxy_cookie(self):
@@ -217,7 +249,6 @@ class SolrHAProxyTest(AdsabsBaseTestCase):
         def reset_solr_url(url):
             config.SOLR_URL = url
         self.addCleanup(reset_solr_url, config.SOLR_URL)
-        
         config.SOLR_URL = 'http://httpbin.org/cookies?' # bit of a hack adding the '?' at the end but otherwise the '/select' added later messes things up
         
         with self.app.test_request_context('/'):

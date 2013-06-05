@@ -2,8 +2,9 @@
 from .request import *
 from .response import *
 from .solrdoc import *
+from .signals import *
 
-from flask import current_app as app
+from flask import current_app as app, request as current_request, g
 
 __all__ = [
     'SolrRequest',
@@ -93,4 +94,3 @@ def get_document(*args, **kwargs):
     if resp.get_hits() == 1:
         return resp.get_doc_object(0)
         
-

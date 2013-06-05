@@ -5,7 +5,6 @@ Created on Sep 19, 2012
 '''
 
 import logging
-from adsabs.core.logevent import LogEvent
 from math import ceil
 from copy import deepcopy
 
@@ -24,7 +23,10 @@ class SolrResponse(object):
         self.meta = {}
         
     def is_error(self):
-        return self.raw['responseHeader']['status'] != 0
+        return self.raw.get('responseHeader',{}).get('status', False)
+    
+    def get_http_status(self):
+        return self.http_status
     
     def search_response(self):
         
@@ -56,7 +58,7 @@ class SolrResponse(object):
     def get_error_components(self):
         """Extracts all the components of an error from the response object"""
         if self.is_error():
-            return self.raw['error']
+            return self.raw.get('error')
         else:
             return {}
     
@@ -113,7 +115,7 @@ class SolrResponse(object):
     def get_all_facets(self):
         if not self.request.facets_on():
             return {}
-        return self.raw['facet_counts']
+        return self.raw.get('facet_counts',{})
     
     def get_all_facet_fields(self):
         return self.get_all_facets().get('facet_fields',{})
@@ -229,7 +231,7 @@ class SolrResponse(object):
         return self.request_facet_params
     
     def get_query(self):
-        return self.raw['responseHeader']['params']['q']
+        return self.raw.get('responseHeader',{}).get('params',{}).get('q')
     
     def get_count(self):
         """
@@ -244,20 +246,14 @@ class SolrResponse(object):
         """
         Returns the total number of record found
         """
-        if self.raw.has_key('response'):
-            return int(self.raw['response']['numFound'])
-        else:
-            return 0
+        return self.raw.get('response',{}).get('numFound',0)
     
     def get_start_count(self):
         """
         Returns the number of the first record in the 
         response compared to the total number
         """
-        if self.raw.has_key('response'):
-            return int(self.raw['response']['start'])
-        else:
-            return 0
+        return self.raw.get('response',{}).get('start',0)
     
     def get_pagination(self):
         """
@@ -294,23 +290,6 @@ class SolrResponse(object):
         return self.pagination
     
     def get_qtime(self):
-        return self.raw['responseHeader']['QTime']
+        return self.raw.get('responseHeader',{}).get('QTime')
     
-    def log_search(self, logger_name, **xtra):
-        """
-        extracts some data from the response for log/analytics purposes
-        """
-        data = {
-            'q': self.get_query(),
-            'hits': self.get_hits(),
-            'count': self.get_count(),
-            'start': self.get_start_count(),
-            'qtime': self.get_qtime(),
-            'results': self.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
-            'solr_url': self.request.get_raw_request_url(),
-            }
-        data.update(xtra)
-        event = LogEvent.new(current_request.url, **data)
-        logging.getLogger(logger_name).info(event)        
-        
         

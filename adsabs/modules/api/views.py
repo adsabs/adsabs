@@ -7,6 +7,9 @@ from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 from functools import wraps
 
 import errors
+import logging
+from adsabs.core import solr
+from adsabs.core.logevent import LogEvent
 from .user import AdsApiUser
 from .request import ApiSearchRequest, ApiRecordRequest
 from config import config
@@ -89,3 +92,15 @@ def record(identifier):
 #@pushrod_view(xml_template="mlt.xml")
 #def mlt():
 #    pass
+
+@solr.signals.search_signal.connect
+@solr.signals.error_signal.connect
+def log_solr_event(sender, **kwargs):
+    """
+    extracts some data from the solr  for log/analytics purposes
+    """
+    
+    if hasattr(g, 'api_user'):
+        kwargs['dev_key'] = g.api_user.get_dev_key()
+        event = LogEvent.new(request.url, **kwargs)
+        logging.getLogger('api').info(event)

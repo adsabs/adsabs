@@ -5,14 +5,14 @@ Created on Sep 19, 2012
 '''
 import re
 
-from flask import g, current_app as app
-from urllib import urlencode
+from flask import g, current_app as app, request as current_request
 from copy import deepcopy
 from simplejson import loads
 from config import config
 from .response import SolrResponse
 from .adapter import SolrRequestAdapter
-from solr import SolrException
+from .signals import error_signal, search_signal
+
 import requests
 
 __all__ = ['SolrRequest','SolrParams']
@@ -162,24 +162,40 @@ class SolrRequest(object):
         return highlights
     
     def get_response(self):
-        raw = self.get_raw_response()
-        data = loads(raw)
-        return SolrResponse(data, self)
+        
+        http_status,text = self._get_solr_response()
+        data = loads(text)
+        resp = SolrResponse(data, self)
+        
+        log_data = { 
+            'q': resp.get_query(),
+            'hits': resp.get_hits(),
+            'count': resp.get_count(),
+            'start': resp.get_start_count(),
+            'qtime': resp.get_qtime(),
+            'results': resp.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
+            'error_msg': resp.get_error_message(),
+            'http_status': http_status,
+            'solr_url': self.url
+        }
+        search_signal.send(self, **log_data)
+        
+        return resp
     
-    def get_raw_response(self):
-        self._request = requests.Request('GET', config.SOLR_URL + '/select', params=self.params.get_dict()).prepare()
+    def _get_solr_response(self):
+        r = requests.Request('GET', config.SOLR_URL + '/select', params=self.params.get_dict()).prepare()
+        self.url = r.url
+        http_resp = None 
         
         try:
-            self.http_resp = requests_session.send(self._request)
+            http_resp = requests_session.send(r, timeout=config.SOLR_TIMEOUT)
         except requests.RequestException, e:
-            app.logger.error("Something blew up when querying solr: %s; request url: %s" % \
-                             (e, self._request.url))
+            error_msg = "Something blew up when querying solr: %s; request url: %s" % \
+                             (e, r.url)
+            error_signal.send(self, error_msg=error_msg)
+            app.logger.error(error_msg)
             raise
-        return self.http_resp.text
-        
-    def get_raw_request_url(self):
-        if hasattr(self, '_request'):
-            return self._request.url
+        return (http_resp.status_code, http_resp.text)
         
 class SolrParams(dict):
     
