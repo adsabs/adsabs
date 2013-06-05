@@ -1,7 +1,8 @@
 from views import *
+from views import search_blueprint as blueprint # import separately and asssign to generic 'blueprint' attr
 
-# import this separately so we can assign it to the generic 'blueprint' attr
-from views import search_blueprint as blueprint
+from flask import g
+from config import config
 
 def setup(app):
     

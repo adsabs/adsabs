@@ -1,4 +1,4 @@
-from flask import (Blueprint, request, g, render_template, flash)
+from flask import Blueprint, request, g, render_template, flash
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm, get_missing_defaults
@@ -7,6 +7,8 @@ from adsabs.core.data_formatter import field_to_json
 from adsabs.core.form_functs import is_submitted_cust
 from misc_functions import build_basicquery_components
 from config import config
+from adsabs.core.logevent import LogEvent
+import logging
 
 #Definition of the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
@@ -58,7 +60,6 @@ def search():
                          )
             if resp.is_error():
                 flash(resp.get_error_message(), 'error')
-            resp.log_search('search', user_cookie_id=g.user_cookie_id)
             return render_template('search_results.html', resp=resp, form=form)
         else:
             for field_name, errors_list in form.errors.iteritems():
@@ -88,3 +89,32 @@ def search_advanced():
     """
     """
     pass
+
+    
+@solr.signals.search_signal.connect
+def log_solr_search(sender, resp, **kwargs):
+    """
+    extracts some data from the response for log/analytics purposes
+    """
+    data = { 
+        'user_cookie_id': g.user_cookie_id,
+        'q': resp.get_query(),
+        'hits': resp.get_hits(),
+        'count': resp.get_count(),
+        'start': resp.get_start_count(),
+        'qtime': resp.get_qtime(),
+        'results': resp.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
+        'error_msg': resp.get_error_message()
+        }
+    data.update(kwargs)
+    event = LogEvent.new(request.url, **data)
+    logging.getLogger('search').info(event)       
+
+@solr.signals.error_signal.connect
+def log_solr_error(sender, **kwargs):
+    data = { 'user_cookie_id': g.user_cookie_id }
+    data.update(kwargs)
+    event = LogEvent.new(request.url, **data)
+    logging.getLogger('search').info(event)                               
+        
+    
