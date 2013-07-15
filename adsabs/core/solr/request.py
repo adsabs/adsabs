@@ -7,7 +7,7 @@ import re
 
 from flask import g, current_app as app, request as current_request
 from copy import deepcopy
-from simplejson import loads
+from simplejson import loads, JSONDecodeError
 from config import config
 from .response import SolrResponse
 from .adapter import SolrRequestAdapter
@@ -19,6 +19,7 @@ __all__ = ['SolrRequest','SolrParams']
 
 requests_session = requests.Session()
 requests_session.mount('http://', SolrRequestAdapter())
+requests_session.keep_alive = False
 
 class SolrRequest(object):
     
@@ -163,8 +164,14 @@ class SolrRequest(object):
     
     def get_response(self):
         
-        http_status,text = self._get_solr_response()
-        data = loads(text)
+        http_status,content = self._get_solr_response()
+        try:
+            data = loads(content)
+        except JSONDecodeError, e:
+            error_msg = "JSON response from solr failed to parse: %s" % content
+            error_signal.send(self, error_msg=error_msg)
+            app.logger.error(error_msg)
+            raise
         resp = SolrResponse(data, self)
         
         log_data = { 
@@ -195,7 +202,7 @@ class SolrRequest(object):
             error_signal.send(self, error_msg=error_msg)
             app.logger.error(error_msg)
             raise
-        return (http_resp.status_code, http_resp.text)
+        return (http_resp.status_code, http_resp.content)
         
 class SolrParams(dict):
     
