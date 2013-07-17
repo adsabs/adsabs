@@ -196,13 +196,16 @@ class SolrRequest(object):
         
         try:
             http_resp = requests_session.send(r, timeout=config.SOLR_TIMEOUT)
+            return (http_resp.status_code, http_resp.content)
         except requests.RequestException, e:
             error_msg = "Something blew up when querying solr: %s; request url: %s" % \
                              (e, r.url)
             error_signal.send(self, error_msg=error_msg)
             app.logger.error(error_msg)
             raise
-        return (http_resp.status_code, http_resp.content)
+        finally:
+            if http_resp:
+                http_resp.close()
         
 class SolrParams(dict):
     
