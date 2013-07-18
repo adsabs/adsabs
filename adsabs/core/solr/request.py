@@ -3,7 +3,9 @@ Created on Sep 19, 2012
 
 @author: jluker
 '''
+
 import re
+import sys
 
 from flask import g, current_app as app, request as current_request
 from copy import deepcopy
@@ -17,6 +19,23 @@ import requests
 
 __all__ = ['SolrRequest','SolrParams']
 
+if "darwin" == sys.platform:
+    # Monkey path socket.sendall to handle EAGAIN (Errno 35) on mac.
+    import socket
+    import time
+    import errno
+    def socket_socket_sendall(self, data):
+        while len(data) > 0:
+            try:
+                bytes_sent = self.send(data)
+                data = data[bytes_sent:]
+            except socket.error, e:
+                if e.errno == errno.EAGAIN:
+                    time.sleep(0.1)
+                else:
+                    raise e
+    socket._socketobject.sendall = socket_socket_sendall
+    
 requests_session = requests.Session()
 requests_session.mount('http://', SolrRequestAdapter())
 requests_session.keep_alive = False
