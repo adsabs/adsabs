@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g, render_template, flash
+from flask import Blueprint, request, g, render_template, flash, current_app as app
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm, get_missing_defaults
@@ -9,7 +9,7 @@ from misc_functions import build_basicquery_components
 from config import config
 from adsabs.core.logevent import LogEvent
 import logging
-
+from multiprocessing import Process
 #Definition of the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
                              static_folder="static", url_prefix='/search')
@@ -89,6 +89,30 @@ def search_advanced():
     """
     """
     pass
+
+class Fetcher(Process):
+    def __init__(self, bibcode):
+        Process.__init__(self)
+        self.q = "references(bibcode:%s)" % bibcode
+        
+    def run(self):
+        req = solr.SolrRequest(self.q)
+        req.set_fields(['bibcode'])
+        app.logger.info("thread %s, searching for '%s'" % (self.name, self.q))
+        resp = req.get_response().search_response()
+        app.logger.info("thread %s, hits: %d" % (self.name, resp['meta']['hits']))
+        
+@search_blueprint.route('/trac_367/<bibcodes>', methods=['GET'])
+def trac_367(bibcodes):
+    bibcodes = bibcodes.strip().split(',')
+    procs = [Fetcher(x) for x in bibcodes]
+    for p in procs:
+        p.start()
+        
+    for p in procs:
+        p.join()
+        
+    return "OK"
 
 @solr.signals.search_signal.connect
 @solr.signals.error_signal.connect
