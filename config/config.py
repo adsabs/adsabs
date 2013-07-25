@@ -190,7 +190,10 @@ class AppConfig(object):
     RECAPTCHA_PUBLIC_KEY = ''
     RECAPTCHA_PRIVATE_KEY = ''
     RECAPTCHA_OPTIONS = {'theme' : 'white'}
-
+    
+    SELENIUM_BASE_URL = None
+    SELENIUM_PAGE_WAIT = None
+    
 try:
     from local_config import LocalConfig
 except ImportError:
