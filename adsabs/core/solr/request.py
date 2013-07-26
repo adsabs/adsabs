@@ -189,6 +189,10 @@ class SolrRequest(object):
         
         return resp
     
+    def get_raw_request_url(self):
+        """"""
+        return self.url
+    
     def _get_solr_response(self):
         r = requests.Request('GET', config.SOLR_URL + '/select', params=self.params.get_dict()).prepare()
         self.url = r.url

@@ -387,6 +387,12 @@ def change_user_settings(form):
         if not user_rec:
             app.logger.error('logged in user doesn\'t have an entry in local mongo DB: %s' % login)
             return False, 'Error with account modification. Please try to logout and login again before trying again.', 'error'
+        #make sure that if name or lastname are present, both are sent for the update
+        if not name:
+            name = user_rec.firstname
+        if not lastname:
+            lastname = user_rec.lastname
+        
         try:
             classic_user = update_classic_user_info(current_user.user_rec.username, form.password.data, name, lastname)
         except TypeError:
