@@ -100,13 +100,13 @@ class SolrDocument(object):
         """
         Returns the list of references
         """
-        return self._get_op("cites", *args, **kwargs)
+        return self._get_op("references", *args, **kwargs)
         
     def get_citations(self, *args, **kwargs):
         """
         Returns the list of citations
         """
-        return self._get_op("citedby", *args, **kwargs)
+        return self._get_op("citations", *args, **kwargs)
     
     def get_toc(self, *args, **kwargs):
         """

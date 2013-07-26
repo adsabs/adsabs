@@ -292,6 +292,8 @@ class UserTests(AdsabsBaseTestCase):
         self.assertEqual('%s?%s' % (parsed_location_header.path, re.sub(self.REFRESH_REGEX_PATTERN, '', parsed_location_header.query)), next_path)
         self.assertRegexpMatches(urlparse(rv.headers.get('Location')).query, self.REFRESH_REGEX_PATTERN)
         
+    
+    
 class ApiUserTests(AdsabsBaseTestCase):
     
     def test_create_api_user(self):
