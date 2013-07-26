@@ -48,7 +48,7 @@ class ChangeUserParamsForm(Form):
 
 class ResetPasswordForm(Form):
     login = EmailField(u'Email address', [required(), length(min=5, max=2048), validators.Email()], description=u"Your login email")
-    submit = SubmitField('Send temporary password')
+    submit = SubmitField('Send temporary reset code')
 
 class ResetPasswordFormConf(ResetPasswordForm):
     resetcode = TextField(u'Reset Code', [required(), length(min=1, max=2048)], description=u"Past here your reset code")

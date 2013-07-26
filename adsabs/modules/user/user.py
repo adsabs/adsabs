@@ -361,24 +361,30 @@ def change_user_settings(form):
     if login:
         user_rec = AdsUserRecord.query.filter((AdsUserRecord.alternate_usernames == login).or_(AdsUserRecord.username == login)).first()  #@UndefinedVariable
         if user_rec and (user_rec.cookie_id != current_user.get_id()) :
-                return False, 'Username already taken by other user.', 'error'
-        else:
-            #send the confirmation email
-            #create an itsdangerous object to sign the verification email 
-            itsd = URLSafeSerializer(config.ACCOUNT_VERIFICATION_SECRET)
-            #send the confirmation email
-            act_code = itsd.dumps('%s||%s' % (login, current_user.user_rec.username))
-            message_html = """<h3>Please confirm your new email address</h3>
-                                <p>Your activation code is <strong>%(code)s</strong></p>
-                                <p>To activate your account, please click <a href="%(act_url)s">here</a></p>
-                                <p>If the link doesn't work, please copy the following URL and paste it in your browser:<br/>%(act_url)s</p>
-                                <p>Please do not replay to this email: to contact us please use our <a href="%(feedb_url)s">feedback form</a></p>
-                                <p>Regards,<br/>The ADS team</p>
-                            """ % {'code':act_code, 
-                                   'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate_new_email'), act_code),
-                                   'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
-                                   }
-            send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [login])
+            return False, 'email address already taken by other user.', 'error'
+        #check if the user already exists in classic and has another cookie
+        if login_exists_classic(login):
+            classic_user = get_classic_user(login)
+            if classic_user.get('cookie') != current_user.get_id():
+                app.logger.error('User tried to use change his login using one belonging to other user. User login: %s; other user login: %s ' % (current_user.get_username(), login))
+                return False, 'email address already taken by other user.', 'error'
+        
+        #send the confirmation email
+        #create an itsdangerous object to sign the verification email 
+        itsd = URLSafeSerializer(config.ACCOUNT_VERIFICATION_SECRET)
+        #send the confirmation email
+        act_code = itsd.dumps('%s||%s' % (login, current_user.user_rec.username))
+        message_html = """<h3>Please confirm your new email address</h3>
+                            <p>Your activation code is <strong>%(code)s</strong></p>
+                            <p>To activate your account, please click <a href="%(act_url)s">here</a></p>
+                            <p>If the link doesn't work, please copy the following URL and paste it in your browser:<br/>%(act_url)s</p>
+                            <p>Please do not replay to this email: to contact us please use our <a href="%(feedb_url)s">feedback form</a></p>
+                            <p>Regards,<br/>The ADS team</p>
+                        """ % {'code':act_code, 
+                               'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate_new_email'), act_code),
+                               'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
+                               }
+        send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [login])
     
     #if name or lastname have changed, submit the changes to the classic ads and update the local database
     if name or lastname:
@@ -517,7 +523,7 @@ def reset_user_password_step_one(form):
                                    'password_time_limit': time_limit.strftime("%A, %d. %B %Y %I:%M%p")
                                    }
         send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [form.login.data])
-    return True, 'If the email you entered exists in our system, you will shortly receive a message at your e-mail address with further instructions on how to reset your password.', 'success'
+    return True, 'If the email you entered exists in our system, you will shortly receive a message at your e-mail address with further instructions on how to reset your password.', 'warning'
 
 def reset_user_password_step_two(form):
     """
