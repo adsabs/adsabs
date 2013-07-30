@@ -1,0 +1,29 @@
+BeautifulSoup>=3.2.1
+beautifulsoup4>=4.2.0
+beaver
+dicttoxml >= 0.8
+-e git+https://github.com/theorm/mongobox.git#egg=mongobox
+fixtures
+Flask>=0.8
+flask-debugtoolbar
+Flask-Login>=0.1
+Flask-Mail>=0.6
+Flask-MongoAlchemy>=0.5.4
+Flask-Pushrod>=0.1.2
+Flask-Script>=0.3.1
+Flask-SQLAlchemy>=0.15
+Flask-WTF>=0.5.4
+lxml>=2.3.5
+MongoAlchemy>=0.13.3
+MySQL-python
+nose==1.2.1
+pytz
+redis
+requests
+scrubber>=1.6.1
+selenium==2.33.0
+simplejson
+SQLAlchemy>=0.7.3
+testtools
+unittest2
+WTForms>=1.0
