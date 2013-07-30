@@ -14,16 +14,16 @@ MySQL-python
 SQLAlchemy>=0.8.1
 WTForms>=1.0.4
 beautifulsoup4>=4.2.0
-beaver
+beaver>=29
 dicttoxml >= 1.1.2
-fixtures
+fixtures>=0.3.12
 itsdangerous>=0.21
 lxml>=2.3.5
 nose==1.2.1
-pytz
+pytz>=2013b
 requests>=1.1.0
-redis
+redis>=2.7.6
 scrubber>=1.6.1
-simplejson
-testtools
-unittest2
+simplejson>=3.3.0
+testtools>=0.9.32
+unittest2>=0.5.1

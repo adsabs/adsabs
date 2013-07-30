@@ -51,7 +51,8 @@ class AdsUser(object):
                                         password='',
                                         registered=datetime.utcnow().replace(tzinfo=pytz.utc),
                                         active=True, 
-                                        anonymous=False)
+                                        anonymous=False,
+                                        remote_login_system=classic_user.get('request', {}).get('man_url', ''))
             new_rec.save()
             # then I re-extract the user object
             # (don't think it's necessary to re-fetch the record
@@ -149,6 +150,9 @@ class AdsUser(object):
     
     def get_username(self):
         return self.user_rec.username
+    
+    def get_developer_key(self):
+        return self.user_rec.developer_key
     
     def get_registered(self):
         """
