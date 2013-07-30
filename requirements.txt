@@ -23,6 +23,7 @@ nose==1.2.1
 pytz>=2013b
 requests>=1.1.0
 redis>=2.7.6
+selenium==2.33.0
 scrubber>=1.6.1
 simplejson>=3.3.0
 testtools>=0.9.32
