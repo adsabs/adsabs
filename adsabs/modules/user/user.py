@@ -250,17 +250,6 @@ def create_user(signup_form):
     #create an itsdangerous object to sign the verification email and encrypt the password
     itsd = URLSafeSerializer(config.ACCOUNT_VERIFICATION_SECRET)
     
-    #create a new user object
-    new_rec = AdsUserRecord(cookie_id=g.user_cookie_id,  #temporary unique cookie id
-                            username=signup_form.login.data, 
-                            firstname=signup_form.name.data, 
-                            lastname=signup_form.lastname.data,
-                            password=itsd.dumps(signup_form.password.data),
-                            registered=datetime.utcnow().replace(tzinfo=pytz.utc),
-                            active=False, 
-                            anonymous=False)
-    #save the user
-    new_rec.save()
     #send the confirmation email
     act_code = itsd.dumps(signup_form.login.data)
     message_html = """<h3>Dear %(name)s %(lastname)s, thank you for registering to the NASA ADS</h3>
@@ -272,9 +261,25 @@ def create_user(signup_form):
                     """ % {'name':signup_form.name.data, 'lastname':signup_form.lastname.data, 'code':act_code, 
                            'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate'), act_code),
                            'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
-                           }
-    send_email_to_user(u"NASA ADS Account confirmation required", message_html, [signup_form.login.data])
-    return True
+                         }
+    try:  
+        send_email_to_user(u"NASA ADS Account confirmation required", message_html, [signup_form.login.data])
+    except:
+        app.logger.error('Failed to send confirmation email for user creation')
+        return False, 'There are some technical problems: please try later.', 'error'
+    
+    #create a new user object
+    new_rec = AdsUserRecord(cookie_id=g.user_cookie_id,  #temporary unique cookie id
+                            username=signup_form.login.data, 
+                            firstname=signup_form.name.data, 
+                            lastname=signup_form.lastname.data,
+                            password=itsd.dumps(signup_form.password.data),
+                            registered=datetime.utcnow().replace(tzinfo=pytz.utc),
+                            active=False, 
+                            anonymous=False)
+    #save the user
+    new_rec.save()
+    return True, 'Thanks for the registration. An email with the activation code has been sent to you.', 'success'
 
 def resend_activation_email(email_to_activate):
     """
@@ -284,22 +289,30 @@ def resend_activation_email(email_to_activate):
     loc_db_user = AdsUserRecord.query.filter(AdsUserRecord.username==email_to_activate) #@UndefinedVariable
     #get the user object
     user_rec = loc_db_user.first()
-    #create an itsdangerous object to sign the verification email 
-    itsd = URLSafeSerializer(config.ACCOUNT_VERIFICATION_SECRET)
-    #send the confirmation email
-    act_code = itsd.dumps(email_to_activate)
-    message_html = """<h3>Dear %(name)s %(lastname)s, thank you for registering to the NASA ADS</h3>
-                        <p>Your activation code is <strong>%(code)s</strong></p>
-                        <p>To activate your account, please click <a href="%(act_url)s">here</a></p>
-                        <p>If the link doesn't work, please copy the following URL and paste it in your browser:<br/>%(act_url)s</p>
-                        <p>Please do not replay to this email: to contact us please use our <a href="%(feedb_url)s">feedback form</a></p>
-                        <p>Regards,<br/>The ADS team</p>
-                    """ % {'name':user_rec.firstname, 'lastname':user_rec.lastname, 'code':act_code, 
-                           'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate'), act_code),
-                           'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
-                           }
-    send_email_to_user(u"NASA ADS Account confirmation required", message_html, [email_to_activate])
-    return True
+    if user_rec:
+        #create an itsdangerous object to sign the verification email 
+        itsd = URLSafeSerializer(config.ACCOUNT_VERIFICATION_SECRET)
+        #send the confirmation email
+        act_code = itsd.dumps(email_to_activate)
+        message_html = """<h3>Dear %(name)s %(lastname)s, thank you for registering to the NASA ADS</h3>
+                            <p>Your activation code is <strong>%(code)s</strong></p>
+                            <p>To activate your account, please click <a href="%(act_url)s">here</a></p>
+                            <p>If the link doesn't work, please copy the following URL and paste it in your browser:<br/>%(act_url)s</p>
+                            <p>Please do not replay to this email: to contact us please use our <a href="%(feedb_url)s">feedback form</a></p>
+                            <p>Regards,<br/>The ADS team</p>
+                        """ % {'name':user_rec.firstname, 'lastname':user_rec.lastname, 'code':act_code, 
+                               'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate'), act_code),
+                               'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
+                               }
+        try:
+            send_email_to_user(u"NASA ADS Account confirmation required", message_html, [email_to_activate])
+        except:
+            app.logger.error('Failed to re-send confirmation email for user creation')
+            return False, 'There are some technical problems: please try later.', 'error'
+        return True, 'A new email with the activation code has been sent to your email address.', 'success'
+    else:
+        app.logger.error('Tried to re-send confirmation email for user creation for user not yet created or not stored in the DB. Email used %s' % email_to_activate)
+        return False, 'The user with the given email does not exist', 'error'
 
 def activate_user(activation_code):
     """
@@ -393,7 +406,11 @@ def change_user_settings(form):
                                'act_url': '%s%s?id=%s' % (config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('user.activate_new_email'), act_code),
                                'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback'))
                                }
-        send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [login])
+        try:
+            send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [login])
+        except:
+            app.logger.error('Failed to send confirmation email for user settings modification.')
+            return False, 'There are some technical problems: please try later.', 'error'
     
     #if name or lastname have changed, submit the changes to the classic ads and update the local database
     if name or lastname:
@@ -531,7 +548,11 @@ def reset_user_password_step_one(form):
                                    'feedb_url' : '%s%s'%(config.MAIL_CONTENT_REDIRECT_BASE_URL, url_for('feedback.feedback')),
                                    'password_time_limit': time_limit.strftime("%A, %d. %B %Y %I:%M%p")
                                    }
-        send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [form.login.data])
+        try:
+            send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [form.login.data])
+        except:
+            app.logger.error('Failed to send reset email for user password.')
+            return False, 'There are some technical problems: please try later.', 'error'
     return True, 'If the email you entered exists in our system, you will shortly receive a message at your e-mail address with further instructions on how to reset your password.', 'warning'
 
 def reset_user_password_step_two(form):
