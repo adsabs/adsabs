@@ -255,7 +255,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         next_path = "/search?param=foo&param2=bar+bar&nil=nal"
-        next_path_out = "/search?param=foo&param2=bar%20bar&nil=nal"
+        next_path_out = "/search?param=foo&param2=bar+bar&nil=nal"
         rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next=next_path,remember=1,submit=1))
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)

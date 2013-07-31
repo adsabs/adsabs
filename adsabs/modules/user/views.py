@@ -195,11 +195,12 @@ def signup():
     form = SignupForm()
     if form.validate_on_submit():
         if not login_exists(form.login.data):
-            create_user(form)
-            flash('Thanks for the registration. An email with the activation code has been sent to you.', 'success')
-            #save the login email in the session
-            session['user_login_email'] = form.login.data
-            return redirect(generate_redirect_url(next_=url_for('user.activate')))
+            success, message, message_type =  create_user(form)
+            flash(message, message_type)
+            if success:
+                #save the login email in the session
+                session['user_login_email'] = form.login.data
+                return redirect(generate_redirect_url(next_=url_for('user.activate')))
         else:
             flash('An user with the same email address already exists in the system. <a href="%s">Log in</a>' % url_for('user.login'), 'error')
     return render_template('signup.html', form=form)
@@ -228,9 +229,12 @@ def resend_activation_code_email():
         else:
             return render_template('resend_email.html', form=form)
     #if the email is in the session, time to sent the email
-    resend_activation_email(session.get('user_login_email'))
-    flash('A new email with the activation code has been sent to your email address.', 'success')
-    return redirect(generate_redirect_url(next_=url_for('user.activate'))) 
+    success, message, message_type =  resend_activation_email(session.get('user_login_email'))
+    flash(message, message_type)
+    if success:
+        return redirect(generate_redirect_url(next_=url_for('user.activate')))
+    else:
+        return redirect(generate_redirect_url(next_=url_for('user.resend_activation_code_email')))
 
 @user_blueprint.route('/activate', methods=['GET', 'POST'])
 def activate():
