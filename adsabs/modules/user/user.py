@@ -361,6 +361,11 @@ def change_user_settings(form):
     if form.login.data != current_user.user_rec.username:
         login = form.login.data
     
+    #if the user submitted a form with no changes there is nothing to do    
+    if not (name or lastname or login):
+        app.logger.debug('The user submitted a form with no changes.')
+        return False, 'Settings not changed. Please modify some settings to change them.', 'warning'
+    
     #check if the login is already used: if so throw an error unless it is from the same
     if login:
         user_rec = AdsUserRecord.query.filter((AdsUserRecord.alternate_usernames == login).or_(AdsUserRecord.username == login)).first()  #@UndefinedVariable
