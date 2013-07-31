@@ -5,11 +5,12 @@ from flask import current_app as app
 import requests
 import sys
 import traceback
+from config import config
+
 
 __all__ = ['get_classic_user', 'create_classic_user', 'update_classic_user_info', 'update_classic_username', 'update_classic_password', 'reset_classic_password', 'login_exists_classic']
 
-ADS_LOGIN_URL = 'http://adsabs.harvard.edu/cgi-bin/maint/manage_account/credentials'
-#ADS_LOGIN_URL = 'http://adsduo.cfa.harvard.edu/cgi-bin/maint/manage_account/credentials' #'http://adsduo.cfa.harvard.edu/cgi-bin/manage_account/credentials'
+ADS_LOGIN_URL = config.ADS_LOGIN_URL
 
 def perform_classic_user_query(parameters, headers, service_url):
     """

@@ -155,6 +155,7 @@ class AppConfig(object):
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
+    ADS_LOGIN_URL = None
 
     API_CURRENT_VERSION = '0.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
