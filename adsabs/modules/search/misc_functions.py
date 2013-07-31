@@ -4,10 +4,28 @@ Created on Nov 30, 2012
 @author: dimilia
 '''
 
+from copy import deepcopy
 from werkzeug.datastructures import CombinedMultiDict
 from config import config
+from adsabs.core.exceptions import ConfigurationError
 #from flask import g, session
 
+import sys
+THIS_MODULE = sys.modules[__name__]
+
+def _append_to_list(list_, item):
+    """
+    Simple append to a list
+    """
+    cur_list = deepcopy(list_)
+    cur_list.append(item)
+    return cur_list
+    
+def _append_to_query(query, item):
+    """
+    Append to query string
+    """
+    return u'%s %s' % (query, item)
 
 def build_basicquery_components(form, request_values=CombinedMultiDict([]), facets_components=False):
     """
@@ -17,23 +35,54 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     search_components = {
             'q' : None,
             'filters': [],
+            'original_q':None,
+            'original_filters': [],
             'sort': config.SEARCH_DEFAULT_SORT,
             'start': None,
             'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
             'rows':config.SEARCH_DEFAULT_ROWS,
     }
+    
+    def add_filter_to_search_components(facet_name, value, force_to_q=False):
+        """
+        Internal function that takes care of appending to the search components 
+        """
+        #if force to query is set, there is no need to proceed with the rest
+        if force_to_q:
+            search_components['q'] = _append_to_query(search_components['q'], value)
+            return None
+        
+        #by default if there is not a real configuration the facets are considered as filter query 
+        #and the default function is a simple append to list
+        mode = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_mode', 'fq')
+        funct_mame = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_function', '_append_to_list')
+        #actually load the right function specified in the config file
+        try:    
+            funct = getattr(THIS_MODULE, funct_mame)
+        except AttributeError:
+            raise ConfigurationError('function %s in configuration file but not implemented' % funct_mame)
+                
+        if mode == 'q':
+            search_components['q'] = funct(search_components['q'], value)
+        elif mode == 'fq':
+            search_components['filters'] = funct(search_components['filters'], value)
+        #this function doesn't return anything: if modifies the search_components variable
+        return None
+    
     #one box query
     search_components['q'] = form.q.data
+    search_components['original_q'] = form.q.data
     #databases
     if form.db_key.data in ('ASTRONOMY', 'PHYSICS',):
-        search_components['filters'].append('database:%s' % form.db_key.data)
+        add_filter_to_search_components('database', 'database:%s' % form.db_key.data)
+        search_components['original_filters'].append('database:%s' % form.db_key.data)
     #sorting
     if form.sort_type.data in config.SOLR_SORT_OPTIONS.keys():
         search_components['sort'] = form.sort_type.data
-    #second order operators wrap the query
-    elif form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
-        search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
-        search_components['sort'] = None
+#     #second order operators wrap the query
+#     elif form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
+#         search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
+#         search_components['sort'] = None
     #date range
     if form.year_from.data or form.year_to.data:
         mindate = '0001-00-00' #'*' the * has a bug
@@ -48,19 +97,23 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
                 maxdate = u'%s-%s-00' % (form.year_to.data, unicode(form.month_to.data).zfill(2))
             else:
                 maxdate = u'%s-%s-00' % (form.year_to.data, u'12')
-        search_components['filters'].append(u'pubdate:[%s TO %s]' % (mindate, maxdate))
+        add_filter_to_search_components('pubdate', u'pubdate:[%s TO %s]' % (mindate, maxdate))
+        search_components['original_filters'].append(u'pubdate:[%s TO %s]' % (mindate, maxdate))
     #refereed
     if form.refereed.data:
-        search_components['filters'].append(u'property:REFEREED')
+        add_filter_to_search_components('prop_f', u'property:REFEREED')
+        search_components['original_filters'].append(u'property:REFEREED')
     #articles only
     if form.article.data:
-        search_components['filters'].append(u'-property:NONARTICLE')
+        add_filter_to_search_components('prop_f', u'-property:NONARTICLE', force_to_q=True)
+        search_components['original_filters'].append(u'-property:NONARTICLE')
     #journal abbreviation
     if form.journal_abbr.data:
         journal_abbr_string = ''
         for bibstem in form.journal_abbr.data.split(','):
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
-        search_components['filters'].append(journal_abbr_string[:-4]) 
+        add_filter_to_search_components('bib_f', journal_abbr_string[:-4]) 
+        search_components['original_filters'].append(journal_abbr_string[:-4]) 
         
     #number of rows
     if form.nr.data and form.nr.data != 'None':
@@ -71,9 +124,16 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
         for elem in request_values.getlist(facet):
             #I have to distinguish between a simple facet and a complex one
             if not (elem.startswith('(') or elem.startswith('[') or elem.startswith('-(')):
-                search_components['filters'].append(u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))
+                cur_filter = u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
+                add_filter_to_search_components(facet, cur_filter)
             else:
-                search_components['filters'].append(u'%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem))            
+                if elem.startswith('-('):
+                    cur_filter = u'-%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem[1:])
+                    add_filter_to_search_components(facet, cur_filter, force_to_q=True)
+                else:
+                    cur_filter = u'%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
+                    add_filter_to_search_components(facet, cur_filter)
+            search_components['original_filters'].append(cur_filter)
     #I handle the page number
     page = request_values.get('page')
     if page:

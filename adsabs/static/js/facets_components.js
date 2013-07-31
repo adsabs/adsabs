@@ -281,19 +281,20 @@ FacetsComponents.apply_facet_url_manager = function(facetid_html, facetid_orig, 
 		location_url += facetid_html;
 	else
 		location_url += facetid_orig;
-	location_url += '=(';
+	location_url += '=';
+	if (op_type == 'EXCL')
+		location_url += '-';
+	location_url += '(';
 	for (var idx in cur_selection)
 	{
-		if (op_type != 'EXCL')
-			location_url += encodeURIComponent('"'+cur_selection[idx]+'"');
-		else
-			location_url += encodeURIComponent('-"'+cur_selection[idx]+'"');
+		location_url += encodeURIComponent('"'+cur_selection[idx]+'"');
+		
 		if (idx < (cur_selection.length-1))
 		{
 			if ((op_type == 'AND') || (op_type == 'OR'))
 				location_url += '+' + op_type + '+';
 			else if (op_type == 'EXCL')
-				location_url += '+AND+';
+				location_url += '+OR+';
 		}
 	}
 	location_url +=')';

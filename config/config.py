@@ -116,6 +116,20 @@ class AppConfig(object):
     SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     SOLR_SEARCH_REQUIRED_FIELDS = ['bibcode']
     
+    #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
+    #added also a default function to use
+    FACET_TO_SOLR_QUERY = {
+                                'bib_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'bibgr_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'aut_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'prop_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'key_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'pub_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'year_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'grant_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'data_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'vizier_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                }
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',
                                          'bibgr_f':'bibgroup_facet',
