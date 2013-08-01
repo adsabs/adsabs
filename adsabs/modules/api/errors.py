@@ -21,6 +21,9 @@ class ApiRecordNotFound(Exception):
 class ApiSolrException(Exception):
     pass
 
+class ApiUnauthorizedIpError(Exception):
+    pass
+
 def init_error_handlers(app):
     @app.errorhandler(ApiNotAuthenticatedError)
     @pushrod_view(xml_template="error.xml", wrap="error")
@@ -51,3 +54,9 @@ def init_error_handlers(app):
     def solr_exception(error):
         msg = "Search processing error: %s" % error
         return {'error': msg},400,None
+    
+    @app.errorhandler(ApiUnauthorizedIpError)
+    @pushrod_view(xml_template="error.xml", wrap="error")
+    def unauthorized_ip(error):
+        msg = "API access blocked: %s" % error
+        return {'error': msg},401,None

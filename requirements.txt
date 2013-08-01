@@ -17,6 +17,7 @@ beautifulsoup4>=4.2.0
 beaver>=29
 dicttoxml >= 1.1.2
 fixtures>=0.3.12
+ipaddress>=1.0.4
 itsdangerous>=0.21
 lxml>=2.3.5
 nose==1.2.1

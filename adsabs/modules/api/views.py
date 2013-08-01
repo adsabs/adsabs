@@ -5,6 +5,7 @@ from flask import Blueprint, request, g, current_app as app
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
 
 from functools import wraps
+from ipaddress import ip_address, ip_network
 
 import errors
 import logging
@@ -37,6 +38,15 @@ def api_user_required(func):
         return func(*args, **kwargs)
     return decorator
 
+def api_ip_allowed(func):
+    @wraps(func)
+    def decorator(*args, **kwargs):
+        user = g.api_user
+        if not user.ip_allowed(request.remote_addr):
+            raise errors.ApiUnauthorizedIpError("api requests not allowed from %s" % request.remote_addr)
+        return func(*args, **kwargs)
+    return decorator
+
 @api_blueprint.before_request
 def get_api_version_header():
     g.api_version = request.headers.get('X-API-Version', config.API_CURRENT_VERSION)
@@ -51,6 +61,7 @@ def add_api_version_header(response):
 
 @api_blueprint.route('/settings/', methods=['GET'])
 @api_user_required
+@api_ip_allowed
 @pushrod_view(xml_template="settings.xml", wrap='settings')
 def settings():
     perms = g.api_user.get_dev_perms()
@@ -60,6 +71,7 @@ def settings():
 
 @api_blueprint.route('/search/', methods=['GET'])
 @api_user_required
+@api_ip_allowed
 @pushrod_view(xml_template="search.xml")
 def search():
     search_req = ApiSearchRequest(request.args)
@@ -71,6 +83,7 @@ def search():
         
 @api_blueprint.route('/record/<path:identifier>', methods=['GET'])
 @api_user_required
+@api_ip_allowed
 @pushrod_view(xml_template="record.xml", wrap='doc')
 def record(identifier):
     record_req = ApiRecordRequest(identifier, request.args)

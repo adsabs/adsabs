@@ -10,6 +10,7 @@ import string
 import base64
 import hashlib
 from random import sample, choice
+from ipaddress import ip_address, ip_network
 
 from flask import g, render_template
 from flask.ext.login import current_user #@UnresolvedImport
@@ -144,6 +145,30 @@ class AdsApiUser(AdsUser):
         extra_fields = self.user_rec.developer_perms.get('allowed_fields',[])
         return config.API_SOLR_DEFAULT_FIELDS + extra_fields
     
+    def get_allowed_ips(self):
+        return self.user_rec.developer_perms.get('allowed_ips', [])
+    
+    def set_allowed_ips(self, ips):
+        assert type(ips) is list
+        self.user_rec.developer_perms['allowed_ips'] = ips
+        self.user_rec.save()
+    
+    def add_allowed_ips(self, ips):
+        assert type(ips) is list
+        self.user_rec.developer_perms.setdefault('allowed_ips', [])
+        self.user_rec.developer_perms['allowed_ips'] += ips
+        self.user_rec.save()
+    
+    def ip_allowed(self, request_ip):
+        allowed_ips = self.get_allowed_ips()
+        if not allowed_ips: return True
+        request_ip = ip_address(unicode(request_ip))
+        for ip_or_range in allowed_ips:
+            network = ip_network(unicode(ip_or_range))
+            if request_ip in network:
+                return True
+        return False
+
     def check_permissions(self, form):
         
         try:
