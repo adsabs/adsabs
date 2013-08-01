@@ -451,15 +451,17 @@ class ApiUserTest(AdsabsBaseTestCase):
         """
         self.insert_user("foo", developer=True, level='basic')
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
-        self.assertTrue(api_user.ip_allowed('192.168.0.1'))
+        with self.app.test_request_context('/'):
+            self.assertTrue(api_user.ip_allowed('192.168.0.1'))
         
     def test_allowed_ips_2(self):
         dev_perms = user.PERMISSION_LEVELS['basic']
         dev_perms['allowed_ips'] = ['192.168.0.1']
         self.insert_user("foo", developer=True, dev_perms=dev_perms.copy())
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
-        self.assertTrue(api_user.ip_allowed('192.168.0.1'))
-        self.assertFalse(api_user.ip_allowed('199.111.99.11'))
+        with self.app.test_request_context('/'):
+            self.assertTrue(api_user.ip_allowed('192.168.0.1'))
+            self.assertFalse(api_user.ip_allowed('199.111.99.11'))
         
     def test_allowed_ips_3(self):
         """
@@ -469,9 +471,10 @@ class ApiUserTest(AdsabsBaseTestCase):
         dev_perms['allowed_ips'] = ['192.168.0.0/0.0.0.255']
         self.insert_user("foo", developer=True, dev_perms=dev_perms.copy())
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
-        self.assertTrue(api_user.ip_allowed('192.168.0.1'))
-        self.assertFalse(api_user.ip_allowed('192.168.1.1'))
-        self.assertFalse(api_user.ip_allowed('199.111.99.11'))
+        with self.app.test_request_context('/'):
+            self.assertTrue(api_user.ip_allowed('192.168.0.1'))
+            self.assertFalse(api_user.ip_allowed('192.168.1.1'))
+            self.assertFalse(api_user.ip_allowed('199.111.99.11'))
 
     def test_allowed_ips_4(self):
         """
@@ -481,9 +484,10 @@ class ApiUserTest(AdsabsBaseTestCase):
         dev_perms['allowed_ips'] = ['131.142.184.0/24','131.142.185.0/24']
         self.insert_user("foo", developer=True, dev_perms=dev_perms.copy())
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
-        self.assertTrue(api_user.ip_allowed('131.142.184.21'))
-        self.assertTrue(api_user.ip_allowed('131.142.185.101'))
-        self.assertFalse(api_user.ip_allowed('131.142.186.190'))
+        with self.app.test_request_context('/'):
+            self.assertTrue(api_user.ip_allowed('131.142.184.21'))
+            self.assertTrue(api_user.ip_allowed('131.142.185.101'))
+            self.assertFalse(api_user.ip_allowed('131.142.186.190'))
 
 class ApiLiveSolrTests(AdsabsBaseTestCase):
     """

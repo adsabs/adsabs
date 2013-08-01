@@ -18,6 +18,7 @@ from flask.ext.login import current_user #@UnresolvedImport
 from config import config
 from adsabs.modules.user import AdsUser
 from adsabs.modules.user.models import AdsUserRecord
+from adsabs.extensions import cache
 from .errors import ApiPermissionError
 
 __all__ = ['AdsApiUser', 'create_api_user']
@@ -159,6 +160,7 @@ class AdsApiUser(AdsUser):
         self.user_rec.developer_perms['allowed_ips'] += ips
         self.user_rec.save()
     
+    @cache.memoize(60)
     def ip_allowed(self, request_ip):
         allowed_ips = self.get_allowed_ips()
         if not allowed_ips: return True
