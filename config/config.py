@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_05_28_v1'
+    APP_VERSION = '2013_08_02_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -202,7 +202,7 @@ class AppConfig(object):
     MAIL_PASSWORD = None
     DEFAULT_MAIL_SENDER = None
     
-    MAIL_CONTENT_REDIRECT_BASE_URL = 'http://adslabs.org/adsabs'
+    MAIL_CONTENT_REDIRECT_BASE_URL = 'http://adslabs.org'
     FEEDBACK_RECIPIENTS = ['name@ema.il',]
     
     RECAPTCHA_USE_SSL = True
