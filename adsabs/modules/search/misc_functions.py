@@ -35,13 +35,13 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     search_components = {
             'q' : None,
             'filters': [],
-            'original_q':None,
-            'original_filters': [],
+            'ui_q':None,
+            'ui_filters': [],
             'sort': config.SEARCH_DEFAULT_SORT,
             'start': None,
             'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
-            'rows':config.SEARCH_DEFAULT_ROWS,
-    }
+            'rows':config.SEARCH_DEFAULT_ROWS
+            }
     
     def add_filter_to_search_components(facet_name, value, force_to_q=False):
         """
@@ -71,18 +71,23 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     
     #one box query
     search_components['q'] = form.q.data
-    search_components['original_q'] = form.q.data
-    #databases
-    if form.db_key.data in ('ASTRONOMY', 'PHYSICS',):
-        add_filter_to_search_components('database', 'database:%s' % form.db_key.data)
-        search_components['original_filters'].append('database:%s' % form.db_key.data)
+    search_components['ui_q'] = form.q.data
+    
+    #wrapping of the query with the second order functions or with other operators like TOPN()
+    #second order operators wrap the query before adding filters
+    if form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
+        search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
+        search_components['sort'] = None
+    
     #sorting
     if form.sort_type.data in config.SOLR_SORT_OPTIONS.keys():
         search_components['sort'] = form.sort_type.data
-#     #second order operators wrap the query
-#     elif form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
-#         search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
-#         search_components['sort'] = None
+        
+    #databases
+    if form.db_key.data in ('ASTRONOMY', 'PHYSICS',):
+        add_filter_to_search_components('database', 'database:%s' % form.db_key.data)
+        search_components['ui_filters'].append('database:%s' % form.db_key.data)
+    
     #date range
     if form.year_from.data or form.year_to.data:
         mindate = '0001-00-00' #'*' the * has a bug
@@ -98,22 +103,22 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
             else:
                 maxdate = u'%s-%s-00' % (form.year_to.data, u'12')
         add_filter_to_search_components('pubdate', u'pubdate:[%s TO %s]' % (mindate, maxdate))
-        search_components['original_filters'].append(u'pubdate:[%s TO %s]' % (mindate, maxdate))
+        search_components['ui_filters'].append(u'pubdate:[%s TO %s]' % (mindate, maxdate))
     #refereed
     if form.refereed.data:
         add_filter_to_search_components('prop_f', u'property:REFEREED')
-        search_components['original_filters'].append(u'property:REFEREED')
+        search_components['ui_filters'].append(u'property:REFEREED')
     #articles only
     if form.article.data:
         add_filter_to_search_components('prop_f', u'-property:NONARTICLE', force_to_q=True)
-        search_components['original_filters'].append(u'-property:NONARTICLE')
+        search_components['ui_filters'].append(u'-property:NONARTICLE')
     #journal abbreviation
     if form.journal_abbr.data:
         journal_abbr_string = ''
         for bibstem in form.journal_abbr.data.split(','):
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
         add_filter_to_search_components('bib_f', journal_abbr_string[:-4]) 
-        search_components['original_filters'].append(journal_abbr_string[:-4]) 
+        search_components['ui_filters'].append(journal_abbr_string[:-4]) 
         
     #number of rows
     if form.nr.data and form.nr.data != 'None':
@@ -133,7 +138,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
                 else:
                     cur_filter = u'%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
                     add_filter_to_search_components(facet, cur_filter)
-            search_components['original_filters'].append(cur_filter)
+            search_components['ui_filters'].append(cur_filter)
     #I handle the page number
     page = request_values.get('page')
     if page:

@@ -79,11 +79,11 @@ class SolrRequest(object):
         self.params.append('fq', filter_)
         return self
         
-    def get_filters(self, exclude_defaults=False):
-        filters = self.params.get('fq', [])
+    def get_filters(self, exclude_defaults=False, params_field='fq'):
+        filters = self.params.get(params_field, [])
         if exclude_defaults:
             default_params = dict(config.SOLR_MISC_DEFAULT_PARAMS)
-            filters = filter(lambda x: x not in default_params.get('fq', []), filters)
+            filters = filter(lambda x: x not in default_params.get(params_field, []), filters)
         return filters
         
     def add_facet(self, field, limit=None, mincount=None, output_key=None, prefix=None):

@@ -213,19 +213,29 @@ class SolrResponse(object):
         if not hasattr(self, 'request_facet_params'):
             facet_params = []
             #first I extract the query parameters excluding the default ones
-            search_filters = self.request.get_filters(exclude_defaults=True)
+            search_filters = self.request.get_filters(exclude_defaults=True, params_field='ui_fq')
             #I extract only the parameters of the allowed facets
             inverted_allowed_facet_dict = dict((v,k) for k,v in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.iteritems())
             for filter_val in search_filters:
                 filter_split = filter_val.split(':', 1)
                 filter_query_name = filter_split[0]
+                
+                #if the filter starts with a "-" sign (exclude), need to remove it and prepend to the value
+                negative_filter = filter_query_name.startswith(u'-')
+                if negative_filter:
+                    filter_query_name = filter_query_name[1:]
+                
                 #remove the filter query parser if present
                 if config.SOLR_FILTER_QUERY_PARSER:
                     if filter_query_name.startswith(u"{!%s}" %  config.SOLR_FILTER_QUERY_PARSER):
                         filter_query_name = filter_query_name[len(u"{!%s}" %  config.SOLR_FILTER_QUERY_PARSER):]
+                
                 if filter_query_name in inverted_allowed_facet_dict:
                     facet_name = inverted_allowed_facet_dict[filter_query_name]
-                    facet_params.append((facet_name, filter_split[1].strip('"')))
+                    filter_value = filter_split[1].strip('"')
+                    if negative_filter:
+                        filter_value = u'-%s' % filter_value
+                    facet_params.append((facet_name, filter_value))
                         
             self.request_facet_params = facet_params
         return self.request_facet_params

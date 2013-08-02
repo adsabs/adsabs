@@ -47,6 +47,7 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         self.assertEqual(tf.format_complex_ads_facet_str('Foobar'), 'Foobar')
         self.assertEqual(tf.format_complex_ads_facet_str('("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")'), '"Civano, Francesca M." OR "Elvis, Martin"')
         self.assertEqual(tf.format_complex_ads_facet_str('(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")'), '-"Civano, Francesca M." AND -"Elvis, Martin"')
+        self.assertEqual(tf.format_complex_ads_facet_str('-("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")'), '-("Civano, Francesca M." OR "Elvis, Martin")')
         self.assertEqual(tf.format_complex_ads_facet_str('[2003 TO 2009]'), '2003 TO 2009')
         self.assertEqual(tf.format_complex_ads_facet_str('|2003 TO 2009|'), '|2003 TO 2009|')
        

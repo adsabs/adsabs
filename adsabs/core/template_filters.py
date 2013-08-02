@@ -71,7 +71,8 @@ def format_complex_ads_facet_str(value):
     """
     Returns a string that can be used as human readable facet
     """
-    value = value.strip('()[]')
+    if not value.startswith('-'):
+        value = value.strip('()[]')
     ret_value = []
     tmp_quoted_str = []
     quoted_section = False

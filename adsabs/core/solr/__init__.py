@@ -5,6 +5,7 @@ from .solrdoc import *
 from .signals import *
 
 from flask import current_app as app, request as current_request, g
+from copy import deepcopy
 
 __all__ = [
     'SolrRequest',
@@ -19,7 +20,7 @@ __all__ = [
 
 
 def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, \
-          rows=config.SEARCH_DEFAULT_ROWS, start=None, **kwargs):
+          rows=config.SEARCH_DEFAULT_ROWS, start=None, ui_q=None, ui_filters=[], **kwargs):
     
     req = SolrRequest(q, rows=rows)
     
@@ -44,6 +45,11 @@ def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_directio
     for hl in config.SOLR_SEARCH_DEFAULT_HIGHLIGHTS:
         req.add_highlight(*hl)
     
+    if ui_q:
+        req.set_params(ui_q=ui_q)
+    if ui_filters:
+        req.set_params(ui_fq=deepcopy(ui_filters))
+    
     # allow for manual overrides
     if len(kwargs):
         req.set_params(**kwargs)
@@ -54,7 +60,7 @@ def query(q, **kwargs):
     req = search_request(q, **kwargs)
     return req.get_response()
 
-def facet_request(q, filters=[], facet_fields=None, **kwargs):
+def facet_request(q, filters=[], facet_fields=None, ui_q=None, ui_filters=[], **kwargs):
     req = SolrRequest(q, rows=0)
     
     for filter_ in filters:
@@ -65,6 +71,11 @@ def facet_request(q, filters=[], facet_fields=None, **kwargs):
         
     for facet in facet_fields:
         req.add_facet(*facet)
+    
+    if ui_q:
+        req.set_params(ui_q=ui_q)
+    if ui_filters:
+        req.set_params(ui_fq=deepcopy(ui_filters))
         
     if len(kwargs):
         req.set_params(**kwargs)

@@ -10,7 +10,7 @@ from flask.ext.wtf import (Form, TextField, SelectField, IntegerField, BooleanFi
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 #from flask.ext.wtf.html5 import RangeInput #@UnresolvedImport
 
-#from config import config
+from config import config
 #from custom_wtform import SelectFieldCssClass
 
 __all__ = ["get_missing_defaults", "QueryForm", "AdvancedQueryForm"]
@@ -38,7 +38,7 @@ class QueryForm(Form):
     q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
     #sort_dir = HiddenField(u'Sort direction', default='desc')
     db_key =  SelectField(u'Database', choices=[('ASTRONOMY', 'Astronomy'), ('PHYSICS', 'Physics'), ('ALL', 'All') ])
-    sort_type = SelectField(u'Sort', choices=[('DATE','Sort by Most recent'),('RELEVANCE','Sort by Most relevant'),
+    sort_type = SelectField(u'Sort', choices=[('RELEVANCE','Sort by Most relevant'),('DATE','Sort by Most recent'),
                                                 ('CITED','Sort by Most cited'),('POPULARITY','Sort by Most popular'),
                                                 #('second_order_operator', 'Use Second order operator'),
                                                 #('hot','Explore What people are reading'),('useful','Explore What experts are citing'),
@@ -55,7 +55,7 @@ class QueryForm(Form):
                                                         ('20', '20 results'), ('50', '50 results'), ('50', '50 results'), ('100', '100 results'), 
                                                         ('200', '200 results')] )
     
-    default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', 'DATE')])
+    default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', config.SEARCH_DEFAULT_SORT)])
     
     
     #second_order_type = RadioField(u'Explore the field', choices=[('hot','What people are reading'),('useful','What experts are citing'),

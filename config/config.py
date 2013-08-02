@@ -84,7 +84,7 @@ class AppConfig(object):
     SOLR_HAPROXY_SESSION_COOKIE_NAME = 'JSESSIONID'
     
     SEARCH_DEFAULT_ROWS = 20
-    SEARCH_DEFAULT_SORT = 'DATE'
+    SEARCH_DEFAULT_SORT = 'RELEVANCE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     
 #    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
