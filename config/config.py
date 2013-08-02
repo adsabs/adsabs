@@ -188,7 +188,7 @@ class AppConfig(object):
     MAIL_PASSWORD = None
     DEFAULT_MAIL_SENDER = None
     
-    MAIL_CONTENT_REDIRECT_BASE_URL = 'http://adslabs.org/adsabs'
+    MAIL_CONTENT_REDIRECT_BASE_URL = 'http://adslabs.org'
     FEEDBACK_RECIPIENTS = ['name@ema.il',]
     
     RECAPTCHA_USE_SSL = True
