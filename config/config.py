@@ -213,6 +213,9 @@ class AppConfig(object):
     SELENIUM_BASE_URL = None
     SELENIUM_PAGE_WAIT = None
     
+    CACHE_TYPE = 'redis'
+    CACHE_KEY_PREFIX = 'cache:adsabs:'
+    
 try:
     from local_config import LocalConfig
 except ImportError:
