@@ -15,7 +15,7 @@
 		<div id="abstractContent" class="span9">
 			<div class="content-fluid">
 				<div class="row-fluid">
-					<div class="span12 abstractTitle">{{ solrdoc.title }}</div>
+					<div class="span12 abstractTitle">{% if solrdoc.title %}{{ solrdoc.title[0] }}{% else %}No title{% endif %}</div>
 				</div>
 				{% if inveniodoc.author %}
 				<div class="row-fluid">

@@ -20,7 +20,9 @@
 			<div class="span4 letterlink_box">
 				{{ render_letterlink_box(doc) }}
 			</div>
-		    <div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title|safe_html_unescape|safe }}</a></div>
+			{% if doc.title %}
+		    	<div class="span12 title"><a href="{{ url_for('abs.abstract', bibcode=doc.bibcode) }}">{{ doc.title[0]|safe_html_unescape|safe }}</a></div>
+		    {% endif %}
 		    {% if doc.author %}
 		        <div class="span12 author">
 		        {# { '; '.join(doc.author) } #}
