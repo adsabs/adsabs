@@ -88,6 +88,7 @@ def format_complex_ads_facet_str(value):
             quoted_section = False
             ret_value = ret_value + list(format_ads_facet_str(''.join(tmp_quoted_str)))
             ret_value.append(char)
+            tmp_quoted_str = []
     return ''.join(ret_value)
 
 def safe_html_unescape(html_str):
