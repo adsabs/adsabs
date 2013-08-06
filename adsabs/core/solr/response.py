@@ -72,7 +72,11 @@ class SolrResponse(object):
         error_message = self.get_error()
         if error_message:
             if error_message.startswith('org.apache.lucene'):
-                return (''.join(error_message.split(':', 1)[1])).strip()
+                error_split = error_message.split(':', 1)
+                if len(error_split) > 1:
+                    return (''.join(error_split[1])).strip()
+                else:
+                    return 'Unspecified error from search engine.'
             else:
                 return error_message
         else:
