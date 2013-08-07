@@ -230,14 +230,14 @@ class AppConfig(object):
     METRICS_MIN_BIBLIO_LENGTH = 5
     METRICS_CHUNK_SIZE = 100
     METRICS_MAX_HITS = 100000
-    MONGO_DATABASE = 'adsdata'
-    MONGO_HOST = "localhost"
-    MONGO_PORT = 27017
-    MONGO_SAFE = True
-    MONGO_USER = 'adsdata'
-    MONGO_PASSWORD = ''
-    MONGO_DOCS_COLLECTION = 'docs'
-    MONGO_DOCS_DEREF_FIELDS = [('docs','full'), ('docs','ack')]
+    ADSDATA_MONGO_DATABASE = 'adsdata'
+    ADSDATA_MONGO_HOST = "localhost"
+    ADSDATA_MONGO_PORT = 27017
+    ADSDATA_MONGO_SAFE = True
+    ADSDATA_MONGO_USER = 'adsdata'
+    ADSDATA_MONGO_PASSWORD = ''
+    ADSDATA_MONGO_DOCS_COLLECTION = 'docs'
+    ADSDATA_MONGO_DOCS_DEREF_FIELDS = [('docs','full'), ('docs','ack')]
     # configuration parameters for the recommender
     RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
     RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'

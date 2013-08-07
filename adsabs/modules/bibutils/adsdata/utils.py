@@ -53,11 +53,11 @@ def mongo_uri(host, port, db=None, user=None, passwd=None):
 def get_session(**kwargs):
     from config import config
     from session import DataSession
-    uri = mongo_uri(config.MONGO_HOST, config.MONGO_PORT, 
-                    db=config.MONGO_DATABASE, user=config.MONGO_USER, passwd=config.MONGO_PASSWORD)
-    return DataSession(config.MONGO_DATABASE, uri, 
-                       config.MONGO_DOCS_COLLECTION, 
-                       ref_fields=config.MONGO_DOCS_DEREF_FIELDS,
+    uri = mongo_uri(config.ADSDATA_MONGO_HOST, config.ADSDATA_MONGO_PORT, 
+                    db=config.ADSDATA_MONGO_DATABASE, user=config.ADSDATA_MONGO_USER, passwd=config.ADSDATA_MONGO_PASSWORD)
+    return DataSession(config.ADSDATA_MONGO_DATABASE, uri, 
+                       config.ADSDATA_MONGO_DOCS_COLLECTION, 
+                       ref_fields=config.ADSDATA_MONGO_DOCS_DEREF_FIELDS,
                        **kwargs) 
 
 def map_reduce_listify(session, source, target_collection_name, group_key, value_field):
