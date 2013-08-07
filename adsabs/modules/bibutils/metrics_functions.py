@@ -176,8 +176,8 @@ def get_attributes(args):
     (cit_dict,ref_cit_dict,non_ref_cit_dict) = get_citations(bibcodes=bibcodes, pubdata=publication_data, type='metrics')
     # divide by 4 because the values of the dictionary are 4-tuples
     # and the flattening removed all structure.
-    Nciting = len(flatten(cit_dict.values()))/4
-    Nciting_ref = len(flatten(ref_cit_dict.values()))/4
+    Nciting = len(set([x[0] for v in cit_dict.values() for x in v]))
+    Nciting_ref = len(set([x[0] for v in ref_cit_dict.values() for x in v]))
     # Now gather all usage data numbers from the MongoDB 'adsdata' collection
     # This info will get stored in the dictionary 'adsdata', also keyed on bibcode
     ads_data = get_mongo_data(bibcodes=bibcodes)
