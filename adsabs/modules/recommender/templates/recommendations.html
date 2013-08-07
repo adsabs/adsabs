@@ -1,0 +1,19 @@
+{# index_recommender.html  #}
+{% extends "layout.html" %}
+
+{% block titlehead %}ADS Recommender Utilities{% endblock %}
+
+{% block body %}
+<h3>Recommendations for: {{results['paper']}}</h3> 
+
+<br>
+<div class="span9">
+<ul class="resultsList">
+{% for item in results['recommendations'] %}
+    <li id="{{item['bibcode']}}">
+        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> {{item['author']}}: {{item['title']}}</div>
+    </li>
+{% endfor %}
+</ul>
+</div>
+{% endblock %}

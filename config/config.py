@@ -215,7 +215,33 @@ class AppConfig(object):
     
     CACHE_TYPE = 'redis'
     CACHE_KEY_PREFIX = 'cache:adsabs:'
-    
+
+    # configuration parameters for bibutils module
+    BIBUTILS_MAX_HITS = 10000
+    BIBUTILS_MAX_INPUT= 500
+    BIBUTILS_THREADS = 4
+    BIBUTILS_THRESHOLD_FREQUENCY = 1
+    BIBUTILS_DEFAULT_SUGGESTIONS = 10
+    BIBUTILS_DEFAULT_FORMAT = 'score'
+    BIBUTILS_CITATION_SOURCE = 'MONGO'
+    # configuration parameters for the metrics module
+    METRICS_DEFAULT_MODELS = ['statistics','histograms','metrics','series']
+    METRICS_THREADS = 8
+    METRICS_MIN_BIBLIO_LENGTH = 5
+    METRICS_CHUNK_SIZE = 100
+    METRICS_MAX_HITS = 100000
+    MONGO_DATABASE = 'adsdata'
+    MONGO_HOST = "localhost"
+    MONGO_PORT = 27017
+    MONGO_SAFE = True
+    MONGO_USER = 'adsdata'
+    MONGO_PASSWORD = ''
+    MONGO_DOCS_COLLECTION = 'docs'
+    MONGO_DOCS_DEREF_FIELDS = [('docs','full'), ('docs','ack')]
+    # configuration parameters for the recommender
+    RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
+    RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'
+
 try:
     from local_config import LocalConfig
 except ImportError:

@@ -1,0 +1,23 @@
+{# citation_helper.html #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Citation Helper - Input Bibcodes{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+<div class="span9">
+Choosing this option computes a list of publications that cite and/or are cited by papers in the list you just submitted, but they were not in this list. The process closely resembles the network approach of establishing “friends of friends”. Assuming that the bibcodes provided are all valid, it is still possible that no results will be returned. If results are returned, they have a score associated with them. This score essentially reflects how many "friends" know these other "friends". Below, please insert a list of bibcodes (one per line).
+</div>
+<div class="span9">
+<form action="" method="post" name="">
+    <p>
+        Please enter your bibcodes:<br>
+        {{form.bibcodes(rows=10, cols=20)}}<br>
+    </p>}
+    <p>Maximum number of results to return:<br>
+        {{form.return_nr}}</p>
+    <p><input type="submit" value="Results"></p>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{# citation_helper_results.html  #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Citation Helper Results{% endblock %}
+
+{% block body %}
+<h3>{{ page_var }}</h3> 
+<div class="span9">
+These results consist of publications that cite and/or are cited by papers in the list you just submitted, but they were not in this list. The process closely resembles the network approach of establishing “friends of friends”. Assuming that the bibcodes provided are all valid, it is still possible that no results will be returned. If results are returned, they have a score associated with them. This score essentially reflects how many "friends" know these other "friends".
+</div>
+<br>
+<div class="span9">
+<ul class="resultsList">
+{% for item in results %}
+    <li id="{{item['bibcode']}}">
+        {% if item['score'] == 'NA'%}
+        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> {{item['author']}}: {{item['title']}}</div>
+        {% else %}
+        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> (score: {{item['score']}}), {{item['author']}}: {{item['title']}}</div>
+        {% endif %}
+    </li>
+{% endfor %}
+</ul>
+</div>
+<div class="span9">
+<a href="{{ url_for('bibutils.citation_helper') }}">Go back</a>
+</div>
+{% endblock %}

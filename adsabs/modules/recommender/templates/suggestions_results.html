@@ -1,0 +1,22 @@
+{# suggestions_results.html  #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Personal Recommendation Results{% endblock %}
+
+{% block body %}
+<div class="span9">
+
+</div>
+<br>
+<div class="span9">
+<ul class="resultsList">
+{% for item in results['recommendations'] %}
+    <li id="{{item['bibcode']}}">
+        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> {{item['author']}}: {{item['title']}}</div>
+    </li>
+{% endfor %}
+</ul>
+</div>
+<div class="span9">
+</div>
+{% endblock %}

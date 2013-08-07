@@ -1,0 +1,21 @@
+{# citation_helper.html #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Metrics - Input Bibcodes{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+<div class="span9">
+This tool will calculate various metrics and histograms for a list of publications. Below, please insert a list of bibcodes (one per line).
+</div>
+<div class="span9">
+<form action="" method="post" name="">
+    <p>
+        Please enter your bibcodes:<br>
+        {{form.bibcodes(rows=10, cols=20)}}<br>
+    </p>
+    <p><input type="submit" value="Results"></p>
+</form>
+</div>
+{% endblock %}
