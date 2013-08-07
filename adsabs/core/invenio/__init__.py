@@ -9,6 +9,12 @@ try:
     from invenio.search_engine import get_record #@UnresolvedImport
     from invenio.bibrecord import record_xml_output #@UnresolvedImport
     from invenio.dbquery import run_sql #@UnresolvedImport
+
+    # invenio.bibdocfile sets this, but that triggers a bug in multiprocessing
+    # so we unset it here
+    import socket
+    socket.setdefaulttimeout(None)
+
 except ImportError:
     import sys
     print >>sys.stderr, "Invenio import failure! Invenio data layer functions will not work!"
