@@ -91,6 +91,17 @@ def format_complex_ads_facet_str(value):
             tmp_quoted_str = []
     return ''.join(ret_value)
 
+def format_special_ads_facet_str(value):
+    """
+    Returns a formatted version of a facet string in very special cases, like "notrefereed" that needs to be transformed to "not refereed"
+    But any other special case can be added here (and in the tests)
+    """
+    if value == 'notrefereed':
+        return u'not refereed'
+    
+    #in any other case returns the original string
+    return value
+
 def safe_html_unescape(html_str):
     """
     Returns a safely unescaped html string where the unsafe tags like <script> and their content is removed
@@ -324,6 +335,10 @@ def configure_template_filters(app):
     @app.template_filter('format_complex_ads_facet_str')
     def f_c_a_f_s(facet_string):
         return format_complex_ads_facet_str(facet_string)
+    
+    @app.template_filter('format_special_ads_facet_str')
+    def f_s_a_f_s(facet_string):
+        return format_special_ads_facet_str(facet_string)
     
     @app.template_filter('safe_html_unescape')
     def s_h_f(html_string):

@@ -51,6 +51,10 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         self.assertEqual(tf.format_complex_ads_facet_str('[2003 TO 2009]'), '2003 TO 2009')
         self.assertEqual(tf.format_complex_ads_facet_str('|2003 TO 2009|'), '|2003 TO 2009|')
         self.assertEqual(tf.format_complex_ads_facet_str(u'-("CfA" OR "CXC")'), u'-("CfA" OR "CXC")')
+        
+    def test_format_special_ads_facet_str(self):
+        self.assertEqual(tf.format_special_ads_facet_str('Foobar'), 'Foobar')
+        self.assertEqual(tf.format_special_ads_facet_str('notrefereed'), u'not refereed')
        
     def test_safe_html_unescape(self):
         self.assertEqual(tf.safe_html_unescape('Foobar'), u'Foobar')

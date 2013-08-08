@@ -43,10 +43,10 @@
 									data-facetid_html="{{ facetid_html }}"
 									onchange="FacetsComponents.multiple_facet_selection(this);"/>
 					 		{% if elem[2] !='selected' %}
-					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0]|format_special_ads_facet_str }} ({{ elem[1] }})</a>
 					 		{% else %}
-					 			{{ elem[0] }} ({{ elem[1] }}) 
-					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+					 			{{ elem[0]|format_special_ads_facet_str }} ({{ elem[1] }}) 
+					 			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0]|format_special_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 					 		{% endif %}
 					 		</li>
 					 	{% else %}
@@ -60,10 +60,10 @@
 											data-facetid_original="{{ facetid }}"
 											onchange="FacetsComponents.multiple_facet_selection(this);"/>
 					  			{% if elem[2] !='selected' %}
-					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0] }} ({{ elem[1] }})</a>
+					  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[0]) }}">{{ elem[0]|format_special_ads_facet_str }} ({{ elem[1] }})</a>
 						  		{% else %}
-						  			{{ elem[0] }} ({{ elem[1] }}) 
-						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0] }}&quot;"><i class="icon-remove-sign"></i></a>
+						  			{{ elem[0]|format_special_ads_facet_str }} ({{ elem[1] }}) 
+						  			<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[0]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[0]|format_special_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 						  		{% endif %}
 						  		</li>
 					 			{% endif %}
@@ -138,10 +138,10 @@
 									data-facetid_html="{{ facetid_html }}"
 									onchange="FacetsComponents.multiple_facet_selection(this);"/>
 							{% if elem[3] != 'selected' %}
-				  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1] }} ({{ elem[2] }})</a>
+				  				<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|ins_par_url(facetid, elem[-1]) }}">{{ elem[1]|format_special_ads_facet_str }} ({{ elem[2] }})</a>
 				  			{% else %}
-				  				{{ elem[1] }} ({{ elem[2] }}) 
-							  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[1] }}&quot;"><i class="icon-remove-sign"></i></a>
+				  				{{ elem[1]|format_special_ads_facet_str }} ({{ elem[2] }}) 
+							  	<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(facetid, elem[-1]) }}" data-rel="bootstrap_tooltip" title="remove &quot;{{ elem[1]|format_special_ads_facet_str }}&quot;"><i class="icon-remove-sign"></i></a>
 				  			{% endif %}
 							<div id="second_level_{{ elem[4]|facet_to_id }}" class="emptySubFacets collapse"></div>
 						</li>
@@ -235,12 +235,12 @@
 						Data :
 					{% elif elem[0] == 'vizier_f' %}
 						Vizier :
-					{% elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'not refereed' in elem[1]) %}
+					{% elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'notrefereed' in elem[1]) %}
 						
 					{% else %}
 						{{ elem[0] }} :
 					{% endif %}
-					{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }} 
+					{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str|format_special_ads_facet_str }} 
 					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" data-rel="bootstrap_tooltip" 
 					   title="remove &ldquo;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&rdquo;"><i class="icon-remove-sign"></i></a>
 				</span>
