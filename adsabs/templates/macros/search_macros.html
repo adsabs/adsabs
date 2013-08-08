@@ -29,6 +29,7 @@
 			        	<ul style="min-width: 300px; padding-bottom: 0px;" class="dropdown-menu donothide clearfix">
 							<li class="nav-header">Search settings</li>
 							
+							<!-- The transformation of the buttonSelect elements is done through the specific jQuery plugin and activated by the code in query_form.js-->
 							<li class="divider"></li>
 							<li class="clearfix nav-list">
 								<div class="control-group clearfix">
@@ -40,10 +41,11 @@
 											<option value="50">50 results</option>
 											<option value="100">100 results</option>
 										</select-->
-										{{ form.nr(class="btn-small span2 hidden_elem") }}
+										{{ form.nr(class="btn-small span2 hidden_elem buttonSelect") }}
 									</div>
 								</div>
 							</li>
+							
 							<!--li class="modal-footer nav-list clearfix"><button class="btn btn-small pull-right" data-placement="bottom" data-rel="bootstrap_tooltip" title="use settings in current search">
 							    <i class="icon-ok"></i> Apply </button>
 							</li-->

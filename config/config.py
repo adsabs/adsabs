@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_08_05_v1'
+    APP_VERSION = '2013_08_06_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -119,16 +119,16 @@ class AppConfig(object):
     #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
     #added also a default function to use
     FACET_TO_SOLR_QUERY = {
-                                'bib_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'bibgr_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'bib_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'bibgr_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 'aut_f':{'default_mode':'q', 'default_function':'_append_to_query'},
-                                'prop_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'key_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'pub_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'year_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'grant_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'data_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
-                                'vizier_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
+                                'prop_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'key_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'pub_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'year_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'grant_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'data_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'vizier_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 }
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',

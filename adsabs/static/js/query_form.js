@@ -67,7 +67,7 @@ $(document).ready(function(){
 		}
 	});
 
-	$('select[name="nr"]').buttonSelect({
+	$('select.buttonSelect').buttonSelect({
 		button: '<div class="btn btn-mini" />', 
 		span: '<span class="btn btn-mini" style="width: 80px;" />',
 		next: '<i class="icon icon-plus"></i>',

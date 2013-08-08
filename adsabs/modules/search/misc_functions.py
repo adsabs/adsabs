@@ -25,7 +25,7 @@ def _append_to_query(query, item):
     """
     Append to query string
     """
-    return u'%s %s' % (query, item)
+    return u'%s AND %s' % (query, item)
 
 def build_basicquery_components(form, request_values=CombinedMultiDict([]), facets_components=False):
     """
@@ -52,10 +52,10 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
             search_components['q'] = _append_to_query(search_components['q'], value)
             return None
         
-        #by default if there is not a real configuration the facets are considered as filter query 
-        #and the default function is a simple append to list
-        mode = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_mode', 'fq')
-        funct_mame = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_function', '_append_to_list')
+        #by default if there is not a real configuration the facets are considered as  query 
+        #and the default function is a simple append to the query string
+        mode = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_mode', 'q')
+        funct_mame = config.FACET_TO_SOLR_QUERY.get(facet_name, {}).get('default_function', '_append_to_query')
         #actually load the right function specified in the config file
         try:    
             funct = getattr(THIS_MODULE, funct_mame)
@@ -78,7 +78,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     if form.sort_type.data in config.SEARCH_SECOND_ORDER_OPERATORS_OPTIONS:
         search_components['q'] = u'%s(%s)' % (form.sort_type.data, search_components['q'])
         search_components['sort'] = None
-    
+        
     #sorting
     if form.sort_type.data in config.SOLR_SORT_OPTIONS.keys():
         search_components['sort'] = form.sort_type.data
@@ -110,15 +110,19 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
         search_components['ui_filters'].append(u'property:REFEREED')
     #articles only
     if form.article.data:
-        add_filter_to_search_components('prop_f', u'-property:NONARTICLE', force_to_q=True)
+        add_filter_to_search_components('prop_f', u'NOT property:NONARTICLE', force_to_q=True)
         search_components['ui_filters'].append(u'-property:NONARTICLE')
     #journal abbreviation
     if form.journal_abbr.data:
         journal_abbr_string = ''
-        for bibstem in form.journal_abbr.data.split(','):
+        bibstems = form.journal_abbr.data.split(',')
+        for bibstem in bibstems:
             journal_abbr_string += u'bibstem:%s OR ' % bibstem.strip()
-        add_filter_to_search_components('bib_f', journal_abbr_string[:-4]) 
-        search_components['ui_filters'].append(journal_abbr_string[:-4]) 
+        journal_abbr_string = journal_abbr_string[:-4]
+        if len(bibstems)>1:
+            journal_abbr_string = u'(%s)' % journal_abbr_string
+        add_filter_to_search_components('bib_f', journal_abbr_string) 
+        search_components['ui_filters'].append(journal_abbr_string.strip('()')) 
         
     #number of rows
     if form.nr.data and form.nr.data != 'None':
@@ -130,15 +134,18 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
             #I have to distinguish between a simple facet and a complex one
             if not (elem.startswith('(') or elem.startswith('[') or elem.startswith('-(')):
                 cur_filter = u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
+                cur_filter_ui = cur_filter
                 add_filter_to_search_components(facet, cur_filter)
             else:
                 if elem.startswith('-('):
-                    cur_filter = u'-%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem[1:])
+                    cur_filter = u'NOT %s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem[1:])
+                    cur_filter_ui = u'-%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem[1:])
                     add_filter_to_search_components(facet, cur_filter, force_to_q=True)
                 else:
                     cur_filter = u'%s:%s' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
+                    cur_filter_ui = cur_filter
                     add_filter_to_search_components(facet, cur_filter)
-            search_components['ui_filters'].append(cur_filter)
+            search_components['ui_filters'].append(cur_filter_ui)
     #I handle the page number
     page = request_values.get('page')
     if page:
@@ -175,6 +182,10 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
                         search_components['facet_fields'].append(tuple(facet_config))
                     except IndexError:
                         pass
+    
+    #wrapping the query with topn function if there is a valid number (the validation must be done in the form) 
+    if form.topn.data and form.topn.data != 'None':
+        search_components['q'] = u'topn(%s, %s)' % (form.topn.data, search_components['q'])
         
     return search_components
 

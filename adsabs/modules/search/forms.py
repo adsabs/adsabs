@@ -30,8 +30,7 @@ def get_missing_defaults(req_val_lists, form):
             for elem in form_defaults.getlist(field):
                 req_val_lists.add(field, elem)
     return ImmutableMultiDict(req_val_lists)
-    
-
+           
 
 class QueryForm(Form):
     """Form for the basic search"""
@@ -51,9 +50,10 @@ class QueryForm(Form):
     journal_abbr = TextField(u'Bibstems', [optional(), length(min=2, max=2048)], description=u'Journal Abbreviation(s)')
     refereed = BooleanField(u'Refereed', description=u'Refereed only')
     article = BooleanField(u'Articles', description=u'Articles only')
-    nr = SelectField(u'Number to return', [optional()], choices=[('', 'default results'), 
+    nr = SelectField(u'Number to view in page', [optional()], choices=[('', 'default results'), 
                                                         ('20', '20 results'), ('50', '50 results'), ('50', '50 results'), ('100', '100 results'), 
                                                         ('200', '200 results')] )
+    topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     
     default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', config.SEARCH_DEFAULT_SORT)])
     
