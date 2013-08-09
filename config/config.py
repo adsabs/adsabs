@@ -209,6 +209,15 @@ class AppConfig(object):
     RECAPTCHA_PUBLIC_KEY = ''
     RECAPTCHA_PRIVATE_KEY = ''
     RECAPTCHA_OPTIONS = {'theme' : 'white'}
+
+    PAGES_GIT_URL = "git@github.com:adsabs/adsabs-pages.git"
+    PAGES_CONTENT_DIR = os.path.join(_basedir, "page_content")
+    PAGES_URL_PREFIX = "/page"
+    PAGES_FILE_EXT = ".md"
+    PAGES_REFRESH_ALLOWED_IPS = []
+    PAGES_REFRESH_ACCESS_KEY = None
+    PAGES_REFRESH_BASE_URL = "http://localhost:5000"
+    PAGES_DEFAULT_INDEX = "Index"
     
     SELENIUM_BASE_URL = None
     SELENIUM_PAGE_WAIT = None

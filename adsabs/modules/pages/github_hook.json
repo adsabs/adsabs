@@ -1,0 +1,12 @@
+{
+  "name": "web",
+  "active": true,
+  "events": [
+    "gollum",
+    "push"
+  ],
+  "config": {
+    "url": "http://requestb.in/1j21og41",
+    "content_type": "json"
+  }
+}

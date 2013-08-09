@@ -147,5 +147,8 @@ from adsabs.modules.api import manager as api_manager
 manager.add_command('api', api_manager)
 manager.add_command('tools', tools_manager)
 
+from adsabs.modules.pages import manager as pages_manager
+manager.add_command('pages', pages_manager)
+
 if __name__ == "__main__":
     manager.run()
