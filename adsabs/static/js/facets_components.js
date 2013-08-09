@@ -475,9 +475,85 @@ FacetsComponents.plot_dates_histogram = function(all_facets, facetid_html)
 };
 
 
+/*
+ * Function that creates the slider and sets up the the topn facet
+ */
+FacetsComponents.topn_facet_manager = function(max_val, facetid_html)
+{
+	//Code to change the icon in the section containing the title of the facets 
+	$('#collapse'+facetid_html).on('hide', function () {
+		$('#icon'+facetid_html).attr('class', 'icon-chevron-right');
+	});
+	$('#collapse'+facetid_html).on('show', function () {
+		$('#icon'+facetid_html).attr('class', 'icon-chevron-down');
+	});
+	//fill the  max input with the proper value
+	$('#facetForm_'+facetid_html+' input[name=topn_value]').val(max_val);
+	//Attach a function to the the input
+	$('#facetForm_'+facetid_html+' input').on('change keyup', function(){FacetsComponents.button_topn_facet_manager(facetid_html);});
+	//draw the slider
+	$( "#slider_"+facetid_html ).slider({
+		range: "min",
+		min: 1,
+		max: max_val,
+		value: max_val,
+		slide: function(event, ui){
+			//set the min a max values
+			$('#facetForm_'+facetid_html+' input[name=topn_value]').val(ui.value);
+			//enable or disable the button to apply the facet
+			FacetsComponents.button_topn_facet_manager(facetid_html);
+		},
+	});
+	//enable the reset if there has already been a topn applied
+	var uri = new Uri(window.location.href);
+	if (uri.getQueryParamValue('topn') !== undefined)
+	{
+		$('span[data-rel="topn_reset_'+facetid_html+'"]').removeClass('disabled').on('click', function(event){window.location = decodeURIComponent(uri.deleteQueryParam('topn').toString()); event.stopPropagation();});
+	}
+};
 
+/*
+ * Function that takes care of the behaviour of the limit button for the topn
+ */
+FacetsComponents.button_topn_facet_manager = function(facetid_html)
+{
+	//extract all the needed
+	var val = $("#slider_"+facetid_html).slider("option", "max");
+	var cur_val = $('#facetForm_'+facetid_html+' input[name=topn_value]').val();
+	//If everything looks fine
+	if ((isInt(cur_val)) && (parseInt(cur_val)<=val))
+	{
+		//remove the error class
+		if ($('#facetForm_'+facetid_html+' input').hasClass('topn_input_error'))
+			$('#facetForm_'+facetid_html+' input').removeClass('topn_input_error');
+		//change the slider
+		$("#slider_"+facetid_html).slider("value", cur_val);
+		//enable or disable the button
+		if (cur_val < val)
+			$('span[data-rel="topn_limit_'+facetid_html+'"]').removeClass('disabled').on('click', function(event){FacetsComponents.apply_topn_url(facetid_html); event.stopPropagation();});
+		else
+			$('span[data-rel="topn_limit_'+facetid_html+'"]').addClass('disabled').off('click');
+	}
+	else
+	{
+		//disable the click on the button
+		if (!$('span[data-rel="topn_limit_'+facetid_html+'"]').hasClass('disabled'))
+			$('span[data-rel="topn_limit_'+facetid_html+'"]').addClass('disabled').off('click');
+		//show the error
+		$('#facetForm_'+facetid_html+' input[name=topn_value]').addClass('topn_input_error');	
+	}
+};
 
-
-
-
-
+/*
+ * Function that builds a facet for the topn
+ */
+FacetsComponents.apply_topn_url = function(facetid_html)
+{
+	//and the other values
+	var val = $('#facetForm_'+facetid_html+' input[name=topn_value]').val();
+	//create the url for the facets to apply
+	var uri = new Uri(window.location.href);
+	uri.replaceQueryParam(facetid_html, val)
+	//console.log(uri.toString());
+	window.location = decodeURIComponent(uri.toString());
+};

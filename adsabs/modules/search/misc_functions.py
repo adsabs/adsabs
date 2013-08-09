@@ -185,7 +185,7 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     
     #wrapping the query with topn function if there is a valid number (the validation must be done in the form) 
     if form.topn.data and form.topn.data != 'None':
-        search_components['q'] = u'topn(%s, %s)' % (form.topn.data, search_components['q'])
+        search_components['q'] = u'topn(%s, (%s))' % (form.topn.data, search_components['q'])
         
     return search_components
 

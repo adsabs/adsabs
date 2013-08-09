@@ -373,7 +373,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     def test_topn_1(self):
         """Test for a request with a number of record to return different from the default (that is all of them)"""
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&topn=1000'):
-            out = {'q': u'topn(1000,  author:"civano" AND database:ASTRONOMY)',
+            out = {'q': u'topn(1000, ( author:"civano" AND database:ASTRONOMY))',
                     'filters': [],
                     'rows': '10',
                     'sort': u'DATE',

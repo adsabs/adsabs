@@ -44,7 +44,7 @@ class SolrRequest(object):
         return self
         
     def set_fields(self, fields):
-        fields.extend(config.SOLR_SEARCH_REQUIRED_FIELDS)
+        fields = list(set(fields + config.SOLR_SEARCH_REQUIRED_FIELDS))
         self.params.fl = ','.join(fields)
         return self
         

@@ -256,3 +256,47 @@
 	</div>
 {% endmacro %}
 
+{# ###Macro to render the TOPn facet #}
+{% macro render_topn_facet(templ_facetid, resp) %}
+	{# I get the configuration for this facet #}
+	{% set facet_config = config.FACETS_IN_TEMPLATE_CONFIG[templ_facetid] %}
+	{# then I extract the configurations I need #}
+	{% set facetid=facet_config['facetid'] %} 
+	{% set facettitle=facet_config['facet_title'] %} 
+	{% set open=facet_config['open_by_default'] %} 
+	{% set facetid_html=facet_config['facetid_html'] %}
+	
+	{# first of all I check which id to use to build the widget #}
+	{% if facetid_html == None %}
+		{% set facetid_html=facetid %}
+	{% endif %}
+	{% set current_page = resp.get_pagination()['current_page']%}
+	{% set tot_number_results = resp.get_hits() %}
+	
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<div class="accordion-toggle" data-toggle="collapse" href="#collapse{{ facetid_html }}">
+				<i id="icon{{ facetid_html }}" class="icon-chevron-{% if open or request.values.get(facetid_html) %}down{% else %}right{% endif %}"></i><strong class="facetsTitle">{{ facettitle }}</strong>
+			</div>
+		</div>
+		<div id="collapse{{ facetid_html }}" class="accordion-body collapse {% if open or request.values.get(facetid_html) %}in{% endif %}">
+			<div class="accordion-inner">
+				<form class="topn_form" id="facetForm_{{ facetid_html }}">
+					top <input type="text" name="topn_value" autocomplete="off" class="topn_field"/> papers
+					<span class="btn btn-mini topn_limit disabled" data-rel="topn_limit_{{ facetid_html }}">apply</span>
+					<span class="btn btn-mini topn_limit disabled" data-rel="topn_reset_{{ facetid_html }}">reset</span>
+					<div id="slider_{{ facetid_html }}"></div>
+				</form>			
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(
+			function(){
+				//Take all the elements 
+				var max_val = {{ tot_number_results }};
+				FacetsComponents.topn_facet_manager(max_val, "{{ facetid_html }}");
+			}	
+		);
+	</script>
+{% endmacro %}
