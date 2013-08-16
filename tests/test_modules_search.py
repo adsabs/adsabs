@@ -32,23 +32,18 @@ class SearchTestCase(AdsabsBaseTestCase):
 class GetMissingDefaultsTestCase(AdsabsBaseTestCase):
     
     def test_all_defaults_present_1(self):
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')]), ImmutableMultiDict([])])
-        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'DATE'), ('db_key', u'ASTRONOMY')])
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')])
         self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
         
     def test_all_defaults_present_2(self):
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'PHYSICS')]), ImmutableMultiDict([])])
-        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'PHYSICS')])
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'physics')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'physics')])
         self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
         
     def test_missing_database(self):
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE')]), ImmutableMultiDict([])])
-        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'ASTRONOMY')])
-        self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
-        
-    def test_missing_sorting(self):
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_key', u'PHYSICS')]), ImmutableMultiDict([])])
-        out = ImmutableMultiDict([('q', u' author:"civano"'), ('sort_type', u'RELEVANCE'), ('db_key', u'PHYSICS')])
+        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"')]), ImmutableMultiDict([])])
+        out = ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'')])
         self.assertEqual(get_missing_defaults(request_values, QueryForm), out)
         
 
@@ -57,196 +52,199 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     
     def test_only_query(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY', 
+            out = {'q' : u'( author:"civano")', 
                    'filters': [], 
                    'ui_q': u' author:"civano"',
-                   'ui_filters': [u'database:ASTRONOMY'], 
+                   'ui_filters': [], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
         
-    def test_query_with_default_params(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY', 
+    def test_query_with_default_params_1(self):
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy'):
+            out = {'q' : u'( author:"civano") AND database:"astronomy"', 
                    'filters': [],
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY'], 
-                   'sort': u'DATE', 
-                   'start': None, 
-                   'sort_direction': 'desc', 
-                   'rows':config.SEARCH_DEFAULT_ROWS }
-            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
-            
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=RELEVANCE'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY', 
-                   'filters': [],
-                   'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY'], 
+                   'ui_filters': [u'database:"astronomy"'],
                    'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
+    
+    def test_query_with_default_params_2(self):        
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=ASTRONOMY'):
+            out = {'q' : u'( author:"civano") AND database:"ASTRONOMY"', 
+                   'filters': [],
+                   'ui_q' : u' author:"civano"', 
+                   'ui_filters': [u'database:"ASTRONOMY"'], 
+                   'sort': u'RELEVANCE', 
+                   'start': None, 
+                   'sort_direction': 'desc', 
+                   'rows':config.SEARCH_DEFAULT_ROWS }
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
+            self.assertFalse(form.validate())
         
     def test_query_non_default_params(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=PHYSICS&sort_type=CITED'):
-            out = {'q' : u' author:"civano" AND database:PHYSICS', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=physics'):
+            out = {'q' : u'( author:"civano") AND database:"physics"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:PHYSICS'], 
-                   'sort': u'CITED', 
+                   'ui_filters': [u'database:"physics"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_query_with_second_order_operator(self):
-        with self.app.test_request_context('/search/?q=galaxy+clusters&db_key=ASTRONOMY&sort_type=hot'):
-            out = {'q' : u'hot(galaxy clusters) AND database:ASTRONOMY', 
+        with self.app.test_request_context('/search/?q=hot(galaxy+clusters)&db_f=astronomy'):
+            out = {'q' : u'(hot(galaxy clusters)) AND database:"astronomy"', 
                    'filters': [],
-                   'ui_q' : u'galaxy clusters', 
-                   'ui_filters': [u'database:ASTRONOMY'],
-                   'sort': None, 
+                   'ui_q' : u'hot(galaxy clusters)', 
+                   'ui_filters': [u'database:"astronomy"'],
+                   'sort': 'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_query_with_date_range_1(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=12&year_from=2010'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND pubdate:[2010-12-00 TO 9999-00-00]', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&month_from=12&year_from=2010'):
+            out = {'q' : u'( author:"civano") AND pubdate:[2010-12-00 TO 9999-00-00] AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'pubdate:[2010-12-00 TO 9999-00-00]'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'pubdate:[2010-12-00 TO 9999-00-00]', u'database:"astronomy"',], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_query_with_date_range_2(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_to=12&year_to=2010'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND pubdate:[0001-00-00 TO 2010-12-00]', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&month_to=12&year_to=2010'):
+            out = {'q' : u'( author:"civano") AND pubdate:[0001-00-00 TO 2010-12-00] AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'pubdate:[0001-00-00 TO 2010-12-00]'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'pubdate:[0001-00-00 TO 2010-12-00]', u'database:"astronomy"',], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_query_with_date_range_3(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=09&year_from=2009&month_to=12&year_to=2010'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND pubdate:[2009-09-00 TO 2010-12-00]', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&month_from=09&year_from=2009&month_to=12&year_to=2010'):
+            out = {'q' : u'( author:"civano") AND pubdate:[2009-09-00 TO 2010-12-00] AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'pubdate:[2009-09-00 TO 2010-12-00]'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'pubdate:[2009-09-00 TO 2010-12-00]', u'database:"astronomy"',], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_query_with_date_range_4(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&month_from=09&year_from=2009&year_to=2010'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND pubdate:[2009-09-00 TO 2010-12-00]', 
+        self.maxDiff = None
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&month_from=09&year_from=2009&year_to=2010'):
+            out = {'q' : u'( author:"civano") AND pubdate:[2009-09-00 TO 2010-12-00] AND database:"astronomy"', 
                    'filters': [],
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'pubdate:[2009-09-00 TO 2010-12-00]'],
-                   'sort': u'DATE', 
+                   'ui_filters': [u'pubdate:[2009-09-00 TO 2010-12-00]', u'database:"astronomy"',],
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
        
     def test_journal_abbreviations_1(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&journal_abbr=ApJ'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND bibstem:ApJ', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"+bibstem%3A"ApJ"&db_f=astronomy'):
+            out = {'q' : u'( author:"civano" bibstem:"ApJ") AND database:"astronomy"', 
                    'filters': [],
-                   'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'bibstem:ApJ'], 
-                   'sort': u'DATE', 
+                   'ui_q' : u' author:"civano" bibstem:"ApJ"', 
+                   'ui_filters': [u'database:"astronomy"',], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_journal_abbreviations_2(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&journal_abbr=ApJ%2C+AJ'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND (bibstem:ApJ OR bibstem:AJ)', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"+bibstem%3A"ApJ"+bibstem%3A"AJ"&db_f=astronomy'):
+            out = {'q' : u'( author:"civano" bibstem:"ApJ" bibstem:"AJ") AND database:"astronomy"', 
                    'filters': [], 
-                   'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'bibstem:ApJ OR bibstem:AJ'], 
-                   'sort': u'DATE', 
+                   'ui_q' : u' author:"civano" bibstem:"ApJ" bibstem:"AJ"', 
+                   'ui_filters': [u'database:"astronomy"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
-    def test_journal_abbreviations_wrong_separator(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&journal_abbr=ApJ%3B+AJ'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND bibstem:ApJ; AJ', 
+    def test_journal_abbreviations_wrong(self):
+        with self.app.test_request_context('/search/?q=+author%3A"civano"+bibstem%3A"ApJ%3B+AJ"&db_f=astronomy'):
+            out = {'q' : u'( author:"civano" bibstem:"ApJ; AJ") AND database:"astronomy"', 
                    'filters': [], 
-                   'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'bibstem:ApJ; AJ'], 
-                   'sort': u'DATE', 
+                   'ui_q' : u' author:"civano" bibstem:"ApJ; AJ"', 
+                   'ui_filters': [u'database:"astronomy"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
             
     def test_refereed_only(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&refereed=y'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND property:REFEREED', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&prop_f=refereed'):
+            out = {'q' : u'( author:"civano") AND property:"refereed" AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'property:REFEREED'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'property:"refereed"', u'database:"astronomy"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            comps = build_basicquery_components(form)
+            comps = build_basicquery_components(form, request.values)
             self.assertEqual(comps, out)
             return
             
     def test_article_only(self):
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&article=y'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY AND NOT property:NONARTICLE', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&article=y'):
+            out = {'q' : u'( author:"civano") AND NOT property:NONARTICLE AND database:"astronomy"', 
                    'filters': [],
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY', u'-property:NONARTICLE'],
-                   'sort': u'DATE', 
+                   'ui_filters': [u'-property:NONARTICLE', u'database:"astronomy"'],
+                   'sort': u'RELEVANCE', 
                    'start': None , 
                    'sort_direction': 'desc', 
                    'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form), out)
+            self.assertEqual(build_basicquery_components(form, request.values), out)
     
-    def test_query_with_facets(self):
-        with self.app.test_request_context('/search/?q=author%3A"Civano"&aut_f=0%2FComastri%2C+A&sort_type=DATE&db_key=ASTRONOMY&grant_f=0%2FNASA-HQ'):
+    def test_query_with_facets_1(self):
+        with self.app.test_request_context('/search/?q=author%3A"Civano"&aut_f=0%2FComastri%2C+A&db_f=astronomy&grant_f=0%2FNASA-HQ'):
             out = {'filters': [],
-                    'q': u'author:"Civano" AND database:ASTRONOMY AND author_facet_hier:"0/Comastri, A" AND grant_facet_hier:"0/NASA-HQ"',
-                    'ui_filters': [u'database:ASTRONOMY',
-                                u'author_facet_hier:"0/Comastri, A"',
-                                u'grant_facet_hier:"0/NASA-HQ"'],
+                    'q': u'(author:"Civano") AND grant_facet_hier:"0/NASA-HQ" AND author_facet_hier:"0/Comastri, A" AND database:"astronomy"',
+                    'ui_filters': [u'grant_facet_hier:"0/NASA-HQ"',
+                                   u'author_facet_hier:"0/Comastri, A"',
+                                   u'database:"astronomy"'],
                     'ui_q': u'author:"Civano"',
-                    'sort': u'DATE',
+                    'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None, 
                     'rows':config.SEARCH_DEFAULT_ROWS}
@@ -254,69 +252,73 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
     
     def test_query_with_facets_2(self):
-        with self.app.test_request_context('/search/?q=author%3A"Civano"&sort_type=DATE&db_key=ASTRONOMY&aut_f=(-"1%2FCivano%2C+F%2FCivano%2C Francesca M."+AND+-"1%2FElvis%2C M%2FElvis%2C Martin")'):
+        with self.app.test_request_context('/search/?q=author%3A"Civano"&db_f=astronomy&aut_f=(-"1%2FCivano%2C+F%2FCivano%2C Francesca M."+AND+-"1%2FElvis%2C M%2FElvis%2C Martin")'):
             out = {'filters': [],
-                    'q': u'author:"Civano" AND database:ASTRONOMY AND author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")',
-                    'ui_filters': [u'database:ASTRONOMY',
-                               u'author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")'],
+                    'q': u'(author:"Civano") AND author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin") AND database:"astronomy"',
+                    'ui_filters': [u'author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")',
+                                   u'database:"astronomy"',],
                     'ui_q': u'author:"Civano"',
-                    'sort': u'DATE',
+                    'sort': u'RELEVANCE',
+                    'sort_direction': 'desc',
+                    'start': None, 
+                    'rows':config.SEARCH_DEFAULT_ROWS}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+     
+    def test_query_with_facets_3(self):
+        with self.app.test_request_context('/search/?q=author%3A"Civano"&db_f=astronomy&aut_f=-("1%2FCivano%2C+F%2FCivano%2C Francesca M."+OR+"1%2FElvis%2C M%2FElvis%2C Martin")'):
+            out = {'filters': [],
+                    'q': u'(author:"Civano") AND NOT author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin") AND database:"astronomy"',
+                    'ui_filters': [u'-author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")',
+                                   u'database:"astronomy"',],
+                    'ui_q': u'author:"Civano"',
+                    'sort': u'RELEVANCE',
+                    'sort_direction': 'desc',
+                    'start': None, 
+                    'rows':config.SEARCH_DEFAULT_ROWS}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+    
+    def test_query_with_facets_4(self):   
+        with self.app.test_request_context('/search/?q=author%3A"Civano"&db_f=astronomy&aut_f=(-"1%2FCivano%2C+F%2FCivano%2C+Francesca+M."+AND+-"1%2FElvis%2C M%2FElvis%2C Martin")&bibgr_f=("CfA"+AND+"CXC")&grant_f=("0%2FNASA-HQ"+OR+"0%2FNASA-GSFC")'):    
+            out = {'filters': [],
+                    'q': u'(author:"Civano") AND grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC") AND author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin") AND bibgroup_facet:("CfA" AND "CXC") AND database:"astronomy"',
+                    'ui_filters': [u'grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")',
+                                u'author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")',
+                                u'bibgroup_facet:("CfA" AND "CXC")',
+                                u'database:"astronomy"',],
+                    'ui_q': u'author:"Civano"',
+                    'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None, 
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
         
-        with self.app.test_request_context('/search/?q=author%3A"Civano"&sort_type=DATE&db_key=ASTRONOMY&aut_f=-("1%2FCivano%2C+F%2FCivano%2C Francesca M."+OR+"1%2FElvis%2C M%2FElvis%2C Martin")'):
+    def test_query_with_facets_5(self):
+        with self.app.test_request_context('/search/?q=author%3A"Civano"&db_f=astronomy&aut_f=-("1%2FCivano%2C+F%2FCivano%2C+Francesca+M."+OR+"1%2FElvis%2C M%2FElvis%2C Martin")&bibgr_f=("CfA"+AND+"CXC")&grant_f=-("0%2FNASA-HQ"+OR+"0%2FNASA-GSFC")'):    
             out = {'filters': [],
-                    'q': u'author:"Civano" AND database:ASTRONOMY AND NOT author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")',
-                    'ui_filters': [u'database:ASTRONOMY',
-                               u'-author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")'],
+                    'q': u'(author:"Civano") AND NOT grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC") AND NOT author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin") AND bibgroup_facet:("CfA" AND "CXC") AND database:"astronomy"',
+                    'ui_filters': [u'-grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")',
+                                  u'-author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")',
+                                  u'bibgroup_facet:("CfA" AND "CXC")',
+                                  u'database:"astronomy"'],
                     'ui_q': u'author:"Civano"',
-                    'sort': u'DATE',
+                    'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None, 
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
-            
-        with self.app.test_request_context('/search/?q=author%3A"Civano"&sort_type=DATE&db_key=ASTRONOMY&aut_f=(-"1%2FCivano%2C+F%2FCivano%2C+Francesca+M."+AND+-"1%2FElvis%2C M%2FElvis%2C Martin")&bibgr_f=("CfA"+AND+"CXC")&grant_f=("0%2FNASA-HQ"+OR+"0%2FNASA-GSFC")'):    
+        
+    def test_query_with_facets_6(self):   
+        with self.app.test_request_context('/search/?q=*&db_f=astronomy&year_f=[2000 TO 2010]'):
             out = {'filters': [],
-                    'q': u'author:"Civano" AND database:ASTRONOMY AND bibgroup_facet:("CfA" AND "CXC") AND author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin") AND grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")',
-                    'ui_filters': [u'database:ASTRONOMY',
-                                u'bibgroup_facet:("CfA" AND "CXC")',
-                                u'author_facet_hier:(-"1/Civano, F/Civano, Francesca M." AND -"1/Elvis, M/Elvis, Martin")',
-                                u'grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")'],
-                    'ui_q': u'author:"Civano"',
-                    'sort': u'DATE',
-                    'sort_direction': 'desc',
-                    'start': None, 
-                    'rows':config.SEARCH_DEFAULT_ROWS}
-            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
-            
-        with self.app.test_request_context('/search/?q=author%3A"Civano"&sort_type=DATE&db_key=ASTRONOMY&aut_f=-("1%2FCivano%2C+F%2FCivano%2C+Francesca+M."+OR+"1%2FElvis%2C M%2FElvis%2C Martin")&bibgr_f=("CfA"+AND+"CXC")&grant_f=-("0%2FNASA-HQ"+OR+"0%2FNASA-GSFC")'):    
-            out = {'filters': [],
-                    'q': u'author:"Civano" AND database:ASTRONOMY AND bibgroup_facet:("CfA" AND "CXC") AND NOT author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin") AND NOT grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")',
-                    'ui_filters': [u'database:ASTRONOMY',
-                                u'bibgroup_facet:("CfA" AND "CXC")',
-                                u'-author_facet_hier:("1/Civano, F/Civano, Francesca M." OR "1/Elvis, M/Elvis, Martin")',
-                                u'-grant_facet_hier:("0/NASA-HQ" OR "0/NASA-GSFC")'],
-                    'ui_q': u'author:"Civano"',
-                    'sort': u'DATE',
-                    'sort_direction': 'desc',
-                    'start': None, 
-                    'rows':config.SEARCH_DEFAULT_ROWS}
-            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
-            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
-            
-        with self.app.test_request_context('/search/?q=*&sort_type=DATE&db_key=ASTRONOMY&year_f=[2000 TO 2010]'):
-            out = {'filters': [],
-                    'q': u'* AND database:ASTRONOMY AND year:[2000 TO 2010]',
-                    'ui_filters': [u'database:ASTRONOMY',
-                               u'year:[2000 TO 2010]'],
+                    'q': u'(*) AND year:[2000 TO 2010] AND database:"astronomy"',
+                    'ui_filters': [u'year:[2000 TO 2010]', 
+                                   u'database:"astronomy"',],
                     'ui_q': u'*',
-                    'sort': u'DATE',
+                    'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None, 
                     'rows':config.SEARCH_DEFAULT_ROWS}
@@ -324,15 +326,16 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
             
     def test_facets_components(self):
-        with self.app.test_request_context('/search/facets?q=author%3A%22civano%22&aut_f=1%2FCivano%2C+F%2FCivano%2C+F.&sort_type=DATE&db_key=ASTRONOMY&facet_field=templ_aut_f&facet_prefix=1/Civano,%20F/'):
+        self.maxDiff = None
+        with self.app.test_request_context('/search/facets?q=author%3A%22civano%22&aut_f=1%2FCivano%2C+F%2FCivano%2C+F.&db_f=astronomy&facet_field=templ_aut_f&facet_prefix=1/Civano,%20F/'):
             out = {'facet_field_interf_id': u'templ_aut_f',
                      'facet_fields': [('author_facet_hier', -1, 1, None, u'1/Civano, F/')],
                      'filters': [],
-                     'q': u'author:"civano" AND database:ASTRONOMY AND author_facet_hier:"1/Civano, F/Civano, F."',
-                     'ui_filters': [u'database:ASTRONOMY',
-                                 u'author_facet_hier:"1/Civano, F/Civano, F."'],
+                     'q': u'(author:"civano") AND author_facet_hier:"1/Civano, F/Civano, F." AND database:"astronomy"',
+                     'ui_filters': [u'author_facet_hier:"1/Civano, F/Civano, F."',
+                                    u'database:"astronomy"',],
                      'ui_q': u'author:"civano"',
-                     'sort': u'DATE',
+                     'sort': u'RELEVANCE',
                      'sort_direction': 'desc',
                      'start': None, 
                      'rows':config.SEARCH_DEFAULT_ROWS}
@@ -342,12 +345,12 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     
     def test_rows_different_from_default_1(self):
         """Test for a request with a number of result to return different from the default"""
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&nr=50'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&nr=50'):
+            out = {'q' : u'( author:"civano") AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'database:"astronomy"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':u'50' }
@@ -357,12 +360,12 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             
     def test_rows_different_from_default_2(self):
         """Test for a request with a number of result to return not valid (not allowed)"""
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&nr=33'):
-            out = {'q' : u' author:"civano" AND database:ASTRONOMY', 
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&nr=33'):
+            out = {'q' : u'( author:"civano") AND database:"astronomy"', 
                    'filters': [], 
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'database:ASTRONOMY'], 
-                   'sort': u'DATE', 
+                   'ui_filters': [u'database:"astronomy"'], 
+                   'sort': u'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
                    'rows':u'33' }
@@ -372,14 +375,14 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     
     def test_topn_1(self):
         """Test for a request with a number of record to return different from the default (that is all of them)"""
-        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_key=ASTRONOMY&sort_type=DATE&topn=1000'):
-            out = {'q': u'topn(1000, ( author:"civano" AND database:ASTRONOMY))',
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&topn=1000'):
+            out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"))',
                     'filters': [],
                     'rows': '10',
-                    'sort': u'DATE',
+                    'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None,
-                    'ui_filters': [u'database:ASTRONOMY'],
+                    'ui_filters': [u'database:"astronomy"'],
                     'ui_q': u' author:"civano"'}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)

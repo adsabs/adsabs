@@ -119,6 +119,23 @@ if (!Object.keys) {
 	    }
 	  })()
 	};
+	
+//###########################################################################################//
+// Useful string functions
+if (typeof String.prototype.startsWith != 'function') 
+{
+	String.prototype.startsWith = function (str)
+	{
+	    return this.slice(0, str.length) == str;
+	};
+};
+if (typeof String.prototype.endsWith != 'function') 
+{
+	String.prototype.endsWith = function (str)
+	{
+		return this.slice(-str.length) == str;
+	};
+};
 //###########################################################################################//
 
 var Misc = new Object();
@@ -146,6 +163,38 @@ Misc.wrapText = function(elementID, openTag, closeTag)
     textArea.selectRange(endrepl, endrepl);
 };
 
+Misc.listOfAlternates = ['trending', 'useful', 'instructive']
+
+Misc.wrapContentWithFunction = function(elementID, functionName, listOfAlternates)
+/*function to wrap the entire content of a input field*/
+{
+	//default value for one of the the parameters
+	if (listOfAlternates == null)
+		listOfAlternates = [];
+	var textArea = $('#' + elementID);
+	var text_content = textArea.val();
+	//if there is no content, a wrapping of a fake content is created
+	if (text_content.length == 0)
+	{
+		textArea.val(functionName + '(YOUR QUERY HERE)');
+		return null;
+	}
+	//if there are alternates texts, check if the input starts and ends with the each alternate and in case replace it
+	for (var i = 0; i < listOfAlternates.length; i++) 
+	{
+		var cur_func = listOfAlternates[i];
+		//if there is a match, the function can be replaced
+		if (text_content.startsWith(cur_func+'(') && text_content.endsWith(')'))
+		{
+			textArea.val(functionName + text_content.slice(-(text_content.length - cur_func.length)));
+			return null;
+		}
+		
+	}
+	//if the code reaches this point, the function is simply applied
+	textArea.val(functionName + '(' + text_content + ')');
+	return null;
+};
 
 
 

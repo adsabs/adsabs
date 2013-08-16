@@ -4,9 +4,10 @@ Created on May 9, 2013
 @author: dimilia
 '''
 
-from flask.ext.wtf import (Form, TextField, RadioField, TextAreaField, RecaptchaField, HiddenField, #SelectField, IntegerField, BooleanField,  , SubmitField, HiddenField,  #@UnresolvedImport
-                          validators, required, #optional, ValidationError, equal_to, email #@UnresolvedImport
-                          length) #@UnresolvedImport
+from flask.ext.wtf import (Form, RecaptchaField)      #@UnresolvedImport
+from wtforms import (TextField, RadioField, TextAreaField, HiddenField, #SelectField, IntegerField, BooleanField,  , SubmitField, HiddenField,  #@UnresolvedImport
+                          validators)   #@UnresolvedImport
+from wtforms.validators import (required, length) #optional, ValidationError, equal_to, email 
 
 from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
 

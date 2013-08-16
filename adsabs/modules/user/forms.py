@@ -1,7 +1,7 @@
-from flask.ext.wtf import (Form, HiddenField, BooleanField, #@UnresolvedImport
-                          PasswordField, SubmitField, TextField, RecaptchaField, #@UnresolvedImport
-                          required, length, validators)#ValidationError, equal_to, email, @UnresolvedImport
-
+from flask.ext.wtf import (Form, RecaptchaField)      #@UnresolvedImport
+from wtforms import (HiddenField, BooleanField,
+                     PasswordField, SubmitField, TextField, validators)
+from wtforms.validators import (required, length)   #ValidationError, equal_to, email
 from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
 
 class LoginForm(Form):

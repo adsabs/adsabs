@@ -2,25 +2,24 @@
 {% macro render_search_form(form) %}
 <div class="container" id="search_form">
     <form class="form-search form-search-cust" method="GET" action="{{ url_for('search.search') }}">
-        {#{ form.rows }#}
         <fieldset>
+        	{#{ form.rows }#}
             <!-- legend>ADS metadata and fulltext integrated search</legend-->
             <div class="row">
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;', '&quot;');">Author</a></small></div>
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;^', '&quot;');">First Author</a></small></div>
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' title:&quot;', '&quot;');">Title</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' year:', '');">Year</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' bibstem:&quot;', '&quot;');">Publication</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' full:&quot;', '&quot;');">Fulltext</a></small></div>
             	<div class="span"><small><a class="link_only_js disabled">Object</a></small></div>
             	<!-- div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' object:&quot;', '&quot;');">Object</a></small></div-->
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' year:', '');">Year</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' full:&quot;', '&quot;');">Fulltext</a></small></div>
             </div>
             <div class="row">
             	<div class="span12">
-			        {{ form.q(class="span6", placeholder=form.q.description, autofocus="autofocus") }}
+			        {{ form.q(class="span9", placeholder=form.q.description, autofocus="autofocus") }}
 			        <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler" 
 			        	title="more options" data-rel="bootstrap_tooltip"><i class="icon-plus"></i></span>
-			        {{ form.db_key(class="span autoWidth") }}
-			        {{ form.sort_type(class="span autoWidth") }}
 			        <button class="btn btn-primary"><i class="icon-search icon-white"></i> Search</button>
 			        <div class="dropdown pull-right">
 			        	<a class="btn dropdown-toggle add-open-permanent" data-toggle="dropdown"  data-rel="bootstrap_tooltip" title="Search settings">
@@ -53,6 +52,11 @@
 			        </div>
 		        </div>
 	        </div>
+	        <div class="row">
+	        	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'trending', Misc.listOfAlternates);">Trending</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'useful', Misc.listOfAlternates);">Useful</a></small></div>
+            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'instructive', Misc.listOfAlternates);">Instructive</a></small></div>
+	        </div>
 	        <div id="advanced_options" class="row">
 	        	<div class="span12 custom-well-small">
 	        	{# { form.sort_dir() } #}
@@ -70,10 +74,10 @@
 	        		</div>
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">
 	        			<div class="row">
-	        				<div class="span2">{{ form.journal_abbr.description }}</div>
+	        				<div class="span2">{{ form.db_f.description }}</div>
 	        			</div>
 	        			<div class="row">
-	        				<div class="span2">{{ form.journal_abbr(class="span2") }}</div>
+	        				<div class="span2">{{ form.db_f(class="span2") }}</div>
 	        			</div>
 	        		</div>
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">

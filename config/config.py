@@ -110,6 +110,7 @@ class AppConfig(object):
         ('data_facet',100, 1),
         ('vizier_facet',100, 1),
         ('grant_facet_hier', 100, 1, None, "0/"),
+        ('database',-1, 1),
         ]
     
     SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
@@ -129,6 +130,7 @@ class AppConfig(object):
                                 'grant_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 'data_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 'vizier_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'db_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 }
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',
@@ -141,6 +143,7 @@ class AppConfig(object):
                                          'grant_f':'grant_facet_hier',
                                          'data_f':'data_facet',
                                          'vizier_f':'vizier_facet',
+                                         'db_f':'database',
                                          }
     #Dictionary with the configuration of the facets for the templates
     FACETS_IN_TEMPLATE_CONFIG = {'templ_aut_f' : {'facetid':'aut_f', 'facet_title':'Authors', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},
@@ -153,6 +156,7 @@ class AppConfig(object):
                                  'templ_vizier_f' : {'facetid':'vizier_f', 'facet_title':'Vizier Tables', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_year_f' : {'facetid':'year_f', 'facet_title':'Publication Year', 'open_by_default':True, 'value_limit_to':[], 'facetid_html':None},
                                  'templ_topn_f' : {'facetid':'topn', 'facet_title':'Top papers', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
+                                 'templ_db_f' : {'facetid':'db_f', 'facet_title':'Database', 'open_by_default':False, 'value_limit_to':[], 'facetid_html':None},
                                 }
     
     LOGGING_LOG_LEVEL = 'WARN'
