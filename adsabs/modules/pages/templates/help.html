@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block titlehead %}{{ title }}{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <!--
+        <div class="span2" id="help-menu">
+        <h3>Contents</h3>
+        <ul>
+            {% for page in pages %}
+            <li><a href="{{ url_for('help.help_page', pagename=page) }}">{{ page }}</a></li>
+            {% endfor %}
+        </ul>
+        </div>
+        -->
+        <div class="span10" id="help-content">
+        {{ content|safe }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

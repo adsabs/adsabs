@@ -1,0 +1,13 @@
+{# index_bibutils.html  #}
+{% extends "layout.html" %}
+
+{% block titlehead %}ADS Bibliographic Utilities{% endblock %}
+
+{% block body %}
+<h3>{{ page_var }}</h3> 
+<ul>
+    <li><a href="{{ url_for('bibutils.citation_helper') }}">Citation Helper</a>
+</ul>
+
+<a href="{{ url_for('bibutils.index_bibutils') }}">Reload this page</a>
+{% endblock %}

@@ -214,13 +214,48 @@ class AppConfig(object):
     RECAPTCHA_PUBLIC_KEY = ''
     RECAPTCHA_PRIVATE_KEY = ''
     RECAPTCHA_OPTIONS = {'theme' : 'white'}
+
+    PAGES_GIT_URL = "git@github.com:adsabs/adsabs-pages.git"
+    PAGES_CONTENT_DIR = os.path.join(_basedir, "page_content")
+    PAGES_URL_PREFIX = "/page"
+    PAGES_FILE_EXT = ".md"
+    PAGES_REFRESH_ALLOWED_IPS = []
+    PAGES_REFRESH_ACCESS_KEY = None
+    PAGES_REFRESH_BASE_URL = "http://localhost:5000"
+    PAGES_DEFAULT_INDEX = "Index"
     
     SELENIUM_BASE_URL = None
     SELENIUM_PAGE_WAIT = None
     
     CACHE_TYPE = 'redis'
     CACHE_KEY_PREFIX = 'cache:adsabs:'
-    
+
+    # configuration parameters for bibutils module
+    BIBUTILS_MAX_HITS = 10000
+    BIBUTILS_MAX_INPUT= 500
+    BIBUTILS_THREADS = 4
+    BIBUTILS_THRESHOLD_FREQUENCY = 1
+    BIBUTILS_DEFAULT_SUGGESTIONS = 10
+    BIBUTILS_DEFAULT_FORMAT = 'score'
+    BIBUTILS_CITATION_SOURCE = 'MONGO'
+    # configuration parameters for the metrics module
+    METRICS_DEFAULT_MODELS = ['statistics','histograms','metrics','series']
+    METRICS_THREADS = 8
+    METRICS_MIN_BIBLIO_LENGTH = 5
+    METRICS_CHUNK_SIZE = 100
+    METRICS_MAX_HITS = 100000
+    ADSDATA_MONGO_DATABASE = 'adsdata'
+    ADSDATA_MONGO_HOST = "localhost"
+    ADSDATA_MONGO_PORT = 27017
+    ADSDATA_MONGO_SAFE = True
+    ADSDATA_MONGO_USER = 'adsdata'
+    ADSDATA_MONGO_PASSWORD = ''
+    ADSDATA_MONGO_DOCS_COLLECTION = 'docs'
+    ADSDATA_MONGO_DOCS_DEREF_FIELDS = [('docs','full'), ('docs','ack')]
+    # configuration parameters for the recommender
+    RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
+    RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'
+
 try:
     from local_config import LocalConfig
 except ImportError:

@@ -1,0 +1,21 @@
+{# suggestions.html #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Recomended Articles - Input Bibcodes{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+<div class="span9">
+Below, please insert a list of bibcodes (one per line).
+</div>
+<div class="span9">
+<form action="" method="post" name="">
+    <p>
+        Please enter your bibcodes:<br>
+        {{form.bibcodes(rows=10, cols=20)}}<br>
+    </p>
+    <p><input type="submit" value="Results"></p>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block titlehead %}Help - {{ title }}{% endblock %}
+
+{% block head%}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="span10" id="page-content">
+        {{ content|safe }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

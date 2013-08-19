@@ -1,0 +1,264 @@
+{# metrics_results.html  #}
+{% extends "layout.html" %}
+
+{% block titlehead %}Metrics Results{% endblock %}
+
+{% block body %}
+<script type="text/javascript">
+    var paperhist_data = {{results['paper histogram']}}
+    var readshist_data = {{results['reads histogram']}}
+    var citshist_data  = {{results['citation histogram']}}
+    var series_data = {{results['metrics series']}}
+</script>
+        <div>
+                <table>
+                        <tbody>
+                                <tr>
+                                        <th>
+                                            Papers
+                                        </th>
+                                        <th>
+                                            Total
+                                        </th>
+                                            <th>Refereed</th>
+                                </tr>
+                                    <tr>
+                                            <td>Number of papers</td>
+                                            <td>
+                                                        {{results['all stats']['Number of papers']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Number of papers']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Normalized paper count</td>
+                                            <td>
+                                                        {{results['all stats']['Normalized paper count']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Normalized paper count']}}
+                                            </td>
+                                    </tr>
+                                <tr>
+                                        <td>Total reads</td>
+                                        <td>
+                                                    {{results['all reads']['Total number of reads']}}
+                                        </td>
+                                            <td>
+                                                        {{results['refereed reads']['Total number of reads']}}
+                                            </td>
+                                </tr>
+                                    <tr>
+                                            <td>Average reads</td>
+                                            <td>
+                                                        {{results['all reads']['Average number of reads']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed reads']['Average number of reads']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Median reads</td>
+                                            <td>
+                                                        {{results['all reads']['Median number of reads']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed reads']['Median number of reads']}}
+                                            </td>
+                                    </tr>
+                                <tr>
+                                        <td>Total downloads</td>
+                                        <td>
+                                                    {{results['all reads']['Total number of downloads']}}
+                                        </td>
+                                            <td>
+                                                        {{results['refereed reads']['Total number of downloads']}}
+                                            </td>
+                                </tr>
+                                    <tr>
+                                            <td>Average downloads</td>
+                                            <td>
+                                                        {{results['all reads']['Average number of downloads']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed reads']['Average number of downloads']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Median downloads</td>
+                                            <td>
+                                                        {{results['all reads']['Median number of downloads']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed reads']['Median number of downloads']}}
+                                            </td>
+                                    </tr>
+                        </tbody>
+                </table>
+                <table>
+                        <tbody>
+                                <tr>
+                                        <th>
+                                            Citations
+                                        </th>
+                                        <th>
+                                            Total
+                                        </th>
+                                            <th>Refereed</th>
+                                </tr>
+                                    <tr>
+                                            <td>Number of citing papers</td>
+                                            <td>
+                                                        {{results['all stats']['Number of citing papers']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Number of citing papers']}}
+                                            </td>
+                                    </tr>
+                                <tr>
+                                        <td>Total citations</td>
+                                        <td>
+                                                    {{results['all stats']['Total citations']}}
+                                        </td>
+                                            <td>
+                                                    {{results['refereed stats']['Total citations']}}
+                                            </td>
+                                </tr>
+                                    <tr>
+                                            <td>Average citations</td>
+                                            <td>
+                                                        {{results['all stats']['Average citations']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Average citations']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Median citations</td>
+                                            <td>
+                                                        {{results['all stats']['Median citations']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Median citations']}}
+                                            </td>
+                                    </tr>
+                                <tr>
+                                        <td>Normalized citations</td>
+                                        <td>
+                                                    {{results['all stats']['Normalized citations']}}
+                                        </td>
+                                            <td>
+                                                        {{results['refereed stats']['Normalized citations']}}
+                                            </td>
+                                </tr>
+                                <tr>
+                                        <td>Refereed citations</td>
+                                        <td>
+                                                    {{results['all stats']['Refereed citations']}}
+                                        </td>
+                                            <td>
+                                                        {{results['refereed stats']['Refereed citations']}}
+                                            </td>
+                                </tr>
+                                    <tr>
+                                            <td>Average refereed citations</td>
+                                            <td>
+                                                        {{results['all stats']['Average refereed citations']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Average refereed citations']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Median refereed citations</td>
+                                            <td>
+                                                        {{results['all stats']['Median refereed citations']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Median refereed citations']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>Normalized refereed citations</td>
+                                            <td>
+                                                        {{results['all stats']['Normalized refereed citations']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['Normalized refereed citations']}}
+                                            </td>
+                                    </tr>
+                        </tbody>
+                </table>
+                    <table>
+                            <tbody>
+                                    <tr>
+                                            <th>Indices</th><th>Total</th><th>Refereed</th>
+                                    </tr>
+                                    <tr>
+                                            <td>h-index</td>
+                                            <td>
+                                                            {{results['all stats']['H-index']}}
+                                            </td>
+                                            <td>
+                                                            {{results['refereed stats']['H-index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>g-index</td>
+                                            <td>
+                                                            {{results['all stats']['g-index']}}
+                                            </td>
+                                            <td>
+                                                            {{results['refereed stats']['g-index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>e-index</td>
+                                            <td>
+                                                        {{results['all stats']['e-index']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['e-index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>i10-index</td>
+                                            <td>
+                                                            {{results['all stats']['i10-index']}}
+                                            </td>
+                                            <td>
+                                                            {{results['refereed stats']['i10-index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>tori index</td>
+                                            <td>
+                                                        {{results['all stats']['tori index']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['tori index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>riq index</td>
+                                            <td>
+                                                            {{results['all stats']['roq index']}}
+                                            </td>
+                                            <td>
+                                                            {{results['refereed stats']['roq index']}}
+                                            </td>
+                                    </tr>
+                                    <tr>
+                                            <td>m-index</td>
+                                            <td>
+                                                        {{results['all stats']['m-index']}}
+                                            </td>
+                                            <td>
+                                                        {{results['refereed stats']['m-index']}}
+                                            </td>
+                                    </tr>
+                            </tbody>
+                    </table>
+                </div>
+{% endblock %}
