@@ -238,7 +238,7 @@
 					{% elif elem[0] == 'db_f' %}
 						Database :
 					{% elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'notrefereed' in elem[1]) %}
-						
+						{# no string and the actual text is converted using the template filter "format_special_ads_facet_str" #}
 					{% else %}
 						{{ elem[0] }} :
 					{% endif %}

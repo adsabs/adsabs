@@ -94,7 +94,6 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     #articles only
     if form.article.data:
         add_filter_to_search_components('prop_f', u'NOT property:NONARTICLE', force_to_q=True)
-        search_components['ui_filters'].append(u'-property:NONARTICLE')
         
     #disable fulltext
     if form.no_ft.data:

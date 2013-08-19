@@ -236,12 +236,12 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             self.assertEqual(comps, out)
             return
             
-    def test_article_only(self):
+    def test_articles_only(self):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&article=y'):
             out = {'q' : u'( author:"civano") AND NOT property:NONARTICLE AND database:"astronomy"', 
                    'filters': [],
                    'ui_q' : u' author:"civano"', 
-                   'ui_filters': [u'-property:NONARTICLE', u'database:"astronomy"'],
+                   'ui_filters': [u'database:"astronomy"'],
                    'sort': u'RELEVANCE', 
                    'start': None , 
                    'sort_direction': 'desc',
