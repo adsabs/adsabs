@@ -4,8 +4,8 @@ Created on Jul 16, 2013
 @author: ehenneken
 '''
 
-from flask.ext.wtf import Form, TextAreaField, BooleanField, RadioField, SelectField
-from flask.ext.wtf import Required
+from flask.ext.wtf import Form #@UnresolvedImport
+from wtforms import TextAreaField
 
 __all__ = ['CitationHelperInputForm',]
 

@@ -5,8 +5,10 @@ Created on May 13, 2013
 '''
 import unittest2
 from flask import request
-from flask.ext.wtf import (Form, TextField, RadioField,     #@UnresolvedImport
-                           TextAreaField, required, length, validators) #@UnresolvedImport
+from flask.ext.wtf import Form #@UnresolvedImport
+from wtforms import (TextField, RadioField,     #@UnresolvedImport
+                    TextAreaField, validators)#@UnresolvedImport
+from wtforms.validators import (required, length) 
 from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
 from test_utils import AdsabsBaseTestCase
 

@@ -378,7 +378,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&topn=1000'):
             out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"))',
                     'filters': [],
-                    'rows': '10',
+                    'rows': config.SEARCH_DEFAULT_ROWS,
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None,

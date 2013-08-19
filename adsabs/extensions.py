@@ -28,5 +28,5 @@ pushrod = Pushrod(default_renderer=config.API_DEFAULT_RESPONSE_FORMAT)
 from flask.ext.mail import Mail #@UnresolvedImport
 mail = Mail()
 
-from flask.ext.cache import Cache
+from flask.ext.cache import Cache   #@UnresolvedImport
 cache = Cache()

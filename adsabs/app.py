@@ -129,13 +129,14 @@ def _configure_extensions(app):
     app.logger.debug("initializing mail")
     mail.init_app(app)  #@UndefinedVariable
     
+    app.logger.debug("initializing app cache")
+    cache.init_app(app) #@UndefinedVariable
+    
     app.logger.debug("initializing jinja2 extensions")
     app.jinja_env.add_extension('jinja2.ext.with_')
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
-    
-    app.logger.debug("initializing app cache")
-    cache.init_app(app)
+     
     
 def _configure_error_handlers(app):
     """

@@ -60,7 +60,7 @@ class UserTests(AdsabsBaseTestCase):
         self.assertIsNone(u.user_rec.last_signon)
         
         # user/password doesn't matter here since we've monkeypatched the auth method
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla1",next="blah",remember=1,submit=1))
         u = user.AdsUser.from_id(fix.user_data['cookie'])
         self.assertIsNotNone(u.get_last_signon())
         
@@ -140,7 +140,7 @@ class UserTests(AdsabsBaseTestCase):
         """ test that when the user logs in, 4 set-cookie headers are sent back"""
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla2",next="blah",remember=1,submit=1))
         #there are some cookies
         self.assertTrue(rv.headers.has_key('Set-Cookie'))
         #count that there are 2 ADS2 and 2 ads classic cookies
@@ -161,7 +161,7 @@ class UserTests(AdsabsBaseTestCase):
         self.useFixture(fix)
         cookie_value = 'c910a0dc-c75b-4f2e-b811-38c45192d93f'
         headers = Headers({'Cookie':'NASA_ADSABS2_ID=%s;' % cookie_value})
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1), headers=headers)
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla3",next="blah",remember=1,submit=1), headers=headers)
         #there are some cookies
         self.assertTrue(rv.headers.has_key('Set-Cookie'))
         #count that there are 2 ADS2 and 2 ads classic cookies
@@ -180,7 +180,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla4",next="blah",remember=1,submit=1))
         #request with wrong cookies
         self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'wrong_cookie')
         self.client.set_cookie('localhost', 'NASA_ADS_ID', 'wrong_cookie')
@@ -201,7 +201,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla5",next="blah",remember=1,submit=1))
         #set cookies for the next request
         self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'abc123')
         self.client.set_cookie('localhost', 'NASA_ADS_ID', 'abc123')
@@ -223,7 +223,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next="blah",remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla6",next="blah",remember=1,submit=1))
         #set cookies for the next request
         self.client.set_cookie('localhost', 'NASA_ADSABS2_ID', 'abc123')
         self.client.set_cookie('localhost', 'NASA_ADS_ID', 'abc123')
@@ -244,7 +244,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         next_path = "/search"
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next=next_path,remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla7",next=next_path,remember=1,submit=1))
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         self.assertEqual(urlparse(rv.headers.get('Location')).path, next_path)
@@ -256,7 +256,7 @@ class UserTests(AdsabsBaseTestCase):
         self.useFixture(fix)
         next_path = "/search?param=foo&param2=bar+bar&nil=nal"
         next_path_out = "/search?param=foo&param2=bar+bar&nil=nal"
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next=next_path,remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla8",next=next_path,remember=1,submit=1))
         self.assertEqual(rv.status_code, 302)
         self.assertNotEqual(rv.headers.get('Location'), None)
         parsed_location_header = urlparse(rv.headers.get('Location'))
@@ -268,7 +268,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next='foo',remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla9",next='foo',remember=1,submit=1))
         #then he logs out
         next_path = "/search"
         rv = self.client.get('/user/logout?next=%s' % quote_plus(next_path))
@@ -282,7 +282,7 @@ class UserTests(AdsabsBaseTestCase):
         fix = ClassicADSSignonFixture()
         self.useFixture(fix)
         #first the user logs in
-        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="barbaz123",next='foo',remember=1,submit=1))
+        rv = self.client.post('/user/login', data=dict(login="foo@example.com",password="bla10",next='foo',remember=1,submit=1))
         #then he logs out
         next_path = "/search?param=foo&param2=bar+bar&nil=nal"
         rv = self.client.get('/user/logout?next=%s' % quote_plus(next_path))

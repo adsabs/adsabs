@@ -65,8 +65,7 @@ def login():
     if current_user.is_authenticated():
         return redirect(request.args.get('next', None) or url_for('user.index'))
     
-    form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None))
-
+    form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None), csrf_enabled=config.CSRF_ENABLED)
     if form.validate_on_submit():
         app.logger.debug('Authentication process')
         user, auth_msg = authenticate(form.login.data, form.password.data)
