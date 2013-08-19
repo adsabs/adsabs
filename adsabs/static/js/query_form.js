@@ -10,13 +10,11 @@ function search_form_drawer_manager(obj_drower, obj_drawer_handler)
 		//I check if the drawer is visible or not
 		if ($(obj_drower).is(":visible"))
 		{
-			$(obj_drawer_handler).html('<i class="icon-minus"></i>');
-			$(obj_drawer_handler).attr('title', 'less options');
+			$(obj_drawer_handler).children('i').removeClass('icon-plus').addClass('icon-minus');
 		}
 		else
 		{
-			$(obj_drawer_handler).html('<i class="icon-plus"></i>');
-			$(obj_drawer_handler).attr('title', 'more options');
+			$(obj_drawer_handler).children('i').removeClass('icon-minus').addClass('icon-plus');
 		}
 	});
 };

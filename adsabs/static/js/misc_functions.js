@@ -177,6 +177,7 @@ Misc.wrapContentWithFunction = function(elementID, functionName, listOfAlternate
 	if (text_content.length == 0)
 	{
 		textArea.val(functionName + '(YOUR QUERY HERE)');
+		textArea.focus();
 		return null;
 	}
 	//if there are alternates texts, check if the input starts and ends with the each alternate and in case replace it
@@ -187,12 +188,14 @@ Misc.wrapContentWithFunction = function(elementID, functionName, listOfAlternate
 		if (text_content.startsWith(cur_func+'(') && text_content.endsWith(')'))
 		{
 			textArea.val(functionName + text_content.slice(-(text_content.length - cur_func.length)));
+			textArea.focus();
 			return null;
 		}
 		
 	}
 	//if the code reaches this point, the function is simply applied
 	textArea.val(functionName + '(' + text_content + ')');
+	textArea.focus();
 	return null;
 };
 
