@@ -19,8 +19,11 @@ __all__ = [
     ]
 
 
-def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, \
-          rows=config.SEARCH_DEFAULT_ROWS, start=None, ui_q=None, ui_filters=[], **kwargs):
+def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, 
+                   sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, 
+                   query_fields=config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
+                   rows=config.SEARCH_DEFAULT_ROWS, start=None, ui_q=None, 
+                   ui_filters=[], **kwargs):
     
     req = SolrRequest(q, rows=rows)
     
@@ -38,6 +41,7 @@ def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, sort_directio
         req.add_filter(filter_)
     
     req.set_fields(config.SOLR_SEARCH_DEFAULT_FIELDS)
+    req.set_query_fields(query_fields)
     
     for facet in config.SOLR_SEARCH_DEFAULT_FACETS:
         req.add_facet(*facet)
@@ -60,9 +64,13 @@ def query(q, **kwargs):
     req = search_request(q, **kwargs)
     return req.get_response()
 
-def facet_request(q, filters=[], facet_fields=None, ui_q=None, ui_filters=[], **kwargs):
+def facet_request(q, filters=[], facet_fields=None, ui_q=None, ui_filters=[], 
+                  query_fields=config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS, **kwargs):
+
     req = SolrRequest(q, rows=0)
     
+    req.set_query_fields(query_fields)
+
     for filter_ in filters:
         req.add_filter(filter_)
     

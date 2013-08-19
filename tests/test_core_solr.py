@@ -60,6 +60,12 @@ class SolrTestCase(AdsabsBaseTestCase):
         req.set_sort("baz", "asc")
         self.assertEqual(req.params.sort, "baz asc")
         self.assertEqual(req.get_sort(), [('baz','asc')])
+        
+    def test_solr_request_set_query_fields(self):
+        req = solr.SolrRequest("foo")
+        self.assertIsNone(req.params.qf)
+        req.set_query_fields("bar baz^1.2")
+        self.assertEqual(req.params.qf, "bar baz^1.2")
     
     def test_solr_request_add_sort(self):
         req = solr.SolrRequest("foo")

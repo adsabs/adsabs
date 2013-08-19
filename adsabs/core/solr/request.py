@@ -48,6 +48,10 @@ class SolrRequest(object):
         self.params.fl = ','.join(fields)
         return self
         
+    def set_query_fields(self, query_fields):
+        self.params.qf = query_fields
+        return self
+
     def get_fields(self):
         if self.params.has_key('fl'):
             return self.params.fl.split(',')
