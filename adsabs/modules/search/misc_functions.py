@@ -40,7 +40,8 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
             'sort': config.SEARCH_DEFAULT_SORT,
             'start': None,
             'sort_direction':config.SEARCH_DEFAULT_SORT_DIRECTION,
-            'rows':config.SEARCH_DEFAULT_ROWS
+            'rows':config.SEARCH_DEFAULT_ROWS,
+            'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS
             }
     
     def add_filter_to_search_components(facet_name, value, force_to_q=False):
@@ -94,6 +95,19 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     if form.article.data:
         add_filter_to_search_components('prop_f', u'NOT property:NONARTICLE', force_to_q=True)
         search_components['ui_filters'].append(u'-property:NONARTICLE')
+        
+    #disable fulltext
+    if form.no_ft.data:
+        #if the param is set by default the conf is set to the limited value
+        search_components['query_fields'] = config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY
+        #if there is only one field in raw_data and its 
+        if len(form.no_ft.raw_data) == 1:
+            if form.no_ft.raw_data[0] == '1':
+                #the default value is ok here
+                pass
+            else:
+                #otherwise the parameter will be the custom one
+                search_components['query_fields'] = form.no_ft.raw_data[0]
         
     #number of rows
     if form.nr.data and form.nr.data != 'None':

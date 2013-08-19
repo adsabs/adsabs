@@ -58,7 +58,8 @@ def search():
                          sort_direction=query_components['sort_direction'],
                          rows=query_components['rows'],
                          ui_filters=query_components['ui_filters'],
-                         ui_q=query_components['ui_q']
+                         ui_q=query_components['ui_q'],
+                         query_fields=query_components['query_fields']
                          )
             if resp.is_error():
                 flash(resp.get_error_message(), 'error')
@@ -81,7 +82,8 @@ def facets():
                             facet_fields=query_components['facet_fields'],
                             filters=query_components['filters'],
                             ui_filters=query_components['ui_filters'],
-                            ui_q=query_components['ui_q']
+                            ui_q=query_components['ui_q'],
+                            query_fields=query_components['query_fields']
                             )
             return render_template('facets_sublevel.html', resp=resp, facet_field_interf_id=query_components['facet_field_interf_id'] )
         else:

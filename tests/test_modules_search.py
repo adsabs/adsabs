@@ -58,7 +58,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -71,7 +72,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"'],
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -84,7 +86,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"ASTRONOMY"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -98,7 +101,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"physics"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -112,6 +116,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'sort': 'RELEVANCE', 
                    'start': None, 
                    'sort_direction': 'desc', 
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -124,7 +129,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'pubdate:[2010-12-00 TO 9999-00-00]', u'database:"astronomy"',], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -137,7 +143,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'pubdate:[0001-00-00 TO 2010-12-00]', u'database:"astronomy"',], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -150,7 +157,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'pubdate:[2009-09-00 TO 2010-12-00]', u'database:"astronomy"',], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -164,7 +172,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'pubdate:[2009-09-00 TO 2010-12-00]', u'database:"astronomy"',],
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -177,7 +186,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"',], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -190,7 +200,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -203,7 +214,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -216,7 +228,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'property:"refereed"', u'database:"astronomy"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             comps = build_basicquery_components(form, request.values)
@@ -231,7 +244,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'-property:NONARTICLE', u'database:"astronomy"'],
                    'sort': u'RELEVANCE', 
                    'start': None , 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values), out)
@@ -246,7 +260,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'author:"Civano"',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -260,7 +275,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'author:"Civano"',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -274,7 +290,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'author:"Civano"',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -290,7 +307,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'author:"Civano"',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -306,7 +324,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'author:"Civano"',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -320,7 +339,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'ui_q': u'*',
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
-                    'start': None, 
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -337,7 +357,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                      'ui_q': u'author:"civano"',
                      'sort': u'RELEVANCE',
                      'sort_direction': 'desc',
-                     'start': None, 
+                     'start': None,
+                     'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                      'rows':config.SEARCH_DEFAULT_ROWS}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=True), out)
@@ -352,7 +373,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':u'50' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -367,7 +389,8 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                    'ui_filters': [u'database:"astronomy"'], 
                    'sort': u'RELEVANCE', 
                    'start': None, 
-                   'sort_direction': 'desc', 
+                   'sort_direction': 'desc',
+                   'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                    'rows':u'33' }
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
@@ -382,11 +405,42 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
                     'sort': u'RELEVANCE',
                     'sort_direction': 'desc',
                     'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'ui_filters': [u'database:"astronomy"'],
                     'ui_q': u' author:"civano"'}
             form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
             self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
             self.assertTrue(form.validate())
+            
+    def test_no_fulltext_1(self):
+        """Test with fulltext disabled"""
+        with self.app.test_request_context('/search/?q=civano&no_ft=1'):
+            out = {'q': u'(civano)',
+                    'filters': [],
+                    'rows': config.SEARCH_DEFAULT_ROWS,
+                    'sort': u'RELEVANCE',
+                    'sort_direction': 'desc',
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY,
+                    'ui_filters': [],
+                    'ui_q': u'civano'}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+            
+    def test_no_fulltext_2(self):
+        """Test with fulltext disable with custom value that is used for the QF field in the SOLR request"""
+        with self.app.test_request_context('/search/?q=civano&no_ft=full^1.3'):
+            out = {'q': u'(civano)',
+                    'filters': [],
+                    'rows': config.SEARCH_DEFAULT_ROWS,
+                    'sort': u'RELEVANCE',
+                    'sort_direction': 'desc',
+                    'start': None,
+                    'query_fields': u'full^1.3',
+                    'ui_filters': [],
+                    'ui_q': u'civano'}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
             
 class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
     

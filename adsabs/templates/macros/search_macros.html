@@ -80,9 +80,14 @@
 	        			</div>
 	        		</div>
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">
-	        			{# <div class="row">
-	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.refereed }} {{ form.refereed.description }}</label></div>
-	        			</div> #}
+	        			<div class="row">
+	        				{% if not form.no_ft.raw_data or form.no_ft.raw_data[0] == '1' %}
+	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.no_ft(value='1') }} {{ form.no_ft.description }}</label></div>
+	        				{% else %}
+	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.no_ft() }} Custom QF</label></div>
+	        				{% endif %}
+	        				
+	        			</div>
 	        			<div class="row">
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.article }} {{ form.article.description }}</label></div>
 	        			</div>

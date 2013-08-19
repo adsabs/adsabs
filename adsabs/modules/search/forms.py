@@ -9,10 +9,7 @@ from wtforms import (TextField, SelectField, IntegerField, BooleanField, #Hidden
                           validators) #@UnresolvedImport
 from wtforms.validators import (required, optional, length)
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
-#from flask.ext.wtf.html5 import RangeInput #@UnresolvedImport
 
-from config import config
-#from custom_wtform import SelectFieldCssClass
 
 __all__ = ["get_missing_defaults", "QueryForm", "AdvancedQueryForm"]
 
@@ -36,37 +33,22 @@ def get_missing_defaults(req_val_lists, form):
 class QueryForm(Form):
     """Form for the basic search"""
     q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
-#     db_f = HiddenField(u'database', default='astronomy')
-#     sort_dir = HiddenField(u'Sort direction', default='desc')
-#     db_key =  SelectField(u'Database', choices=[('ASTRONOMY', 'Astronomy'), ('PHYSICS', 'Physics'), ('ALL', 'All') ])
-#     sort_type = SelectField(u'Sort', choices=[('RELEVANCE','Sort by Most relevant'),('DATE','Sort by Most recent'),
-#                                                 ('CITED','Sort by Most cited'),('POPULARITY','Sort by Most popular'),
-#                                                 #('second_order_operator', 'Use Second order operator'),
-#                                                 #('hot','Explore What people are reading'),('useful','Explore What experts are citing'),
-#                                                 #('instructive','Explore Reviews and introductory papers ')
-#                                                 ] )
+
     db_f =  SelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('general', 'general'), ('', 'all') ], description=u'Database')
     
     month_from = IntegerField(u'Month From', [optional(), validators.NumberRange(min=1, max=12, message='Starting month not valid: allowed values from 01 to 12')])
     month_to = IntegerField(u'Month To', [optional(), validators.NumberRange(min=1, max=12, message='Ending month not valid: allowed values from 01 to 12')])
     year_from = IntegerField(u'Year From', [optional(), validators.NumberRange(min=1, max=2500, message='Starting year not valid')])
     year_to = IntegerField(u'Year To', [optional(), validators.NumberRange(min=1, max=2500, message='Ending year not valid')])
-#     journal_abbr = TextField(u'Bibstems', [optional(), length(min=2, max=2048)], description=u'Journal Abbreviation(s)')
-#     refereed = BooleanField(u'Refereed', description=u'Refereed only')
     article = BooleanField(u'Articles', description=u'Articles only')
     nr = SelectField(u'Number to view in page', [optional()], choices=[('', 'default results'), 
                                                         ('20', '20 results'), ('50', '50 results'), ('50', '50 results'), ('100', '100 results'), 
                                                         ('200', '200 results')] )
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
+    no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
     
-#     default_if_missing = MultiDict([('db_key', 'ASTRONOMY'), ('sort_type', config.SEARCH_DEFAULT_SORT)])
     default_if_missing = MultiDict([('db_f', ''), ])
-    
-    
-    #second_order_type = RadioField(u'Explore the field', choices=[('hot','What people are reading'),('useful','What experts are citing'),
-    #                                                   ('instructive','Reviews and introductory papers ')])
-    #author = TextField('Author', [length(min=1, max=2048)], description="Author field search")
-    #submit = SubmitField('Search', description="Search")
+
     
 class AdvancedQueryForm(QueryForm):
     pass
