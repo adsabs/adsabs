@@ -1,5 +1,8 @@
-import unittest2 as unittest
+import os
+import sys
+sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path
 
+import unittest2 as unittest
 import page_objects as po
 from utils import BaseSeleniumTestCase
 

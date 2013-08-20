@@ -1,5 +1,6 @@
 import unittest2 as unittest
 from selenium import webdriver
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -16,19 +17,18 @@ def case_ins_contains(s):
 
 class TestContext(object):
     
-    def __init__(self):
-        self.driver = test_config.SELENIUM_DEFAULT_BROWSER
-        
     def open_browser(self):
-        if test_config.SELENIUM_USE_REMOTE:
-            dc = getattr(DesiredCapabilities, self.driver.upper())
-            dc['name'] = test_config.SELENIUM_TEST_NAME
-            cmd_exec = test_config.SELENIUM_REMOTE_CMD_EXEC
-            self.browser = webdriver.Remote(desired_capabilities=dc, command_executor=cmd_exec)
-        else:
+
+#         if test_config.SELENIUM_USE_REMOTE:
+#             dc = getattr(DesiredCapabilities, self.driver.upper())
+#             dc['name'] = test_config.SELENIUM_TEST_NAME
+#             cmd_exec = test_config.SELENIUM_REMOTE_CMD_EXEC
+#             self.browser = webdriver.Remote(desired_capabilities=dc, command_executor=cmd_exec)
+
+        if test_config.SELENIUM_USE_VIRTUALDISPLAY:
             self.virtualdisplay = Display(backend=test_config.SELENIUM_VIRTUALDISPLAY_BACKEND, size=(600, 800)).start()
-            driver = getattr(webdriver, test_config.SELENIUM_DEFAULT_BROWSER)
-            self.browser = driver()
+
+        self.browser = webdriver.Firefox(firefox_binary=FirefoxBinary(test_config.SELENIUM_FIREFOX_PATH))
         self.browser.implicitly_wait(test_config.SELENIUM_PAGE_WAIT)
         
     def close(self):

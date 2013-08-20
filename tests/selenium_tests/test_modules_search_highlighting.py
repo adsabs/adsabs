@@ -1,5 +1,7 @@
 import os
 import sys
+sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
