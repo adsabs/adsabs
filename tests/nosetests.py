@@ -9,8 +9,9 @@ import sys
 import nose
 
 test_dir = os.path.abspath(os.path.dirname(__file__))
-selenium_dir = os.path.join(test_dir, 'selenium')
+selenium_dir = os.path.join(test_dir, 'selenium_tests')
 
-argv = sys.argv[:]
-argv += [test_dir, selenium_dir, '-v']
+sys.path = [test_dir, selenium_dir] + sys.path
+
+argv = sys.argv[:] + ['-v']
 nose.main(argv=argv)
