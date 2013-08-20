@@ -227,9 +227,6 @@ class AppConfig(object):
     PAGES_REFRESH_BASE_URL = "http://localhost:5000"
     PAGES_DEFAULT_INDEX = "Index"
     
-    SELENIUM_BASE_URL = None
-    SELENIUM_PAGE_WAIT = None
-    
     CACHE_TYPE = 'redis'
     CACHE_KEY_PREFIX = 'cache:adsabs:'
 
