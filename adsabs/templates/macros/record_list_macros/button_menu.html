@@ -22,7 +22,7 @@
 			>
 			<i class="icon-random"></i>
 			Sort
-			{% if re_sort_type and re_sort_dir %}
+			{% if re_sort_type %}
 			<i class="icon-ok-sign"></i>
 			{% else %}
 			<i class="icon-white"></i>
@@ -30,83 +30,100 @@
 			<i class="caret"></i>
 		</a>
 		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-			<li class="dropdown-submenu pull-left">
-				<a tabindex="-1">by date
-				{% if re_sort_type == 'DATE' %}
+			<li>
+				<a href="{{ base_re_sort_url }}&re_sort_type=RELEVANCE">by relevance
+				{% if re_sort_type == 'RELEVANCE' %}
 				<i class="icon-ok-sign"></i>
 				{% endif %}</a>
+			</li>
+			<li class="dropdown-submenu pull-left">
+				<a tabindex="-1"
+				{% if re_sort_type == 'DATE' %}
+					{% if re_sort_dir=='desc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=asc"
+					{% elif re_sort_dir=='asc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=desc"
+					{% endif %}
+				{% else %}
+				href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=desc"
+				{% endif %}
+				>by date
+					{% if re_sort_type == 'DATE' %}
+						<i class="icon-ok-sign"></i>
+					{% endif %}</a>
 				<ul class="dropdown-menu">
 					<li class="nav-header">by date</li>
-					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=asc">Ascending
-						{% if re_sort_type == 'DATE' and re_sort_dir=='asc' %}
-						<i class="icon-ok-sign"></i>
-						{% endif %}</a>
-					</li>
 					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=desc">Descending
 						{% if re_sort_type == 'DATE' and re_sort_dir=='desc' %}
 						<i class="icon-ok-sign"></i>
 						{% endif %}</a>
 					</li>
-				</ul>
-			</li>
-		  <li class="dropdown-submenu pull-left">
-				<a tabindex="-1">by relevance
-				{% if re_sort_type == 'RELEVANCE' %}
-				<i class="icon-ok-sign"></i>
-				{% endif %}</a>
-				<ul class="dropdown-menu">
-					<li class="nav-header">by relevance</li>
-					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=RELEVANCE&re_sort_dir=asc">Ascending
-						{% if re_sort_type == 'RELEVANCE' and re_sort_dir=='asc' %}
-						<i class="icon-ok-sign"></i>
-						{% endif %}</a>
-					</li>
-					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=RELEVANCE&re_sort_dir=desc">Descending
-						{% if re_sort_type == 'RELEVANCE' and re_sort_dir=='desc' %}
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=DATE&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'DATE' and re_sort_dir=='asc' %}
 						<i class="icon-ok-sign"></i>
 						{% endif %}</a>
 					</li>
 				</ul>
 			</li>
-		  <li class="dropdown-submenu pull-left">
-				<a tabindex="-1">by citation num
+		  	<li class="dropdown-submenu pull-left">
+				<a tabindex="-1"
+				{% if re_sort_type == 'CITED' %}
+					{% if re_sort_dir=='desc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=asc"
+					{% elif re_sort_dir=='asc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc"
+					{% endif %}
+				{% else %}
+				href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc"
+				{% endif %}
+				>by citation num
 				{% if re_sort_type == 'CITED' %}
 				<i class="icon-ok-sign"></i>
 				{% endif %}</a>
 				<ul class="dropdown-menu">
 					<li class="nav-header">by citation num</li>
-					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=asc">Ascending
-						{% if re_sort_type == 'CITED' and re_sort_dir=='asc' %}
-						<i class="icon-ok-sign"></i>
-						{% endif %}</a>
-					</li>
 					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc">Descending
 						{% if re_sort_type == 'CITED' and re_sort_dir=='desc' %}
 						<i class="icon-ok-sign"></i>
 						{% endif %}</a>
 					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'CITED' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
 				</ul>
 			</li>
-		  <li class="dropdown-submenu pull-left">
-				<a tabindex="-1">by popularity
+		  	<li class="dropdown-submenu pull-left">
+				<a tabindex="-1"
+				{% if re_sort_type == 'POPULARITY' %}
+					{% if re_sort_dir=='desc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=asc"
+					{% elif re_sort_dir=='asc' %}
+					href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=desc"
+					{% endif %}
+				{% else %}
+				href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=desc"
+				{% endif %}
+				>by popularity
 				{% if re_sort_type == 'POPULARITY' %}
 				<i class="icon-ok-sign"></i>
 				{% endif %}</a>
 				<ul class="dropdown-menu">
 					<li class="nav-header">by popularity</li>
-					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=asc">Ascending
-						{% if re_sort_type == 'POPULARITY' and re_sort_dir=='asc' %}
-						<i class="icon-ok-sign"></i>
-						{% endif %}</a>
-					</li>
 					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=desc">Descending
 						{% if re_sort_type == 'POPULARITY' and re_sort_dir=='desc' %}
 						<i class="icon-ok-sign"></i>
 						{% endif %}</a>
 					</li>
+					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=POPULARITY&re_sort_dir=asc">Ascending
+						{% if re_sort_type == 'POPULARITY' and re_sort_dir=='asc' %}
+						<i class="icon-ok-sign"></i>
+						{% endif %}</a>
+					</li>
 				</ul>
 			</li>
-			{% if re_sort_type and re_sort_dir %}
+			{% if re_sort_type %}
 			<li class="divider"></li>
 			<li><a tabindex="-1" href="{{ base_re_sort_url }}">Remove Sort</a></li>
 			{% endif %}
