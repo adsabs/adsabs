@@ -5,7 +5,7 @@ Created on Aug 2, 2013
 '''
 
 from search_page import BaseSearchPage
-from config import test_config
+from config.test_config import test_config
 
 class HomePage(BaseSearchPage):
     

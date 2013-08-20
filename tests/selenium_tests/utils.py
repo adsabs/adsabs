@@ -6,7 +6,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from pyvirtualdisplay import Display
 
-from config import test_config
+from config.test_config import test_config
 
 def case_ins_contains(s):
     """

@@ -6,7 +6,7 @@ Created on Aug 2, 2013
 from selenium.webdriver.common.keys import Keys
 
 from page_object import BasePageObject
-from config import test_config
+from config.test_config import test_config
 
 class BaseSearchPage(BasePageObject):
     """

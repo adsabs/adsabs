@@ -1,6 +1,3 @@
-import os
-import sys
-sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path
 
 import unittest2 as unittest
 import page_objects as po
@@ -12,7 +9,7 @@ class SearchTest(BaseSeleniumTestCase):
 
         home = po.HomePage(self.tc)
         search_results = home.search("black holes")
-        self.assertIn("Search Results: black holes", search_results.title())
+        self.assertIn("black holes", search_results.title())
         self.assertTrue(search_results.has_pagination())
         
 if __name__ == '__main__':

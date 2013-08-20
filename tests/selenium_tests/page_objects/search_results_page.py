@@ -3,8 +3,9 @@ Created on Aug 2, 2013
 
 @author: jluker
 '''
+import sys
 from search_page import BaseSearchPage
-from utils import case_ins_contains
+from tests.selenium_tests.utils import case_ins_contains
 
 class SearchResultsPage(BaseSearchPage):
     

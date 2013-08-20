@@ -20,7 +20,7 @@ try:
     if TestConfig.SELENIUM_USE_VIRTUALDISPLAY:
         d = Display(backend=TestConfig.SELENIUM_VIRTUALDISPLAY_BACKEND, size=(600, 800))
 except:
-    print >>sys.stderr, "%s initialization failed. Tests won't use virtualdisplay." % TestConfig.SELENIUM_VIRTUALDISPLAY_BACKEND
+    print >>sys.stderr, "%s initialization failed. Selenium tests won't use virtualdisplay." % TestConfig.SELENIUM_VIRTUALDISPLAY_BACKEND
     TestConfig.SELENIUM_USE_VIRTUALDISPLAY = False
 
 try:

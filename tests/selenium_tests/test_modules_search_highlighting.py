@@ -1,14 +1,10 @@
-import os
-import sys
-sys.path = [os.path.dirname(os.path.abspath(__file__))] + sys.path
-
+import nose
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 from utils import TestContext
 import page_objects as po
 
-tc = None
     
 def test_generate():
 
@@ -40,19 +36,22 @@ def test_generate():
         
 def check_highlights(q, match):
     # check that matching highlights are displayed
+    tc = TestContext()
+    tc.open_browser()
     home = po.HomePage(tc)
     search_results = home.search(q)
+    tc.close()
     assert search_results.has_highlights(match)
 
 def check_highlights_not_exist(q):
     # test that no highlights are displayed
+    tc = TestContext()
+    tc.open_browser()
     home = po.HomePage(tc)
     search_results = home.search(q)
+    tc.close()
     assert not search_results.has_highlights()
 
 if __name__ == '__main__':
-    import nose
-    tc = TestContext()
-    tc.open_browser()
     nose.run(defaultTest=__name__, argv=[__file__, '-v'])
 
