@@ -118,7 +118,7 @@ class AppConfig(object):
     
     SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
     SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
-    SOLR_SEARCH_REQUIRED_FIELDS = ['bibcode']
+    SOLR_SEARCH_REQUIRED_FIELDS = ['id','bibcode']
     
     #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
     #added also a default function to use
