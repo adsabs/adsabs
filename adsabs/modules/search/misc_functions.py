@@ -169,7 +169,17 @@ def build_basicquery_components(form, request_values=CombinedMultiDict([]), face
     
     #wrapping the query with topn function if there is a valid number (the validation must be done in the form) 
     if form.topn.data and form.topn.data != 'None':
-        search_components['q'] = u'topn(%s, (%s))' % (form.topn.data, search_components['q'])
+        topn_sort_mode = config.RE_SORT_OPTIONS[search_components['sort']]
+        topn_sort_dir = search_components['sort_direction']
+        #if sort is RELEVANCE, there is no need of direction
+        if search_components['sort'] == 'RELEVANCE':
+            topn_sort_dir = ''
+        topn_sort = '%s %s' % (topn_sort_mode, topn_sort_dir)
+        #if the topn is used, no sorting is needed by SOLR
+        search_components['sort'] = None
+        search_components['sort_direction'] = None
+        
+        search_components['q'] = u'topn(%s, (%s), "%s")' % (form.topn.data, search_components['q'], topn_sort.strip())
         
     return search_components
 

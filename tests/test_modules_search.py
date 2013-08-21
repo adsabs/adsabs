@@ -399,11 +399,43 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
     def test_topn_1(self):
         """Test for a request with a number of record to return different from the default (that is all of them)"""
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&topn=1000'):
-            out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"))',
+            out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"), "score")',
                     'filters': [],
                     'rows': config.SEARCH_DEFAULT_ROWS,
-                    'sort': u'RELEVANCE',
-                    'sort_direction': 'desc',
+                    'sort': None,
+                    'sort_direction': None,
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
+                    'ui_filters': [u'database:"astronomy"'],
+                    'ui_q': u' author:"civano"'}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+            self.assertTrue(form.validate())
+    
+    def test_topn_2(self):
+        """Test for a request with a number of record to return different from the default with sorting"""
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&re_sort_type=DATE&re_sort_dir=desc&topn=1000'):
+            out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"), "pubdate_sort desc")',
+                    'filters': [],
+                    'rows': config.SEARCH_DEFAULT_ROWS,
+                    'sort': None,
+                    'sort_direction': None,
+                    'start': None,
+                    'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
+                    'ui_filters': [u'database:"astronomy"'],
+                    'ui_q': u' author:"civano"'}
+            form = QueryForm(get_missing_defaults(request.values, QueryForm), csrf_enabled=False)
+            self.assertEqual(build_basicquery_components(form, request.values, facets_components=False), out)
+            self.assertTrue(form.validate())
+            
+    def test_topn_3(self):
+        """Test for a request with a number of record to return different from the default (that is all of them)"""
+        with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&re_sort_type=POPULARITY&re_sort_dir=asc&topn=1000'):
+            out = {'q': u'topn(1000, (( author:"civano") AND database:"astronomy"), "read_count asc")',
+                    'filters': [],
+                    'rows': config.SEARCH_DEFAULT_ROWS,
+                    'sort': None,
+                    'sort_direction': None,
                     'start': None,
                     'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
                     'ui_filters': [u'database:"astronomy"'],
