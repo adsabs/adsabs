@@ -58,6 +58,10 @@ class SearchHighlightingTest(BaseSeleniumTestCase):
         search_results = home.search('author:"*woo"')
         self.assertFalse(search_results.has_highlights())
         
+    def test_highlights_11(self):
+        home = po.HomePage(self.tc)
+        search_results = home.search('black holes database:astronomy')
+        self.assertFalse(search_results.has_highlights("database"))
     
 if __name__ == '__main__':
     unittest.main()
