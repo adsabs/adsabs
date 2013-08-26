@@ -3,8 +3,12 @@ Created on May 14, 2013
 
 @author: dimilia
 '''
-
-import unittest2
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+    
 from test_utils import (AdsabsBaseTestCase, ClassicADSSignonFixture)
 from bs4 import BeautifulSoup
 
@@ -102,4 +106,4 @@ class FeedbackTests(AdsabsBaseTestCase):
         self.assertGreater(len(tag), 0)
         
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

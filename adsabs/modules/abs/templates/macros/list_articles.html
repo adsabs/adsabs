@@ -3,19 +3,19 @@
 {% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
 {% from "macros/record_list_macros/button_menu.html" import render_re_sort, render_toggle_all_paper_list, render_export_menu with context %}
 
-{% macro render_list_articles(list_articles, blueprint, bibcode) %}
+{% macro render_list_articles(list_articles, list_type, bibcode) %}
 <form action="">
 	<div class="container-fluid">	
 	{# Navbar on top of the results #}
 		<div class="row-fluid well well-small">
 			<div class="span5 firstspan">
 				{{ render_toggle_all_paper_list() }}
-				{{ render_result_numbers(list_articles, blueprint, bibcode) }}
+				{{ render_result_numbers(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type)) }}
 			</div>
 			<div class="span4 pull-right">
 				<!-- button class="btn pull-right">Sort</button-->
 				<!-- button class="btn pull-right">More</button-->
-				{{ render_re_sort(list_articles, blueprint, bibcode) }}
+				{{ render_re_sort(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type)) }}
 				{{ render_export_menu() }}
 			</div>
 		</div>
@@ -25,6 +25,6 @@
 	{% endfor %}
 	</div>
 </form>
-{{ render_pagination(list_articles.get_pagination(), blueprint, bibcode) }}
+{{ render_pagination(list_articles.get_pagination(), url_for('abs.tab_list', bibcode=bibcode, list_type=list_type)) }}
 
 {% endmacro %}

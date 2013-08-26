@@ -1,11 +1,16 @@
 
 import os
+import sys
 import site
 tests_dir = os.path.dirname(os.path.abspath(__file__))
 site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
 site.addsitedir(tests_dir) #@UndefinedVariable
 
-import unittest2
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+
 import uuid
 import pytz
 from datetime import datetime#, timedelta
@@ -17,7 +22,7 @@ from werkzeug.datastructures import Headers
 
 #from adsabs.app import create_app
 from adsabs.modules.user import user
-from adsabs.modules.api.user import create_api_user, PERMISSION_LEVELS
+from adsabs.modules.api.api_user import create_api_user, PERMISSION_LEVELS
 from config import config
 from test_utils import (AdsabsBaseTestCase, ClassicADSSignonFixture, AdsApiUser)
 
@@ -309,4 +314,4 @@ class ApiUserTests(AdsabsBaseTestCase):
         
         
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

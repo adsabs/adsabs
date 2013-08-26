@@ -9,8 +9,7 @@ import re
 from flask import g
 from wtforms import Form, Field, fields, ValidationError, validators
 
-from adsabs.core.solr import SolrRequest
-from .renderers import VALID_FORMATS
+from renderers import VALID_FORMATS
 from config import config
 
 MIN_QUERY_LENGTH = 2

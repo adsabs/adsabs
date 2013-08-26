@@ -6,7 +6,6 @@ from multiprocessing import Pool, current_process
 from multiprocessing import Manager
 # BEER specific imports
 from flask import current_app as app
-from adsabs.core.solr import SolrRequest
 # methods to retrieve various types of data
 from utils import get_citations
 from utils import get_mongo_data

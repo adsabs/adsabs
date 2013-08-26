@@ -1,30 +1,28 @@
 import sys
-sys.path.append('..')
 
 from flask import Blueprint, request, g, current_app as app
 from flask.ext.pushrod import pushrod_view #@UnresolvedImport
+from flask.ext.solrquery import solr, signals as solr_signals #@UnresolvedImport
 
 from functools import wraps
-from ipaddress import ip_address, ip_network
 
-import errors
+import api_errors
 import logging
-from adsabs.core import solr
 from adsabs.core.logevent import LogEvent
-from .user import AdsApiUser
-from .request import ApiSearchRequest, ApiRecordRequest
+from api_user import AdsApiUser
+from api_request import ApiSearchRequest, ApiRecordRequest
 from config import config
 
 #definition of the blueprint for the user part
 api_blueprint = Blueprint('api', __name__,template_folder="templates", url_prefix='/api')
-errors.init_error_handlers(api_blueprint)
+api_errors.init_error_handlers(api_blueprint)
 
 def api_user_required(func):
     @wraps(func)
     def decorator(*args, **kwargs):
         dev_key = request.args.get('dev_key', None)
         if not dev_key or len(dev_key) == 0:
-            raise errors.ApiNotAuthenticatedError("no developer token provided")
+            raise api_errors.ApiNotAuthenticatedError("no developer token provided")
         try:
             user = AdsApiUser.from_dev_key(dev_key)
         except Exception, e:
@@ -33,7 +31,7 @@ def api_user_required(func):
             app.logger.error("User auth failure: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
             user = None
         if not user:
-            raise errors.ApiNotAuthenticatedError("unknown user")
+            raise api_errors.ApiNotAuthenticatedError("unknown user")
         g.api_user = user
         return func(*args, **kwargs)
     return decorator
@@ -43,7 +41,7 @@ def api_ip_allowed(func):
     def decorator(*args, **kwargs):
         user = g.api_user
         if not user.ip_allowed(request.remote_addr):
-            raise errors.ApiUnauthorizedIpError("api requests not allowed from %s" % request.remote_addr)
+            raise api_errors.ApiUnauthorizedIpError("api requests not allowed from %s" % request.remote_addr)
         return func(*args, **kwargs)
     return decorator
 
@@ -75,11 +73,10 @@ def settings():
 @pushrod_view(xml_template="search.xml")
 def search():
     search_req = ApiSearchRequest(request.args)
-    if search_req.validate():
-        resp = search_req.execute()
-        return resp.search_response()
-    raise errors.ApiInvalidRequest(search_req.input_errors())
-        
+    if not search_req.validate():
+        raise api_errors.ApiInvalidRequest(search_req.input_errors())
+    resp = search_req.execute()
+    return resp.search_response()
         
 @api_blueprint.route('/record/<path:identifier>', methods=['GET'])
 @api_user_required
@@ -87,12 +84,12 @@ def search():
 @pushrod_view(xml_template="record.xml", wrap='doc')
 def record(identifier):
     record_req = ApiRecordRequest(identifier, request.args)
-    if record_req.validate():
-        resp = record_req.execute()
-        if not resp.get_hits() > 0:
-            raise errors.ApiRecordNotFound(identifier)
-        return resp.record_response()
-    raise errors.ApiInvalidRequest(record_req.errors())
+    if not record_req.validate():
+        raise api_errors.ApiInvalidRequest(record_req.errors())
+    resp = record_req.execute()
+    if not resp.get_hits() > 0:
+        raise api_errors.ApiRecordNotFound(identifier)
+    return resp.record_response()
         
 #@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
 #@api_user_required
@@ -106,14 +103,32 @@ def record(identifier):
 #def mlt():
 #    pass
 
-@solr.signals.search_signal.connect
-@solr.signals.error_signal.connect
+@solr_signals.error_signal.connect
+def log_solr_error(sender, **kwargs):
+    if hasattr(g, 'user_cookie_id'):
+        kwargs['dev_key'] = g.api_user.get_dev_key()
+        event = LogEvent.new(request.url, **kwargs)
+        logging.getLogger('search').info(event)    
+
+@solr_signals.search_signal.connect
 def log_solr_event(sender, **kwargs):
     """
     extracts some data from the solr  for log/analytics purposes
     """
-    
     if hasattr(g, 'api_user'):
-        kwargs['dev_key'] = g.api_user.get_dev_key()
-        event = LogEvent.new(request.url, **kwargs)
+        resp = kwargs.pop('response')
+        log_data = {
+            'q': resp.get_query(),
+            'hits': resp.get_hits(),
+            'count': resp.get_count(),
+            'start': resp.get_start_count(),
+            'qtime': resp.get_qtime(),
+            'results': resp.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
+            'error_msg': resp.get_error_message(),
+            'http_status': resp.get_http_status(),
+            'solr_url': resp.request.url,
+            'dev_key': g.api_user.get_dev_key()
+        }
+        log_data.update(kwargs)
+        event = LogEvent.new(request.url, **log_data)
         logging.getLogger('api').info(event)

@@ -5,28 +5,28 @@ Created on Sep 19, 2012
 '''
 
 import logging
-from math import ceil
-from copy import deepcopy
 
 from config import config
-from .solrdoc import SolrDocument
+from solrdoc import SolrDocument
 
 from flask import request as current_request, current_app as app
+from flask.ext.solrquery import SearchResponseMixin #@UnresolvedImport
 
 __all__ = ['SolrResponse']
 
-class SolrResponse(object):
+class SolrResponse(SearchResponseMixin):
     
-    def __init__(self, raw, request=None):
-        self.raw = deepcopy(raw)
+    def __init__(self, data, request, http_response, **kwargs):
+        self.raw = data
         self.request = request
+        self.http_response = http_response
         self.meta = {}
         
     def is_error(self):
         return self.raw.get('responseHeader',{}).get('status', False)
     
     def get_http_status(self):
-        return self.http_status
+        return self.http_response.status_code
     
     def search_response(self):
         
@@ -55,18 +55,6 @@ class SolrResponse(object):
         except IndexError:
             return None
     
-    def get_error_components(self):
-        """Extracts all the components of an error from the response object"""
-        if self.is_error():
-            return self.raw.get('error')
-        else:
-            return {}
-    
-    def get_error(self):
-        """Function that returns the raw error message"""
-        error_components = self.get_error_components()
-        return error_components.get('msg', None)
-    
     def get_error_message(self):
         """Function to remove the useless part of the error message coming from SOLR"""
         error_message = self.get_error()
@@ -88,16 +76,6 @@ class SolrResponse(object):
     def raw_response(self):
         return self.raw
     
-    def get_docset(self):
-        if self.raw.has_key('response'):
-            docset = self.raw['response'].get('docs', [])
-            if self.request.highlights_on() and self.raw.has_key('highlighting'):
-                for doc in docset:
-                    doc['highlights'] = self.raw['highlighting'][doc['id']]
-            return self.raw['response'].get('docs', [])
-        else:
-            return []
-    
     def get_docset_objects(self):
         return [SolrDocument(x) for x in self.get_docset()]
 
@@ -105,24 +83,6 @@ class SolrResponse(object):
         doc = self.get_doc(idx)
         if doc:
             return SolrDocument(doc)
-    
-    def get_doc(self, idx):
-        try:
-            return self.get_docset()[idx]
-        except IndexError:
-            app.logger.debug("response has no doc at idx %d" % idx)
-            
-    def get_doc_values(self, field, start=0, stop=None):
-        docs = self.get_docset()
-        return [x.get(field, None) for x in docs[int(start):int(stop)]]
-    
-    def get_all_facets(self):
-        if not self.request.facets_on():
-            return {}
-        return self.raw.get('facet_counts',{})
-    
-    def get_all_facet_fields(self):
-        return self.get_all_facets().get('facet_fields',{})
     
     def get_all_facet_queries(self):
         return self.get_all_facets().get('facet_queries',{})
@@ -217,7 +177,7 @@ class SolrResponse(object):
         if not hasattr(self, 'request_facet_params'):
             facet_params = []
             #first I extract the query parameters excluding the default ones
-            search_filters = self.request.get_filters(exclude_defaults=True, params_field='ui_fq')
+            search_filters = self.request.get_param('ui_filters')
             #I extract only the parameters of the allowed facets
             inverted_allowed_facet_dict = dict((v,k) for k,v in config.ALLOWED_FACETS_FROM_WEB_INTERFACE.iteritems())
             for filter_val in search_filters:
@@ -244,66 +204,14 @@ class SolrResponse(object):
             self.request_facet_params = facet_params
         return self.request_facet_params
     
-    def get_query(self):
-        return self.raw.get('responseHeader',{}).get('params',{}).get('q')
-    
-    def get_count(self):
-        """
-        Returns number of documents in current response
-        """
-        if self.raw.has_key('response'):
-            return len(self.raw['response']['docs'])
-        else:
-            return 0
-    
-    def get_hits(self):
-        """
-        Returns the total number of record found
-        """
-        return self.raw.get('response',{}).get('numFound',0)
-    
-    def get_start_count(self):
-        """
-        Returns the number of the first record in the 
-        response compared to the total number
-        """
-        return self.raw.get('response',{}).get('start',0)
-    
     def get_pagination(self):
         """
-        Returns a dictionary containing all the informations
-        about the status of the pagination 
+        wrap default pagination but use our row count setting
         """
-        if not hasattr(self, 'pagination'):
-            max_pagination_len = 5 #maybe we want to put this in the configuration
-            try:
-                num_rows = int(self.request.params.rows)
-            except (ValueError, TypeError):
-                num_rows = int(config.SEARCH_DEFAULT_ROWS)
-            num_total_pages = int(ceil(float(self.get_hits()) / float(num_rows)))
-            current_page = (int(self.get_start_count()) / num_rows) + 1
-            max_num_pages_before = int(ceil(min(max_pagination_len, num_total_pages) / 2.0)) - 1
-            max_num_pages_after = int(min(max_pagination_len, num_total_pages)) / 2
-            distance_to_1 = current_page - 1
-            distance_to_max = num_total_pages - current_page
-            num_pages_before = min(distance_to_1, max_num_pages_before)
-            num_pages_after = min(distance_to_max, max_num_pages_after)
-            if num_pages_before < max_num_pages_before:
-                num_pages_after += max_num_pages_before - num_pages_before
-            if num_pages_after < max_num_pages_after:
-                num_pages_before += max_num_pages_after - num_pages_after 
-            pages_before = sorted([current_page - i for i in range(1, num_pages_before+1)])
-            pages_after = sorted([current_page + i for i in range(1, num_pages_after+1)])
-            self.pagination = {
-                   'max_pagination_len':max_pagination_len ,
-                   'num_total_pages': num_total_pages,
-                   'current_page': current_page,
-                   'pages_before': pages_before,
-                   'pages_after': pages_after,       
-            }
-        return self.pagination
-    
-    def get_qtime(self):
-        return self.raw.get('responseHeader',{}).get('QTime')
-    
+        try:
+            num_rows = int(self.request.params.rows)
+        except (ValueError, TypeError):
+            num_rows = int(config.SEARCH_DEFAULT_ROWS)
+        return super(SolrResponse, self).get_pagination(rows_per_page=num_rows)
+        
         

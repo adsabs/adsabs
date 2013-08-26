@@ -9,6 +9,8 @@ from urllib2 import quote
 from urllib import urlencode
 from simplejson import dumps
 
+from flask.ext.solrquery import solr #@UnresolvedImport
+
 from adsabs.core.invenio import record_url
 from adsabs.core.classic import abstract_url
 
@@ -31,41 +33,29 @@ class SolrDocument(object):
     
     def has_references(self):
         """Checks if references are present and returns a boolean"""
-        if self.__getattr__('reference'):
-            return True
-        else:
-            return False
+        return self.reference and True or False
     
     def get_references_count(self):
         """Returns the number of references"""
-        if self.has_references():
-            return len(self.__getattr__('reference'))
-        else:
-            return 0
+        return self.reference and len(self.reference) or 0
     
     def has_citations(self):
         """Checks if citations are present and returns a boolean"""
-        if self.__getattr__('citation_count'):
-            return True
-        else:
-            return False
+        return self.citation_count and True or False
         
     def get_citation_count(self):
         """Returns the number of citations
            Now it is useless, but if we change the way we compute the citations this method can be pretty useful
         """
-        if self.has_citations():
-            return self.__getattr__('citation_count')
-        else:
-            return 0
+        return self.citation_count or 0
     
     def has_toc(self):
         """Checks if abstract has a Table of contents"""
-        properties = self.__getattr__('property')
-        if properties and 'TOC' in properties:
-            return True
-        else:
-            return False     
+        return self.property and 'TOC' in self.property
+    
+    def has_assoc_list(self, list_type):
+        method = getattr(self, "has_%s" % list_type)
+        return method()
     
     def classic_url(self):
         return abstract_url(self.bibcode)
@@ -83,6 +73,9 @@ class SolrDocument(object):
         return val
     
     def solr_url(self, wt=None):
+        """
+        TODO: this is dumb. get the solr url from the request object
+        """
         if wt is None:
             return config.SOLR_URL + '/select?q=id:' + quote(str(self.id))
         else:
@@ -91,36 +84,50 @@ class SolrDocument(object):
     def to_json(self):
         return dumps(self.data)
     
-    def _get_op(self, op, *args, **kwargs):
-        from adsabs.core.solr import query
-        q = "%s(%s:%s)" % (op, config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return query(q, *args, **kwargs)
+    def get_assoc_list(self, list_type, **kwargs):
+        q = "%s(%s:%s)" % (list_type, config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
+        return solr.query(q, **kwargs)
         
-    def get_references(self, *args, **kwargs):
+    def get_references(self, **kwargs):
         """
         Returns the list of references
         """
-        return self._get_op("references", *args, **kwargs)
+        q = "references(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
+        return solr.query(q, **kwargs)
         
-    def get_citations(self, *args, **kwargs):
+    def get_citations(self, **kwargs):
         """
         Returns the list of citations
         """
-        return self._get_op("citations", *args, **kwargs)
+        q = "citations(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
+        return solr.query(q, **kwargs)
     
-    def get_toc(self, *args, **kwargs):
+    def get_toc(self, **kwargs):
         """
         Returns the table of contents
         It queries SOLR for the first 13 characters of the bibcode and "*"
         If the 14th character is a "E" I add also this before the "*"
         """
-        from adsabs.core.solr import query
-        bibcode = self.data[config.SOLR_DOCUMENT_ID_FIELD]
+        bibcode = self.bibcode
         if bibcode[13] == 'E':
             bibquery = bibcode[:14]
         else:
             bibquery = bibcode[:13]
-        q = "%s:%s*" % (config.SOLR_DOCUMENT_ID_FIELD, bibquery)
-        return query(q, *args, **kwargs)
-        
+        q = "bibcode:%s*" % bibquery
+        return solr.query(q, **kwargs)
+
+    def has_highlights(self, field=None):
+        if not self.highlights or len(self.highlights) == 0:
+            return False
+        if field is not None and self.highlights.get(field) is None:
+            return False
+        return True
+    
+    def get_highlights(self, field=None):
+        if not self.has_highlights(field):
+            return None
+        if field is None:
+            return self.highlights
+        return self.highlights.get(field, None)
+            
         

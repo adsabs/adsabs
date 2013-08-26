@@ -19,7 +19,7 @@ from config import config
 from adsabs.modules.user import AdsUser
 from adsabs.modules.user.models import AdsUserRecord
 from adsabs.extensions import cache
-from .errors import ApiPermissionError
+from api_errors import ApiPermissionError
 
 __all__ = ['AdsApiUser', 'create_api_user']
 
@@ -144,7 +144,7 @@ class AdsApiUser(AdsUser):
     
     def get_allowed_fields(self):
         extra_fields = self.user_rec.developer_perms.get('allowed_fields',[])
-        return config.API_SOLR_DEFAULT_FIELDS + extra_fields
+        return list(set(config.API_SOLR_DEFAULT_FIELDS + config.SOLR_SEARCH_REQUIRED_FIELDS + extra_fields))
     
     def get_allowed_ips(self):
         return self.user_rec.developer_perms.get('allowed_ips', [])

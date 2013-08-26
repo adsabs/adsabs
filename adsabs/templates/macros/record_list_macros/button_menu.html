@@ -1,11 +1,5 @@
 {# ###Macro to render re_sort menu #}
-{% macro render_re_sort(resp, blueprint='search.search', bibcode=None) %}
-	{# base url#}
-	{% if not bibcode %}
-		{% set base_url = url_for(blueprint) %}
-	{% else %}
-		{% set base_url = url_for(blueprint, bibcode=bibcode) %}
-	{% endif %}
+{% macro render_re_sort(resp, base_url) %}
 	{% set current_page = resp.get_pagination()['current_page']%}
 	{% set re_sort_type = request.values.get('re_sort_type') %}
 	{% set re_sort_dir = request.values.get('re_sort_dir') %}

@@ -1,11 +1,5 @@
 {# ###Macro for very basic pagination with result number on top of the results #}
-{% macro render_result_numbers(resp, blueprint='search.search', bibcode=None) %}
-	{# base url#}
-	{% if not bibcode %}
-		{% set base_url = url_for(blueprint) %}
-	{% else %}
-		{% set base_url = url_for(blueprint, bibcode=bibcode) %}
-	{% endif %}
+{% macro render_result_numbers(resp, base_url) %}
 	
 	{% set pagination=resp.get_pagination() %}
 	<span class="help-inline hidden-phone results_count">
@@ -20,13 +14,7 @@
 {% endmacro %}
 
 {# ###Macro for pagination ### #}
-{% macro render_pagination(pagination, blueprint='search.search', bibcode=None) %}
-	{# base url#}
-	{% if not bibcode %}
-		{% set base_url = url_for(blueprint) %}
-	{% else %}
-		{% set base_url = url_for(blueprint, bibcode=bibcode) %}
-	{% endif %}
+{% macro render_pagination(pagination, base_url) %}
 	<div class="pagination pagination-small pagination-centered">
 		<ul>
 			<li{% if pagination['current_page'] == 1 %} class="disabled"{% else %} title="First"{% endif %}>

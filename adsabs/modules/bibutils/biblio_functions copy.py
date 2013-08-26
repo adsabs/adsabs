@@ -14,7 +14,6 @@ import urllib
 import requests
 # BEER-specific imports
 from flask import current_app as app
-from adsabs.core.solr import SolrRequest
 # memory mapped data
 manager = Manager()
 cit_dict = manager.dict()

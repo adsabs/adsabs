@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+import atexit
 from pyvirtualdisplay import Display
 
 from config.test_config import test_config
@@ -52,6 +53,12 @@ class BaseSeleniumTestCase(unittest.TestCase):
         unittest.TestCase.setUp(self)
         self.tc = TestContext()
         self.tc.open_browser()
+
+        @atexit.register
+        def driverCleanup():
+            """last ditch effort to prevent zombie browser processes"""
+            try: self.tc.close()
+            except: pass
         
     def tearDown(self):
         self.tc.close()

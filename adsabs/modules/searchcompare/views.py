@@ -10,9 +10,9 @@ from lxml.etree import fromstring
 from simplejson import dumps
 
 from flask import Blueprint, request, g, render_template, abort
+from flask.ext.solrquery import solr
 
 from config import config
-from adsabs.core.solr import SolrRequest
 
 searchcompare_blueprint = Blueprint('searchcompare', __name__, template_folder="templates", 
                                     static_folder="static", url_prefix='/searchcompare')
@@ -47,13 +47,11 @@ def solr_search():
         q = request.args.get('q')
     except:
         abort(400)
-    req = SolrRequest(q)
-    req.set_rows(200)
-    req.set_fields(['bibcode','title','score'])
-    req.set_sort(config.SOLR_SORT_OPTIONS['DATE'],'desc')
-    req.add_filter('database:ASTRONOMY')
-    resp = req.get_response().search_response()
-    return render_template('results.html', results=resp['results'], type='solr', search_url=req.get_raw_request_url())
+    resp = solr.query(q, rows=200, fields=['bibcode','title','score'], 
+                      sort=(config.SOLR_SORT_OPTIONS['DATE'], 'desc'),
+                      filters=['database:ASTRONOMY'])
+    search_results = resp.search_response()
+    return render_template('results.html', results=search_results['results'], type='solr', search_url=resp.request.url)
 
 @searchcompare_blueprint.route('/', methods=['GET'])
 def index():

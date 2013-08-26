@@ -3,20 +3,27 @@ Created on Nov 12, 2012
 
 @author: jluker
 '''
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 import mongobox
+import atexit
 import fixtures
-import unittest2
 from simplejson import dumps
 from copy import deepcopy
 from datetime import datetime
+from mock import patch
+from contextlib import contextmanager
 
 from flask import g
-from adsabs.modules.api.user import AdsApiUser, PERMISSION_LEVELS
+from adsabs.modules.api.api_user import AdsApiUser, PERMISSION_LEVELS
 from config import config
 from adsabs.app import create_app
 
-class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
+class AdsabsBaseTestCase(unittest.TestCase, fixtures.TestWithFixtures):
     
     def setUp(self):
         self.box = mongobox.MongoBox(scripting=True, auth=True)
@@ -25,6 +32,11 @@ class AdsabsBaseTestCase(unittest2.TestCase, fixtures.TestWithFixtures):
         self.boxclient['admin'].add_user('foo','bar')
         self.boxclient['admin'].authenticate('foo','bar')
         self.boxclient['test'].add_user('test','test')
+        
+        @atexit.register
+        def cleanupMongo():
+            try: self.box.stop()
+            except: pass
         
         config.TESTING = True
         config.MONGOALCHEMY_HOST = 'localhost'
@@ -78,14 +90,51 @@ class GlobalApiUserFixture(fixtures.Fixture):
         
     def set_api_user(self):
         g.api_user = AdsApiUser.from_dev_key(self.dev_key)
-        
-class SolrRawQueryFixture(fixtures.MonkeyPatch):
+
+@contextmanager
+def global_api_user(dev_key):
+    g.api_user = AdsApiUser.from_dev_key(dev_key)
+    yield
+    g.api_user = None
+
+class FakeSolrHttpResponse(object):
     
-    @classmethod
-    def default_response(cls):
-        return deepcopy(cls.DEFAULT_RESPONSE)
+    DEFAULT_DATA = {
+             "responseHeader":{
+               "status":0,
+               "QTime":1,
+               "params":{ "indent":"true", "wt":"json", "q":"foo"}},
+             "response":{
+                "numFound":13,
+                "start":0,
+                "docs":[ 
+                        { "id": 1 }, 
+                        { "id": 2 }, 
+                        { "id": 3 }, 
+                        { "id": 4 }, 
+                        { "id": 5 }, 
+                        { "id": 6 }, 
+                        { "id": 7 }, 
+                        { "id": 8 }, 
+                        { "id": 9 }, 
+                        { "id": 10 }, 
+                        { "id": 11 }, 
+                        { "id": 12 }, 
+                        { "id": 13 }, 
+            ]}}
+
+    def __init__(self, data=None, status_code=200):
+        self.status_code = status_code
+        self.data = data
+        if self.data is None:
+            self.data = self.DEFAULT_DATA
+
+    def json(self):
+        return self.data
+
+class CannedSolrResponse(object):
     
-    DEFAULT_RESPONSE = {
+    DEFAULT_DATA = {
         'responseHeader': {
             'QTime': 100,
             'status': 0,
@@ -126,20 +175,24 @@ class SolrRawQueryFixture(fixtures.MonkeyPatch):
         }
     }
     
-    def __init__(self, data=None, **kwargs):
-        if data is None:
-            data = self.DEFAULT_RESPONSE
-        self.resp_data = data
+    def __init__(self, data=None, status_code=200):
+        self.status_code = status_code
+        self.data = data
+        if self.data is None:
+            self.data = self.DEFAULT_DATA
+
+    def json(self):
+        return self.data
         
-        def raw(req_obj, *args_, **kwargs_):
-            req_obj.url = 'http://foo.bar'
-            return (200, dumps(self.resp_data))
-        
-        fixtures.MonkeyPatch.__init__(self, 'adsabs.core.solr.request.SolrRequest._get_solr_response', raw)
-        
-    def set_data(self, data):
-        self.resp_data = data
-        
+@contextmanager
+def canned_solr_response_data(data=None, status_code=200):
+    def fake_send(*args, **kwargs):
+        return CannedSolrResponse(data, status_code)
+    mocked_send = patch("flask_solrquery.requests.sessions.Session.send", fake_send)
+    mocked_send.start()
+    yield
+    mocked_send.stop()        
+
 class SolrNotAvailableFixture(fixtures.MonkeyPatch):
     
     def __init__(self, exc_class, exc_msg=None):

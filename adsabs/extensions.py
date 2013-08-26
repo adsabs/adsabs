@@ -30,3 +30,6 @@ mail = Mail()
 
 from flask.ext.cache import Cache   #@UnresolvedImport
 cache = Cache()
+
+from flask.ext.solrquery import FlaskSolrQuery #@UnresolvedImport
+solr = FlaskSolrQuery()

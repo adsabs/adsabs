@@ -3,13 +3,14 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
+from flask import g #@UnresolvedImport
+from flask.ext.solrquery import solr, SearchRequest #@UnresolvedImport
+
 import logging
 from adsabs.core.logevent import LogEvent
-from flask import g #@UnresolvedImport
-from adsabs.core.solr import SolrRequest
 from config import config
 from .forms import ApiQueryForm
-from .errors import ApiPermissionError,ApiSolrException
+from api_errors import ApiPermissionError,ApiSolrException
     
 __all__ = ['ApiSearchRequest','ApiRecordRequest']
 
@@ -27,11 +28,12 @@ class ApiSearchRequest(object):
     def input_errors(self):
         return self.form.errors
     
-    def _create_solr_request(self):
-        req = SolrRequest(self.form.q.data)
+    def _create_search_request(self):
+        req = SearchRequest(self.form.q.data)
         
         if self.form.fl.data:
-            req.set_fields(self.form.fl.data.split(','))
+            fields = list(set(self.form.fl.data.split(',') + config.SOLR_SEARCH_REQUIRED_FIELDS))
+            req.set_fields(fields)
         else:
             req.set_fields(self.user.get_allowed_fields())
             
@@ -78,20 +80,20 @@ class ApiSearchRequest(object):
         return req
                 
     def execute(self):
-        solr_req = self._create_solr_request()
+        req = self._create_search_request()
         
         try:
-            solr_resp = solr_req.get_response()
+            resp = solr.get_response(req)
         except Exception, e:
             # TODO: Log this error + traceback
             # raaise a more user-friendly exception
             raise ApiSolrException("Error communicating with search service")
         
-        if solr_resp.is_error():
-            raise ApiSolrException(solr_resp.get_error())
+        if resp.is_error():
+            raise ApiSolrException(resp.get_error())
         
-        solr_resp.add_meta('api-version', g.api_version)
-        self.resp = solr_resp
+        resp.add_meta('api-version', g.api_version)
+        self.resp = resp
         return self.resp
 
     def query(self):
@@ -103,12 +105,13 @@ class ApiRecordRequest(ApiSearchRequest):
         self.record_id = identifier
         ApiSearchRequest.__init__(self, request_vals)
         
-    def _create_solr_request(self):
+    def _create_search_request(self):
         q = "identifier:%s OR doi:%s" % (self.record_id, self.record_id)
-        req = SolrRequest(q, rows=1)
+        req = SearchRequest(q, rows=1)
         
         if self.form.fl.data:
-            req.set_fields(self.form.fl.data.split(','))
+            fields = list(set(self.form.fl.data.split(',') + config.SOLR_SEARCH_REQUIRED_FIELDS))
+            req.set_fields(fields)
         else:
             req.set_fields(self.user.get_allowed_fields())
             

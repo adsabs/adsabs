@@ -4,11 +4,16 @@ Created on Nov 5, 2012
 @author: jluker
 '''
 import os
+import sys
 import fixtures
 import shutil
 import tempfile
-import unittest2 as unittest
 
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+    
 from config import config
 from test_utils import AdsabsBaseTestCase
 
@@ -97,7 +102,5 @@ class PagesTestCase(AdsabsBaseTestCase):
             self.assertIn("Bluh!Bluh!Bluh!", rv.data)
             
         
-        
-    
 if __name__ == '__main__':
     unittest.main()

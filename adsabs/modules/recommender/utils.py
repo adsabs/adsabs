@@ -11,7 +11,7 @@ from config import config
 import urllib
 import requests
 from flask import current_app as app
-from adsabs.core.solr import SolrRequest
+from flask.ext.solrquery import solr #@UnresolvedImport
 from .errors import SolrQueryError
 from .errors import RecommderServerConnectionError
 
@@ -31,19 +31,15 @@ def get_meta_data(**args):
     bibcodes = args['bibcodes']
     list = " OR ".join(map(lambda a: "bibcode:%s"%a, bibcodes))
     q = '%s' % list
-    # Initialize the Solr reuqest object
-    req = SolrRequest(q)
-    req.set_rows(config.BIBUTILS_MAX_HITS)
-    # Get the title and first author fields from Solr
-    req.set_fields(['bibcode,title,first_author'])
     try:
         # Get the information from Solr
-        resp = req.get_response().search_response()
+        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode,title,first_author'])
     except SolrQueryError, e:
-        app.logger.error("Solr references query for %s blew up (%s)" % (bibcode,e))
+        app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
         raise
     # Gather meta data
-    for doc in resp['results']['docs']:
+    search_results = resp.search_response()
+    for doc in search_results['results']['docs']:
         title = 'NA'
         if 'title' in doc: title = doc['title'][0]
         author = 'NA'

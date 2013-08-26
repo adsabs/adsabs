@@ -36,9 +36,9 @@
 		    {% endif %}
 		    <div class="span12 pubdate"><em>Published in {{ doc.pubdate|format_ads_date}}</em></div>
 		    <div class="span12 snippets">
-		    	{% if doc.highlights.get('abstract') %}
+		    	{% if doc.has_highlights('abstract') %}
 		    		{% set len_snippets_abs = doc.highlights.get('abstract')|length %}
-		    		{% for highlight in doc.highlights.get('abstract') %}
+		    		{% for highlight in doc.get_highlights('abstract') %}
 		    			{% if loop.index0 < 4 %}
 		    				{# only the first 4 snippets are visualized #}
 		    				<span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
@@ -49,8 +49,8 @@
 		    	{% else %}
 		    		{% set len_snippets_abs = 0 %}
 		    	{% endif %}
-		    	{% if doc.highlights.get('full') and len_snippets_abs <= 4 %}
-		    		{% for highlight in doc.highlights.get('full') %}
+		    	{% if doc.has_highlights('full') and len_snippets_abs <= 4 %}
+		    		{% for highlight in doc.get_highlights('full') %}
 		    			{% if loop.index0 < 4 - len_snippets_abs %}
 		    				<span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
 		    			{% else %}
@@ -83,9 +83,9 @@
 	class="letterLink">{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<a data-rel="bootstrap_tooltip" target="_blank" title="Open URL" href="{{ doc.bibcode|ads_url_redirect(id_type='openurl') }}">L</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'arXiv' in id_types %}<a data-rel="bootstrap_tooltip" target="_blank" class="letterOpenaccess" title="arXiv eprint (Open Access)" href="{{ doc.bibcode|ads_url_redirect(id_type='preprint') }}">X</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'data' in link_types %}<a data-rel="bootstrap_tooltip" target="_blank" title="Archival Data" href="{{ doc.bibcode|ads_url_redirect(id_type='data') }}">D</a>{% else %}&nbsp;{% endif %}</span><span 
-	class="letterLink">{% if doc.has_toc() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.toc', bibcode=doc.bibcode) }}" title="Table of contents">T</a>{% else %}&nbsp;{% endif %}</span><span 
-	class="letterLink">{% if doc.has_references() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.references', bibcode=doc.bibcode) }}" title="References ({{ doc.get_references_count() }})">R</a>{% else %}&nbsp;{% endif %}</span><span 
-	class="letterLink">{% if doc.has_citations() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.citations', bibcode=doc.bibcode) }}" title="Citations ({{ doc.get_citation_count() }})">C</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if doc.has_toc() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.tab_list', list_type='toc', bibcode=doc.bibcode) }}" title="Table of contents">T</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if doc.has_references() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.tab_list', list_type='references', bibcode=doc.bibcode) }}" title="References ({{ doc.get_references_count() }})">R</a>{% else %}&nbsp;{% endif %}</span><span 
+	class="letterLink">{% if doc.has_citations() %}<a data-rel="bootstrap_tooltip" href="{{ url_for('abs.tab_list', list_type='citations', bibcode=doc.bibcode) }}" title="Citations ({{ doc.get_citation_count() }})">C</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'simbad' in link_types %}<a data-rel="bootstrap_tooltip" target="_blank" title="SIMBAD objects" href="{{ doc.bibcode|ads_url_redirect(id_type='simbad') }}">S</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{% if 'ned' in link_types %}<a data-rel="bootstrap_tooltip" target="_blank" title="NED objects" href="{{ doc.bibcode|ads_url_redirect(id_type='ned') }}">N</a>{% else %}&nbsp;{% endif %}</span><span 
 	class="letterLink">{# not implemented yet #}{% if False %}U{% else %}&nbsp;{% endif %}</span><span 

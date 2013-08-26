@@ -13,7 +13,7 @@ from multiprocessing import Process, Queue, cpu_count
 import urllib
 import requests
 from flask import current_app as app
-from adsabs.core.solr import SolrRequest
+from flask.ext.solrquery import solr #@UnresolvedImport
 import adsdata
 # local imports
 from config import config
@@ -56,23 +56,17 @@ class CitationHarvester(Process):
                     resp = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
                     result_field = 'response'
                 else:
-                # create the Solr request object
-                    req = SolrRequest(q)
                     result_field = 'results'
-                # we only need the contents of the 'bibcode' field, i.e. the citations
-                    req.params['fl'] = fl
-                    req.params['q'] = q
-                    req.params['wt'] = 'json'
-                    req.params['rows'] = config.BIBUTILS_MAX_HITS
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = req.get_response().search_response()
+                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                    search_results = resp.search_response()
                 # gather citations and put them into the results queue
                 citations = []
                 cits = []
                 ref_cits = []
                 non_ref_cits = []
-                for doc in resp[result_field]['docs']:
+                for doc in search_results[result_field]['docs']:
                     if not 'bibcode' in doc:
                         continue
                     pubyear = int(bibcode[:4])
@@ -113,21 +107,15 @@ class DataHarvester(Process):
                     resp = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
                     result_field = 'response'
                 else:
-                # create the Solr request object
-                    req = SolrRequest(q)
                     result_field = 'results'
-                # we only need the contents of the 'bibcode' field, i.e. the citations
-                    req.params['fl'] = fl
-                    req.params['q'] = q
-                    req.params['wt'] = 'json'
-                    req.params['rows'] = config.BIBUTILS_MAX_HITS
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = req.get_response().search_response()
+                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                    search_results = resp.search_response()
                 # gather citations and put them into the results queue
-                self.result_queue.put(resp[result_field]['docs'])
+                self.result_queue.put(search_results[result_field]['docs'])
             except SolrCitationQueryError, e:
-                app.logger.error("Solr data query for %s blew up (%s)" % (bibcode,e))
+                app.logger.error("Solr data query for %s blew up (%s)" % (q,e))
                 raise
         return
 
@@ -308,19 +296,15 @@ def get_meta_data(**args):
     bibcodes = [bibcode for (bibcode,score) in args['results']]
     list = " OR ".join(map(lambda a: "bibcode:%s"%a, bibcodes))
     q = '%s' % list
-    # Initialize the Solr reuqest object
-    req = SolrRequest(q)
-    req.set_rows(config.BIBUTILS_MAX_HITS)
-    # Get the title and first author fields from Solr
-    req.set_fields(['bibcode,title,first_author'])
     try:
         # Get the information from Solr
-        resp = req.get_response().search_response()
+        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode,title,first_author'])
     except SolrMetaDataQueryError, e:
         app.logger.error("Solr references query for %s blew up (%s)" % (bibcode,e))
         raise
     # Collect meta data
-    for doc in resp['results']['docs']:
+    search_results = resp.search_response()
+    for doc in search_results['results']['docs']:
         title = 'NA'
         if 'title' in doc: title = doc['title'][0]
         author = 'NA'
@@ -369,40 +353,31 @@ def get_references(**args):
     # This information can be retrieved with one single Solr query
     # (just an 'OR' query of a list of bibcodes)
     q = " OR ".join(map(lambda a: "bibcode:%s"%a, args['bibcodes']))
-    # Initialize the Solr reuqest object
-    req = SolrRequest(q)
-    # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
-    # referenced by the paper at hand)
-    req.params['fl'] = 'reference'
-    req.params['q'] = q
-    req.params['wt'] = 'json'
-    req.params['rows'] = config.BIBUTILS_MAX_HITS
     try:
         # Get the information from Solr
-        resp = req.get_response().search_response()
+        # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
+        # referenced by the paper at hand)
+        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
     except SolrReferenceQueryError, e:
-        app.logger.error("Solr references query for %s blew up (%s)" % (bibcode,e))
+        app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
         raise
     # Collect all bibcodes in a list (do NOT remove multiplicity)
-    for doc in resp['results']['docs']:
+    search_results = resp.search_response()
+    for doc in search_results['results']['docs']:
         if 'reference' in doc:
             papers += doc['reference']
     return papers
 
 def get_publications_from_query(q):
-    req = SolrRequest(str(q))
-    req.params['fl'] = 'bibcode'
-    req.params['q'] = q
-    req.params['wt'] = 'json'
-    req.params['rows'] = config.BIBUTILS_MAX_HITS
     try:
         # Get the information from Solr
-        resp = req.get_response().search_response()
+        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
     except SolrReferenceQueryError, e:
-        app.logger.error("Solr publications query for %s blew up (%s)" % (bibcode,e))
+        app.logger.error("Solr publications query for %s blew up (%s)" % (q,e))
         raise
     # Collect all bibcodes in a list
-    return map(lambda a: a['bibcode'],resp['results']['docs'])
+    search_results = resp.search_response()
+    return map(lambda a: a['bibcode'],search_results['results']['docs'])
 
 def get_bibcodes_from_private_library(id):
     sys.stderr.write('Private libraries are not yet implemented')

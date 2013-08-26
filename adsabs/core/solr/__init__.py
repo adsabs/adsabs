@@ -1,14 +1,14 @@
 
-from .request import *
 from .response import *
+from .adapter import SolrRequestAdapter
 from .solrdoc import *
-from .signals import *
+from query_builder import QueryBuilderSimple, QueryBuilderSearch
 
 from flask import current_app as app, request as current_request, g
+from flask.ext.solrquery import solr #@UnresolvedImport
 from copy import deepcopy
 
 __all__ = [
-    'SolrRequest',
     'SolrResponse',
     'SolrDocument',
     'query',
@@ -16,6 +16,9 @@ __all__ = [
     'facet_request',
     'document_request',
     'get_document',
+    'SolrRequestAdapter',
+    'QueryBuilderSimple',
+    'QueryBuilderSearch',
     ]
 
 
@@ -94,22 +97,11 @@ def facet_query(q, **kwargs):
     req = facet_request(q, **kwargs)
     return req.get_response()
         
-def document_request(identifier, hlq=None, **kwargs):
-    req = SolrRequest(q="identifier:%s" % identifier)
-    
-    req.set_fields(config.SOLR_SEARCH_DEFAULT_FIELDS)
-    
-    if hlq:
-        for hl in config.SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS:
-            req.add_highlight(*hl)
-        req.set_hlq(hlq)
-        
-    req.set_params(**kwargs)
-    return req
-    
-def get_document(*args, **kwargs):
-    req = document_request(*args, **kwargs)
-    resp = req.get_response()
+def get_document(identifier, **kwargs):
+    q = "identifier:%s" % identifier
+    resp = solr.query(q, rows=1, fields=config.SOLR_SEARCH_DEFAULT_FIELDS, **kwargs)
     if resp.get_hits() == 1:
         return resp.get_doc_object(0)
+    else:
+        return None
         

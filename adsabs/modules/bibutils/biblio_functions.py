@@ -11,7 +11,6 @@ import operator
 from itertools import groupby
 # BEER-specific imports
 from flask import current_app as app
-from adsabs.core.solr import SolrRequest
 from config import config
 from utils import get_references
 from utils import get_citations

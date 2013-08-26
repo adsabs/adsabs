@@ -4,13 +4,16 @@ Created on July 22, 2013
 @author: ehenneken
 '''
 import os
+import sys
 import site
 tests_dir = os.path.dirname(os.path.abspath(__file__))
 site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
 site.addsitedir(tests_dir) #@UndefinedVariable
 
-#import fixtures
-import unittest2
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 #from adsabs.app import create_app
 #from adsabs.core import solr

@@ -55,9 +55,10 @@ class AppConfig(object):
                          },  
                      }
     
-    SOLR_URL = 'http://adswhy:9000/solr/collection1'
-    SOLR_TIMEOUT = 300
-    SOLR_MAX_RETRIES = 5
+    SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
+    SOLRQUERY_TIMEOUT = 300
+    SOLRQUERY_KEEPALIVE = False
+
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
                          'CITED': 'citation_count',
@@ -77,8 +78,9 @@ class AppConfig(object):
         #('fq', ['pubdate_sort:[* TO 20140000]']),
         ('indent', 'true')
     ]
+
     SOLR_DEFAULT_FORMAT = 'json'
-    SOLR_ARG_SEPARATOR = '#' # used to thwart the defaul solrpy behavior of replacing '_' with '.' in all solr params
+
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     SOLR_FILTER_QUERY_PARSER = 'aqp'
     SOLR_HAPROXY_SESSION_COOKIE_NAME = 'JSESSIONID'

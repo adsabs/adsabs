@@ -3,7 +3,11 @@ Created on May 13, 2013
 
 @author: dimilia
 '''
-import unittest2
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
 from flask import request
 from flask.ext.wtf import Form #@UnresolvedImport
 from wtforms import (TextField, RadioField,     #@UnresolvedImport
@@ -40,4 +44,4 @@ class FomFunctions(AdsabsBaseTestCase):
             self.assertTrue(ff.is_submitted_cust(form))
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

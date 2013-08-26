@@ -5,12 +5,16 @@ Created on Feb 14, 2013
 '''
 
 import os
+import sys
 import site
 tests_dir = os.path.dirname(os.path.abspath(__file__))
 site.addsitedir(os.path.dirname(tests_dir)) #@UndefinedVariable
 site.addsitedir(tests_dir) #@UndefinedVariable
 
-import unittest2
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
 
 from config import config
 from test_utils import (AdsabsBaseTestCase)
@@ -106,4 +110,4 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
 
 
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()
