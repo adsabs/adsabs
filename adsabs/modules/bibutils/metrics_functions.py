@@ -227,6 +227,15 @@ def format_results(data_dict,**args):
     doc['citation histogram']['type'] = "citation_histogram"
     return doc
 
+# Uglify output results into how the old metrics module produced it output
+def legacy_format(data):
+    entry_mapping = {1:1, 2:3, 3:4, 4:2, 5:5, 6:7, 7:8, 8:6}
+    citation_histogram = {}
+    for (year,values) in data['citation histogram'].items():
+        entries = values.split(':') 
+        new_entries = [entries[entry_mapping[i]] for i in range(len(entries))]
+        citation_histogram[year] = ":".join(new_entries)
+    return data['all stats'],data['refereed stats'],data['all reads'],data['refereed reads'],data['paper histogram'],data['reads histogram'],citation_histogram,data['metrics series']
 # General metrics engine
 def generate_metrics(**args):
     # First we gather the necessary 'attributes' for all publications involved
@@ -234,6 +243,8 @@ def generate_metrics(**args):
     attr_list,num_cit,num_cit_ref = get_attributes(args)
     # What types of metrics are we gather (everything by default)
     stats_models = []
+    # Determine the output format (really only used to get the 'legacy format')
+    format = args.get('fmt','')
     try:
         model_types = args['types'].split(',')
     except:
@@ -250,4 +261,7 @@ def generate_metrics(**args):
     # Now shape the results in the final format
     results = format_results(model_results)
     # Send the result back to our caller
-    return results
+    if format == 'legacy':
+        return legacy_format(results)
+    else:
+        return results
