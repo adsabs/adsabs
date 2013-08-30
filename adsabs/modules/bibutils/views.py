@@ -30,7 +30,12 @@ def citation_helper(**args):
     Entry point of input for Citation Helper: form to input bibcodes
     """
     form = CitationHelperInputForm()
-    bibcodes = []
+    # If we were called from results form, get bibcodes
+    # from URL
+    try:
+        bibcodes = request.args.getlist('bibcode')
+    except:
+        bibcodes = []
     results = None
     format = ''
     # check if we were called with bibcodes
