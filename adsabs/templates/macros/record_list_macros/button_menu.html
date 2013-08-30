@@ -143,6 +143,17 @@
 </div>
 {% endmacro %}
 
+{# ###Macro to render analyze menu #}
+{% macro render_analyze_menu() %}
+<div class="analyze_view_menu dropdown pull-right">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-search"></i> Analyze <i class="caret"></i></a>
+        <ul class="dropdown-menu">
+                <li class="nav-header">selected records:</li>
+                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.citation_helper()">Citation Helper</a></li>
+        </ul>
+</div>
+{% endmacro %}
+
 {# ###Macro to render toggle all button #}
 {% macro render_toggle_all_paper_list() %}
 <span class="btn" data-rel="bootstrap_tooltip" title="Toggle all" onclick="$('input[type=checkbox][name=bibcode]').prop('checked', function() {return !$(this).prop('checked')});">
