@@ -37,31 +37,35 @@ class TestQueryForm(AdsabsBaseTestCase):
     
     def test_init_with_defaults_01(self):
         """ test that defaults don't override inputs"""
-        QueryForm.default_if_missing = MultiDict([('db_f', '')])
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')]), ImmutableMultiDict([])])
-        test_query = QueryForm.init_with_defaults(request_values)
-        self.assertEqual(test_query.data['db_f'], 'astronomy')
+        with self.app.test_request_context():
+            QueryForm.default_if_missing = MultiDict([('db_f', '')])
+            request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')]), ImmutableMultiDict([])])
+            test_query = QueryForm.init_with_defaults(request_values)
+            self.assertEqual(test_query.data['db_f'], 'astronomy')
         
     def test_init_with_defaults_02(self):
         """ test that defaults don't override inputs"""
-        QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')]), ImmutableMultiDict([])])
-        test_query = QueryForm.init_with_defaults(request_values)
-        self.assertEqual(test_query.data['db_f'], 'astronomy')
+        with self.app.test_request_context():
+            QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
+            request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'astronomy')]), ImmutableMultiDict([])])
+            test_query = QueryForm.init_with_defaults(request_values)
+            self.assertEqual(test_query.data['db_f'], 'astronomy')
         
     def test_init_with_defaults_03(self):
         """ test that defaults don't override inputs"""
-        QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'')]), ImmutableMultiDict([])])
-        test_query = QueryForm.init_with_defaults(request_values)
-        self.assertEqual(test_query.data['db_f'], '')
+        with self.app.test_request_context():
+            QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
+            request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"'), ('db_f', u'')]), ImmutableMultiDict([])])
+            test_query = QueryForm.init_with_defaults(request_values)
+            self.assertEqual(test_query.data['db_f'], '')
         
     def test_init_with_defaults_04(self):
         """ test that defaults get set """
-        QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
-        request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"')]), ImmutableMultiDict([])])
-        test_query = QueryForm.init_with_defaults(request_values)
-        self.assertEqual(test_query.data['db_f'], 'foo')
+        with self.app.test_request_context():
+            QueryForm.default_if_missing = MultiDict([('db_f', 'foo')])
+            request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"')]), ImmutableMultiDict([])])
+            test_query = QueryForm.init_with_defaults(request_values)
+            self.assertEqual(test_query.data['db_f'], 'foo')
         
 class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
