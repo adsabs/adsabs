@@ -32,9 +32,9 @@ ResultListManager.citation_helper = function()
             // Call the Citation Helper with these bibcodes
         if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
         {
-                $('#search_results_form').attr('bibcodes', ResultListManager.checked_bibcodes.join("\n")).attr('action', 'http://jadzia:5000/bibutils/citation_helper').submit();
+            // NOTE: PUT IN CORRECT URL!!!!!
+                $('#search_results_form').attr('action', 'http://jadzia:5000/bibutils/citation_helper').submit();
         }
-            // Display the results
 
         }
 };
