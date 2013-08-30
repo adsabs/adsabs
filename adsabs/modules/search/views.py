@@ -1,10 +1,9 @@
 from flask import Blueprint, request, g, render_template, flash
 
 #from flask.ext.login import current_user #@UnresolvedImport
-from .forms import QueryForm, get_missing_defaults
+from .forms import QueryForm
 from adsabs.core import solr
 from adsabs.core.data_formatter import field_to_json
-from adsabs.core.form_functs import is_submitted_cust
 from misc_functions import build_basicquery_components
 from config import config
 from adsabs.core.logevent import LogEvent
@@ -32,22 +31,17 @@ def add_caching_header(response):
 def register_formatting_funcs():
     g.formatter_funcs = {'field_to_json': field_to_json}
 
-def init_search_form():
-    """
-    common search request form populating
-    """
-    #I add the default values if they have not been submitted by the form and I create the new form
-    params = get_missing_defaults(request.values, QueryForm)
-    form = QueryForm(params, csrf_enabled=False)
-    return form
-    
 @search_blueprint.route('/', methods=('GET', 'POST'))
 def search():
     """
     returns the results of a search
     """
-    form = init_search_form()
-    if is_submitted_cust(form):
+    if not len(request.values):
+        form = QueryForm(csrf_enabled=False)
+        # prefill the database select menu option
+        form.db_f.default = config.SEARCH_DEFAULT_DATABASE
+    else:
+        form = QueryForm.init_with_defaults(request.values)
         if form.validate():
             #I append to the g element a dictionary of functions I need in the template
             query_components = build_basicquery_components(form, request.values)

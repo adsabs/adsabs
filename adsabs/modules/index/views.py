@@ -29,8 +29,10 @@ def index():
     """
     Entry point of the web site
     """
-    #I initialize the form
-    search_form = QueryForm(request.values, csrf_enabled=False)
+    form = QueryForm(csrf_enabled=False)
+    # prefill the database select menu option
+    form.db_f.default = config.SEARCH_DEFAULT_DATABASE
+
     #I look for the static html if there is some
     static_file_path = os.path.join(current_app.root_path, 'static', 'static_html', 'main_page_static_html.html')
     try:
@@ -38,4 +40,4 @@ def index():
             static_content = f.read()
     except:
         static_content = ''
-    return render_template('main_page.html', form=search_form, static_content=static_content)
+    return render_template('main_page.html', form=form, static_content=static_content)
