@@ -68,7 +68,7 @@ def facets():
     """
     returns facet sets for a search query
     """
-    form = init_search_form()
+    form = QueryForm.init_with_defaults(request.values)
     if form.validate():
         query_components = build_basicquery_components(form, request.values, facets_components=True)
         if query_components.get('facet_fields') and query_components.get('facet_field_interf_id'):
