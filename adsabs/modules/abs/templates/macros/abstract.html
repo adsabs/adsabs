@@ -1,3 +1,5 @@
+{% macro render_abstract(solrdoc, inveniodoc) %}
+
 {# I get the links #}
 {% set links = solrdoc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
 {% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
@@ -9,7 +11,8 @@
 {% if solrdoc.property %}{% if 'ADS_SCAN' in solrdoc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
 {% if solrdoc.property %}{% if 'PUB_OPENACCESS' in solrdoc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
 {% if solrdoc.property %}{% if 'PRIVATE' in solrdoc.property %}{% set private_abstract = True %}{% else %}{% set private_abstract = False %}{%endif%}{% else %}{% set private_abstract = False %}{% endif %}
-		
+
+
 <div class="container-fluid absview">
 	<div class="row-fluid">
 		<div id="abstractContent" class="span9">
@@ -140,6 +143,34 @@
 			{% endif %}
 		</div>
 		{% endif %}
+		<div id="abstractRightMenu" class="span3 linkRightMenu">
+			<a target="_blank" class="socialButton" title="Save in Private library" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='private_library', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/ADS-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Save in Private library" />
+			</a>
+			<a target="_blank" class="socialButton" title="Tweet this" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='twitter', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/twitter-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Tweet this" />
+			</a>
+			<a target="_blank" class="socialButton" title="Share on Facebook" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='facebook', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/facebook-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on Facebook" />
+			</a>
+			<a target="_blank" class="socialButton" title="Share on LinkedIn" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='linkedin', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/linkedin-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on LinkedIn" />
+			</a>
+			<a target="_blank" class="socialButton" title="Export to Mendeley" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='mendeley', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/mendeley-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to Mendeley" />
+			</a>
+			{% if 'arXiv' in id_types %}
+			<a target="_blank" class="socialButton" title="Export to ScienceWise" data-rel="bootstrap_tooltip"
+				href="{{ url_for('redirect.socialbutton', redirect_type='sciencewise', bibcode=solrdoc.bibcode) }}">
+				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/sciencewise-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to ScienceWise" />
+			</a>
+			{% endif %}
+		</div>
 	</div>
 	
 	<script type="text/javascript">
@@ -167,3 +198,78 @@
 		});
 	</script>
 </div>
+
+{% endmacro %}
+
+
+
+{% macro render_abstract_macro_tags(solrdoc, inveniodoc) %}
+{% if solrdoc.property %}{% if 'PRIVATE' in solrdoc.property %}{% set private_abstract = True %}{% else %}{% set private_abstract = False %}{%endif%}{% else %}{% set private_abstract = False %}{% endif %}
+{# I get the ids #}
+{% set ids = solrdoc.getattr_func('ids_data', g.formatter_funcs.field_to_json) %}
+{% set id_types = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') %}{% do id_types.append(id.get('description')) %}{% endif %}{% endfor %}{% endif %}
+{% set arxiv_id = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') =='arXiv' %}{% do arxiv_id.append(id.get('identifier')) %}{% endif %}{% endfor %}{% endif %}
+
+	<meta property="og:title" content="{% if inveniodoc.author %}{{ inveniodoc.author[0].name }}:{% endif %} {% if solrdoc.title %}{{ solrdoc.title[0] }}{% else %}No title{% endif %}" />
+	<meta property="og:description" content="{% if not private_abstract %}
+								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape }}{% else %}Abstract not available.{% endif %}
+							{% else %}
+								Abstract available on the publisher website.
+							{% endif %}" />
+	<meta property="og:image" content="{{ url_for('static', filename='images/The_NASA_Astrophysics_Data_System.jpeg') }}" />
+	
+	{# Dublin Core meta tags #}
+	<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+	<link rel="schema.DCTERMS" href="http://purl.org/dc/terms/" />
+	<meta name="DC.language" content="en" />
+	<meta name="DC.identifier" content="bibcode:{{ solrdoc.bibcode }}" />
+	{% if solrdoc.doi %}
+		<meta name="DC.identifier" content="doi:{{ solrdoc.doi[0] }}" />
+	{% endif %}
+	{% if arxiv_id %}
+		<meta name="DC.identifier" content="{{ arxiv_id[0] }}" />
+	{% endif %}
+	{% if inveniodoc.author %}
+		{% for author in inveniodoc.author %}
+			<meta name="DC.creator" content="{{ author.name }}" />
+		{% endfor %}
+	{% endif %}
+	<meta name="DC.date" content="{{ solrdoc.pubdate }}" />
+	{% if solrdoc.pub_raw %}
+		<meta name="DC.source" content="{{ solrdoc.pub_raw }}" />
+	{% endif %}
+	{% if solrdoc.title %}
+		<meta name="DC.title" content="{{ solrdoc.title[0] }}" />
+	{% else %}
+		<meta name="DC.title" content="No title" />
+	{% endif %}
+	{% if not private_abstract %}
+		{% if solrdoc.abstract %}
+			<meta name="DCTERMS.abstract" content="{{ solrdoc.abstract|safe_html_unescape }}" />
+		{% else %}
+			<meta name="DCTERMS.abstract" content="Abstract not available." />
+		{% endif %}
+	{% else %}
+		<meta name="DCTERMS.abstract" content="Abstract available on the publisher website." />
+	{% endif %}
+	
+	
+	{# Meta tags for Mendeley #}
+	{% if solrdoc.title %}
+		<meta name="citation_title" content="{{ solrdoc.title[0] }}" />
+	{% else %}
+		<meta name="citation_title" content="No title" />
+	{% endif %}
+	{% if inveniodoc.author %}
+		<meta name="citation_authors" content="{% for author in inveniodoc.author %}{{ author.name }}{% if not loop.last %}; {% endif %}{% endfor %}" />
+	{% endif %}
+	<meta name="citation_journal_title" content="{{ solrdoc.pub_raw }}" />
+	{% if solrdoc.doi %}
+		<meta name="citation_doi" content="{{ solrdoc.doi[0] }}" />
+	{% endif %}
+	<meta name="citation_date" content="{{ solrdoc.pubdate }}" />
+	{% if arxiv_id %}
+		<meta name="citation_arxiv_id" content="{{ arxiv_id[0] }}" />
+	{% endif %}
+	
+{% endmacro %}

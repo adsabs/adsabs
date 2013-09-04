@@ -341,6 +341,10 @@ div.linkRightMenu dl {
 	margin: 0 0 10px 0;	
 }
 
+a.socialButton {
+	text-decoration:none;
+}
+
 div.abstractTitle {
 	font-size: 1.3em;
 	font-weight: bold;	

@@ -1,11 +1,16 @@
 {# Local import #}
 {% from "macros/list_articles.html" import render_list_articles with context %}
+{% from "macros/abstract.html" import render_abstract, render_abstract_macro_tags with context %}
 
 {% extends "layout.html" %}
 
 {% block titlehead %}{% if inveniodoc.author|length > 0 and inveniodoc.author[0].get('name') %}{{ inveniodoc.author[0].get('name')}}: {% endif %}{{ inveniodoc.title }}{% endblock %}
 
-{% block head%}{% endblock %}
+{% block head%}
+	{% if curview == 'abstract' %}
+		{{ render_abstract_macro_tags(solrdoc, inveniodoc) }}
+	{% endif %}
+{% endblock %}
 
 {% block body %}
 
@@ -38,7 +43,8 @@
 	<div class="row">
 		<div class="span12">
 			{% if curview == 'abstract' %}
-				{% include 'abstract.html' %}
+				{# converted to macro % include 'abstract.html' %#}
+				{{ render_abstract(solrdoc, inveniodoc) }}
 			{% elif curview == 'references' %}
 				{{ render_list_articles(reference_list, 'abs.references', solrdoc.bibcode) }}
 			{% elif curview == 'citations' %}

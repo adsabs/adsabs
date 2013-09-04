@@ -82,7 +82,7 @@ def metrics(**args):
     """
     Entry point of input for Metrics: form to input bibcodes
     """
-    query = request.args.get('q', None)
+#     query = request.args.get('q', None)
     form = MetricsInputForm()
     bibcodes = []
     results = None
