@@ -501,13 +501,14 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
         resp = loads(rv.data)
+        allowed_fields = api_user.get_allowed_fields()
         for f in resp['results']['docs'][0].keys():
-            self.assertIn(f, api_user.get_allowed_fields())
+            self.assertIn(f, allowed_fields)
             
-        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fl=bibcode,title')
+        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fl=abstract,title')
         resp = loads(rv.data)
-        for f in resp['results']['docs'][0].keys():
-            self.assertIn(f, ['bibcode','title'])
+        expected_fields = ['abstract','title'] + config.SOLR_SEARCH_REQUIRED_FIELDS
+        self.assertEqual(set(resp['results']['docs'][0].keys()), set(expected_fields))
         
     @unittest2.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
     def test_record_requests(self):

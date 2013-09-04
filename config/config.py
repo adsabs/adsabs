@@ -86,6 +86,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_ROWS = 20
     SEARCH_DEFAULT_SORT = 'RELEVANCE'
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
+    SEARCH_DEFAULT_DATABASE = 'astronomy'
     
 #    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
 #                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']

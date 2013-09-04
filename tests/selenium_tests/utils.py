@@ -2,6 +2,8 @@ import unittest2 as unittest
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from pyvirtualdisplay import Display
@@ -39,6 +41,10 @@ class TestContext(object):
     def get(self, url):
         self.browser.get(url)
         self.url = url
+        
+    def wait_for(self, by, thing):
+        wait = WebDriverWait(self.browser, test_config.SELENIUM_PAGE_WAIT)
+        wait.until(EC.presence_of_element_located((by, thing)))
 
 class BaseSeleniumTestCase(unittest.TestCase):
     
