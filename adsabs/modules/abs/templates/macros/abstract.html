@@ -117,63 +117,68 @@
 			</div>
 		</div>
 		
-		
-		{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
-		(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) 
-		or ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
-		<div id="abstractRightMenu" class="span3 linkRightMenu">
+		<div class="span3">
 			{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
-			(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) %}
-			<dl>
-				<dt>Full Text Sources</dt>
-				{% if 'electr' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">Publisher article</a>{% if pub_openaccess %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
-				{% if ads_scan or 'pdf' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='article') }}">{% if ads_scan %}ADS PDF{% elif 'pdf' in link_types %}Publisher PDF{% endif %}</a>{% if ads_scan or pub_openaccess%} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
-				{% if ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='gif') }}">ADS Scanned Article</a>  <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
-				{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='openurl') }}">{% if current_user.user_rec.openurl_icon %}<img class="socialButton" src="{{ current_user.user_rec.openurl_icon }}" alt="Open URL" />{% else %}Open URL{% endif %}</a></dd>{% endif %}
-				{% if 'arXiv' in id_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='preprint') }}">arXiv eprint</a> <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
-			</dl>
+			(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) 
+			or ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+			<div id="abstractRightMenu" class="linkRightMenu">
+				{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
+				(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) %}
+				<dl>
+					<dt>Full Text Sources</dt>
+					{% if 'electr' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">Publisher article</a>{% if pub_openaccess %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+					{% if ads_scan or 'pdf' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='article') }}">{% if ads_scan %}ADS PDF{% elif 'pdf' in link_types %}Publisher PDF{% endif %}</a>{% if ads_scan or pub_openaccess%} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+					{% if ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='gif') }}">ADS Scanned Article</a>  <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
+					{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='openurl') }}">{% if current_user.user_rec.openurl_icon %}<img class="socialButton" src="{{ current_user.user_rec.openurl_icon }}" alt="Open URL" />{% else %}Open URL{% endif %}</a></dd>{% endif %}
+					{% if 'arXiv' in id_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='preprint') }}">arXiv eprint</a> <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
+				</dl>
+				{% endif %}
+				{% if ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+				<dl>
+					<dt>Data Products</dt>
+					{% if 'data' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='data') }}">Archival Data</a></dd>{% endif %}
+					{% if 'simbad' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='simbad') }}">SIMBAD objects</a></dd>{% endif %}
+					{% if 'ned' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='ned') }}">NED objects</a></dd>{% endif %}
+				</dl>
+				{% endif %}
+			</div>
 			{% endif %}
-			{% if ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
-			<dl>
-				<dt>Data Products</dt>
-				{% if 'data' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='data') }}">Archival Data</a></dd>{% endif %}
-				{% if 'simbad' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='simbad') }}">SIMBAD objects</a></dd>{% endif %}
-				{% if 'ned' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='ned') }}">NED objects</a></dd>{% endif %}
-			</dl>
-			{% endif %}
-		</div>
-		{% endif %}
-		<div id="abstractRightMenu" class="span3 linkRightMenu">
-			<a target="_blank" class="socialButton" title="Save in Private library" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='private_library', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/ADS-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Save in Private library" />
-			</a>
-			<a target="_blank" class="socialButton" title="Tweet this" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='twitter', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/twitter-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Tweet this" />
-			</a>
-			<a target="_blank" class="socialButton" title="Share on Facebook" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='facebook', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/facebook-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on Facebook" />
-			</a>
-			<a target="_blank" class="socialButton" title="Share on LinkedIn" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='linkedin', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/linkedin-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on LinkedIn" />
-			</a>
-			<a target="_blank" class="socialButton" title="Export to Mendeley" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='mendeley', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/mendeley-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to Mendeley" />
-			</a>
-			{% if 'arXiv' in id_types %}
-			<a target="_blank" class="socialButton" title="Export to ScienceWise" data-rel="bootstrap_tooltip"
-				href="{{ url_for('redirect.socialbutton', redirect_type='sciencewise', bibcode=solrdoc.bibcode) }}">
-				<img class="socialButton" src="{{ url_for('static', filename='images/buttons/sciencewise-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to ScienceWise" />
-			</a>
-			{% endif %}
+			
+			<div id="recommendations" class="linkRightMenu"></div>
+			
+			<div id="social_buttons" class="linkRightMenu">
+				<a target="_blank" class="socialButton" title="Save in Private library" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='private_library', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/ADS-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Save in Private library" />
+				</a>
+				<a target="_blank" class="socialButton" title="Tweet this" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='twitter', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/twitter-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Tweet this" />
+				</a>
+				<a target="_blank" class="socialButton" title="Share on Facebook" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='facebook', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/facebook-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on Facebook" />
+				</a>
+				<a target="_blank" class="socialButton" title="Share on LinkedIn" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='linkedin', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/linkedin-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Share on LinkedIn" />
+				</a>
+				<a target="_blank" class="socialButton" title="Export to Mendeley" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='mendeley', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/mendeley-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to Mendeley" />
+				</a>
+				{% if 'arXiv' in id_types %}
+				<a target="_blank" class="socialButton" title="Export to ScienceWise" data-rel="bootstrap_tooltip"
+					href="{{ url_for('redirect.socialbutton', redirect_type='sciencewise', bibcode=solrdoc.bibcode) }}">
+					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/sciencewise-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to ScienceWise" />
+				</a>
+				{% endif %}
+			</div>
 		</div>
 	</div>
 	
 	<script type="text/javascript">
+	$(document).ready(function(){
 		//toggle for the coauthors in a list with more than 10 authors 
 		$('.coauthorsToggle').on('click', function(){
 			//I show or hide the coauthors 
@@ -196,6 +201,26 @@
 			else
 				$('.affiliationToggle > span.textToggle').html('show');
 		});
+		
+		//Start a spin 
+		$('#recommendations').html('&nbsp;').spin('ads_facets');
+		//create the url for the recommendations 
+		var url_to_query = "{{ url_for('recommender.recommender', bibcode=solrdoc.bibcode, format='embedded_html') }}";
+		//ajax query 
+		$.get(url_to_query)
+			.done(function(response){
+				//Insert the data into the DOM 
+				$('#recommendations').html(response);
+			})
+			.fail(function(){
+				//Message if ajax fails 
+				$('#recommendations').html('<dl><dt>Error retrieving Suggested Articles</dt></dl>');
+			})
+			.always(function(){
+				//Stop the spin
+				$('#recommendations').spin(false);
+			});
+	});
 	</script>
 </div>
 

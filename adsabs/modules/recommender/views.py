@@ -15,6 +15,18 @@ __all__ = ['recommender_blueprint','recommender','suggestions']
 
 recommender_blueprint = Blueprint('recommender', __name__, template_folder="templates", url_prefix='/recommender')
 
+@recommender_blueprint.after_request
+def add_caching_header(response):
+    """
+    Adds caching headers
+    """
+    if not config.DEBUG:
+        cache_header = 'max-age=3600, must-revalidate'
+    else:
+        cache_header = 'no-cache'
+    response.headers.setdefault('Cache-Control', cache_header)
+    return response
+
 #@recommender_blueprint.route('/', methods=('GET','POST'))
 #def index_recommender():
 #    """
@@ -40,6 +52,8 @@ def recommender(bibcode,format):
         return results['recommendations']
     elif format == 'ascii':
         return "\n".join([item['bibcode'] for item in results['recommendations']])
+    elif format == 'embedded_html':
+        return render_template('recommendations_embedded.html', results=results)
     else:
         return render_template('recommendations.html', results=results)
 

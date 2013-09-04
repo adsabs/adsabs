@@ -1,0 +1,12 @@
+{# Template that renders a set of recommendations #}
+
+{% if not results.get('recommendations', []) %}
+	<dl><dt>No Suggested Articles for this paper.</dt></dl>
+{% else %}
+	<dl>
+		<dt class="recommendation">Suggested Articles</dt>
+		{% for result in results.get('recommendations', []) %}
+		<dd class="recommendation"><a href="{{ url_for('abs.abstract', bibcode=result.get('bibcode', '')) }}">{{ result.get('bibcode', '') }}</a> {{ result.get('author', '') }}: {{ result.get('title', '') }}</dd>
+		{% endfor %}
+	</dl>
+{% endif %}

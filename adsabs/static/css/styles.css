@@ -345,6 +345,16 @@ a.socialButton {
 	text-decoration:none;
 }
 
+dt.recommendation {
+	margin-bottom: 5px;
+}
+
+dd.recommendation {
+	font-size: .9em;
+	line-height: 12px;
+	margin-bottom: 5px;
+}
+
 div.abstractTitle {
 	font-size: 1.3em;
 	font-weight: bold;	
