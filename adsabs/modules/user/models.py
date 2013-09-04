@@ -30,6 +30,7 @@ class AdsUserRecord(mongodb.Document): #@UndefinedVariable
     last_signon = mongodb.DateTimeField(default=None, required=False) #@UndefinedVariableo
     remote_login_system = mongodb.StringField(default='', required=False) #@UndefinedVariable
     alternate_usernames = mongodb.SetField(mongodb.StringField(), required=False) #@UndefinedVariable
+    openurl_icon = mongodb.StringField(default=None, required=False) #@UndefinedVariable
     
     # indexes
     cookie_id_index = document.Index().descending('cookie_id').unique()

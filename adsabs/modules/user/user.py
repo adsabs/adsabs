@@ -52,7 +52,8 @@ class AdsUser(object):
                                         registered=datetime.utcnow().replace(tzinfo=pytz.utc),
                                         active=True, 
                                         anonymous=False,
-                                        remote_login_system=classic_user.get('request', {}).get('man_url', ''))
+                                        remote_login_system=classic_user.get('request', {}).get('man_url', ''),
+                                        openurl_icon=classic_user.get('openurl_icon'))
             new_rec.save()
             # then I re-extract the user object
             # (don't think it's necessary to re-fetch the record
@@ -65,6 +66,8 @@ class AdsUser(object):
                 params_update['username'] = classic_user.get('email')
             if user_rec.myads_id != classic_user.get('myadsid'):
                 params_update['myads_id'] = classic_user.get('myadsid')
+            if user_rec.openurl_icon != classic_user.get('openurl_icon'):
+                params_update['openurl_icon'] = classic_user.get('openurl_icon')
             if user_rec.firstname != firstname:
                 params_update['firstname'] = firstname
             if user_rec.lastname != lastname:
