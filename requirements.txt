@@ -1,5 +1,5 @@
 -e git+https://github.com/theorm/mongobox.git#egg=mongobox
--e git+git@github.com:lbjay/flask-solrquery.git#egg=flask-solrquery
+-e git+https://github.com/lbjay/flask-solrquery.git#egg=flask-solrquery 
 BeautifulSoup>=3.2.1
 Flask-Cache>=0.12
 Flask-DebugToolbar>=0.8.0
