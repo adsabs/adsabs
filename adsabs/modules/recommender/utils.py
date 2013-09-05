@@ -51,7 +51,7 @@ def get_recommendations(**args):
     try:
         bibcode = args['bibcode']
     except:
-        return []
+        return {}
     try:
         server = Server(config.RECOMMENDER_SERVER)
     except RecommderServerConnectionError, err:
@@ -60,7 +60,7 @@ def get_recommendations(**args):
     try:
         recommendations = server.recommend([bibcode])
     except:
-        return []
+        return {}
     # Get meta data for the recommendations
     meta_dict = get_meta_data(bibcodes=recommendations[1:])
     # Filter out any bibcodes for which no meta data was found
