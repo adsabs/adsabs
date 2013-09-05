@@ -20,7 +20,7 @@ def perform_classic_user_query(parameters, headers, service_url):
     parameters['man_ads2'] = '1'
     #Perform the request
     r = requests.get(service_url, params=parameters, headers=headers)
-    #Perform the request
+    #Check for problems
     try:
         r.raise_for_status()
     except Exception, e:
