@@ -235,7 +235,7 @@ def set_topn_query(topn, sc, rv):
         topn_sort = "%s %s" % sc['sort']
             
     # if the topn is used, no sorting is needed by SOLR
-    sc['sort'] = None
+    #sc['sort'] = None #actually for some reason Roman needs the sorting
     sc['q'] = u'topn(%s, (%s), "%s")' % (topn, sc['q'], topn_sort)
     
     

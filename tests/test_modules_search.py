@@ -348,12 +348,13 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
     def test_query_with_default_params_23(self):
         """test topn operator"""
+        self.maxDiff = None
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&topn=1000'):
             expected = deepcopy(QueryBuilderSearch.DEFAULT_COMPONENTS)
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "score")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = None
+            expected['sort'] = ('score', 'desc')
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
@@ -361,12 +362,13 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
     def test_query_with_default_params_24(self):
         """test topn operator"""
+        self.maxDiff = None
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&re_sort_type=DATE&re_sort_dir=desc&topn=1000'):
             expected = deepcopy(QueryBuilderSearch.DEFAULT_COMPONENTS)
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "pubdate_sort desc")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = None
+            expected['sort'] = ('pubdate_sort', 'desc')
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
@@ -374,12 +376,13 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
     def test_query_with_default_params_25(self):
         """test topn operator"""
+        self.maxDiff = None
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&re_sort_type=POPULARITY&re_sort_dir=asc&topn=1000'):
             expected = deepcopy(QueryBuilderSearch.DEFAULT_COMPONENTS)
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "read_count asc")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = None
+            expected['sort'] = ('read_count', 'asc')
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
