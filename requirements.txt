@@ -38,3 +38,4 @@ multiprocessing
 Markdown>=2.3.1
 path.py>=4.3
 GitPython>=0.3.2.RC1
+mock>=1.0.1
