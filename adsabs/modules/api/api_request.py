@@ -3,11 +3,10 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
+import sys
 from flask import g #@UnresolvedImport
 from flask.ext.solrquery import solr, SearchRequest #@UnresolvedImport
 
-import logging
-from adsabs.core.logevent import LogEvent
 from config import config
 from .forms import ApiQueryForm
 from api_errors import ApiPermissionError,ApiSolrException
@@ -85,9 +84,8 @@ class ApiSearchRequest(object):
         try:
             resp = solr.get_response(req)
         except Exception, e:
-            # TODO: Log this error + traceback
-            # raaise a more user-friendly exception
-            raise ApiSolrException("Error communicating with search service")
+            from adsabs.core.solr import AdsabsSolrqueryException
+            raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
         
         if resp.is_error():
             raise ApiSolrException(resp.get_error())
