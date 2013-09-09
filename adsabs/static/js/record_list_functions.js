@@ -57,6 +57,8 @@ ResultListManager.export_to_ads_classic = function()
 ResultListManager.export_records_in_other_format = function(format)
 {	
 	$.fancybox.showLoading();
+	//re-enable query parameters
+	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
 	//remove a hidden fields if exists
 	$('#search_results_form > input.ajaxHiddenField').remove();
 	//append the format to the form
