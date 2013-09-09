@@ -42,7 +42,8 @@
 			</div>
 		</div>
 		<div class="span9" id="results">
-			<form id="search_results_form" action="">
+			<form id="search_results_form" method="post" action="" >
+				<input type="hidden" value='{{ query_components|tojson|safe }}' name="current_search_parameters" />
 				<div class="container-fluid">
 				{# The facet bar #}
 				{% if resp.get_facet_parameters() %}
@@ -50,12 +51,12 @@
 				{% endif %}		
 				{# Navbar on top of the results #}
 					<div class="row-fluid well well-small">
-						<div class="span5 firstspan">
+						<div class="span6 firstspan">
 							{{ render_toggle_all_paper_list() }}
 							{{ render_result_numbers(resp) }}
 						</div>
 						
-						<div class="span5 pull-right">
+						<div class="span6 pull-right">
 							<!-- button class="btn pull-right">Sort</button-->
 							<!-- button class="btn pull-right">More</button-->
 							{{ render_re_sort(resp, url_for('search.search')) }}

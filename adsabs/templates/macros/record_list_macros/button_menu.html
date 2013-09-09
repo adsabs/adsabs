@@ -128,10 +128,13 @@
 {# ###Macro to render view/export menu #}
 {% macro render_export_menu() %}
 <div class="export_view_menu dropdown pull-right">
-	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> View <i class="caret"></i></a>
+	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> Export <i class="caret"></i></a>
 	<ul class="dropdown-menu">
-		<li class="nav-header">selected records:</li>
+		<li class="nav-header">records:</li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('BIBTEX')">in Bibtex</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('AASTeX')">in AASTex</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('ENDNOTE')">in EndNote</a></li>
 	</ul>
 </div>
 {% endmacro %}

@@ -9,9 +9,72 @@ ResultListManager = new Object();
  */
 ResultListManager.export_to_ads_classic = function()
 {
-	//if I have checked bibcodes
+	//remove a hidden fields if exists
+	$('#search_results_form > input.ajaxHiddenBibcode').remove();
+	
+	//if there are checked bibcodes there is nothing to do but submitting the form
 	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
 	{
+		//remove the query parameters
+		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+		//submit the form
 		$('#search_results_form').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).attr('target', '_blank').submit();
 	}
+	//otherwise need to retrieve the list and then submit the form
+	else
+	{
+		$.fancybox.showLoading();
+		
+		//re-enable query parameters
+		$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+		//get the bibcodes
+		$.ajax({
+			type : "POST",
+			cache : false,
+			url : GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY,
+			data : $('#search_results_form').serializeArray(),
+			success: function(data) {
+				$.fancybox.hideLoading();
+				//remove the query parameters
+				$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+				//append an hidden parameter for the bibcodes retrieved
+				$('#search_results_form').append('<input type="hidden" name="bibcode" class="ajaxHiddenBibcode" value="'+data+'"/>');
+				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenBibcode" value="'+GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN+'"/>');
+				//submit the form
+				$('#search_results_form').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
+			}
+		});
+	}
+		
+	
+};
+
+/*
+ * Function to export a list of selected papers to ads classic
+ */
+ResultListManager.export_records_in_other_format = function(format)
+{	
+	$.fancybox.showLoading();
+	//append the format to the form
+	$('#search_results_form').append('<input type="hidden" name="export_format" value="'+format+'"/>');
+	
+	//if there are checked bibcodes
+	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+	{
+		//remove the query parameters
+		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+	}
+	
+	//submit the form via ajax
+	$.ajax({
+		type : "POST",
+		cache : false,
+		url : GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL,
+		data : $('#search_results_form').serializeArray(),
+		success: function(data) {
+			$.fancybox.hideLoading();
+			$.fancybox('<pre>'+data+'</pre>');
+		}
+	});
+	
 };

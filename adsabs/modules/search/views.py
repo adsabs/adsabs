@@ -47,7 +47,7 @@ def search():
             resp = solr.query(**query_components)
             if resp.is_error():
                 flash(resp.get_error_message(), 'error')
-            return render_template('search_results.html', resp=resp, form=form)
+            return render_template('search_results.html', resp=resp, form=form, query_components=query_components)
         else:
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')

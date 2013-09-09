@@ -10,11 +10,11 @@ import sys
 import traceback
 
 
-__all__ = ['get_classic_export']
+__all__ = ['get_classic_records_export']
 
 CLASSIC_EXPORT_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect'
 
-def get_classic_export(bibcodes_list, export_format):
+def get_classic_records_export(bibcodes_list, export_format):
     """
     Fetches the metadata for the list of bibcodes in the specified list
     """
