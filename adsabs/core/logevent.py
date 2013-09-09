@@ -6,9 +6,16 @@ Created on Apr 30, 2013
 
 import pytz
 import socket
+import logging
 import datetime
 from flask import request
 
+def log_event(logger, **kwargs):
+    if not kwargs.has_key('msg'):
+        kwargs['msg'] = request.url
+    event = LogEvent.new(**kwargs)
+    logging.getLogger(logger).info(event)   
+    
 class LogEvent(dict):
     
     @classmethod

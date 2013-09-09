@@ -5,97 +5,58 @@ from .solrdoc import *
 from query_builder import QueryBuilderSimple, QueryBuilderSearch
 
 from flask import current_app as app, request as current_request, g
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr, signals as solrquery_signals #@UnresolvedImport
 from copy import deepcopy
+
+from adsabs.core.logevent import log_event
 
 __all__ = [
     'SolrResponse',
     'SolrDocument',
     'query',
-    'search_request',
-    'facet_request',
-    'document_request',
     'get_document',
     'SolrRequestAdapter',
     'QueryBuilderSimple',
     'QueryBuilderSearch',
+    'AdsabsSolrqueryException'
     ]
 
+@solrquery_signals.search_signal.connect
+def handle_search_signal(sender, **kwargs):
+    """
+    catches the search signal sent from the flask-solrquery extension,
+    extracts some event data and sends it to the appropriate logger.
+    TODO: figure out a way to push the logic of which event stream
+    (e.g., 'api' or 'search') should handle the event out of here and into
+    the actual blueprints. I tried and failed to come up with a solution.
+    """
 
-def search_request(q, filters=[], sort=config.SEARCH_DEFAULT_SORT, 
-                   sort_direction=config.SEARCH_DEFAULT_SORT_DIRECTION, 
-                   query_fields=config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
-                   rows=config.SEARCH_DEFAULT_ROWS, start=None, ui_q=None, 
-                   ui_filters=[], **kwargs):
-    
-    req = SolrRequest(q, rows=rows)
-    
-    if start:
-        req.set_start(start)
-        
-    if sort is not None:
-        try:
-            sort_field = config.SOLR_SORT_OPTIONS[sort]
-            req.add_sort(sort_field, sort_direction)
-        except KeyError:
-            app.logger.error("Invalid sort option: %s" % sort)
-                
-    for filter_ in filters:
-        req.add_filter(filter_)
-    
-    req.set_fields(config.SOLR_SEARCH_DEFAULT_FIELDS)
-    req.set_query_fields(query_fields)
-    
-    for facet in config.SOLR_SEARCH_DEFAULT_FACETS:
-        req.add_facet(*facet)
-        
-    for hl in config.SOLR_SEARCH_DEFAULT_HIGHLIGHTS:
-        req.add_highlight(*hl)
-    
-    if ui_q:
-        req.set_params(ui_q=ui_q)
-    if ui_filters:
-        req.set_params(ui_fq=deepcopy(ui_filters))
-    
-    # allow for manual overrides
-    if len(kwargs):
-        req.set_params(**kwargs)
-        
-    return req
+    resp = kwargs.pop('response')
 
-def query(q, **kwargs):
-    req = search_request(q, **kwargs)
-    return req.get_response()
+    # common search event data
+    log_data = {
+        'q': resp.get_query(),
+        'hits': resp.get_hits(),
+        'count': resp.get_count(),
+        'start': resp.get_start_count(),
+        'qtime': resp.get_qtime(),
+        'results': resp.get_doc_values('bibcode', 0, config.SEARCH_DEFAULT_ROWS),
+        'error_msg': resp.get_error_message(),
+        'http_status': resp.get_http_status(),
+        'solr_url': resp.request.url,
+    }
 
-def facet_request(q, filters=[], facet_fields=None, ui_q=None, ui_filters=[], 
-                  query_fields=config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS, **kwargs):
+    if hasattr(g, 'api_user'):
+        log_data['dev_key'] = g.api_user.get_dev_key()
+        log_event('api', **log_data)
+    elif hasattr(g, 'user_cookie_id'):
+        log_data['user_cookie_id'] = g.user_cookie_id
+        log_event('search', **log_data)
 
-    req = SolrRequest(q, rows=0)
-    
-    req.set_query_fields(query_fields)
-
-    for filter_ in filters:
-        req.add_filter(filter_)
-    
-    if not facet_fields:
-        facet_fields = config.SOLR_SEARCH_DEFAULT_FACETS
-        
-    for facet in facet_fields:
-        req.add_facet(*facet)
-    
-    if ui_q:
-        req.set_params(ui_q=ui_q)
-    if ui_filters:
-        req.set_params(ui_fq=deepcopy(ui_filters))
-        
-    if len(kwargs):
-        req.set_params(**kwargs)
-        
-    return req
-    
-def facet_query(q, **kwargs):
-    req = facet_request(q, **kwargs)
-    return req.get_response()
+class AdsabsSolrqueryException(Exception):
+    def __init__(self, message, exc_info):
+        Exception.__init__(self, message)
+        self.exc_info = exc_info
         
 def get_document(identifier, **kwargs):
     q = "identifier:%s" % identifier

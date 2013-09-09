@@ -71,7 +71,7 @@ class APITests(AdsabsBaseTestCase):
         
         rv = self.client.get('/api/search/?q=black+holes&dev_key=foo')
         self.assertEqual(rv.status_code, 401)
-        self.assertIn("API authentication failed: unknown user", rv.data)
+        self.assertIn("API authentication failed: unknown dev_key", rv.data)
         
         rv = self.client.get('/api/record/1234')
         self.assertEqual(rv.status_code, 401)
