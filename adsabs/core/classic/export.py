@@ -20,7 +20,8 @@ def get_classic_records_export(bibcodes_list, export_format):
     """
     
     parameters = {'bibcode' : ';'.join(bibcodes_list),
-                  'data_type' : export_format
+                  'data_type' : export_format,
+                  'sort' : 'NONE'
                   }
     headers = {'User-Agent':'ADS Script Request Agent'}
     

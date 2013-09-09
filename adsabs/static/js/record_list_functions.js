@@ -10,7 +10,9 @@ ResultListManager = new Object();
 ResultListManager.export_to_ads_classic = function()
 {
 	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenBibcode').remove();
+	$('#search_results_form > input.ajaxHiddenField').remove();
+	//disable sorting for ADS Classic
+	$('#search_results_form').append('<input type="hidden" name="sort" class="ajaxHiddenField" value="NONE"/>');
 	
 	//if there are checked bibcodes there is nothing to do but submitting the form
 	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
@@ -38,10 +40,10 @@ ResultListManager.export_to_ads_classic = function()
 				//remove the query parameters
 				$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
 				//append an hidden parameter for the bibcodes retrieved
-				$('#search_results_form').append('<input type="hidden" name="bibcode" class="ajaxHiddenBibcode" value="'+data+'"/>');
-				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenBibcode" value="'+GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN+'"/>');
+				$('#search_results_form').append('<input type="hidden" name="bibcode" class="ajaxHiddenField" value="'+data+'"/>');
+				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenField" value="'+GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN+'"/>');
 				//submit the form
-				$('#search_results_form').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
+				$('#search_results_form').removeAttr('target').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
 			}
 		});
 	}
@@ -55,8 +57,10 @@ ResultListManager.export_to_ads_classic = function()
 ResultListManager.export_records_in_other_format = function(format)
 {	
 	$.fancybox.showLoading();
+	//remove a hidden fields if exists
+	$('#search_results_form > input.ajaxHiddenField').remove();
 	//append the format to the form
-	$('#search_results_form').append('<input type="hidden" name="export_format" value="'+format+'"/>');
+	$('#search_results_form').append('<input type="hidden" name="export_format" class="ajaxHiddenField"  value="'+format+'"/>');
 	
 	//if there are checked bibcodes
 	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
