@@ -31,6 +31,13 @@ class SolrDocument(object):
         if data:
             return func(data)
     
+    def has_coreads(self):
+        """Checks if document has a list of assoc reader ids"""
+        if self.reader:
+            return True
+        else:
+            return False
+    
     def has_references(self):
         """Checks if references are present and returns a boolean"""
         return self.reference and True or False
@@ -114,6 +121,11 @@ class SolrDocument(object):
         else:
             bibquery = bibcode[:13]
         q = "bibcode:%s*" % bibquery
+        return solr.query(q, **kwargs)
+    
+    def get_coreads(self, **kwargs):
+        """returns the results of the 'trending' 2nd order operator"""
+        q = "trending(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
         return solr.query(q, **kwargs)
 
     def has_highlights(self, field=None):

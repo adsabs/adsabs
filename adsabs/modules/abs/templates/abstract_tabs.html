@@ -57,7 +57,14 @@
 					       href="{{ url_for('abs.tab_list', list_type='citations', bibcode=inveniodoc.bibcode) }}"
 					       {%- endif %}> Citations {% if solrdoc.has_citations() %}({{ solrdoc.get_citation_count() }}){% endif %}</a></li>
 
-					<li class="disabled"><a> Co-reads </a></li>
+					<li {% if curview == 'coreads'%}
+					   class="active"
+					   {% elif not solrdoc.has_assoc_list('coreads')%}
+					   class="disabled"
+					   {%- endif %}><a
+					       {% if curview != 'coreads' and solrdoc.has_coreads() %}
+					       href="{{ url_for('abs.tab_list', list_type='coreads', bibcode=inveniodoc.bibcode) }}"
+					       {%- endif %}> Co-Reads </a></li>
 
 					<li class="disabled"><a> Similar Articles </a></li>
 					
