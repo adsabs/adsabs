@@ -58,6 +58,7 @@ class AppConfig(object):
     SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
     SOLRQUERY_TIMEOUT = 300
     SOLRQUERY_KEEPALIVE = False
+    SOLRQUERY_HTTP_METHOD = 'POST'
 
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
