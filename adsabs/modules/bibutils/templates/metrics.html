@@ -1,4 +1,4 @@
-{# citation_helper.html #}
+{# metrics.html #}
 {% extends "layout.html" %}
 
 {% block titlehead %}Metrics - Input Bibcodes{% endblock %}
@@ -15,6 +15,7 @@ This tool will calculate various metrics and histograms for a list of publicatio
         Please enter your bibcodes:<br>
         {{form.bibcodes(rows=10, cols=20)}}<br>
     </p>
+    <input type="hidden" name="layout" class="ajaxHiddenField"  value="YES"/>
     <p><input type="submit" value="Results"></p>
 </form>
 </div>

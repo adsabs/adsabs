@@ -1,15 +1,9 @@
 {# metrics_results.html  #}
+{% if include_layout == 'YES'%}
 {% extends "layout.html" %}
-
 {% block titlehead %}Metrics Results{% endblock %}
-
+{% endif %}
 {% block body %}
-<script type="text/javascript">
-    var paperhist_data = {{results['paper histogram']}}
-    var readshist_data = {{results['reads histogram']}}
-    var citshist_data  = {{results['citation histogram']}}
-    var series_data = {{results['metrics series']}}
-</script>
         <div>
                 <table>
                         <tbody>

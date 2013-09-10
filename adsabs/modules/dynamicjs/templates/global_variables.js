@@ -18,3 +18,5 @@ GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL = '{{ url_for("export.
 GlobalVariables.ADSABS2_AUTHOR_NETWORK = '{{ url_for("visualization.author_network") }}';
 
 GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citation_helper") }}';
+
+GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';

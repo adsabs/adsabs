@@ -104,10 +104,15 @@ def metrics(**args):
         bibcodes = []
     results = None
     format = ''
+    layout = 'YES'
     if 'bibcodes' in args:
         bibcodes = args['bibcodes']
         format = 'json'
     if is_submitted_cust(form):
+        try:
+            layout = form.layout.data
+        except:
+            layout = 'NO'
         # the form was submitted, so get the contents from the submit box
         # make sure we have a list of what seem to be bibcodes
         bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
@@ -122,9 +127,10 @@ def metrics(**args):
             results = generate_metrics(bibcodes=bibcodes, types='statistics,histograms,metrics,series', fmt=format)
         except Exception, err:
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
+            return render_template('metrics_no_results.html', include_layout=layout)
     if results:
         if format == 'json':
             return jsonify(metrics=results)
         else:
-            return render_template('metrics_results.html', results=results)
+            return render_template('metrics_results.html', results=results, include_layout=layout)
     return render_template('metrics.html', form=form)
