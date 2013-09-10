@@ -2,7 +2,17 @@
 {% if include_layout == 'YES'%}
 {% extends "layout.html" %}
 {% block titlehead %}Metrics Results{% endblock %}
+{% else %}
+<script type="text/javascript" src="/static/js/metrics.js?app_version=2013_08_26_v1"></script>
 {% endif %}
+<script type="text/javascript">
+    {% autoescape false %}
+    var paperhist_data = {{results['paper histogram']}};
+    var readshist_data = {{results['reads histogram']}};
+    var citshist_data  = {{results['citation histogram']}};
+    var series_data = {{results['metrics series']}};
+    {% endautoescape %}
+</script>
 {% block body %}
         <div>
                 <table>
@@ -255,4 +265,87 @@
                             </tbody>
                     </table>
                 </div>
+	<div id="metrics_plots" class="wrapper group_wrapper">
+			<div id="paperhist_wrap" class="wrapper plot_wrapper" >
+				<div id="paperhist_description" class="plot_title"></div>
+				
+				<div class="plot_content_wrapper">
+					<div id="paperhist_tabs" class="plot_tabs">
+						<div id="paperhist_tabs_left" class="plot_tabs_both">
+							<span>Total</span>
+						</div>
+						<div id="paperhist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_paperhist('normalized', 'right', 'paperhist_tabs_');">
+							<span>Normalized</span>
+						</div>
+						<br style="clear:both;"/>
+					</div>
+					<div id="paperhist" style="margin:5px;"></div>
+				</div>
+				<div id="paperhist_legend" class="plot_legend"></div>
+				<div id="paperhist_buttons" class="plot_buttons">
+					View as <select onchange="show_plot_paperhist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+					Size <select onchange="size_plot_paperhist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+				</div>
+			</div>
+		<div id="readshist_wrap" class="wrapper plot_wrapper" >
+			<div id="readshist_description" class="plot_title"></div>
+			
+			<div class="plot_content_wrapper">
+				<div id="readshist_tabs" class="plot_tabs">
+					<div id="readshist_tabs_left" class="plot_tabs_both">
+						<span>Total</span>
+					</div>
+					<div id="readshist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_readshist('normalized', 'right', 'readshist_tabs_');">
+						<span>Normalized</span>
+					</div>
+					<br style="clear:both;"/>
+				</div>
+				<div id="readshist" style="margin:5px;"></div>
+			</div>
+			<div id="readshist_legend" class="plot_legend"></div>
+			<div id="readshist_buttons" class="plot_buttons">
+				View as <select onchange="show_plot_readshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+				Size <select onchange="size_plot_readshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+			</div>
+		</div>
+		<div id="citshist_wrap" class="wrapper plot_wrapper"> 
+			<div id="citshist_description" class="plot_title"></div>
+			
+			<div class="plot_content_wrapper">
+				<div id="citshist_tabs" class="plot_tabs">
+					<div id="citshist_tabs_left" class="plot_tabs_both">
+						<span>Total</span>
+					</div>
+					<div id="citshist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_citshist('normalized', 'right', 'citshist_tabs_');">
+						<span>Normalized</span>
+					</div>
+					<br style="clear:both;"/>
+				</div>
+				<div id="citshist" style="margin:5px;"></div>
+			</div>
+			
+			<div id="citshist_legend" class="plot_legend"></div>
+			<div id="citshist_buttons" class="plot_buttons">
+				View as <select onchange="show_plot_citshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+				Size <select onchange="size_plot_citshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+			</div>
+		</div>
+			<div id="series_wrap" class="wrapper plot_wrapper plot_wrapper_more">
+				<div id="series_description" class="plot_title"></div>
+				<div class="plot_content_wrapper">
+					<div id="citshist_tabs" class="plot_tabs">
+						<div id="citshist_tabs_left" class="plot_tabs_both">
+							<span>&nbsp;</span>
+						</div>
+						<br style="clear:both;"/>
+					</div>
+					<div id="series" style="margin: 5px 10px 5px 10px;"></div>
+				</div>
+				<div id="series_legend" class="plot_legend"></div>
+				<div id="series_buttons" class="plot_buttons">
+					View as <select onchange="show_plot_series(this.value);"><option value="points">Points</option><option value="lines">Lines</option></select>
+					Size <select onchange="size_plot_series(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+				</div>
+			</div>
+	</div>
 {% endblock %}
