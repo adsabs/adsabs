@@ -83,11 +83,18 @@ class TestSolrHAProxyCookie(AdsabsBaseTestCase):
         from flask import g
          
         with self.app.test_request_context():
+
+            # the httpbin thing will only work with GET requests
+            orig_method = solr.request_http_method
+            solr.request_http_method = 'GET'
+        
             self.app.preprocess_request()
             req = solr.create_request("foo")
-            resp = solr.get_response(req, solrquery_url='http://httpbin.org/cookies')
+            resp = solr.get_response(req, base_url='http://httpbin.org/cookies')
             expected = { config.SOLR_HAPROXY_SESSION_COOKIE_NAME: g.user_cookie_id }
             self.assertDictContainsSubset(expected, resp.raw['cookies'])
+
+            solr.request_http_method = orig_method
 
 class TestSolrErrorResponse(AdsabsBaseTestCase):
  

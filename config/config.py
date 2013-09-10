@@ -58,6 +58,7 @@ class AppConfig(object):
     SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
     SOLRQUERY_TIMEOUT = 300
     SOLRQUERY_KEEPALIVE = False
+    SOLRQUERY_HTTP_METHOD = 'POST'
 
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
@@ -102,7 +103,7 @@ class AppConfig(object):
 
 #    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
+                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader']
     SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year"
@@ -183,6 +184,8 @@ class AppConfig(object):
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
+    ADS_CLASSIC_LINKOUT_BASEURL = 'http://adsabs.harvard.edu/cgi-bin/nph-data_query/noredirect'
+    ADS_CLASSIC_LINKOUT_LINK_TYPE_MAP = {'coreads': 'AR'}
     ADS_LOGIN_URL = None
 
     API_CURRENT_VERSION = '0.1'
