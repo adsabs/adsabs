@@ -1,0 +1,29 @@
+{% macro render_classic_log_request_js(bibcode, link_type) %}
+
+{% if link_type in config.ADS_CLASSIC_LINKOUT_LINK_TYPE_MAP -%}
+    {% set link_type = config.ADS_CLASSIC_LINKOUT_LINK_TYPE_MAP[link_type] %}
+{% else -%}
+    {% set link_type = link_type.upper() %}
+{% endif %}
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+    var classicLinkoutUrl = "{{ config.ADS_CLASSIC_LINKOUT_BASEURL }}";
+    var params = {'bibcode': '{{ bibcode }}', 'link_type': '{{ link_type }}' };
+	$.ajax(classicLinkoutUrl, {
+		data: params,
+		type: 'GET',
+		dataType: 'json',
+		error: function(jqXHR, textStatus, errorThrown) {
+			{% if config.DEBUG -%}
+			if (window.console) {
+				console.log('Classic linkout request failed: ' + textStatus);
+				console.log('url: ' + this.url)
+			}
+			{% endif %}
+		},
+	});	
+})
+</script>
+{% endmacro %}

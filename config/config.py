@@ -182,6 +182,8 @@ class AppConfig(object):
     
     INVENIO_BASEURL = 'http://adsx.cfa.harvard.edu'
     ADS_CLASSIC_BASEURL = 'http://adsabs.harvard.edu'
+    ADS_CLASSIC_LINKOUT_BASEURL = 'http://adsabs.harvard.edu/cgi-bin/nph-data_query/noredirect'
+    ADS_CLASSIC_LINKOUT_LINK_TYPE_MAP = {'coreads': 'AR'}
     ADS_LOGIN_URL = None
 
     API_CURRENT_VERSION = '0.1'
