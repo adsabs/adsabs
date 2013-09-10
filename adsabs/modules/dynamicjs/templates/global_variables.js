@@ -16,3 +16,5 @@ GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY = '{{ url_for("export.get_b
 GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL = '{{ url_for("export.export_to_other_formats") }}';
 //Variable with the url of the view for the author network
 GlobalVariables.ADSABS2_AUTHOR_NETWORK = '{{ url_for("visualization.author_network") }}';
+
+GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citation_helper") }}';

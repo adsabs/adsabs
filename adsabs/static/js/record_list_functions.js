@@ -123,23 +123,45 @@ ResultListManager.view_author_network = function()
  */
 ResultListManager.citation_helper = function()
 {
-        //if I have checked bibcodes
+        $.fancybox.showLoading();
+        //re-enable query parameters
+        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+        //remove a hidden fields if exists
+        $('#search_results_form > input.ajaxHiddenField').remove();
+        //if there are checked bibcodes
         if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
         {
-            // Gather the checked bibcodes
-            ResultListManager.checked_bibcodes = new Array();
-            var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
-            $inputs.each(function() {
-                ResultListManager.checked_bibcodes.push($(this).attr('value'));
-            });
-            // Call the Citation Helper with these bibcodes
-        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+                //remove the query parameters
+                checked_bibcodes = new Array();
+                var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
+                $inputs.each(function() {
+                    checked_bibcodes.push($(this).attr('value'));
+                });
+                var collapsed_bibcodes = checked_bibcodes.join('\n');
+        }
+        else
         {
-            // NOTE: PUT IN CORRECT URL!!!!!
-                $('#search_results_form').attr('action', 'http://jadzia:5000/bibutils/citation_helper').submit();
+                bibcodes = new Array();
+                var $inputs = $('#search_results_form').find('input[name="bibcode"]');
+                $inputs.each(function() {
+                    bibcodes.push($(this).attr('value'));
+                });
+                var collapsed_bibcodes = bibcodes.join('\n');
         }
-
-        }
+        $('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+        $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField"  value="'+collapsed_bibcodes+'"/>');
+        $('#search_results_form').append('<input type="hidden" name="return_nr" class="ajaxHiddenField"  value="10"/>');
+        //submit the form via ajax
+        $.ajax({
+                type : "POST",
+                cache : false,
+                url : GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL,
+                data : $('#search_results_form').serializeArray(),
+                success: function(data) {
+                    $.fancybox.hideLoading();
+                    $.fancybox(data);
+                } 
+        });
 };
 /*
  * Function to get Metrics results

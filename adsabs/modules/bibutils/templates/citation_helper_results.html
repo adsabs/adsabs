@@ -1,8 +1,8 @@
 {# citation_helper_results.html  #}
+{% if include_layout == 'YES'%}
 {% extends "layout.html" %}
-
 {% block titlehead %}Citation Helper Results{% endblock %}
-
+{% endif %}
 {% block body %}
 <h3>{{ page_var }}</h3> 
 <div class="span9">
@@ -22,7 +22,9 @@ These results consist of publications that cite and/or are cited by papers in th
 {% endfor %}
 </ul>
 </div>
+{% if include_layout == 'YES'%}
 <div class="span9">
 <a href="{{ url_for('bibutils.citation_helper') }}">Go back</a>
 </div>
+{% endif %}
 {% endblock %}
