@@ -14,3 +14,5 @@ GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN = {{ config.EXPORT_DEFAULT_ROWS 
 GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY = '{{ url_for("export.get_bibcodes_from_query") }}';
 //Variable with the url of the view to export the bibcodes in other formats
 GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL = '{{ url_for("export.export_to_other_formats") }}';
+//Variable with the url of the view for the author network
+GlobalVariables.ADSABS2_AUTHOR_NETWORK = '{{ url_for("visualization.author_network") }}';

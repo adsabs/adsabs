@@ -5,7 +5,7 @@
 ResultListManager = new Object();
 
 /*
- * Function to export a list of selected papers to ads classic
+ * Function to export a list of selected papers or a query to ads classic
  */
 ResultListManager.export_to_ads_classic = function()
 {
@@ -52,7 +52,7 @@ ResultListManager.export_to_ads_classic = function()
 };
 
 /*
- * Function to export a list of selected papers to ads classic
+ * Function to export a list of papers or a query in different formats
  */
 ResultListManager.export_records_in_other_format = function(format)
 {	
@@ -84,3 +84,36 @@ ResultListManager.export_records_in_other_format = function(format)
 	});
 	
 };
+
+
+/*
+ * Function to visualize an author network for a list of papers or a query 
+ */
+ResultListManager.view_author_network = function()
+{
+	//re-enable query parameters
+	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+	//remove a hidden fields if exists
+	$('#search_results_form > input.ajaxHiddenField').remove();
+	
+	//if there are checked bibcodes
+	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+	{
+		//remove the query parameters
+		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+	}
+	
+	//submit the form via ajax
+	$.ajax({
+		type : "POST",
+		cache : false,
+		url : GlobalVariables.ADSABS2_AUTHOR_NETWORK,
+		data : $('#search_results_form').serializeArray(),
+		success: function(data) {
+			$.fancybox.hideLoading();
+			$.fancybox('<pre>'+data+'</pre>');
+		}
+	});
+};
+
+

@@ -214,6 +214,10 @@ div.export_view_menu {
 	margin-right:5px;
 }
 
+div.export_view_menu a {
+	padding: 4px 8px;
+}
+
 a.jslinkmenu {
 	cursor:pointer;
 }

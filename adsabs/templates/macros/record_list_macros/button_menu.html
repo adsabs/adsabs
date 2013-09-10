@@ -14,14 +14,7 @@
 			{% endif %}
 			data-rel="bootstrap_tooltip"
 			>
-			<i class="icon-random"></i>
-			Sort
-			{% if re_sort_type %}
-			<i class="icon-ok-sign"></i>
-			{% else %}
-			<i class="icon-white"></i>
-			{% endif %}
-			<i class="caret"></i>
+			<i class="icon-random"></i> Sort{% if re_sort_type %}<i class="icon-ok-sign"></i>{% else %}<i class="icon-white"></i>{% endif %}<i class="caret"></i>
 		</a>
 		<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
 			<li>
@@ -128,13 +121,24 @@
 {# ###Macro to render view/export menu #}
 {% macro render_export_menu() %}
 <div class="export_view_menu dropdown pull-right">
-	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> Export <i class="caret"></i></a>
+	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> Export<i class="caret"></i></a>
 	<ul class="dropdown-menu">
 		<li class="nav-header">records:</li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('BIBTEX')">in Bibtex</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('AASTeX')">in AASTex</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('ENDNOTE')">in EndNote</a></li>
+	</ul>
+</div>
+{% endmacro %}
+
+{# ###Macro to render visualization menu #}
+{% macro render_view_menu() %}
+<div class="export_view_menu dropdown pull-right">
+	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-picture"></i> View<i class="caret"></i></a>
+	<ul class="dropdown-menu">
+		{# <li class="nav-header">records:</li> #}
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.view_author_network()">Author network</a></li>
 	</ul>
 </div>
 {% endmacro %}

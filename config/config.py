@@ -12,7 +12,7 @@ class AppConfig(object):
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     
-    APP_VERSION = '2013_09_09_v1'
+    APP_VERSION = '2013_09_10_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -91,6 +91,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_DATABASE = 'astronomy'
     
     EXPORT_DEFAULT_ROWS = 500
+    AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     
 #    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
 #                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']

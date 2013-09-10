@@ -1,0 +1,1 @@
+from views import visualization_blueprint as blueprint
