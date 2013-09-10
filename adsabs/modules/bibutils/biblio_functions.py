@@ -14,6 +14,7 @@ from flask import current_app as app
 from config import config
 from utils import get_references
 from utils import get_citations
+from utils import get_citing_papers
 from utils import get_meta_data
  
 __all__ = ['get_suggestions']
@@ -39,8 +40,7 @@ def get_suggestions(**args):
     bibcodes = map(lambda a: a.strip(), bibcodes)[:config.BIBUTILS_MAX_INPUT]
     # start processing
     # get the citations for all publications (keeping multiplicity is essential)
-    cit_dict = get_citations(bibcodes=bibcodes, threads=config.BIBUTILS_THREADS)
-    cits = [item for sublist in cit_dict.values() for item in sublist]
+    cits = get_citing_papers(bibcodes=bibcodes)
     # clean up cits
     cits = filter(lambda a: len(a) > 0, cits)
     # get references

@@ -194,6 +194,34 @@ class MongoCitationHarvester(Process):
                 raise
         return
 
+class MongoCitationListHarvester(Process):
+    """
+    Class to allow parallel retrieval of citation data from Mongo
+    """
+    def __init__(self, task_queue, result_queue):
+        Process.__init__(self)
+        self.task_queue = task_queue
+        self.result_queue = result_queue
+        self.session = adsdata.get_session()
+    def run(self):
+        while True:
+            bibcode = self.task_queue.get()
+            if bibcode is None:
+                break
+            try:
+                pubyear = int(bibcode[:4])
+                cit_collection = self.session.get_collection('citations')
+                res1 = cit_collection.find_one({'_id': bibcode})
+                if res1:
+                    citations = res1.get('citations',[])
+                else:
+                    citations = cits = ref_cits = non_ref_cits = []
+                self.result_queue.put({'citations':citations})
+            except MongoQueryError, e:
+                app.logger.error("Mongo citation list query for %s blew up (%s)" % (bibcode,e))
+                raise
+        return
+
 def get_citations(**args):
     """
     Method to prepare the actual citation dictionary creation
@@ -344,6 +372,37 @@ def get_mongo_data(**args):
         ads_data[data['_id']] = data
         num_jobs -= 1
     return ads_data
+
+def get_citing_papers(**args):
+    # create the queues
+    tasks = Queue()
+    results = Queue()
+    # how many threads are there to be used
+    if 'threads' in args:
+        threads = args['threads']
+    else:
+        threads = cpu_count()
+    bibcodes = args.get('bibcodes',[])
+    # initialize the "harvesters" (each harvester get the citations for a bibcode)
+    harvesters = [ MongoCitationListHarvester(tasks, results) for i in range(threads)]
+    # start the harvesters
+    for b in harvesters:
+        b.start()
+    # put the bibcodes in the tasks queue
+    num_jobs = 0
+    for bib in bibcodes:
+        tasks.put(bib)
+        num_jobs += 1
+    # add some 'None' values at the end of the tasks list, to faciliate proper closure
+    for i in range(threads):
+        tasks.put(None)
+    # gather all results into one citation dictionary
+    cit_list = []
+    while num_jobs:
+        data = results.get()
+        cit_list += data.get('citations',[])
+        num_jobs -= 1
+    return cit_list
 
 def get_references(**args):
     """

@@ -141,3 +141,26 @@ ResultListManager.citation_helper = function()
 
         }
 };
+/*
+ * Function to get Metrics results
+ */
+ResultListManager.metrics = function()
+{
+        //if I have checked bibcodes
+        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+        {
+            // Gather the checked bibcodes
+            ResultListManager.checked_bibcodes = new Array();
+            var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
+            $inputs.each(function() {
+                ResultListManager.checked_bibcodes.push($(this).attr('value'));
+            });
+            // Call the Citation Helper with these bibcodes
+        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+        {
+            // NOTE: PUT IN CORRECT URL!!!!!
+                $('#search_results_form').attr('action', 'http://jadzia:5000/bibutils/metrics').submit();
+        }
+
+        }
+};

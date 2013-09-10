@@ -89,7 +89,12 @@ def metrics(**args):
     """
 #     query = request.args.get('q', None)
     form = MetricsInputForm()
-    bibcodes = []
+    # If we were called from results form, get bibcodes
+    # from URL
+    try:
+        bibcodes = request.args.getlist('bibcode')
+    except:
+        bibcodes = []
     results = None
     format = ''
     if 'bibcodes' in args:
