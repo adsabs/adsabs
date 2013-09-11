@@ -91,6 +91,7 @@ ResultListManager.export_records_in_other_format = function(format)
  */
 ResultListManager.view_author_network = function()
 {
+	$.fancybox.showLoading();
 	//re-enable query parameters
 	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
 	//remove a hidden fields if exists
@@ -111,7 +112,7 @@ ResultListManager.view_author_network = function()
 		data : $('#search_results_form').serializeArray(),
 		success: function(data) {
 			$.fancybox.hideLoading();
-			$.fancybox('<pre>'+data+'</pre>');
+			$.fancybox(data);
 		}
 	});
 };

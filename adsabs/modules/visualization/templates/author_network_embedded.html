@@ -1,0 +1,402 @@
+<div class="authnet_body">
+  <div class="container-fluid">
+    <div class="row-fluid">
+  <div class="span2" id="controlpanel"> 
+
+    <div class="dropdown">
+   <a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+    What Is The Author Network?
+     <span class="caret"></span>
+  </a>
+    <ul class="dropdown-menu authnet_ul" style="text-indent: 10px;width:400px;" role="menu" aria-labelledby="dLabel" >
+      <li>This visualization uses a simulation of physical forces to
+       illustrate author networks within ADS search results. 
+       Author nodes repel one another while links between authors
+        bind nodes together.</li>
+        <li>The width of lines between authors signals the frequency
+        with which the authors have co-authored papers, while the font size of author
+        names indicates the total number of times the author
+        appeared in the selection returned by the ADS search.</li>
+        <li> The data is prepared and thus slightly altered before the 
+        creation of the visualization. For instance, papers with more 
+        than 30 authors are not considered for the network visualization.
+        Individual authors below a certain frequency threshold similarly 
+        do not appear.</li> 
+    </ul>
+    </div> 
+
+    <div class="dropdown">
+   <a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+    How Do I Use It?
+     <span class="caret"></span>
+  </a>
+    <ul class="dropdown-menu authnet_ul"  role="menu" style="width:400px" aria-labelledby="dLabel" >
+      <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
+        <li> <strong>Filter</strong> ADS search results by selecting individual authors
+        and author clusters, then clicking on the 'filter search' button </li>
+        <li><strong>Type </strong>the name of an author in the search box to find the author
+         node's exact position. </li>
+         <li><strong>Drag</strong> the node in interactive mode to dynamically alter the network. </li>
+         <li><strong>Select</strong> a node and each one of its links at once in group select mode.</li>        
+    </ul>
+    </div> 
+
+    <div class="row-fluid">
+      <button type="button" class="btn authnet_button_format span6 btn-warning" id="staticmode">Static</button>
+      <button type="button" class="btn authnet_button_format span6" id="interactmode">Interactive</button> 
+    </div>
+
+  <div class="row-fluid">
+    <button type="button" class="btn authnet_button_format span6 btn-warning" id="animatedmode" >Animate</button>
+    <button type="button" class="btn authnet_button_format span6" id="freezemode">Freeze</button>
+  </div>
+
+  <div class="row-fluid">
+    <button type="button" class="btn authnet_button_format span6 btn-warning" id="singleauthor">Select Single</button> 
+    <button type="button" class="btn authnet_button_format span6" id="multiauthor">Select Group</button>
+  </div>
+
+    <div class="well well-small authnet_button_format ">
+       <p class="authnet_black"> Selected Authors: </p>
+        <ul class="authnet_ul" id="list">
+          <li> Click on a name to add it to this list.</li>
+          <li> Click again on the name to remove it.</li>
+        </ul>
+    </div> 
+    
+  <div class="well well-small clearfix authnet_button_format"><p class="authnet_black">Search for an Author: </p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findauthor"> </input><button class ="btn btn-info pull-right button-spacing" id="searchsubmit" >Search</button></div>
+
+</div>
+
+  <div class="span10" id="chart"></div>
+
+    <script type="text/javascript">
+	var json = {{ network_data|tojson|safe }};
+      $(document).ready( function(){
+
+        $(window).width();
+
+        var w = $(window).width()*.8,
+        h= $(window).height();
+
+    var selected=Array();
+
+    var force=d3.layout.force()
+                .size([w, h])
+                .linkDistance(35)
+                .gravity(1)
+                .charge(-500)
+
+    var svg= d3.select("#chart").append("svg:svg")
+          .attr("width", w)
+          .attr("height", h)
+          .attr("pointer-events", "all")
+          .attr("id", "svg")
+
+    var z =d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.5, 8])
+    var g = svg.append("svg:g")
+          .call(z)
+          .append("svg:g")
+
+    g.append("svg:rect")
+      .attr("width", w)
+      .attr("height", h)
+      .attr("id", "g")
+      .attr("fill", "#F9F9F9")
+
+    function redraw() {
+      console.log(  "translate(" + d3.event.translate + ")"
+        + " scale(" + d3.event.scale + ")")
+        g.attr("transform",
+        "translate(" + d3.event.translate + ")"
+        + " scale(" + d3.event.scale + ")");
+        }
+
+      names=Array()
+
+      for (var i=0; i<json.nodes.length; i++){
+        names.push(json.nodes[i]['nodeName'])
+      }
+
+      force.nodes(json.nodes)
+        .links(json.links)
+        .start();
+
+      function findValues(listOfDicts, value){
+        var newList= new Array();
+        for (var i=0; i< listOfDicts.length; i++){
+          newList.push(listOfDicts[i][value]);
+        }
+        return newList;
+      };
+      var nodeWeights=findValues(json.nodes, "nodeWeight"),
+          linkValues=findValues(json.links, "value");
+
+      var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,14]), 
+          lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, 2.5]);
+
+    var link=g.selectAll(".link")
+          .data(json.links)
+          .enter().append("line")
+          .attr("class", "authnet_link")
+          .style("stroke-width", function(d){
+            return lineScale(d.value)
+          });
+  //node click function
+  function nodeClick (d){//probably a more elegant way of doing this
+              if (d.select==false || !d.hasOwnProperty("select")){
+                  d3.select(this)
+                    .transition()
+                    .duration(500)
+                    .style("fill", "#FF6600");
+                    //adding to selected array
+                    d.select=true;
+                    selected.push(d.nodeName+ '.');
+                    //removing current list
+                    d3.select("#list")
+                      .selectAll("li")
+                      .remove()
+                    //adding new list
+                    for (var i=0; i<selected.length; i++)
+                    {d3.select("#list")
+                      .append("li")
+                      .text(selected[i]+"  ")}}
+              else if (d.select==true)
+                {d3.select(this)
+                    .transition()
+                    .duration(1000)
+                  .style("fill", "#00006B")
+                    d.select=false;
+                    var i=selected.indexOf(d.nodeName);
+                    selected.splice(i, 1);
+                  d3.select("#list")
+                      .selectAll("li")
+                      .remove()
+                    for (var i=0; i<selected.length; i++)
+                    {d3.select("#list")
+                      .append("li")
+                      .text(selected[i])}}
+                //adding search button                 
+                d3.select("#list")
+                  .append("li")
+                  .html(function(){
+                    if(selected.length>0){return '<button type="button" class="btn btn-info button-spacing btn-block" id="search" style="font-weight:200">Filter Search with Selected Authors</button>'}
+                    else
+                      {return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>'}})} //end nodeClick
+
+    var node = g.selectAll(".node")
+            .data(json.nodes)
+            .enter()
+            .append("text")
+            .attr("class", "authnet_node")
+            .classed("authnet_svgtext", true)
+            .each(function(d){
+              d.select=false
+            })
+            .text(function(d) {return d.nodeName})
+            .attr("font-size", function(d){
+              return fontScale(d.nodeWeight)+"px";
+            })
+            .attr("text-anchor", "middle")
+            .on("click", nodeClick) 
+
+  var staticmode=true;
+
+    function staticMode(){
+      if (staticmode==true)
+        {return}
+      else{
+        d3.select("#interactmode")
+          .classed("btn-warning", false);
+        d3.select(this)
+          .classed("btn-warning", true);
+        node.on('mousedown.drag', null);
+        staticmode=true;
+      }
+    }
+
+    function interactMode(){
+      if (staticmode==false)
+        {return}
+      else{
+        d3.select("#staticmode")
+          .classed("btn-warning", false);
+        d3.select(this)
+          .classed("btn-warning", true);
+        node.call(force.drag());
+        staticmode=false;
+        freeze=false;
+
+        //changing freeze mode to animate as well
+
+         d3.select("#freezemode")
+        .classed("btn-warning", false);
+        d3.select("#animatedmode")
+        .classed("btn-warning", true);
+        freeze=false;
+      }
+    }
+
+  d3.select("#staticmode")
+    .on("click", staticMode)
+
+  d3.select("#interactmode")
+    .on("click", interactMode)
+
+  var freeze=false;
+
+  function freezeMode(){
+    if (freeze==true){
+      return}
+    else{
+      d3.select("#animatedmode")
+      .classed("btn-warning", false);
+      d3.select(this)
+      .classed("btn-warning", true)
+      freeze=true;
+      force.stop();
+      
+      //changing to static mode
+      d3.select("#interactmode")
+        .classed("btn-warning", false);
+      d3.select("#staticmode")
+        .classed("btn-warning", true);
+        node.on('mousedown.drag', null);
+        staticmode=true;
+      }
+    }
+
+    function animatedMode() {
+      if (freeze==false){
+        return}
+      else{
+        d3.select("#freezemode")
+        .classed("btn-warning", false);
+        d3.select(this)
+        .classed("btn-warning", true);
+        freeze=false;
+        force.start()}
+      }
+
+d3.select("#freezemode")
+  .on('click', freezeMode);
+
+d3.select("#animatedmode")
+  .on('click', animatedMode);
+
+   //the searchbox
+      $('#findauthor').typeahead({source:names})
+
+      d3.select("#searchsubmit")
+              .on("click", function(){
+                var n=jQuery.trim(document.getElementById("findauthor").value.toLowerCase());
+                for (var i=0; i<node[0].length; i++){
+                  if (jQuery.trim(node[0][i].childNodes[0]['data'].toLowerCase())==n){
+                      var x= node[0][i]['attributes'][3].value,
+                          y= node[0][i]['attributes'][4].value;
+                          var scale=3;
+                          var translateX=-scale*x +w/2;
+                          var translateY=-scale*y +h/2;
+                      d3.select(g[0][0]).transition().duration(3500).attr('transform', 'translate('+ translateX+', '+ translateY+ ') scale('+scale+')');
+                      console.log( 'translate('+ translateX+', '+ translateY+ ' scale('+scale+')')
+                      //informing d3 that we zoomed in independently
+                      z.translate([translateX, translateY]).scale([scale])
+                      d3.select(node[0][i]).transition().delay(1000).duration(3000).style('fill', '#CC00FF').transition().delay(5000).duration(3000).style('fill', '#00006B')
+                  }
+                }})
+
+    node.append("title")
+        .text(function(d){return d.nodeName;});
+
+        force.on("tick", function(t) {
+          var counter=String(t.alpha)[4]
+          link.attr("x1", function(d) { return d.source.x; })
+              .attr("y1", function(d) { return d.source.y; })
+              .attr("x2", function(d) { return d.target.x; })
+              .attr("y2", function(d) { return d.target.y; });
+            // bounding box
+            // var r=6;
+          // node.attr("x", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+          //     .attr("y", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); }); 
+          node.attr("x", function(d) { return d.x })
+              .attr("y", function(d) { return d.y })
+        });
+
+var singleauthor=true;
+
+    function singleAuthor(){
+      if (singleauthor==true){
+        return}
+      else {
+        d3.select("#multiauthor")
+          .classed("btn-warning", false);
+        d3.select("#singleauthor")
+          .classed("btn-warning", true);
+        endMultiSelect();
+        singleauthor=true;
+      }
+    }
+
+    function multiAuthor(){
+      if (singleauthor==false) {
+          return}
+      else {
+        d3.select("#singleauthor")
+          .classed("btn-warning", false);
+        d3.select("#multiauthor")
+          .classed("btn-warning", true);
+        startMultiSelect();
+        singleauthor=false;
+      }
+    }
+
+    d3.select("#singleauthor")
+      .on("click", singleAuthor);
+
+    d3.select("#multiauthor")
+      .on("click", multiAuthor);
+
+    function startMultiSelect(){
+      //add special event listener to node that highlights its friends
+      //namespaced for easy removal
+      //two options because we don't know the order of the link entries
+      node.on("click.group", function(d1, i){
+        for (var ji=0; ji<json.links.length; ji++) {
+          if(json.links[ji]['source']['index']==i){
+            var partner=json.links[ji]["target"];
+            node.each(function(d2, i){
+              console.log(d2.nodeName, d1.select, d2.select)
+              //ok so the select settings are different because the click event
+              //for the primary node has already fired
+              if (d2.nodeName==partner.nodeName && d1.select==true && d2.select==false){
+                nodeClick.apply(this,[d2])}
+                //unselecting main and everything attached to it
+              else if (d2.nodeName==partner.nodeName && d1.select==false && d2.select==true)
+                {nodeClick.apply(this,[d2])}
+            })
+          }
+         else if(json.links[ji]['target']['index']==i){
+            var partner=json.links[ji]['source'];
+            node.each(function(d2, i){
+              if (d2.nodeName==partner.nodeName && d1.select==true && d2.select==false){
+                nodeClick.apply(this,[d2])}
+              else if (d2.nodeName==partner.nodeName && d1.select==false && d2.select==true)
+                {nodeClick.apply(this,[d2])}
+              })
+            }
+          }
+        })
+      };
+
+    function endMultiSelect(){
+    console.log('removing group author selection')
+      //remove event listener
+      node.on("click.group", null)
+      node.on("click", null)
+      node.on("click", nodeClick)
+    }
+
+        }) // end jquery document.ready()
+      // </script>
+  </div>
+</div>

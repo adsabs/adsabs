@@ -47,4 +47,4 @@ def author_network():
         if doc.author_norm:
             lists_of_authors.append(doc.author_norm)
         
-    return jsonify(**get_authorsnetwork(lists_of_authors))
+    return render_template('author_network_embedded.html', network_data=get_authorsnetwork(lists_of_authors))

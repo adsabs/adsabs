@@ -488,3 +488,67 @@ div.absview div.row-fluid label {
 	display: block;
 	margin-bottom: 10px;
 }
+
+/*
+Author network specific css
+*/
+.authnet_body {
+	font-family: Helvetica, Arial, Sans-serif;
+	font-size:12px;
+	color:    #7575A3;
+	font-weight: 100;
+	margin: 0 auto;
+}
+
+.authnet_link {
+	stroke: #7575A3;
+	stroke-opacity:.15;
+}
+
+.authnet_svgtext {
+  fill: #00006B;
+  font-weight: 400;
+}
+
+.authnet_button_format {
+  margin-top:10px;
+ font-weight:200;
+  font-size: 13px;
+}
+
+ .authnet_ul {
+   padding:0;
+   margin-left: 0;
+ }
+
+ .authnet_ul li {
+   text-align: left;
+   padding-left: 3px;
+   padding-right:2px;
+   font-size:13px;
+   list-style-type:none;
+ }
+
+ .authnet_black {
+   color:black;
+   font-weight:100;
+   font-size: 14px;
+ }
+
+ .authnet_body::selection {
+     background:transparent;
+ }
+
+ .authnet_body:focus{
+   outline: none
+ }
+
+ .authnet_node:hover{
+   cursor: pointer;
+   cursor: hand;
+  }
+
+ .authnet_btn{
+   padding:2px;
+   font-size: 12px;
+ }
