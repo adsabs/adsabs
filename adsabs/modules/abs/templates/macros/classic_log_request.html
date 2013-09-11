@@ -10,7 +10,7 @@
 
 $(document).ready(function(){
     var classicLinkoutUrl = "{{ config.ADS_CLASSIC_LINKOUT_BASEURL }}";
-    var params = {'bibcode': '{{ bibcode }}', 'link_type': '{{ link_type }}' };
+    var params = {'bibcode': '{{ bibcode|urlencode }}', 'link_type': '{{ link_type }}' };
 	$.ajax(classicLinkoutUrl, {
 		data: params,
 		type: 'GET',
