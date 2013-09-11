@@ -6,7 +6,7 @@
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/metrics.css') }}">
 <link media="screen"  rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/jquery.msg.css') }}">
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery-1.7.1.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.center.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.msg.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/flot/jquery.flot.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
