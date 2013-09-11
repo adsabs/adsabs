@@ -71,7 +71,7 @@ class ApiSearchRequest(object):
                 
         if len(self.form.filter.data):
             for fltr in self.form.filter.data:
-                req.add_filter(fltr)
+                req.add_filter_query(fltr)
                 
         if self.form.hlq.data:
             req.set_hlq(self.form.hlq.data)
