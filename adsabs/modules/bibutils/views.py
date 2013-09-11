@@ -15,7 +15,7 @@ from .errors import CitationHelperCannotGetResults
 
 __all__ = ['bibutils_blueprint', 'index_bibutils', 'citation_helper','metrics']
 
-bibutils_blueprint = Blueprint('bibutils', __name__, template_folder="templates", url_prefix='/bibutils')
+bibutils_blueprint = Blueprint('bibutils', __name__, template_folder="templates", static_folder="static", url_prefix='/bibutils')
 
 @bibutils_blueprint.route('/', methods=('GET','POST'))
 def index_bibutils():
@@ -129,6 +129,10 @@ def metrics(**args):
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
             return render_template('metrics_no_results.html', include_layout=layout)
     if results:
+        mode = 'normal'
+        if len(bibcodes) == 1:
+            mode = 'singlebibcode'
+        results['mode'] = mode
         if format == 'json':
             return jsonify(metrics=results)
         else:
