@@ -216,7 +216,7 @@ class APITests(AdsabsBaseTestCase):
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
             self.assertIn('<hits type="int">1</hits>', rv.data)
     #         
-    def test_request_creation(self):
+    def test_request_creation_01(self):
          
         self.insert_user("foo", developer=True)
          
@@ -226,6 +226,17 @@ class APITests(AdsabsBaseTestCase):
                 req = ApiSearchRequest(request.values) #@UndefinedVariable
                 solr_req = req._create_search_request()
                 self.assertEquals(solr_req.params.q, 'black holes')
+    
+    def test_request_creation_02(self):
+        
+        self.insert_user("foo", developer=True)
+         
+        with self.app.test_request_context('/api/search/?dev_key=foo_dev_key&q=black+holes&filter=pubdate:[2000-01-00 TO *]'):
+            self.app.preprocess_request()
+            with global_api_user("foo_dev_key"):
+                req = ApiSearchRequest(request.values) #@UndefinedVariable
+                solr_req = req._create_search_request()
+                self.assertEquals(solr_req.params.fq, ['pubdate:[2000-01-00 TO *]'])
          
     def test_validation(self):
          
