@@ -80,17 +80,17 @@ class Statistics():
         # get number of refereed entries
         cls.number_of_refereed_entries = len(refereed_values)
         # get normalized value
-        cls.normalized_value = vector_product(values,weights)
+        cls.normalized_value = '%.1f' % round(vector_product(values,weights), 1)
         # get refereed normalized value
-        cls.refereed_normalized_value = vector_product(refereed_values,refereed_weights)
+        cls.refereed_normalized_value = '%.1f' % round(vector_product(refereed_values,refereed_weights), 1)
         # get mean value of values
-        cls.mean_value = mean(values)
+        cls.mean_value = '%.1f' % round(mean(values), 1)
         # get mean value of refereed values
-        cls.refereed_mean_value = mean(refereed_values)
+        cls.refereed_mean_value = '%.1f' % round(mean(refereed_values), 1)
         # get median value of values
-        cls.median_value = median(values)
+        cls.median_value = '%.1f' % round(median(values), 1)
         # get median value of refereed values
-        cls.refereed_median_value = median(refereed_values)
+        cls.refereed_median_value = '%.1f' % round(median(refereed_values), 1)
         # get total of values
         cls.total_value = sum(values)
         # get total of refereed values
@@ -156,11 +156,11 @@ class Metrics():
             riq = "NA"
         cls.h_index = h
         cls.g_index = g
-        cls.m_index = float(h)/float(cls.time_span)
+        cls.m_index = '%.1f' % round(float(h)/float(cls.time_span), 2)
         cls.i10_index = len(filter(lambda a: a >= 10, citations))
-        cls.e_index = e
-        cls.tori = tori
-        cls.riq  = riq
+        cls.e_index = '%.1f' % round(e,1)
+        cls.tori = '%.1f' % round(tori,1)
+        cls.riq  = '%.1f' % round(riq,1)
 
         cls.post_process()
 

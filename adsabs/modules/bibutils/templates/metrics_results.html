@@ -2,9 +2,11 @@
 {% if include_layout == 'YES'%}
 {% extends "layout.html" %}
 {% block titlehead %}Metrics Results{% endblock %}
-{% else %}
-<script type="text/javascript" src="/static/js/metrics.js?app_version=2013_08_26_v1"></script>
 {% endif %}
+{% block head %}
+<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/metrics.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<link rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/metrics.css') }}">
+{% endblock %}
 <script type="text/javascript">
     {% autoescape false %}
     var paperhist_data = {{results['paper histogram']}};
@@ -14,338 +16,379 @@
     {% endautoescape %}
 </script>
 {% block body %}
-        <div>
-                <table>
-                        <tbody>
-                                <tr>
-                                        <th>
-                                            Papers
-                                        </th>
-                                        <th>
-                                            Total
-                                        </th>
-                                            <th>Refereed</th>
-                                </tr>
-                                    <tr>
-                                            <td>Number of papers</td>
-                                            <td>
-                                                        {{results['all stats']['Number of papers']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Number of papers']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Normalized paper count</td>
-                                            <td>
-                                                        {{results['all stats']['Normalized paper count']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Normalized paper count']}}
-                                            </td>
-                                    </tr>
-                                <tr>
-                                        <td>Total reads</td>
-                                        <td>
-                                                    {{results['all reads']['Total number of reads']}}
-                                        </td>
-                                            <td>
-                                                        {{results['refereed reads']['Total number of reads']}}
-                                            </td>
-                                </tr>
-                                    <tr>
-                                            <td>Average reads</td>
-                                            <td>
-                                                        {{results['all reads']['Average number of reads']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed reads']['Average number of reads']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Median reads</td>
-                                            <td>
-                                                        {{results['all reads']['Median number of reads']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed reads']['Median number of reads']}}
-                                            </td>
-                                    </tr>
-                                <tr>
-                                        <td>Total downloads</td>
-                                        <td>
-                                                    {{results['all reads']['Total number of downloads']}}
-                                        </td>
-                                            <td>
-                                                        {{results['refereed reads']['Total number of downloads']}}
-                                            </td>
-                                </tr>
-                                    <tr>
-                                            <td>Average downloads</td>
-                                            <td>
-                                                        {{results['all reads']['Average number of downloads']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed reads']['Average number of downloads']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Median downloads</td>
-                                            <td>
-                                                        {{results['all reads']['Median number of downloads']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed reads']['Median number of downloads']}}
-                                            </td>
-                                    </tr>
-                        </tbody>
-                </table>
-                <table>
-                        <tbody>
-                                <tr>
-                                        <th>
-                                            Citations
-                                        </th>
-                                        <th>
-                                            Total
-                                        </th>
-                                            <th>Refereed</th>
-                                </tr>
-                                    <tr>
-                                            <td>Number of citing papers</td>
-                                            <td>
-                                                        {{results['all stats']['Number of citing papers']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Number of citing papers']}}
-                                            </td>
-                                    </tr>
-                                <tr>
-                                        <td>Total citations</td>
-                                        <td>
-                                                    {{results['all stats']['Total citations']}}
-                                        </td>
-                                            <td>
-                                                    {{results['refereed stats']['Total citations']}}
-                                            </td>
-                                </tr>
-                                    <tr>
-                                            <td>Average citations</td>
-                                            <td>
-                                                        {{results['all stats']['Average citations']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Average citations']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Median citations</td>
-                                            <td>
-                                                        {{results['all stats']['Median citations']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Median citations']}}
-                                            </td>
-                                    </tr>
-                                <tr>
-                                        <td>Normalized citations</td>
-                                        <td>
-                                                    {{results['all stats']['Normalized citations']}}
-                                        </td>
-                                            <td>
-                                                        {{results['refereed stats']['Normalized citations']}}
-                                            </td>
-                                </tr>
-                                <tr>
-                                        <td>Refereed citations</td>
-                                        <td>
-                                                    {{results['all stats']['Refereed citations']}}
-                                        </td>
-                                            <td>
-                                                        {{results['refereed stats']['Refereed citations']}}
-                                            </td>
-                                </tr>
-                                    <tr>
-                                            <td>Average refereed citations</td>
-                                            <td>
-                                                        {{results['all stats']['Average refereed citations']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Average refereed citations']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Median refereed citations</td>
-                                            <td>
-                                                        {{results['all stats']['Median refereed citations']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Median refereed citations']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>Normalized refereed citations</td>
-                                            <td>
-                                                        {{results['all stats']['Normalized refereed citations']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['Normalized refereed citations']}}
-                                            </td>
-                                    </tr>
-                        </tbody>
-                </table>
-                    <table>
-                            <tbody>
-                                    <tr>
-                                            <th>Indices</th><th>Total</th><th>Refereed</th>
-                                    </tr>
-                                    <tr>
-                                            <td>h-index</td>
-                                            <td>
-                                                            {{results['all stats']['H-index']}}
-                                            </td>
-                                            <td>
-                                                            {{results['refereed stats']['H-index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>g-index</td>
-                                            <td>
-                                                            {{results['all stats']['g-index']}}
-                                            </td>
-                                            <td>
-                                                            {{results['refereed stats']['g-index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>e-index</td>
-                                            <td>
-                                                        {{results['all stats']['e-index']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['e-index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>i10-index</td>
-                                            <td>
-                                                            {{results['all stats']['i10-index']}}
-                                            </td>
-                                            <td>
-                                                            {{results['refereed stats']['i10-index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>tori index</td>
-                                            <td>
-                                                        {{results['all stats']['tori index']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['tori index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>riq index</td>
-                                            <td>
-                                                            {{results['all stats']['roq index']}}
-                                            </td>
-                                            <td>
-                                                            {{results['refereed stats']['roq index']}}
-                                            </td>
-                                    </tr>
-                                    <tr>
-                                            <td>m-index</td>
-                                            <td>
-                                                        {{results['all stats']['m-index']}}
-                                            </td>
-                                            <td>
-                                                        {{results['refereed stats']['m-index']}}
-                                            </td>
-                                    </tr>
-                            </tbody>
-                    </table>
-                </div>
-	<div id="metrics_plots" class="wrapper group_wrapper">
-			<div id="paperhist_wrap" class="wrapper plot_wrapper" >
-				<div id="paperhist_description" class="plot_title"></div>
-				
-				<div class="plot_content_wrapper">
-					<div id="paperhist_tabs" class="plot_tabs">
-						<div id="paperhist_tabs_left" class="plot_tabs_both">
-							<span>Total</span>
-						</div>
-						<div id="paperhist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_paperhist('normalized', 'right', 'paperhist_tabs_');">
-							<span>Normalized</span>
-						</div>
-						<br style="clear:both;"/>
-					</div>
-					<div id="paperhist" style="margin:5px;"></div>
-				</div>
-				<div id="paperhist_legend" class="plot_legend"></div>
-				<div id="paperhist_buttons" class="plot_buttons">
-					View as <select onchange="show_plot_paperhist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-					Size <select onchange="size_plot_paperhist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
-				</div>
-			</div>
-		<div id="readshist_wrap" class="wrapper plot_wrapper" >
-			<div id="readshist_description" class="plot_title"></div>
-			
-			<div class="plot_content_wrapper">
-				<div id="readshist_tabs" class="plot_tabs">
-					<div id="readshist_tabs_left" class="plot_tabs_both">
-						<span>Total</span>
-					</div>
-					<div id="readshist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_readshist('normalized', 'right', 'readshist_tabs_');">
-						<span>Normalized</span>
-					</div>
-					<br style="clear:both;"/>
-				</div>
-				<div id="readshist" style="margin:5px;"></div>
-			</div>
-			<div id="readshist_legend" class="plot_legend"></div>
-			<div id="readshist_buttons" class="plot_buttons">
-				View as <select onchange="show_plot_readshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-				Size <select onchange="size_plot_readshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
-			</div>
-		</div>
-		<div id="citshist_wrap" class="wrapper plot_wrapper"> 
-			<div id="citshist_description" class="plot_title"></div>
-			
-			<div class="plot_content_wrapper">
-				<div id="citshist_tabs" class="plot_tabs">
-					<div id="citshist_tabs_left" class="plot_tabs_both">
-						<span>Total</span>
-					</div>
-					<div id="citshist_tabs_right" class="plot_tabs_both plot_tabs_right_unselected" onclick="switch_plot_citshist('normalized', 'right', 'citshist_tabs_');">
-						<span>Normalized</span>
-					</div>
-					<br style="clear:both;"/>
-				</div>
-				<div id="citshist" style="margin:5px;"></div>
-			</div>
-			
-			<div id="citshist_legend" class="plot_legend"></div>
-			<div id="citshist_buttons" class="plot_buttons">
-				View as <select onchange="show_plot_citshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-				Size <select onchange="size_plot_citshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
-			</div>
-		</div>
-			<div id="series_wrap" class="wrapper plot_wrapper plot_wrapper_more">
-				<div id="series_description" class="plot_title"></div>
-				<div class="plot_content_wrapper">
-					<div id="citshist_tabs" class="plot_tabs">
-						<div id="citshist_tabs_left" class="plot_tabs_both">
-							<span>&nbsp;</span>
-						</div>
-						<br style="clear:both;"/>
-					</div>
-					<div id="series" style="margin: 5px 10px 5px 10px;"></div>
-				</div>
-				<div id="series_legend" class="plot_legend"></div>
-				<div id="series_buttons" class="plot_buttons">
-					View as <select onchange="show_plot_series(this.value);"><option value="points">Points</option><option value="lines">Lines</option></select>
-					Size <select onchange="size_plot_series(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
-				</div>
-			</div>
+<div id="content">
+	<div id="metrics_tables" class="wrapper group_wrapper">
+		<table class="metricsval">
+			<tbody>
+				<tr>
+					<th>
+					{% if results['mode'] == 'singlebibcode' %}
+						Metrics for {{results['bibcode']}}
+					{% else %}
+						Papers
+                                        {% endif %}
+					</th>
+					<th class="helptip">&nbsp;</th>
+					<th>
+					{% if results['mode'] == 'singlebibcode' %}
+						&nbsp;
+					{% else %}
+						Totals
+                                        {% endif %}
+					</th>
+					{% if results['mode'] == 'normal' %}
+						<th>Refereed</th>
+                                        {% endif %}
+				</tr>
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Number of papers</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_NUMBER_OF_PAPERS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Number of papers']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Number of papers']}}
+						</td>
+					</tr>
+                                {% endif %}
+                                {% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Normalized paper count</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_NORMALIZED_PAPER_COUNT" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Normalized paper count']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Normalized paper count']}}
+						</td>
+					</tr>
+				{% endif %}
+				<tr>
+					<td>Total reads</td>
+					<td class="helptip">
+						[<a class="helptip_mark" id="option_TOTAL_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+					</td>
+					<td>
+						{{results['all reads']['Total number of reads']}}
+					</td>
+					{% if results['mode'] == 'normal' %}
+						<td>
+							{{results['refereed reads']['Total number of reads']}}
+						</td>
+					{% endif %}
+				</tr>
+                                
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Average reads</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_AVERAGE_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all reads']['Average number of reads']}}
+						</td>
+						<td>
+							{{results['refereed reads']['Average number of reads']}}
+						</td>
+					</tr>
+					<tr>
+						<td>Median reads</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_MEDIAN_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all reads']['Median number of reads']}}
+						</td>
+						<td>
+							{{results['refereed reads']['Median number of reads']}}
+						</td>
+					</tr>
+				{% endif %}
+				<tr>
+					<td>Total downloads</td>
+					<td class="helptip">
+						[<a class="helptip_mark" id="option_TOTAL_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+					</td>
+					<td>
+						{{results['all reads']['Total number of downloads']}}
+					</td>
+					{% if results['mode'] == 'normal' %}
+						<td>
+							{{results['refereed reads']['Total number of downloads']}}
+						</td>
+					{% endif %}
+				</tr>
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Average downloads</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_AVERAGE_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all reads']['Average number of downloads']}}
+						</td>
+						<td>
+							{{results['refereed reads']['Average number of downloads']}}
+						</td>
+					</tr>
+					<tr>
+						<td>Median downloads</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_MEDIAN_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all reads']['Median number of downloads']}}
+						</td>
+						<td>
+							{{results['refereed reads']['Median number of downloads']}}
+						</td>
+					</tr>
+					{% endif %}
+			</tbody>
+		</table>
+		<table class="metricsval">
+			<tbody>
+				<tr>
+					<th>
+					{% if results['mode'] == 'normal' %}
+						Citations
+					{% else %}
+						Citations for {{results['bibcode']}}
+                                        {% endif %}
+					</th>
+					<th class="helptip">&nbsp;</th>
+					<th>
+					{% if results['mode'] == 'normal' %}
+						Total
+					{% else %}
+						&nbsp;
+                                        {% endif %}
+					</th>
+					{% if results['mode'] == 'normal' %}
+						<th>Refereed</th>
+                                        {% endif %}
+				</tr>
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Number of citing papers</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_NUMBER_OF_CITING_PAPERS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Number of citing papers']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Number of citing papers']}}
+						</td>
+					</tr>
+				{% endif %}
+				<tr>
+					<td>Total citations</td>
+					<td class="helptip">
+						[<a class="helptip_mark" id="option_TOTAL_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+					</td>
+					<td>
+						{{results['all stats']['Total citations']}}
+					</td>
+					{% if results['mode'] == 'normal' %}
+						<td>
+							{{results['refereed stats']['Total citations']}}
+						</td>
+					{% endif %}
+				</tr>
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Average citations</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_AVERAGE_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Average citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Average citations']}}
+						</td>
+					</tr>
+					<tr>
+						<td>Median citations</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_MEDIAN_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Median citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Median citations']}}
+						</td>
+					</tr>
+					{% endif %}
+				<tr>
+					<td>Normalized citations</td>
+					<td class="helptip">
+						[<a class="helptip_mark" id="option_NORMALIZED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+					</td>
+					<td>
+						{{results['all stats']['Normalized citations']}}
+					</td>
+					{% if results['mode'] == 'normal' %}
+						<td>
+							{{results['refereed stats']['Normalized citations']}}
+						</td>
+					{% endif %}
+				</tr>
+				<tr>
+					<td>Refereed citations</td>
+					<td class="helptip">
+						[<a class="helptip_mark" id="option_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+					</td>
+					<td>
+						{{results['all stats']['Refereed citations']}}
+					</td>
+					{% if results['mode'] == 'normal' %}
+						<td>
+							{{results['refereed stats']['Refereed citations']}}
+						</td>
+					{% endif %}
+				</tr>
+				{% if results['mode'] == 'normal' %}
+					<tr>
+						<td>Average refereed citations</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_AVERAGE_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Average refereed citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Average refereed citations']}}
+						</td>
+					</tr>
+					<tr>
+						<td>Median refereed citations</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_MEDIAN_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Median refereed citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Median refereed citations']}}
+						</td>
+					</tr>
+					<tr>
+						<td>Normalized refereed citations</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_NORMALIZED_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['Normalized refereed citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['Normalized refereed citations']}}
+						</td>
+					</tr>
+					{% endif %}
+			</tbody>
+		</table>
+		{% if results['mode'] == 'normal' %}
+			<table class="metricsval">
+				<tbody>
+					<tr>
+						<th>Indices</th><th class="helptip">&nbsp;</th><th>Total</th><th>Refereed</th>
+					</tr>
+					<tr>
+						<td>h-index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_H_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['H-index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['H-index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>g-index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_G_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['g-index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['g-index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>e-index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_E_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['e-index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['e-index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>i10-index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_I10_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['i10-index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['i10-index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>tori index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_TORI_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['tori index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['tori index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>riq index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_ROQ_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['roq index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['roq index']}}
+						</td>
+					</tr>
+					<tr>
+						<td>m-index</td>
+						<td class="helptip">
+							[<a class="helptip_mark" id="option_M_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+						</td>
+						<td>
+							{{results['all stats']['m-index']}}
+						</td>
+						<td>
+							{{results['refereed stats']['m-index']}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			{% endif %}
 	</div>
+</div>
+
 {% endblock %}

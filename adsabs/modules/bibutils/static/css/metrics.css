@@ -1,0 +1,140 @@
+@CHARSET "UTF-8";
+
+#content {
+	min-width:1080px;
+	padding:0;
+}
+
+table.metricsval {
+	text-align:right;
+	background: #EEE;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border: 1px solid #DDD;
+	margin-bottom: 20px;
+	clear:both;
+	min-width: 350px;
+	font-size: .9em;
+}
+
+table.metricsval:last-child {
+	margin-bottom: 0;
+}
+
+table.metricsval tr th {
+	background: #DDD;
+	padding-bottom: 2px;
+	padding-top: 2px;
+}
+table.metricsval tr td{
+	padding-bottom: 2px;
+	padding-top: 2px;
+	min-width: 60px;
+	border-bottom: 2px solid #DDD;
+}
+table.metricsval tr th:first-child, table.metricsval tr td:first-child{
+	text-align:left;
+}
+
+table.metricsval tr th.helptip, table.metricsval tr td.helptip{
+	text-align:center;
+	font-size:0.8em;	
+	min-width: 30px;
+}
+
+a.helptip_mark {
+	cursor:pointer;
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+#content:after, #metrics_tables:after, #metrics_plots:after{
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	line-height: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+	width: 0;
+}
+
+.wrapper {
+	padding:0;
+}
+
+.group_wrapper {
+	float:left;
+	/*border: 1px solid #DDD;*/
+	padding: 5px;
+	margin-right:10px;
+}
+
+.plot_wrapper {
+	float: left;
+	margin-right:20px;
+}
+
+.plot_wrapper:nth-child(odd) {
+	clear:left;
+}
+
+.plot_wrapper_more {
+	margin-top:30px;
+}
+
+.plot_wrapper:last-child {
+	margin-right: 5px;
+}
+
+.plot_title {
+	text-align:center;
+	font-weight:bold;
+	margin-bottom:10px;	
+}
+
+.plot_legend {
+	margin-top: 10px;	
+}
+
+.plot_buttons {
+	display:none;
+	margin-top: 10px;	
+}
+
+.plot_content_wrapper {
+	border: 1px solid #CCC;	
+}
+
+/*#######################*/
+.plot_tabs {
+	margin-bottom:5px;	
+}
+
+.plot_tabs_both{
+	float:left; 
+	width:155px; 
+	text-align:center; 
+	font-size:.9em; 
+	font-weight:bold; 
+	padding:3px;
+}
+
+.plot_tabs_left_unselected, .plot_tabs_right_unselected {
+	border-bottom:1px solid #CCC; 
+	background-color:#EEE;
+	cursor:pointer;
+}
+
+.plot_tabs_left_unselected {
+	border-right:1px solid #CCC;
+}
+
+.plot_tabs_right_unselected {
+	border-left:1px solid #CCC; 
+}
+
+.plot_tabs_left_unselected span, .plot_tabs_right_unselected span {
+	color:blue; 
+	text-decoration:underline;
+}
