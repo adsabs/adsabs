@@ -1,0 +1,148 @@
+<!-- Code written by Rahul Dave, following Alex Holachek -->
+<style>
+#aladin-lite-div {
+    height: 650px;
+    width: 650px;
+}
+
+#bibcodeList {
+    width: 400px;
+}
+</style>
+
+<link rel="stylesheet" href="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.css" />
+<div class="authnet_body">
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span2" id="controlpanel"> 
+				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="font-weight:200;margin-top:10px">Apply Filter To Search</button>	
+			</div>
+		
+			<div class="span10" id="chart">
+				<div id="aladin-lite-div" ></div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+
+	Array.prototype.clear = function() {
+  		while (this.length > 0) {
+    		this.pop();
+  		}
+	};
+	var json = {{ bibcodes|tojson|safe }};
+	var baseurlandquery = window.location.href;
+    var newbibcodes=[];
+
+    function generateSearch(){
+    	var selected=newbibcodes;
+		querypieces=[];
+		if (selected.length==1){
+			var querystring = selected[0];
+		} else {
+			querypieces.push("(");
+			for (var i=0; i<selected.length; i++){
+				if (i==0){
+					querypieces.push(selected[i]);
+				} else {
+					querypieces.push('OR');
+					querypieces.push(selected[i]);
+				}
+			}
+			querypieces.push(")");
+			var querystring=querypieces[0];
+			querystring+=querypieces.slice(1,-1).join(' ');
+			querystring+=querypieces.slice(-1)
+		}//end else for multiple selected authors
+
+		var finalURI= new Uri(baseurlandquery);
+		finalURI.addQueryParam('bibcode', querystring);
+		window.location.href = decodeURIComponent(finalURI.toString());
+	}
+
+
+    function newCatLayer(aladinLite, objArray, layerName) {
+        var catalogLayer = a.createCatalog({name: layerName});
+        aladinLite.addCatalog(catalogLayer);
+        var sources = [];
+        for (var k=0; k<objArray.length; k++) {
+            sources.push(aladinLite.createSource(objArray[k].ra, objArray[k].dec, objArray[k].data));
+        }
+        catalogLayer.addSources(sources);
+
+	}
+
+
+    var a = $.aladin('#aladin-lite-div');
+    a.setImageSurvey(a.createImageSurvey('SIMBAD heatmap', 'SIMBAD heatmap', 'http://cdsannotations.u-strasbg.fr/ADSAllSkySurvey/SimbadHeatMaps/healpix/date-2000', 'equatorial', 3));
+
+    
+    
+    a.on('select', function(sources) {
+     // do something with the selected sources
+     	newbibcodes.clear();
+        console.log(sources.length);
+        console.log(sources);
+        var templist;
+        for (var k=0; k<sources.length; k++) {
+        	templist=sources[k].data.reflist;
+        	for (var j=0; j<templist.length; j++){}
+            	newbibcodes.push(templist[j]);
+        	}
+        }
+     });
+    
+    $('#selectBtn').click(function() {
+         a.select();
+    });
+
+    $('#dofacet').click(function() {
+         generateSearch();
+    });
+
+    $(document).ready( function(){
+    	a.removeLayers();
+        var list = json.bibcodes;
+        // query SIMBAD with list of bibcodes
+        $.ajax({
+            url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
+            data: {"bibcode": list, 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
+            method: 'GET',
+            dataType: 'jsonp',
+            success: function(data) {
+                layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
+                var otype, category;
+                for (var k=0; k<data.length; k++) {
+                    otype = data[k].otype;
+                    if (otype=='Star') {
+                        category = 'Stars';
+                    }
+                    else if (otype=='ISM') {
+                        category = 'ISM';
+                    }
+                    else if (otype=='Galaxy') {
+                        category = 'Galaxy';
+                    }
+                    else {
+                        category = 'Other';
+                    }
+                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype}});
+                    console.log(layersData);
+                }
+                for (var category in layersData) {
+                    if (layersData[category].length==0) {
+                        continue;
+                    }
+                    newCatLayer(a, layersData[category], category);
+                }
+            },
+            error: function() {
+                console.log('Something wrong occured');
+            }
+        });
+    }); // end jquery document.ready()
+</script>
+		

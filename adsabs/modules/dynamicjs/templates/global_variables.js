@@ -22,3 +22,4 @@ GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citatio
 GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';
 
 GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/metrics/';
+GlobalVariables.ADSABS2_ALLADIN_LITE = '{{ url_for("visualization.alladin_lite") }}';
