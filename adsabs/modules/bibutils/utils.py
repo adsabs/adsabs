@@ -147,7 +147,6 @@ class MongoHarvester(Process):
                 break
             try:
                 doc = self.session.get_doc(bibcode)
-                doc.pop("full", None)
                 self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
@@ -385,7 +384,8 @@ def get_mongo_data(**args):
     ads_data = {}
     while num_jobs:
         data = results.get()
-        ads_data[data['_id']] = data
+        if data:
+            ads_data[data['_id']] = data
         num_jobs -= 1
     return ads_data
 
