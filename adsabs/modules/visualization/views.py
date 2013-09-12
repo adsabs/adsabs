@@ -5,7 +5,7 @@ Created on Sep 10, 2013
 '''
 import simplejson as json
 from simplejson import JSONDecodeError
-from flask import (Blueprint, request, Response, current_app as app, abort, render_template, jsonify)
+from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify)
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 from authorsnetwork import get_authorsnetwork

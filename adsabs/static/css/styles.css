@@ -501,54 +501,54 @@ Author network specific css
 }
 
 .authnet_link {
-	stroke: #7575A3;
+	stroke: gray;
 	stroke-opacity:.15;
 }
 
+
 .authnet_svgtext {
-  fill: #00006B;
-  font-weight: 400;
+	fill: #00006B;
+	font-weight: 400;
 }
 
 .authnet_button_format {
-  margin-top:10px;
- font-weight:200;
-  font-size: 13px;
+	margin-top:10px;
+	font-weight:200;
+	font-size: 13px;
 }
 
- .authnet_ul {
-   padding:0;
-   margin-left: 0;
- }
+.authnet_ul {
+	padding:0;
+	margin-left: 0;
+}
 
- .authnet_ul li {
-   text-align: left;
-   padding-left: 3px;
-   padding-right:2px;
-   font-size:13px;
-   list-style-type:none;
- }
+.authnet_ul li {
+	text-align: left;
+	padding-left: 3px;
+	padding-right:2px;
+	font-size:13px;
+	list-style-type:none;
+}
 
- .authnet_black {
-   color:black;
-   font-weight:100;
-   font-size: 14px;
- }
+.authnet_black {
+	color:black;
+	font-weight:100;
+	font-size: 14px;
+}
 
- .authnet_body::selection {
-     background:transparent;
- }
+.authnet_body::selection {
+	background:transparent;
+}
 
- .authnet_body:focus{
-   outline: none
- }
+.authnet_body:focus{
+	outline: none
+}
 
- .authnet_node:hover{
-   cursor: pointer;
-   cursor: hand;
-  }
+.authnet_node:hover{
+	cursor: pointer;
+}
 
- .authnet_btn{
-   padding:2px;
-   font-size: 12px;
- }
+.authnet_btn{
+	padding:2px;
+	font-size: 12px;
+}

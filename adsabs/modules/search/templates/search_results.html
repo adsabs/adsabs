@@ -7,7 +7,7 @@
 
 {% extends "layout.html" %}
 
-{% block titlehead %}Search Results: {{ resp.get_query() }}{% endblock %}
+{% block titlehead %}Search Results: {{ resp.request.get_param('ui_q') }}{% endblock %}
 
 {% block head%}{% endblock %}
 
