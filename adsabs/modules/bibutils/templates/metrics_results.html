@@ -16,10 +16,12 @@
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/helptips.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript">
     {% autoescape false %}
+    {% if results['mode'] == 'normal' %}
     var paperhist_data = {{results['paper histogram']}};
+    var series_data = {{results['metrics series']}};
+    {% endif %}
     var readshist_data = {{results['reads histogram']}};
     var citshist_data  = {{results['citation histogram']}};
-    var series_data = {{results['metrics series']}};
     {% endautoescape %}
 </script>
 {% endblock %}
@@ -443,8 +445,9 @@
 			</div>
 		</div>
 		<div id="citshist_wrap" class="wrapper plot_wrapper 
-			$if metdata['mode'] != 'singlebibcode':
+                        {% if results['mode'] == 'normal' %}
 				plot_wrapper_more
+                        {% endif %}
 			" >
 			<div id="citshist_description" class="plot_title"></div>
 			

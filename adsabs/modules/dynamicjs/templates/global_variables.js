@@ -20,3 +20,5 @@ GlobalVariables.ADSABS2_AUTHOR_NETWORK = '{{ url_for("visualization.author_netwo
 GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citation_helper") }}';
 
 GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';
+
+GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/metrics/';

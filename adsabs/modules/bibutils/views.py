@@ -60,10 +60,7 @@ def citation_helper(**args):
             number_of_suggestions = int(form.return_nr.data)
         except:
             number_of_suggestions = config.BIBUTILS_DEFAULT_SUGGESTIONS
-        try:
-            layout = form.layout.data
-        except:
-            layout = 'NO'
+        layout = form.layout.data or "NO"
         app.logger.info('ID %s. Requesting %s suggestions. Input: %s'%(g.user_cookie_id,number_of_suggestions,str(bibcodes)))
     if len(bibcodes) > 0:
         # we have all we need, so it's time to get the suggestions
@@ -83,8 +80,8 @@ def citation_helper(**args):
                 return render_template('citation_helper_results.html', page_var='Citation Helper Results', results=suggestions, include_layout=layout)
         else:
             app.logger.info('ID %s. No suggestions found.'%g.user_cookie_id)
-            if format == 'json':
-                return jsonify(suggestions=suggestions)
+            if layout == 'NO':
+                return render_template('citation_helper_no_results.html')
             else:
                 flash('Citation Helper returned no results. Reason: No suggestions were found.')
     return render_template('citation_helper.html', form=form)

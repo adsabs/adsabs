@@ -1,29 +1,6 @@
-{# citation_helper_results.html  #}
-{% if include_layout == 'YES'%}
-{% extends "layout.html" %}
-{% block titlehead %}Citation Helper Results{% endblock %}
-{% endif %}
+{# metrics_no_results.html  #}
 {% block body %}
 <div class="span9">
 No metrics were returned.
 </div>
-<br>
-<div class="span9">
-<ul class="resultsList">
-{% for item in results %}
-    <li id="{{item['bibcode']}}">
-        {% if item['score'] == 'NA'%}
-        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> {{item['author']}}: {{item['title']}}</div>
-        {% else %}
-        <div class="bibcode"><a href="{{ url_for('abs.abstract', bibcode=item['bibcode']) }}">{{item['bibcode']}}</a> (score: {{item['score']}}), {{item['author']}}: {{item['title']}}</div>
-        {% endif %}
-    </li>
-{% endfor %}
-</ul>
-</div>
-{% if include_layout == 'YES'%}
-<div class="span9">
-<a href="{{ url_for('bibutils.citation_helper') }}">Go back</a>
-</div>
-{% endif %}
 {% endblock %}
