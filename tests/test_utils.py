@@ -39,7 +39,7 @@ class AdsabsBaseTestCase(unittest.TestCase, fixtures.TestWithFixtures):
             except: pass
         
         config.TESTING = True
-        config.MONGOALCHEMY_HOST = 'localhost'
+        config.MONGOALCHEMY_SERVER = 'localhost'
         config.MONGOALCHEMY_PORT = self.box.port
         config.MONGOALCHEMY_DATABASE = 'test'
         config.MONGOALCHEMY_USER = 'test'
