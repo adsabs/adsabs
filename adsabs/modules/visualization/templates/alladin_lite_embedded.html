@@ -14,7 +14,10 @@
 <div class="authnet_body">
 	<div class="container-fluid">
 		<div class="row-fluid">
+
 			<div class="span2" id="controlpanel"> 
+                <button type="button" class="btn btn-info button-spacing btn-block" id="selectBtn" style="font-weight:200;margin-top:10px">Make a selection</button>
+
 				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="font-weight:200;margin-top:10px">Apply Filter To Search</button>	
 			</div>
 		
@@ -24,7 +27,7 @@
 		</div>
 	</div>
 </div>
-<script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
+<!--script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script-->
 
 <script type="text/javascript">
 
@@ -41,7 +44,7 @@
     	var selected=newbibcodes;
 		querypieces=[];
 		if (selected.length==1){
-			var querystring = selected[0];
+			var querystring = "bibcode:"+selected[0];
 		} else {
 			querypieces.push("(");
 			for (var i=0; i<selected.length; i++){
@@ -59,7 +62,11 @@
 		}//end else for multiple selected authors
 
 		var finalURI= new Uri(baseurlandquery);
-		finalURI.addQueryParam('bibcode', querystring);
+        var oldqlist = finalURI.getQueryParamValues('q');
+        console.log(oldqlist);
+        oldqlist.push("bibcode:"+querystring);
+        var qstring=oldqlist.join(' AND ');
+		finalURI.replaceQueryParam('q', qstring);
 		window.location.href = decodeURIComponent(finalURI.toString());
 	}
 
@@ -75,8 +82,8 @@
 
 	}
 
-
-    var a = $.aladin('#aladin-lite-div');
+    var a = new Aladin($('#aladin-lite-div')[0], {fov: 180})
+    //var a = $.aladin('#aladin-lite-div');
     a.setImageSurvey(a.createImageSurvey('SIMBAD heatmap', 'SIMBAD heatmap', 'http://cdsannotations.u-strasbg.fr/ADSAllSkySurvey/SimbadHeatMaps/healpix/date-2000', 'equatorial', 3));
 
     
@@ -89,10 +96,11 @@
         var templist;
         for (var k=0; k<sources.length; k++) {
         	templist=sources[k].data.reflist;
-        	for (var j=0; j<templist.length; j++){}
+        	for (var j=0; j<templist.length; j++){
             	newbibcodes.push(templist[j]);
         	}
         }
+        //alert("NEWBIBCODES"+newbibcodes);
      });
     
     $('#selectBtn').click(function() {
@@ -106,10 +114,11 @@
     $(document).ready( function(){
     	a.removeLayers();
         var list = json.bibcodes;
+        console.log("LIST", list);
         // query SIMBAD with list of bibcodes
         $.ajax({
             url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
-            data: {"bibcode": list, 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
+            data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
             method: 'GET',
             dataType: 'jsonp',
             success: function(data) {
@@ -144,5 +153,45 @@
             }
         });
     }); // end jquery document.ready()
+
+/*
+$.ajax({
+            url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
+            data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
+            method: 'GET',
+            dataType: 'jsonp',
+            success: function(data) {
+                layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
+                var otype, category;
+                for (var k=0; k<data.length; k++) {
+                    otype = data[k].otype;
+                    if (otype=='Star') {
+                        category = 'Stars';
+                    }
+                    else if (otype=='ISM') {
+                        category = 'ISM';
+                    }
+                    else if (otype=='Galaxy') {
+                        category = 'Galaxy';
+                    }
+                    else {
+                        category = 'Other';
+                    }
+                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype}});
+                    console.log(layersData);
+                }
+                for (var category in layersData) {
+                    if (layersData[category].length==0) {
+                        continue;
+                    }
+                    newCatLayer(a, layersData[category], category);
+                }
+            },
+            error: function() {
+                console.log('Something wrong occured');
+            }
+        });
+*/
 </script>
-		
+
+

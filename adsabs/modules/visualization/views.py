@@ -60,6 +60,7 @@ def alladin_lite():
         
     #if there are not bibcodes, there should be a query to extract the authors
     if not request.values.has_key('bibcode'):
+        bibcodes=[]
         try:
             query_components = json.loads(request.values.get('current_search_parameters'))
         except (TypeError, JSONDecodeError):
