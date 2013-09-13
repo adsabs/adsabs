@@ -53,7 +53,7 @@ class CitationHarvester(Process):
             fl= 'bibcode,property,reference'
             try:
                 if sys.platform == 'darwin':
-                    resp = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
+                    search_results = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
                     result_field = 'response'
                 else:
                     result_field = 'results'
@@ -104,7 +104,7 @@ class DataHarvester(Process):
             fl = 'bibcode,reference,author_norm,property,read_count'
             try:
                 if sys.platform == 'darwin':
-                    resp = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
+                    search_results = solr_req(config.SOLR_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
                     result_field = 'response'
                 else:
                     result_field = 'results'
