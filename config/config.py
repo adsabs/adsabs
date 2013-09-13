@@ -61,6 +61,15 @@ class AppConfig(object):
     SOLRQUERY_TIMEOUT = 300
     SOLRQUERY_KEEPALIVE = False
     SOLRQUERY_HTTP_METHOD = 'POST'
+    SOLRQUERY_EXTRA_PARAMS = [
+        ('hl.maxAnalyzedChars', '150000'), 
+#        ('hl.useFastVectorHighlighter', 'true'),
+        ('hl.requireFieldMatch', 'true'),
+        ('hl.mergeContiguous', 'true'),
+        ('hl.usePhraseHighlighter', 'true'),
+        #('fq', ['pubdate_sort:[* TO 20140000]']),
+        ('indent', 'true')
+    ]
 
     SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
                          'RELEVANCE': 'score',
@@ -75,12 +84,6 @@ class AppConfig(object):
                          'POPULARITY': 'read_count'
                         }
     SEARCH_SECOND_ORDER_OPERATORS_OPTIONS = ['hot', 'useful', 'instructive']
-    SOLR_MISC_DEFAULT_PARAMS = [
-        ('hl.maxAnalyzedChars', '150000'), 
-        ('hl.useFastVectorHighlighter', 'true'),
-        #('fq', ['pubdate_sort:[* TO 20140000]']),
-        ('indent', 'true')
-    ]
 
     SOLR_DEFAULT_FORMAT = 'json'
 

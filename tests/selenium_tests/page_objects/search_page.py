@@ -19,7 +19,8 @@ class BaseSearchPage(BasePageObject):
         from search_results_page import SearchResultsPage
 
         query_input = self.browser.find_element_by_name("q")
-        query_input.send_keys("black holes")
+        query_input.clear()
+        query_input.send_keys(query)
         query_input.send_keys(Keys.RETURN)
 
         return SearchResultsPage(self.tc)

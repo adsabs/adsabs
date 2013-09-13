@@ -16,7 +16,7 @@ def case_ins_contains(s):
     lower-case() is only avialable in xslt 2.0, so we need to use this dumb hack
     """
     translate = "translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
-    return "contains(%s, %s)" % (translate, s)
+    return 'contains(%s, "%s")' % (translate, s)
 
 class TestContext(object):
     
