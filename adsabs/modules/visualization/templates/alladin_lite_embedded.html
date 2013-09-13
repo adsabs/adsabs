@@ -91,8 +91,8 @@
     a.on('select', function(sources) {
      // do something with the selected sources
      	newbibcodes.clear();
-        console.log(sources.length);
-        console.log(sources);
+        //console.log(sources.length);
+        //console.log(sources);
         var templist;
         for (var k=0; k<sources.length; k++) {
         	templist=sources[k].data.reflist;
@@ -119,9 +119,11 @@
         $.ajax({
             url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
             data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
-            method: 'GET',
-            dataType: 'jsonp',
-            success: function(data) {
+            method: 'POST',
+            success: function(datastring) {
+                data=JSON.parse(datastring);
+                //console.log("Got back",);
+                a.gotoPosition( data[0].ra, data[0].dec);
                 layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
                 var otype, category;
                 for (var k=0; k<data.length; k++) {
@@ -139,7 +141,7 @@
                         category = 'Other';
                     }
                     layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype}});
-                    console.log(layersData);
+                    //console.log(layersData);
                 }
                 for (var category in layersData) {
                     if (layersData[category].length==0) {
