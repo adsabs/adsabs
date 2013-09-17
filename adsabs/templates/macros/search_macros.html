@@ -61,6 +61,8 @@
             	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'instructive', Misc.listOfAlternates);"
             						data-rel="bootstrap_tooltip" title="Returns the list of documents citing the most cited papers on the topic being 
             						researched; these are papers containing the most extensive reviews of the field.">Instructive</a></small></div>
+            	<div class="span" style="margin-left:380px;"><small><a class="link_only_js" onclick="search_form_drawer_manager($('#examples'), $(this))"
+            						data-rel="bootstrap_tooltip" title="Click here to see some examples">Examples</a></small></div>
 	        </div>
 	        <div id="advanced_options" class="row">
 	        	<div class="span12 custom-well-small">
@@ -108,7 +110,22 @@
 	        		{% endif %} 
 	        	{% endfor %}####END COMMENTED### #}
 	        </div>
-        </fieldset>     
+	        <div id="examples" class="row" style="display: none">
+	        	<div class="span12 custom-well-small">
+	        	    <div class="span8 adv_opt_box">
+	                    <dl>
+							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;Huchra, John&quot;','');">Author search for 'John Huchra'</a></small></dd>
+							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', '&quot;cfa redshift survey&quot;','');">Phrase search for 'cfa redshift survey'</a></small></dd>
+	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'title:&quot;QSO&quot; -LHC','');">Publications with 'QSO' in their title, excluding 'LHC'</a></small></dd>
+	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'arXiv:1012.5859','');">Find publication corresponding with arXiv ID '1012.5859'</a></small></dd>
+	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'doi:10.1086/345794','');">Find publication corresponding with DOI '10.1086/345794'</a></small></dd>
+	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot;   bibstem:&quot;ApJ&quot;','');">Find publications in the Astrophysical Journal with John Huchra as first author</a></small></dd>
+							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot; OR &quot;cfa redshift survey&quot;  -title:&quot;2MASS&quot;','');">Find publications with 'John Huchra' as author or with the phrase 'cfa redshift survey' but without '2MASS' in the title</a></small></dd>
+	                    </dl>
+	                </div>
+	            </div>
+	        </div>
+        </fieldset>
     </form>
     
 </div>
