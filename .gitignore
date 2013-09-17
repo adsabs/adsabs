@@ -36,6 +36,7 @@ man
 .pydevproject
 .settings
 
+adsabs.log
 #logging local configuration
 logging.conf
 
