@@ -14,6 +14,15 @@
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.qtip-1.0.0.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/metrics.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/helptips.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<!-- Fancybox stuff -->
+<script type="text/javascript" src="{{ url_for('static', filename='fancybox/jquery.mousewheel-3.0.6.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/jquery.fancybox.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/jquery.fancybox.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-media.js') }}?app_version={{ config.APP_VERSION }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
+<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.js') }}?app_version={{ config.APP_VERSION }}"></script>
 <script type="text/javascript">
     {% autoescape false %}
     {% if results['mode'] == 'normal' %}
