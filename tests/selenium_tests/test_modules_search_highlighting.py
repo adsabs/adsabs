@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import unittest2 as unittest
 
-from utils import TestContext, BaseSeleniumTestCase
+from utils import BaseSeleniumTestCase
 import page_objects as po
 
 class SearchHighlightingTest(BaseSeleniumTestCase):

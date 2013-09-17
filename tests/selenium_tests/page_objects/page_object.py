@@ -11,6 +11,8 @@ class BasePageObject(object):
     
     def __init__(self, tc):
         self.tc = tc
+        if not hasattr(tc, 'browser'):
+            tc.open_browser()
         self.browser = self.tc.browser
             
     def title(self):
