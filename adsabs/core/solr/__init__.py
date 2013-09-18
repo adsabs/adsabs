@@ -65,4 +65,12 @@ def get_document(identifier, **kwargs):
         return resp.get_doc_object(0)
     else:
         return None
-        
+    
+def get_document_similar(q, **kwargs):        
+    params = dict(config.SOLR_MLT_PARAMS)
+    params['mlt.fl'] = ','.join(config.SOLR_MLT_FIELDS)
+    params.update(**kwargs)
+    # TODO: someday maybe flask-solrquery can be made to know about different endpoints
+    query_url = config.SOLRQUERY_URL
+    mlt_query_url = query_url.rsplit('/', 1)[0] + '/mlt'
+    return solr.query(q, query_url=mlt_query_url, **params)

@@ -7,6 +7,7 @@ import simplejson as json
 from simplejson import JSONDecodeError
 from flask import (Blueprint, request, Response, current_app as app, abort, render_template)
 from adsabs.core.classic.export import get_classic_records_export
+from adsabs.core.solr import get_document_similar
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 
@@ -22,6 +23,8 @@ def export_to_other_formats():
     """
     #extract the format
     export_format = request.values.getlist('export_format')
+    list_type = request.values.get('list_type')
+
     #list of bibcodes to extract
     bibcodes_to_export = []
     #flag to check if everything has been extracted
@@ -40,7 +43,10 @@ def export_to_other_formats():
         #update the query parameters to return only what is necessary
         query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
         #execute the query
-        resp = solr.query(**query_components)
+        if list_type == 'similar':
+            resp = get_document_similar(**query_components)
+        else:
+            resp = solr.query(**query_components)
         if resp.is_error():
             return render_template('errors/generic_error.html', error_message='Error while exporting records (code #2). Please try later.')
         #extract the bibcodes
@@ -78,16 +84,21 @@ def get_bibcodes_from_query():
     """
     #list of bibcodes to extract
     bibcodes_to_export = []
+    list_type = request.values.get('list_type')
     
     try:
         query_components = json.loads(request.values.get('current_search_parameters'))
-    except (TypeError, JSONDecodeError):
+    except (TypeError, JSONDecodeError), e:
         #@todo: logging of the error
         return ''
     #update the query parameters to return only what is necessary
     query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
     #execute the query
-    resp = solr.query(**query_components)
+    
+    if list_type == 'similar':
+        resp = get_document_similar(**query_components)
+    else:
+        resp = solr.query(**query_components)
     if resp.is_error():
         #@todo: logging of the error
         return ''

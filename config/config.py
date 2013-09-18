@@ -65,7 +65,6 @@ class AppConfig(object):
         ('hl.maxAnalyzedChars', '150000'), 
 #        ('hl.useFastVectorHighlighter', 'true'),
         ('hl.requireFieldMatch', 'true'),
-        ('hl.mergeContiguous', 'true'),
         ('hl.usePhraseHighlighter', 'true'),
         #('fq', ['pubdate_sort:[* TO 20140000]']),
         ('indent', 'true')
@@ -96,7 +95,7 @@ class AppConfig(object):
     SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     SEARCH_DEFAULT_DATABASE = 'astronomy'
     
-    EXPORT_DEFAULT_ROWS = 500
+    EXPORT_DEFAULT_ROWS = 300
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     
 #    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
@@ -132,6 +131,12 @@ class AppConfig(object):
     SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     SOLR_SEARCH_REQUIRED_FIELDS = ['id','bibcode']
     
+    SOLR_MLT_FIELDS = ["abstract","title"]
+    SOLR_MLT_PARAMS = [
+            ('boost', 'true'),
+            ('mlt.interestingTerms', 'list'),
+            ('mlt.match.include','true')
+        ]
     #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
     #added also a default function to use
     FACET_TO_SOLR_QUERY = {

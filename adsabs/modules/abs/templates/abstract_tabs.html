@@ -67,7 +67,14 @@
 					       href="{{ url_for('abs.tab_list', list_type='coreads', bibcode=inveniodoc.bibcode) }}"
 					       {%- endif %}> Co-Reads </a></li>
 
-					<li class="disabled"><a> Similar Articles </a></li>
+                    <li {% if curview == 'similar'%}
+                       class="active"
+                       {% elif not solrdoc.has_assoc_list('similar')%}
+                       class="disabled"
+                       {%- endif %}><a
+                           {% if curview != 'similar' and solrdoc.has_similar() %}
+                           href="{{ url_for('abs.tab_list', list_type='similar', bibcode=inveniodoc.bibcode) }}"
+                           {%- endif %}> Similar Articles </a></li>
 					
 					<li {% if curview == 'toc'%}
 					   class="active"

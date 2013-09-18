@@ -184,7 +184,8 @@ class QueryBuilderSimple(object):
     
     DEFAULT_COMPONENTS = {
         'sort': (config.SOLR_SORT_OPTIONS[config.SEARCH_DEFAULT_SORT],config.SEARCH_DEFAULT_SORT_DIRECTION),
-        'rows': config.SEARCH_DEFAULT_ROWS
+        'rows': config.SEARCH_DEFAULT_ROWS,
+        'fields': config.SOLR_SEARCH_DEFAULT_FIELDS,
     }
 
     @classmethod

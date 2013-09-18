@@ -15,7 +15,7 @@ if sys.version_info < (2,7):
 else:
     import unittest
 
-from adsabs.core import solr
+from adsabs.core.solr import SolrDocument
 from config import config
 from test_utils import AdsabsBaseTestCase, canned_solr_response_data
 
@@ -72,6 +72,60 @@ class TestSolrResponse(AdsabsBaseTestCase):
                 doc = resp.get_doc(0)
                 self.assertIn('highlights',doc)
 
+class TestSolrDoc(unittest.TestCase):
+    
+    def test_attribute_access(self):
+        data = {'foo': 1, 'bar': 3, 'baz': [1,2,3], 'none': None}
+        doc = SolrDocument(data)
+        self.assertEquals(doc.foo, 1)
+        self.assertEquals(doc.bar, 3)
+        self.assertEquals(doc.baz, [1,2,3])
+        self.assertEquals(doc.none, None)
+        self.assertEquals(doc.bleh, None)
+        
+    def test_has_similar(self):
+        data = {'foo': 1, 'bar': [1,2]}
+        doc = SolrDocument(data)
+        self.assertTrue(doc.has_similar(mlt_fields=['foo']))
+        self.assertTrue(doc.has_similar(mlt_fields=['bar']))
+        self.assertTrue(doc.has_similar(mlt_fields=['foo','bar']))
+        self.assertTrue(doc.has_similar(mlt_fields=['foo','baz']))
+        self.assertFalse(doc.has_similar(mlt_fields=['baz']))
+        
+    def test_has_coreads(self):
+        self.assertTrue(SolrDocument({'reader': ['foo']}).has_coreads())
+        self.assertFalse(SolrDocument({'reader': []}).has_coreads())
+        self.assertFalse(SolrDocument({}).has_coreads())
+        
+    def test_has_references(self):
+        self.assertTrue(SolrDocument({'reference': ['foo']}).has_references())
+        self.assertFalse(SolrDocument({'reference': []}).has_references())
+        self.assertFalse(SolrDocument({}).has_references())
+
+    def test_has_toc(self):
+        self.assertTrue(SolrDocument({'property': ['TOC']}).has_toc())
+        self.assertFalse(SolrDocument({'property': ['FOO']}).has_toc())
+        self.assertFalse(SolrDocument({}).has_toc())
+
+    def test_has_citations(self):
+        self.assertTrue(SolrDocument({'citation_count': 5}).has_citations())
+        self.assertFalse(SolrDocument({'citation_count': 0}).has_citations())
+        self.assertFalse(SolrDocument({}).has_citations())
+    
+    def test_counts(self):
+        doc = SolrDocument({'reference': ['foo','bar'], 'citation_count': 3})
+        self.assertEqual(doc.get_citation_count(), 3)
+        self.assertEqual(doc.get_references_count(), 2)
+        
+    def test_highlights(self):
+        data = {'highlights': {'foo': ['bar','baz']}}
+        doc = SolrDocument(data)
+        self.assertTrue(doc.has_highlights())
+        self.assertTrue(doc.has_highlights('foo'))
+        self.assertFalse(doc.has_highlights('blah'))
+        self.assertEqual(doc.get_highlights('foo'), ['bar','baz'])
+        self.assertEqual(doc.get_highlights('blah'), None)
+
 class TestSolrHAProxyCookie(AdsabsBaseTestCase):
      
     @unittest.skipUnless(NETWORK_AVAILABLE, 'network unavailable')
@@ -90,7 +144,7 @@ class TestSolrHAProxyCookie(AdsabsBaseTestCase):
         
             self.app.preprocess_request()
             req = solr.create_request("foo")
-            resp = solr.get_response(req, base_url='http://httpbin.org/cookies')
+            resp = solr.get_response(req, query_url='http://httpbin.org/cookies')
             expected = { config.SOLR_HAPROXY_SESSION_COOKIE_NAME: g.user_cookie_id }
             self.assertDictContainsSubset(expected, resp.raw['cookies'])
 

@@ -9,6 +9,7 @@
 
 <form id="search_results_form" action="">
 	<input type="hidden" value='{{ query_components|tojson|safe }}' name="current_search_parameters" />
+	<input type="hidden" value='{{ list_type }}' name="list_type" />
 	<div class="container-fluid">	
 	{# Navbar on top of the results #}
 		<div class="row-fluid well well-small">
@@ -16,10 +17,11 @@
 				{{ render_toggle_all_paper_list() }}
 				{{ render_result_numbers(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type)) }}
 			</div>
-			<div class="span4 pull-right">
+			<div class="span7 pull-right">
 				<!-- button class="btn pull-right">Sort</button-->
 				<!-- button class="btn pull-right">More</button-->
-				{{ render_re_sort(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type)) }}
+				{% set disabled = list_type == 'similar' %}
+				{{ render_re_sort(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type), disabled) }}
 				{{ render_export_menu() }}
 			</div>
 		</div>

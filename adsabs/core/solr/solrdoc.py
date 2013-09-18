@@ -22,6 +22,7 @@ class SolrDocument(object):
     def __getattr__(self, attr):
         if attr in self.data:
             return self.data[attr]
+        return None
     
     def getattr_func(self, attr, func):
         """
@@ -37,6 +38,14 @@ class SolrDocument(object):
             return True
         else:
             return False
+    
+    def has_similar(self, mlt_fields=None):
+        if mlt_fields is None:
+            mlt_fields = config.SOLR_MLT_FIELDS
+        for field in mlt_fields:
+            if field in self.data:
+                return True
+        return False
     
     def has_references(self):
         """Checks if references are present and returns a boolean"""
@@ -79,26 +88,14 @@ class SolrDocument(object):
             return sep.join(val)
         return val
     
-    def solr_url(self, wt=None):
-        """
-        TODO: this is dumb. get the solr url from the request object
-        """
-        if wt is None:
-            return config.SOLR_URL + '/select?q=id:' + quote(str(self.id))
-        else:
-            return self.document_url() + urlencode({'wt': wt})
-        
     def to_json(self):
         return dumps(self.data)
-    
-    def get_assoc_list(self, list_type, **kwargs):
-        q = "%s(%s:%s)" % (list_type, config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return solr.query(q, **kwargs)
         
     def get_references(self, **kwargs):
         """
         Returns the list of references
         """
+        from adsabs.core.solr import get_document_list
         q = "references(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
         return solr.query(q, **kwargs)
         
@@ -127,6 +124,12 @@ class SolrDocument(object):
         """returns the results of the 'trending' 2nd order operator"""
         q = "trending(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
         return solr.query(q, **kwargs)
+
+    def get_similar(self, **kwargs):
+        
+        from adsabs.core.solr import get_document_similar
+        q = "%s:%s" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
+        return get_document_similar(q, **kwargs)
 
     def has_highlights(self, field=None):
         if not self.highlights or len(self.highlights) == 0:
