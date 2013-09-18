@@ -95,7 +95,6 @@ class SolrDocument(object):
         """
         Returns the list of references
         """
-        from adsabs.core.solr import get_document_list
         q = "references(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
         return solr.query(q, **kwargs)
         
