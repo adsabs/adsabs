@@ -291,7 +291,7 @@ class APITests(AdsabsBaseTestCase):
         not_valid('sort=year', {'sort': 'you must specify'})
         not_valid('sort=foo asc', {'sort': 'Invalid sort type'})
         not_valid('sort=DATE foo', {'sort': 'Invalid sort direction'})
-        for f in config.SOLR_SORT_OPTIONS.keys():
+        for f in config.SEARCH_SORT_OPTIONS_MAP.keys():
             is_valid('sort=%s asc' % f)
              
         is_valid('facet=author')

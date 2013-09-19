@@ -3,6 +3,7 @@ Created on Nov 2, 2012
 
 @author: jluker
 '''
+import re
 import sys
 from flask import g #@UnresolvedImport
 from flask.ext.solrquery import solr, SearchRequest #@UnresolvedImport
@@ -45,12 +46,16 @@ class ApiSearchRequest(object):
             req.set_start(self.form.start.data)
             
         if self.form.sort.data:
-            (sort, direction) = self.form.sort.data.split()
-            sort_field = config.SOLR_SORT_OPTIONS[sort]
-            req.set_sort(sort_field, direction)
+            sort_tokens = re.split('[\s,]+', self.form.sort.data)
+            # tupleize the list into field,direction pairs
+            sort_tokens = zip(*[iter(sort_tokens)] * 2)
+            for sort, direction in sort_tokens:
+                sort_field = config.SEARCH_SORT_OPTIONS_MAP[sort]
+                req.add_sort(sort_field, direction)
         else:
-            req.set_sort(*config.API_SOLR_DEFAULT_SORT)
-            
+            for field, direction in config.API_SOLR_DEFAULT_SORT:
+                req.add_sort(field, direction)
+                
         if len(self.form.facet.data):
             for facet in self.form.facet.data:
                 facet = facet.split(':')

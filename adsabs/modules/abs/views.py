@@ -62,7 +62,7 @@ def tab_list(bibcode, list_type):
     inveniodoc = invenio.get_invenio_metadata(bibcode)
 
     #I parse the get options 
-    query_components = QueryBuilderSimple.build(request.values)
+    query_components = QueryBuilderSimple.build(request.values, list_type=list_type)
 
     # use the appropriate getter method
     list_method = getattr(solrdoc, "get_%s" % list_type)
