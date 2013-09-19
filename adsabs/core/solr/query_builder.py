@@ -27,6 +27,52 @@ def _append_to_query(query, item):
     """
     return u'%s AND %s' % (query, item)
 
+def create_sort_param(sort_type=None, sort_dir=None, list_type=None):    
+
+    if list_type is not None \
+            and list_type in config.ABS_SORT_OPTIONS_MAP \
+            and sort_type is None:
+        # no sorting input, use proper default sort for list type
+        return [
+            config.ABS_SORT_OPTIONS_MAP[list_type],
+            config.SEARCH_DEFAULT_SECONDARY_SORT,
+            ]
+    else:
+        
+        default_type = config.SEARCH_DEFAULT_SORT
+        primary = config.SEARCH_SORT_OPTIONS_MAP[default_type]
+        secondary = config.SEARCH_DEFAULT_SECONDARY_SORT
+        
+        if sort_type is None:
+            # no sorting input; do nothing
+            pass
+        elif sort_type not in config.SEARCH_SORT_OPTIONS_MAP:
+            # invalid sort_type
+            app.logger.error("Got bad sort options: %s, %s" % (sort_type, sort_dir))
+        else:
+            # get the standard sort field mapping
+            primary = config.SEARCH_SORT_OPTIONS_MAP[sort_type]
+            if sort_dir and sort_dir not in ['asc','desc']:
+                app.logger.error("Got bad sort options: %s, %s" % (sort_type, sort_dir))
+            elif sort_dir is not None:
+                primary = (primary[0], sort_dir)
+                secondary = (secondary[0], sort_dir)
+        return [primary, secondary]
+
+def set_topn_query(topn, sc, rv):    
+    sort_type = rv.get('re_sort_type', 'RELEVANCE')
+    if sort_type is 'RELEVANCE':
+        # sorting by solr score doesn't allow a direction
+        topn_sort = config.SEARCH_SORT_OPTIONS_MAP[sort_type]
+    else:
+        # use the tuple we created in the previous sort step
+        topn_sort = "%s %s" % sc['sort']
+            
+    # if the topn is used, no sorting is needed by SOLR
+    #sc['sort'] = None #actually for some reason Roman needs the sorting
+    sc['q'] = u'topn(%s, (%s), "%s")' % (topn, sc['q'], topn_sort)
+    
+    
 class QueryBuilderSearch(object):
 
     DEFAULT_COMPONENTS = {
@@ -34,10 +80,7 @@ class QueryBuilderSearch(object):
             'filter_queries': [],
             'ui_q':None,
             'ui_filters': [],
-            'sort': [
-                 (config.SEARCH_SORT_OPTIONS_MAP[config.SEARCH_DEFAULT_SORT],config.SEARCH_DEFAULT_SORT_DIRECTION),
-                 (config.SEARCH_DEFAULT_SECONDARY_SORT, config.SEARCH_DEFAULT_SORT_DIRECTION)
-             ],
+            'sort': create_sort_param(),
             'rows':config.SEARCH_DEFAULT_ROWS,
             'fields': config.SOLR_SEARCH_DEFAULT_FIELDS,
             'query_fields':config.SOLR_SEARCH_DEFAULT_QUERY_FIELDS,
@@ -173,7 +216,9 @@ class QueryBuilderSearch(object):
                             pass
     
         # update any sort options
-        sort_options = create_sort_param(request_values)
+        sort_type = request_values.get('re_sort_type')
+        sort_dir = request_values.get('re_sort_dir')
+        sort_options = create_sort_param(sort_type, sort_dir)
         if sort_options is not None:
             search_components['sort'] = sort_options
         
@@ -186,10 +231,7 @@ class QueryBuilderSearch(object):
 class QueryBuilderSimple(object):
     
     DEFAULT_COMPONENTS = {
-        'sort': [
-            (config.SEARCH_SORT_OPTIONS_MAP[config.SEARCH_DEFAULT_SORT],config.SEARCH_DEFAULT_SORT_DIRECTION),
-            (config.SEARCH_DEFAULT_SECONDARY_SORT, config.SEARCH_DEFAULT_SORT_DIRECTION)
-        ],
+        'sort': create_sort_param(),
         'rows': config.SEARCH_DEFAULT_ROWS,
         'fields': config.SOLR_SEARCH_DEFAULT_FIELDS,
     }
@@ -212,52 +254,10 @@ class QueryBuilderSimple(object):
                 search_components['start'] = str((int(page) - 1) * int(config.SEARCH_DEFAULT_ROWS))
 
         # update any sort options
-        sort_options = create_sort_param(request_values, list_type)
+        sort_type = request_values.get('re_sort_type')
+        sort_dir = request_values.get('re_sort_dir')
+        sort_options = create_sort_param(sort_type, sort_dir, list_type)
         if sort_options is not None:
             search_components['sort'] = sort_options
 
         return search_components
-
-def create_sort_param(rv, list_type=None):    
-    sort_type = rv.get('re_sort_type')
-    sort_dir = rv.get('re_sort_dir')
-
-    if list_type is not None \
-            and list_type in config.ABS_SORT_OPTIONS_MAP \
-            and sort_type is None:
-        # no sorting input, use proper default sort for list type
-        sort_param = config.ABS_SORT_OPTIONS_MAP[list_type]
-    elif sort_type is None:
-        # no sorting input
-        return None
-    elif sort_type not in config.SEARCH_SORT_OPTIONS_MAP:
-        # invalid sort_type
-        app.logger.error("Got bad sort options: %s, %s" % (sort_type, sort_dir))
-        return None
-    else:
-        # get the standard sort field mapping
-        sort_param = config.SEARCH_SORT_OPTIONS_MAP[sort_type]
-        if sort_dir and sort_dir not in ['asc','desc']:
-            app.logger.error("Got bad sort options: %s, %s" % (sort_type, sort_dir))
-        elif sort_dir is not None:
-            sort_param[1] = sort_dir
-        
-    # finally add the secondary, tie-breaker sort
-    sort_param.append((config.SEARCH_DEFAULT_SECONDARY_SORT, sort_dir))
-
-    return sort_param
-
-def set_topn_query(topn, sc, rv):    
-    sort_type = rv.get('re_sort_type', 'RELEVANCE')
-    if sort_type is 'RELEVANCE':
-        # sorting by solr score doesn't allow a direction
-        topn_sort = config.SEARCH_SORT_OPTIONS_MAP[sort_type]
-    else:
-        # use the tuple we created in the previous sort step
-        topn_sort = "%s %s" % sc['sort']
-            
-    # if the topn is used, no sorting is needed by SOLR
-    #sc['sort'] = None #actually for some reason Roman needs the sorting
-    sc['q'] = u'topn(%s, (%s), "%s")' % (topn, sc['q'], topn_sort)
-    
-    

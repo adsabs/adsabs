@@ -88,7 +88,7 @@ class AppConfig(object):
         'references': ('author_norm', 'asc'),
         'citations': ('pubdate_sort', 'desc')
     }
-    SEARCH_DEFAULT_SECONDARY_SORT = 'bibcode'
+    SEARCH_DEFAULT_SECONDARY_SORT = ('bibcode', 'desc')
 
     EXPORT_DEFAULT_ROWS = 300
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000

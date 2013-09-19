@@ -50,7 +50,7 @@ class ApiSearchRequest(object):
             # tupleize the list into field,direction pairs
             sort_tokens = zip(*[iter(sort_tokens)] * 2)
             for sort, direction in sort_tokens:
-                sort_field = config.SEARCH_SORT_OPTIONS_MAP[sort]
+                sort_field = config.SEARCH_SORT_OPTIONS_MAP[sort][0]
                 req.add_sort(sort_field, direction)
         else:
             for field, direction in config.API_SOLR_DEFAULT_SORT:
