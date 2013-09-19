@@ -26,6 +26,7 @@ from flask import request
 from werkzeug.datastructures import MultiDict, ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport
 #from adsabs.modules.search.misc_functions import build_basicquery_components, build_singledoc_components
 from adsabs.core.solr import QueryBuilderSearch, QueryBuilderSimple
+from adsabs.core.solr.query_builder import create_sort_param
 from adsabs.modules.search.forms import QueryForm
 
 class SearchTestCase(AdsabsBaseTestCase):
@@ -72,6 +73,51 @@ class TestQueryForm(AdsabsBaseTestCase):
             request_values = CombinedMultiDict([ImmutableMultiDict([('q', u' author:"civano"')]), ImmutableMultiDict([])])
             test_query = QueryForm.init_with_defaults(request_values)
             self.assertEqual(test_query.data['db_f'], 'foo')
+        
+class TestQueryBuilderSorting(AdsabsBaseTestCase):
+    
+    def test_create_sort_param_01(self):
+        """no options should produce default values"""
+        sort = create_sort_param()
+        default_type = config.SEARCH_DEFAULT_SORT
+        primary = config.SEARCH_SORT_OPTIONS_MAP[default_type]
+        secondary = config.SEARCH_DEFAULT_SECONDARY_SORT
+        self.assertEqual(sort, [primary,secondary])
+    
+    def test_create_sort_param_02(self):
+        """sort type input should produce correct values from mapping"""
+        for sort_type, primary in config.SEARCH_SORT_OPTIONS_MAP.items():
+            sort = create_sort_param(sort_type=sort_type)
+            self.assertEqual(sort, [primary, config.SEARCH_DEFAULT_SECONDARY_SORT])
+
+    def test_create_sort_param_03(self):
+        """sort direction input handled properly"""
+        for sort_type, primary in config.SEARCH_SORT_OPTIONS_MAP.items():
+            sort = create_sort_param(sort_type=sort_type, sort_dir='desc')
+            self.assertEqual(sort, [(primary[0], 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT])
+            sort = create_sort_param(sort_type=sort_type, sort_dir='asc')
+            self.assertEqual(sort, [(primary[0], 'asc'), (config.SEARCH_DEFAULT_SECONDARY_SORT[0], 'asc')])
+        
+    def test_create_sort_param_04(self):
+        """list type that doesn't appear in ABS_SORT_OPTIONS_MAP should get defaults"""
+        sort = create_sort_param(list_type='foo')
+        default_type = config.SEARCH_DEFAULT_SORT
+        primary = config.SEARCH_SORT_OPTIONS_MAP[default_type]
+        secondary = config.SEARCH_DEFAULT_SECONDARY_SORT
+        self.assertEqual(sort, [primary,secondary])
+        
+    def test_create_sort_param_05(self):
+        """list type in ABS_SORT_OPTIONS_MAP should get produce correct value"""
+        for list_type, primary in config.ABS_SORT_OPTIONS_MAP.items():
+            sort = create_sort_param(list_type=list_type)
+            self.assertEqual(sort, [primary, config.SEARCH_DEFAULT_SECONDARY_SORT])
+            
+    def test_create_sort_param_06(self):
+        """list type shouldn't override form input"""
+        for list_type, lt_primary in config.ABS_SORT_OPTIONS_MAP.items():
+            for sort_type, primary in config.SEARCH_SORT_OPTIONS_MAP.items():
+                sort = create_sort_param(sort_type=sort_type, list_type=list_type)
+                self.assertEqual(sort, [primary, config.SEARCH_DEFAULT_SECONDARY_SORT])
         
 class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
@@ -354,7 +400,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "score")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = ('score', 'desc')
+            expected['sort'] = [('score', 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT]
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
@@ -368,7 +414,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "pubdate_sort desc")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = ('pubdate_sort', 'desc')
+            expected['sort'] = [('pubdate_sort', 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT]
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
@@ -382,7 +428,7 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "read_count asc")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = ('read_count', 'asc')
+            expected['sort'] = [('read_count', 'asc'),(config.SEARCH_DEFAULT_SECONDARY_SORT[0],'asc')]
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
@@ -425,7 +471,7 @@ class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
     def test_re_sort(self):
         request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEVANCE')]), ImmutableMultiDict([])])
         expected = deepcopy(QueryBuilderSimple.DEFAULT_COMPONENTS)
-        expected['sort'] = ('score', 'desc')
+        expected['sort'] = [('score', 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT]
         actual = QueryBuilderSimple.build(request_values)
         self.assertEqual(actual, expected)
         
@@ -433,7 +479,7 @@ class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
         
         request_values = CombinedMultiDict([ImmutableMultiDict([('re_sort_type', 'RELEVANCE'), ('re_sort_dir', 'asc')]), ImmutableMultiDict([])])
         expected = deepcopy(QueryBuilderSimple.DEFAULT_COMPONENTS)
-        expected['sort'] = ('score','asc')
+        expected['sort'] = [('score','asc'),(config.SEARCH_DEFAULT_SECONDARY_SORT[0],'asc')]
         actual = QueryBuilderSimple.build(request_values)
         self.assertEqual(actual, expected)
            

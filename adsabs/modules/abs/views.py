@@ -35,7 +35,7 @@ def add_caching_header(response):
     response.headers.setdefault('Cache-Control', cache_header)
     return response
 
-@abs_blueprint.route('/<bibcode>', methods=['GET'])
+@abs_blueprint.route('/<bibcode>/', methods=['GET'])
 def abstract(bibcode):
     
     solrdoc = get_document(bibcode)
@@ -48,7 +48,7 @@ def abstract(bibcode):
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='abstract')
     
-@abs_blueprint.route('/<bibcode>/<list_type>', methods=['GET'])
+@abs_blueprint.route('/<bibcode>/<list_type>/', methods=['GET'])
 def tab_list(bibcode, list_type):
 
     #I get the document
@@ -62,7 +62,7 @@ def tab_list(bibcode, list_type):
     inveniodoc = invenio.get_invenio_metadata(bibcode)
 
     #I parse the get options 
-    query_components = QueryBuilderSimple.build(request.values)
+    query_components = QueryBuilderSimple.build(request.values, list_type=list_type)
 
     # use the appropriate getter method
     list_method = getattr(solrdoc, "get_%s" % list_type)

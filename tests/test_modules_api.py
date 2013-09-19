@@ -288,10 +288,10 @@ class APITests(AdsabsBaseTestCase):
          
         is_valid('sort=DATE asc')
         is_valid('sort=DATE desc')
-        not_valid('sort=year', {'sort': 'you must specify'})
+        not_valid('sort=year', {'sort': 'must be a comma-separated list'})
         not_valid('sort=foo asc', {'sort': 'Invalid sort type'})
         not_valid('sort=DATE foo', {'sort': 'Invalid sort direction'})
-        for f in config.SOLR_SORT_OPTIONS.keys():
+        for f in config.SEARCH_SORT_OPTIONS_MAP.keys():
             is_valid('sort=%s asc' % f)
              
         is_valid('facet=author')
@@ -518,7 +518,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         for f in resp['results']['docs'][0].keys():
             self.assertIn(f, allowed_fields)
              
-        rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fl=abstract,title')
+        rv = self.client.get('/api/search/?q=black+holes+AND+year:2012&sort=CITED+desc&dev_key=foo_dev_key&fl=abstract,title')
         resp = json.loads(rv.data)
         expected_fields = ['abstract','title'] + config.SOLR_SEARCH_REQUIRED_FIELDS
         self.assertEqual(set(resp['results']['docs'][0].keys()), set(expected_fields))

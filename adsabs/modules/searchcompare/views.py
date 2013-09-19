@@ -48,7 +48,7 @@ def solr_search():
     except:
         abort(400)
     resp = solr.query(q, rows=200, fields=['bibcode','title','score'], 
-                      sort=(config.SOLR_SORT_OPTIONS['DATE'], 'desc'),
+                      sort=(config.SEARCH_SORT_OPTIONS_MAP['DATE'], 'desc'),
                       filters=['database:ASTRONOMY'])
     search_results = resp.search_response()
     return render_template('results.html', results=search_results['results'], type='solr', search_url=resp.request.url)

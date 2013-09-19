@@ -5,7 +5,15 @@ Created on Aug 2, 2013
 '''
 import sys
 import re
+from random import choice
 from search_page import BaseSearchPage
+from abstract_page import AbstractPage
+from config.test_config import test_config
+
+def new_search(tc, query):
+    srp = SearchResultsPage(tc)
+    srp.tc.get(test_config.SELENIUM_BASE_URL + 'search?q=' + query)
+    return srp
 
 class SearchResultsPage(BaseSearchPage):
     
@@ -33,5 +41,15 @@ class SearchResultsPage(BaseSearchPage):
         highlights = filter(lambda x: pattern.search(x.text) and True, highlights)
 
         return len(highlights) and True or False
+    
+    def get_abstract(self, result_idx=0):
+        search_result_divs = self.browser.find_elements_by_class_name("searchresult")
+        if not search_result_divs:
+            print >>sys.stderr, "No results to click on!"
+        link = search_result_divs[result_idx] \
+            .find_element_by_class_name("title") \
+            .find_element_by_tag_name("a")
+        self.tc.follow_link(link)
+        return AbstractPage(self.tc)
         
         

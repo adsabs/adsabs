@@ -63,28 +63,11 @@ class AppConfig(object):
     SOLRQUERY_HTTP_METHOD = 'POST'
     SOLRQUERY_EXTRA_PARAMS = [
         ('hl.maxAnalyzedChars', '150000'), 
-#        ('hl.useFastVectorHighlighter', 'true'),
         ('hl.requireFieldMatch', 'true'),
         ('hl.usePhraseHighlighter', 'true'),
         #('fq', ['pubdate_sort:[* TO 20140000]']),
         ('indent', 'true')
     ]
-
-    SOLR_SORT_OPTIONS = {'DATE': 'pubdate_sort',
-                         'RELEVANCE': 'score',
-                         'CITED': 'citation_count',
-                         'POPULARITY': 'read_count'
-                        }
-    #the fields allowed to override the sort parameter. 
-    #For now they are only the same but in the future we will implement re-sorting for other fields like author or title
-    RE_SORT_OPTIONS = {'DATE': 'pubdate_sort',
-                         'RELEVANCE': 'score',
-                         'CITED': 'citation_count',
-                         'POPULARITY': 'read_count'
-                        }
-    SEARCH_SECOND_ORDER_OPERATORS_OPTIONS = ['hot', 'useful', 'instructive']
-
-    SOLR_DEFAULT_FORMAT = 'json'
 
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     SOLR_FILTER_QUERY_PARSER = 'aqp'
@@ -92,9 +75,21 @@ class AppConfig(object):
     
     SEARCH_DEFAULT_ROWS = 20
     SEARCH_DEFAULT_SORT = 'RELEVANCE'
-    SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
+#    SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
     SEARCH_DEFAULT_DATABASE = 'astronomy'
     
+    SEARCH_SORT_OPTIONS_MAP = {
+        'DATE': ('pubdate_sort', 'desc'),
+        'RELEVANCE': ('score', 'desc'),
+        'CITED': ('citation_count', 'desc'),
+        'POPULARITY': ('read_count', 'desc'),
+    }
+    ABS_SORT_OPTIONS_MAP = {
+        'references': ('author_norm', 'asc'),
+        'citations': ('pubdate_sort', 'desc')
+    }
+    SEARCH_DEFAULT_SECONDARY_SORT = ('bibcode', 'desc')
+
     EXPORT_DEFAULT_ROWS = 300
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     
@@ -200,7 +195,7 @@ class AppConfig(object):
 
     API_CURRENT_VERSION = '0.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
-    API_SOLR_DEFAULT_SORT = ('pubdate_sort','desc')
+    API_SOLR_DEFAULT_SORT = [('pubdate_sort','desc'),('bibcode','desc')]
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
                                'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate']

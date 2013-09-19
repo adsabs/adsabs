@@ -42,6 +42,10 @@ class TestContext(object):
     def get(self, url):
         self.browser.get(url)
         self.url = url
+    
+    def follow_link(self, link):
+        link.click()
+        self.url = self.browser.current_url
         
     def wait_for(self, by, thing):
         wait = WebDriverWait(self.browser, test_config.SELENIUM_PAGE_WAIT)

@@ -95,14 +95,18 @@ class ApiQueryForm(Form):
         if not len(field.data):
             return
         try:
-            sort, direction = field.data.split()
+            sort_tokens = re.split('[\s,]+', field.data)
+            assert len(sort_tokens) % 2 == 0
         except:
-            raise ValidationError("Invalid sort option: you must specify a type (%s) and direction (%s)" % \
-                                  (','.join(config.SOLR_SORT_OPTIONS.keys()), ','.join(SORT_DIRECTIONS)))
-        if sort not in config.SOLR_SORT_OPTIONS:
-            raise ValidationError("Invalid sort type. Valid options are %s" % ','.join(config.SOLR_SORT_OPTIONS.keys()))
-        if direction not in SORT_DIRECTIONS:
-            raise ValidationError("Invalid sort direction. Valid options are %s" % ','.join(SORT_DIRECTIONS))
+            raise ValidationError("Invalid sort option: must be a comma-separated list of 'TYPE direction' pairs.") 
+        # tupleize the list into field,direction pairs
+        sort_pairs = zip(*[iter(sort_tokens)] * 2)
+
+        for sort, direction in sort_pairs:
+            if sort not in config.SEARCH_SORT_OPTIONS_MAP:
+                raise ValidationError("Invalid sort type: '%s'. Valid options are %s" % (sort, ','.join(config.SEARCH_SORT_OPTIONS_MAP.keys())))
+            if direction not in ['asc','desc']:
+                raise ValidationError("Invalid sort direction: '%s'. Valid options are 'asc' and 'desc'." % direction)
 
     def validate_facet(self, field):
         for facet in field.data:
