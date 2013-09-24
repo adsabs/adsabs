@@ -42,6 +42,7 @@ class SearchResultsPage(BaseSearchPage):
         return len(highlights) and True or False
     
     def get_abstract(self, result_idx=0):
+        import page_objects as po
         search_result_divs = self.browser.find_elements_by_class_name("searchresult")
         if not search_result_divs:
             print >>sys.stderr, "No results to click on!"
@@ -49,6 +50,6 @@ class SearchResultsPage(BaseSearchPage):
             .find_element_by_class_name("title") \
             .find_element_by_tag_name("a")
         self.tc.follow_link(link)
-        return AbstractPage(self.tc)
+        return po.AbstractPage(self.tc)
         
         
