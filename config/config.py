@@ -122,7 +122,7 @@ class AppConfig(object):
         ('database',-1, 1),
         ]
     
-    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4)]
+    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4),('ack', 4)]
     SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     SOLR_SEARCH_REQUIRED_FIELDS = ['id','bibcode']
     

@@ -57,7 +57,18 @@
 		    				{% break %}
 		    			{% endif %}
 		    		{% endfor %}
-		    	{% endif %}
+                {% else %}
+                    {% set len_snippets_abs = 0 %}
+                {% endif %}
+                {% if doc.has_highlights('ack') and len_snippets_abs <= 4 %}
+                    {% for highlight in doc.get_highlights('ack') %}
+                        {% if loop.index0 < 4 - len_snippets_abs %}
+                            <span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
+                        {% else %}
+                            {% break %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
 		    </div>
 	    </div>
 	</div>

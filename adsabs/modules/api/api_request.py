@@ -87,7 +87,7 @@ class ApiSearchRequest(object):
         req = self._create_search_request()
         
         try:
-            resp = solr.get_response(req)
+            resp = solr.get_response(req, http_method='GET')
         except Exception, e:
             from adsabs.core.solr import AdsabsSolrqueryException
             raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
