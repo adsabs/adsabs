@@ -5,14 +5,8 @@ Created on Jul 11, 2013
 '''
 
 import os
-import re
-from git import Repo
-from path import path
-from simplejson import loads
 from functools import wraps
-from ipaddress import ip_address, ip_network
-from flask import Blueprint, abort, redirect, url_for, \
-                  render_template, request, current_app as app 
+from flask import Blueprint, abort, render_template
 
 from adsabs.modules.pages.content import ContentManager
 from config import config
@@ -66,34 +60,6 @@ def page(page_path):
         'title': title
         }
     
-@pages_blueprint.route('/_refresh/<key>', methods=['POST'])
-def refresh_content(key):
-    
-    app.logger.info("page content refresh initiated")
-    # first check that the access key matches
-    if key != config.PAGES_REFRESH_ACCESS_KEY:
-        app.logger.error("page content: access key invalid: %s" % key)
-        abort(401)
-        
-    # next check the ip of requester
-    def addr_ok():
-        ip = ip_address(unicode(request.remote_addr))
-        for ip_range in config.PAGES_REFRESH_ALLOWED_IPS:
-            if ip in ip_network(ip_range):
-                return True
-    if not addr_ok():
-        app.logger.error("page content: request came from unauthorized ip: %s" % request.remote_addr)
-        abort(401)
-        
-    repo = Repo(config.PAGES_CONTENT_DIR)
-    try:
-        pull = repo.remotes.origin.pull()
-    except Exception, e:
-        app.logger.error("page content: git pull operation failure: %s" % e)
-        abort(500)
-    app.logger.info("page content: content refreshed. HEAD now at %s" % repo.head.commit.name_rev)
-    return repo.head.commit.name_rev, 200
-        
         
         
         
