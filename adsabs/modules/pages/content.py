@@ -40,7 +40,7 @@ class ContentManager(object):
         """
         content = open(abs_path, 'r').read()
         content = gfm(content)
-        content = content.encode('utf-8','ignore')
+        content = content.decode('utf-8','ignore')
         content = self.md.convert(content)
         return content, PageMeta(self.md.Meta)
     
