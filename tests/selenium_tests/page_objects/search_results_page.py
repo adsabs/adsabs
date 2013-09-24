@@ -7,7 +7,6 @@ import sys
 import re
 from random import choice
 from search_page import BaseSearchPage
-from abstract_page import AbstractPage
 from config.test_config import test_config
 
 def new_search(tc, query):

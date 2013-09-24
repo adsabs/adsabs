@@ -6,7 +6,6 @@ Created on Aug 2, 2013
 
 from selenium.webdriver.common.by import By
 
-
 class BasePageObject(object):
     
     def __init__(self, tc):
