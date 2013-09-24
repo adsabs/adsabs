@@ -85,7 +85,7 @@ class AppConfig(object):
         'POPULARITY': ('read_count', 'desc'),
     }
     ABS_SORT_OPTIONS_MAP = {
-        'references': ('author_norm', 'asc'),
+        'references': ('first_author_norm', 'asc'),
         'citations': ('pubdate_sort', 'desc')
     }
     SEARCH_DEFAULT_SECONDARY_SORT = ('bibcode', 'desc')
