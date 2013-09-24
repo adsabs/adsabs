@@ -72,6 +72,7 @@ def alladin_lite():
         if resp.is_error():
             return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
         for doc in resp.get_docset_objects():
+            print "DOC IS", doc.data, doc.to_json()
             bibcodes.append(doc.bibcode)
     else:
         bibcodes = request.values.getlist('bibcode')

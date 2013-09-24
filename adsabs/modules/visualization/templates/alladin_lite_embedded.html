@@ -1,8 +1,8 @@
 <!-- Code written by Rahul Dave, following Alex Holachek -->
 <style>
 #aladin-lite-div {
-    height: 650px;
-    width: 650px;
+    height: 800px;
+    width: 800px;
 }
 
 #bibcodeList {
@@ -16,9 +16,36 @@
 		<div class="row-fluid">
 
 			<div class="span2" id="controlpanel"> 
-                <button type="button" class="btn btn-info button-spacing btn-block" id="selectBtn" style="font-weight:200;margin-top:10px">Make a selection</button>
 
-				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="font-weight:200;margin-top:10px">Apply Filter To Search</button>	
+                <div class="dropdown">
+                    <a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+                      What Is The Object Skymap?
+                       <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu authnet_ul" style="text-indent: 10px;width:400px;" role="menu" aria-labelledby="dLabel" >
+                        <li>This visualization utilizes CDS's excellent Alladin Lite web based sky visualization to
+                            show the objects associated with a set of papers. The objects are color coded by their type.
+                        </li>
+                        <li>You can select you co-ordinate system by choosing J2000, or Gal(actic) from the dropdown menu,
+                            and which layers you'd like to see, including surveys and object types, by clicking on the layers icon.
+                            The search button will take you to a particular object or position.
+                        </li>
+                        <li> When you click the "Make a Selection" button below, you will be able to draw a rectangular region
+                            on the screen. The objects included are printed out below on the left. Then, clicking "Apply Filter To
+                            "Search" will choose the <strong>publications</strong> associated with those objects to narrow your search, 
+                            returning you to the main search page.</li> 
+                    </ul>
+                </div>
+
+                <button type="button" class="btn btn-info button-spacing btn-block" id="selectBtn" style="font-weight:200;margin-top:10px">Make a selection</button>
+                
+				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="display:none; font-weight:200;margin-top:10px">Filter Search By Selection</button>
+                <div class="well well-small">
+                    <p>Objects in search:</p>
+                    <p id="object_list" style="overflow: scroll;  height: 340px">
+
+                    </p>
+                </div> 	
 			</div>
 		
 			<div class="span10" id="chart">
@@ -63,7 +90,7 @@
 
 		var finalURI= new Uri(baseurlandquery);
         var oldqlist = finalURI.getQueryParamValues('q');
-        console.log(oldqlist);
+        //console.log(oldqlist);
         oldqlist.push("bibcode:"+querystring);
         var qstring=oldqlist.join(' AND ');
 		finalURI.replaceQueryParam('q', qstring);
@@ -82,28 +109,40 @@
 
 	}
 
-    var a = new Aladin($('#aladin-lite-div')[0], {fov: 180})
+    var a = new Aladin($('#aladin-lite-div')[0], {zoom: 180, survey:"P/DSS2/red"})
     //var a = $.aladin('#aladin-lite-div');
-    a.setImageSurvey(a.createImageSurvey('SIMBAD heatmap', 'SIMBAD heatmap', 'http://cdsannotations.u-strasbg.fr/ADSAllSkySurvey/SimbadHeatMaps/healpix/date-2000', 'equatorial', 3));
+    //a.setImageSurvey(a.createImageSurvey('SIMBAD heatmap', 'SIMBAD heatmap', 'http://cdsannotations.u-strasbg.fr/ADSAllSkySurvey/SimbadHeatMaps/healpix/date-2000', 'equatorial', 3));
 
     
     
     a.on('select', function(sources) {
      // do something with the selected sources
      	newbibcodes.clear();
+        //$('#object_list').empty();
         //console.log(sources.length);
         //console.log(sources);
-        var templist;
+        var templist, notuniqlist=[], uniqlist;
+        var objectnames=[];
         for (var k=0; k<sources.length; k++) {
         	templist=sources[k].data.reflist;
+            //console.log(sources[k]);
+            objectnames.push(sources[k].data.name);
         	for (var j=0; j<templist.length; j++){
-            	newbibcodes.push(templist[j]);
+            	notuniqlist.push(templist[j]);
         	}
         }
-        //alert("NEWBIBCODES"+newbibcodes);
+        uniqlist=_.uniq(notuniqlist);
+        for (var i=0; i < uniqlist.length; i++){
+            newbibcodes.push(uniqlist[i]);
+        }
+        if (newbibcodes.length > 0){
+            $('#dofacet').show();
+        }
+        $('#object_list').append(objectnames.join(', '));
      });
     
     $('#selectBtn').click(function() {
+        $('#object_list').empty();
          a.select();
     });
 
@@ -128,6 +167,7 @@
                 var otype, category;
                 for (var k=0; k<data.length; k++) {
                     otype = data[k].otype;
+                    //console.log("DD",data[k]);
                     if (otype=='Star') {
                         category = 'Stars';
                     }
@@ -140,7 +180,7 @@
                     else {
                         category = 'Other';
                     }
-                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype}});
+                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype, name: data[k].mainId}});
                     //console.log(layersData);
                 }
                 for (var category in layersData) {
