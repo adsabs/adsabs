@@ -36,7 +36,7 @@ def generate_json_from_solr_output(j):
 	return terminfodict
 
 
-def wc_json(j, fname):
+def wc_json(j):
 	'''Takes solr-generated json and filename, returns word-cloud-ready json and saves it.
 	The function works takes a number of steps: 
 	1. Run generate_json_from_solr_output()

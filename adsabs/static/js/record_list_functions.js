@@ -117,6 +117,36 @@ ResultListManager.view_author_network = function()
 	});
 };
 
+/*
+ * Function to visualize word cloud of relevant terms
+ */
+ResultListManager.view_word_cloud = function()
+{
+	$.fancybox.showLoading();
+	//re-enable query parameters
+	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+	//remove a hidden fields if exists
+	$('#search_results_form > input.ajaxHiddenField').remove();
+
+	//if there are checked bibcodes
+	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+	{
+		//remove the query parameters
+		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+	}
+	
+	//submit the form via ajax
+	$.ajax({
+		type : "POST",
+		cache : false,
+		url : GlobalVariables.ADSABS2_WORD_CLOUD,
+		data : $('#search_results_form').serializeArray(),
+		success: function(data) {
+			$.fancybox.hideLoading();
+			$.fancybox(data);
+		}
+	});
+};
 
 /*
  * Function to get Citation Helper results

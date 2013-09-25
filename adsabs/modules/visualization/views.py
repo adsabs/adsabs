@@ -56,32 +56,50 @@ def word_cloud():
     """
     View that creates the data for the word cloud
     """
+
+    query_url = config.SOLRQUERY_URL
+    tvrh_query_url = query_url.rsplit('/', 1)[0] + '/tvrh'
+
     #query
     if not request.values.has_key('bibcode'):
         try:
-            original_query = json.loads(request.values.get('current_search_parameters'))
-            original_query= original_query['q']
+            query_components = json.loads(request.values.get('current_search_parameters'))
+            original_query = query_components['q']
         except (TypeError, JSONDecodeError):
             #@todo: logging of the error
             return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #1). Please try later.')
 
-        solr_data=solr.query({'q':original_query, 'defType':'aqp', 'df':'abstract', 'start': 0, 'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
-                             'tv.all': 'true', 'tv.fl':'abstract', 'fl':'id', 'wt':'json'})
+        solr_data = {
+            'defType':'aqp', 
+            'df':'abstract', 
+            'rows': str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+            'tv.all': 'true', 
+            'tv.fl':'abstract', 
+            'fl':'id', 
+        }
+        
+        resp = solr.query(original_query, query_url=tvrh_query_url, **solr_data)
 
     #allowing people to append own list of bibcodes(?)
     else:
         bibcodes = request.values.getlist('bibcode')
-        q = 'bibcode:%s' % bibcodes.pop()
-        for bibcode in bibcodes:
-            q = '%s OR bibcode:%s' % (q, bibcode)
+        q = ' OR '.join(["bibcode:%s" % b for b in bibcodes])
         
-        solr_data = {'q':q, 'defType':'aqp', 'df':'abstract', 'start': 0, 'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
-         'tv.all': 'true', 'tv.fl':'abstract', 'fl':'id', 'wt':'json'}
+        solr_data = {
+            'defType':'aqp',
+            'df':'abstract',
+            'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+            'tv.all': 'true',
+            'tv.fl':'abstract',
+            'fl':'id',
+        }
 
-    if solr_data.is_error():
+        resp = solr.query(q, query_url=tvrh_query_url, **solr_data)
+
+    if resp.is_error():
         return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
     
-    return render_template('author_network_embedded.html', wordcloud_data=wc_json(solr_data))
+    return render_template('word_cloud_embedded.html', wordcloud_data=wc_json(resp.raw_response()))
 
 
 
