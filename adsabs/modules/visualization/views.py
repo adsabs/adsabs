@@ -55,9 +55,6 @@ def alladin_lite():
     """
     View that creates the data for alladin lite
     """
-    #list of bibcodes to extract
-    lists_of_authors = []
-        
     #if there are not bibcodes, there should be a query to extract the authors
     if not request.values.has_key('bibcode'):
         bibcodes=[]
@@ -67,17 +64,13 @@ def alladin_lite():
             #@todo: logging of the error
             return render_template('errors/generic_error.html', error_message='Error. Please try later.')
         #update the query parameters to return only what is necessary
-        query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS)})
+        query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.SEARCH_DEFAULT_ROWS)})
         resp = solr.query(**query_components)
         if resp.is_error():
-            return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
+            return render_template('errors/generic_error.html', error_message='Error while creating the objects skymap. Please try later.')
         for doc in resp.get_docset_objects():
-            print "DOC IS", doc.data, doc.to_json()
             bibcodes.append(doc.bibcode)
     else:
         bibcodes = request.values.getlist('bibcode')
-
-        
-    
         
     return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})

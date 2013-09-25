@@ -71,7 +71,7 @@
     	var selected=newbibcodes;
 		querypieces=[];
 		if (selected.length==1){
-			var querystring = "bibcode:"+selected[0];
+			var querystring = "bibcode:"+encodeURIComponent(selected[0]);
 		} else {
 			querypieces.push("(");
 			for (var i=0; i<selected.length; i++){
@@ -86,12 +86,12 @@
 			var querystring=querypieces[0];
 			querystring+=querypieces.slice(1,-1).join(' ');
 			querystring+=querypieces.slice(-1)
+	        querystring = "bibcode:"+encodeURIComponent(querystring);
 		}//end else for multiple selected authors
 
 		var finalURI= new Uri(baseurlandquery);
         var oldqlist = finalURI.getQueryParamValues('q');
-        //console.log(oldqlist);
-        oldqlist.push("bibcode:"+querystring);
+        oldqlist.push(querystring);
         var qstring=oldqlist.join(' AND ');
 		finalURI.replaceQueryParam('q', qstring);
 		window.location.href = decodeURIComponent(finalURI.toString());
