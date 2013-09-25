@@ -9,6 +9,7 @@ from flask import (Blueprint, request, url_for, Response, current_app as app, ab
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 from authorsnetwork import get_authorsnetwork
+from solrjsontowordcloudjson import wc_json
 
 visualization_blueprint = Blueprint('visualization', __name__, template_folder="templates", url_prefix='/visualization')
 
@@ -48,3 +49,40 @@ def author_network():
             lists_of_authors.append(doc.author_norm)
         
     return render_template('author_network_embedded.html', network_data=get_authorsnetwork(lists_of_authors))
+
+
+@visualization_blueprint.route('/word_cloud', methods=['GET', 'POST'])
+def word_cloud():
+    """
+    View that creates the data for the word cloud
+    """
+    #query
+    if not request.values.has_key('bibcode'):
+        try:
+            original_query = json.loads(request.values.get('current_search_parameters'))
+            original_query= original_query['q']
+        except (TypeError, JSONDecodeError):
+            #@todo: logging of the error
+            return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #1). Please try later.')
+
+        solr_data=solr.query({'q':original_query, 'defType':'aqp', 'df':'abstract', 'start': 0, 'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+                             'tv.all': 'true', 'tv.fl':'abstract', 'fl':'id', 'wt':'json'})
+
+    #allowing people to append own list of bibcodes(?)
+    else:
+        bibcodes = request.values.getlist('bibcode')
+        q = 'bibcode:%s' % bibcodes.pop()
+        for bibcode in bibcodes:
+            q = '%s OR bibcode:%s' % (q, bibcode)
+        
+        solr_data = {'q':q, 'defType':'aqp', 'df':'abstract', 'start': 0, 'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+         'tv.all': 'true', 'tv.fl':'abstract', 'fl':'id', 'wt':'json'}
+
+    if solr_data.is_error():
+        return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
+    
+    return render_template('author_network_embedded.html', wordcloud_data=wc_json(solr_data))
+
+
+
+
