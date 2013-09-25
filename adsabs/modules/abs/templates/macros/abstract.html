@@ -110,7 +110,7 @@
 				{% if solrdoc.copyright %}
 				<div class="row-fluid">
 					<div class="span12 abstractCopyright">
-						<span class=copyright>{{ solrdoc.copyright }}</span>
+						<span class=copyright>{{ solrdoc.copyright|safe_html_unescape }}</span>
 					</div>
 				</div>
 				{% endif %}
