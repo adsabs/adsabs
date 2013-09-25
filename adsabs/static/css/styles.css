@@ -558,3 +558,70 @@ Author network specific css
 	padding:2px;
 	font-size: 12px;
 }
+
+/* Word cloud specific css */
+
+.wordcloud_body {
+  font-family: Helvetica, Arial, Sans-serif;
+  background-color: #f9f9f9;
+  font-size:14px;
+  color:  #4C4C4C;
+  font-weight: 300;
+  margin: 0 auto;
+  margin-top:2%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  }
+
+.wordcloud_svgtext {
+  fill: #00006B;
+  font-weight: 400;
+}
+
+.wordcloud_button_format {
+  margin-top:30px;
+ font-weight:200;
+  font-size: 13px;
+}
+
+.wordcloud_ul {
+  padding:0;
+  margin-left: 0;
+}
+
+.wordcloud_ul li {
+  text-align: left;
+  padding-left: 3px;
+  padding-right:2px;
+  font-size:13px;
+  list-style-type:none;
+}
+
+.wordcloud_black {
+  color:black;
+  font-weight:100;
+  font-size: 14px;
+}
+
+.wordcloud_btn{
+  padding:2px;
+  font-size: 12px;
+}
+
+.wordcloud_text:hover{
+  cursor: pointer;
+  cursor: hand;
+ }
+
+#wordcloud_container{
+  font-weight: 500;
+}
+
+.wordcloud_explanation{
+  width:400px;
+  padding:25px;
+}
