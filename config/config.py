@@ -129,9 +129,13 @@ class AppConfig(object):
     
     SOLR_MLT_FIELDS = ["abstract","title"]
     SOLR_MLT_PARAMS = [
-            ('boost', 'true'),
-            ('mlt.interestingTerms', 'list'),
-            ('mlt.match.include','true')
+            ('mlt.boost', 'true'),
+            ('mlt.interestingTerms', 'details'),
+            ('mlt.mintf',1),
+            ('mlt.mindf',20),
+            ('mlt.minwl',2),
+            ('mlt.maxwl',40),
+            ('mlt.maxqt',20)
         ]
     #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
     #added also a default function to use
