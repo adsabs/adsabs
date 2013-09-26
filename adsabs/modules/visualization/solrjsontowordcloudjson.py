@@ -5,37 +5,23 @@ import copy
 
 #title will be added later
 
-def generate_json_from_solr_output(j):
-	'''Takes solr json, returns nice json'''
-	terminfodict={}
-	docs=j['response']['docs']
-	for i, t in enumerate(j['termVectors']):
-		#get paper id--avoid lists and non-numbers and hope that what is left over is id
-		if isinstance(t, unicode) and re.match(r'\d+', t):
-			#termvector info is a list of word, tfidf info for a paper
-			termvectorinfo=j['termVectors'][i+1][3:]
-			#iterating  through paper entry--both words and list info
-			for term in termvectorinfo:
-				#list of just words
-				words= term[0::2]
-				#list of accompanying lists with tfidf info and other stuff
-				#we want to turn it into a list of dicts instead of list of lists
-				tfinfo= term[1::2]
-				list_of_dicts=[]
-				for termlist in tfinfo:
-					tfinfo_dict=dict(zip(termlist[0::2], termlist[1::2]))
-					#creating a dict of tfidf info for each word (in each abstract or t)
-					offset_temp=tfinfo_dict['offsets']
-					start_offsets=offset_temp[1::4]
-					end_offsets=offset_temp[3::4]
-					del tfinfo_dict['offsets']
-					tfinfo_dict['offsets']={'start': start_offsets, 'end':end_offsets}
-	 				list_of_dicts.append(tfinfo_dict)
-	  		fullinfo=dict(zip(words, list_of_dicts))
-	 		terminfodict[t]={'terminfo': fullinfo}
-	return terminfodict
-
-
+def list_to_dict(l, depth=0):
+	"""
+	takes awkward list of list data structure returnd in solr json and dictifies it
+	"""
+	d = {}
+	i = 0
+	while i < len(l):
+		key = l[i]
+		val = l[i + 1]
+		if isinstance(val, list):
+			depth += 1
+			d[key] = list_to_dict(val[:], depth) 
+		else:
+			d[key] = val
+		i += 2
+	return d
+	
 def wc_json(j):
 	'''Takes solr-generated json and filename, returns word-cloud-ready json and saves it.
 	The function works takes a number of steps: 
@@ -47,7 +33,7 @@ def wc_json(j):
 	5. Choose a display word for synonyms, and capitalize acronyms'''
 
 	#terminfodict will be a dict with keys=paper ids, values= dict with tf info
-	terminfodict=generate_json_from_solr_output(j)
+	terminfodict=list_to_dict(j)
 	#this dict just stores word, number info for wordcloud
 	finalfrequencydict={}
 	
@@ -109,10 +95,13 @@ def wc_json(j):
 								#finally, check to make sure it wasn't removed as an ascii duplicate
 								and wordkey1 in terminfodict[t]['terminfo']):
 								substrings.append((wordkey1, entry))
-								#and lets subtract 1 point for all component words (can't delete because it may have shown up independently elsewhere)
-								terminfodict[t]['terminfo'][wordkey1]['tf-idf']= ((terminfodict[t]['terminfo'][wordkey1]['tf']-1) * 
-								(terminfodict[t]['terminfo'][wordkey1]['tf-idf']/terminfodict[t]['terminfo'][wordkey1]['tf']))
-								terminfodict[t]['terminfo'][wordkey1]['tf']=terminfodict[t]['terminfo'][wordkey1]['tf']-1
+								try:
+									#and lets subtract 1 point for all component words (can't delete because it may have shown up independently elsewhere)
+									terminfodict[t]['terminfo'][wordkey1]['tf-idf']= ((terminfodict[t]['terminfo'][wordkey1]['tf']-1) * 
+									(terminfodict[t]['terminfo'][wordkey1]['tf-idf']/terminfodict[t]['terminfo'][wordkey1]['tf']))
+									terminfodict[t]['terminfo'][wordkey1]['tf']=terminfodict[t]['terminfo'][wordkey1]['tf']-1
+								except:
+									pass
 								if terminfodict[t]['terminfo'][wordkey1]['tf']==0:
 									del terminfodict[t]['terminfo'][wordkey1]
 				
