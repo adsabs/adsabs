@@ -495,7 +495,7 @@ Author network specific css
 .authnet_body {
 	font-family: Helvetica, Arial, Sans-serif;
 	font-size:12px;
-	color:    #7575A3;
+	color: #4C4C4C;
 	font-weight: 100;
 	margin: 0 auto;
 	-webkit-touch-callout: none;
@@ -584,7 +584,6 @@ Author network specific css
   }
 
 .wordcloud_svgtext {
-  fill: #00006B;
   font-weight: 400;
 }
 
