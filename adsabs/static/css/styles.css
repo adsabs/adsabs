@@ -559,6 +559,12 @@ Author network specific css
 	font-size: 12px;
 }
 
+.authnet_explanation{
+  width:400px;
+  padding:25px;
+
+}
+
 /* Word cloud specific css */
 
 .wordcloud_body {
