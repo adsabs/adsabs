@@ -489,91 +489,16 @@ div.absview div.row-fluid label {
 	margin-bottom: 10px;
 }
 
-/*
-Author network specific css
-*/
-.authnet_body {
-	font-family: Helvetica, Arial, Sans-serif;
-	font-size:12px;
-	color: #4C4C4C;
-	font-weight: 100;
-	margin: 0 auto;
-	-webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
 
-.authnet_link {
-	stroke: gray;
-	stroke-opacity:.15;
-}
+/* Visualization CSS*/
 
-
-.authnet_svgtext {
-	fill: #00006B;
-	font-weight: 400;
-}
-
-.authnet_button_format {
-	margin-top:10px;
-	font-weight:200;
-	font-size: 13px;
-}
-
-.authnet_ul {
-	padding:0;
-	margin-left: 0;
-}
-
-.authnet_ul li {
-	text-align: left;
-	padding-left: 3px;
-	padding-right:2px;
-	font-size:13px;
-	list-style-type:none;
-}
-
-.authnet_black {
-	color:black;
-	font-weight:100;
-	font-size: 14px;
-}
-
-.authnet_body::selection {
-	background:transparent;
-}
-
-.authnet_body:focus{
-	outline: none
-}
-
-.authnet_node:hover{
-	cursor: pointer;
-}
-
-.authnet_btn{
-	padding:2px;
-	font-size: 12px;
-}
-
-.authnet_explanation{
-  width:400px;
-  padding:25px;
-
-}
-
-/* Word cloud specific css */
-
-.wordcloud_body {
+.vis_body {
   font-family: Helvetica, Arial, Sans-serif;
   background-color: #f9f9f9;
   font-size:14px;
   color:  #4C4C4C;
   font-weight: 300;
-  margin: 0 auto;
+  margin: 0;
   margin-top:2%;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -582,51 +507,56 @@ Author network specific css
   -ms-user-select: none;
   user-select: none;
   }
+  
+.vis_explanation{
+  width:400px;
+  padding:25px;
+    }
 
-.wordcloud_svgtext {
-  font-weight: 400;
-}
+  
+.vis_svgtext {
+	fill: #00006B;
+	font-weight: 400;
+    }
 
-.wordcloud_button_format {
+.vis_button_format {
   margin-top:30px;
  font-weight:200;
   font-size: 13px;
-}
+    }
 
-.wordcloud_ul {
+.vis_btn{
+  padding:2px;
+  font-size: 12px;
+    }
+
+.vis_link {
+	stroke: gray;
+	stroke-opacity:.15;
+    }
+
+.vis_ul {
   padding:0;
   margin-left: 0;
-}
+  list-style-type:none;
+    }
 
-.wordcloud_ul li {
+.vis_ul li {
   text-align: left;
   padding-left: 3px;
   padding-right:2px;
   font-size:13px;
-  list-style-type:none;
-}
+    }
 
-.wordcloud_black {
+.vis_black {
   color:black;
-  font-weight:100;
   font-size: 14px;
-}
+    }
 
-.wordcloud_btn{
-  padding:2px;
-  font-size: 12px;
-}
-
-.wordcloud_text:hover{
+.vis_hover_pointer:hover{
   cursor: pointer;
   cursor: hand;
  }
-
-#wordcloud_container{
-  font-weight: 500;
-}
-
-.wordcloud_explanation{
-  width:400px;
-  padding:25px;
-}
+ 
+ .vis_muted_button {
+ background-color:#85ADFF;
