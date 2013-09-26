@@ -1,0 +1,239 @@
+<!-- Code written by Rahul Dave, following Alex Holachek -->
+<style>
+#aladin-lite-div {
+    height: 800px;
+    width: 800px;
+}
+
+#bibcodeList {
+    width: 400px;
+}
+</style>
+
+<link rel="stylesheet" href="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.css" />
+<div class="authnet_body">
+	<div class="container-fluid">
+		<div class="row-fluid">
+
+			<div class="span2" id="controlpanel"> 
+
+                <div class="dropdown">
+                    <a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+                      What Is The Object Skymap?
+                       <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu authnet_ul" style="text-indent: 10px;width:400px;" role="menu" aria-labelledby="dLabel" >
+                        <li>This visualization utilizes CDS's excellent Alladin Lite web based sky visualization to
+                            show the objects associated with a set of papers. The objects are color coded by their type.
+                        </li>
+                        <li>You can select you co-ordinate system by choosing J2000, or Gal(actic) from the dropdown menu,
+                            and which layers you'd like to see, including surveys and object types, by clicking on the layers icon.
+                            The search button will take you to a particular object or position.
+                        </li>
+                        <li> When you click the "Make a Selection" button below, you will be able to draw a rectangular region
+                            on the screen. The objects included are printed out below on the left. Then, clicking "Apply Filter To
+                            "Search" will choose the <strong>publications</strong> associated with those objects to narrow your search, 
+                            returning you to the main search page.</li> 
+                    </ul>
+                </div>
+
+                <button type="button" class="btn btn-info button-spacing btn-block" id="selectBtn" style="font-weight:200;margin-top:10px">Make a selection</button>
+                
+				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="display:none; font-weight:200;margin-top:10px">Filter Search By Selection</button>
+                <div class="well well-small">
+                    <p>Objects in search:</p>
+                    <p id="object_list" style="overflow: scroll;  height: 340px">
+
+                    </p>
+                </div> 	
+			</div>
+		
+			<div class="span10" id="chart">
+				<div id="aladin-lite-div" ></div>
+			</div>
+		</div>
+	</div>
+</div>
+<!--script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script-->
+
+<script type="text/javascript">
+
+	Array.prototype.clear = function() {
+  		while (this.length > 0) {
+    		this.pop();
+  		}
+	};
+	var json = {{ bibcodes|tojson|safe }};
+	var baseurlandquery = window.location.href;
+    var newbibcodes=[];
+
+    function generateSearch(){
+    	var selected=newbibcodes;
+		querypieces=[];
+		if (selected.length==1){
+			var querystring = "bibcode:"+encodeURIComponent(selected[0]);
+		} else {
+			querypieces.push("(");
+			for (var i=0; i<selected.length; i++){
+				if (i==0){
+					querypieces.push(selected[i]);
+				} else {
+					querypieces.push('OR');
+					querypieces.push(selected[i]);
+				}
+			}
+			querypieces.push(")");
+			var querystring=querypieces[0];
+			querystring+=querypieces.slice(1,-1).join(' ');
+			querystring+=querypieces.slice(-1)
+	        querystring = "bibcode:"+encodeURIComponent(querystring);
+		}//end else for multiple selected authors
+
+		var finalURI= new Uri(baseurlandquery);
+        var oldqlist = finalURI.getQueryParamValues('q');
+        oldqlist.push(querystring);
+        var qstring=oldqlist.join(' AND ');
+		finalURI.replaceQueryParam('q', qstring);
+		window.location.href = decodeURIComponent(finalURI.toString());
+	}
+
+
+    function newCatLayer(aladinLite, objArray, layerName) {
+        var catalogLayer = a.createCatalog({name: layerName});
+        aladinLite.addCatalog(catalogLayer);
+        var sources = [];
+        for (var k=0; k<objArray.length; k++) {
+            sources.push(aladinLite.createSource(objArray[k].ra, objArray[k].dec, objArray[k].data));
+        }
+        catalogLayer.addSources(sources);
+
+	}
+
+    var a = new Aladin($('#aladin-lite-div')[0], {zoom: 180, survey:"P/DSS2/red"})
+    //var a = $.aladin('#aladin-lite-div');
+    //a.setImageSurvey(a.createImageSurvey('SIMBAD heatmap', 'SIMBAD heatmap', 'http://cdsannotations.u-strasbg.fr/ADSAllSkySurvey/SimbadHeatMaps/healpix/date-2000', 'equatorial', 3));
+
+    
+    
+    a.on('select', function(sources) {
+     // do something with the selected sources
+     	newbibcodes.clear();
+        //$('#object_list').empty();
+        //console.log(sources.length);
+        //console.log(sources);
+        var templist, notuniqlist=[], uniqlist;
+        var objectnames=[];
+        for (var k=0; k<sources.length; k++) {
+        	templist=sources[k].data.reflist;
+            //console.log(sources[k]);
+            objectnames.push(sources[k].data.name);
+        	for (var j=0; j<templist.length; j++){
+            	notuniqlist.push(templist[j]);
+        	}
+        }
+        uniqlist=_.uniq(notuniqlist);
+        for (var i=0; i < uniqlist.length; i++){
+            newbibcodes.push(uniqlist[i]);
+        }
+        if (newbibcodes.length > 0){
+            $('#dofacet').show();
+        }
+        $('#object_list').append(objectnames.join(', '));
+     });
+    
+    $('#selectBtn').click(function() {
+        $('#object_list').empty();
+         a.select();
+    });
+
+    $('#dofacet').click(function() {
+         generateSearch();
+    });
+
+    $(document).ready( function(){
+    	a.removeLayers();
+        var list = json.bibcodes;
+        console.log("LIST", list);
+        // query SIMBAD with list of bibcodes
+        $.ajax({
+            url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
+            data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
+            method: 'POST',
+            success: function(datastring) {
+                data=JSON.parse(datastring);
+                //console.log("Got back",);
+                a.gotoPosition( data[0].ra, data[0].dec);
+                layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
+                var otype, category;
+                for (var k=0; k<data.length; k++) {
+                    otype = data[k].otype;
+                    //console.log("DD",data[k]);
+                    if (otype=='Star') {
+                        category = 'Stars';
+                    }
+                    else if (otype=='ISM') {
+                        category = 'ISM';
+                    }
+                    else if (otype=='Galaxy') {
+                        category = 'Galaxy';
+                    }
+                    else {
+                        category = 'Other';
+                    }
+                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype, name: data[k].mainId}});
+                    //console.log(layersData);
+                }
+                for (var category in layersData) {
+                    if (layersData[category].length==0) {
+                        continue;
+                    }
+                    newCatLayer(a, layersData[category], category);
+                }
+            },
+            error: function() {
+                console.log('Something wrong occured');
+            }
+        });
+    }); // end jquery document.ready()
+
+/*
+$.ajax({
+            url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
+            data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
+            method: 'GET',
+            dataType: 'jsonp',
+            success: function(data) {
+                layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
+                var otype, category;
+                for (var k=0; k<data.length; k++) {
+                    otype = data[k].otype;
+                    if (otype=='Star') {
+                        category = 'Stars';
+                    }
+                    else if (otype=='ISM') {
+                        category = 'ISM';
+                    }
+                    else if (otype=='Galaxy') {
+                        category = 'Galaxy';
+                    }
+                    else {
+                        category = 'Other';
+                    }
+                    layersData[category].push({ra: data[k].ra, dec: data[k].dec, data: {reflist: data[k].reflist, otype: data[k].otype}});
+                    console.log(layersData);
+                }
+                for (var category in layersData) {
+                    if (layersData[category].length==0) {
+                        continue;
+                    }
+                    newCatLayer(a, layersData[category], category);
+                }
+            },
+            error: function() {
+                console.log('Something wrong occured');
+            }
+        });
+*/
+</script>
+
+

@@ -24,6 +24,7 @@
 	
 	<!-- Other libraries -->
 	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/Uri.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/underscore-min.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	
 	<!-- d3 stuff -->
 	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v3.js') }}?app_version={{ config.APP_VERSION }}"></script>
@@ -48,6 +49,7 @@
 	<script type="text/javascript" src="{{ url_for('static', filename='js/record_list_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip_manager.js') }}?app_version={{ config.APP_VERSION }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='js/feedback_components.js') }}?app_version={{ config.APP_VERSION }}"></script>
+	<script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
 	{% block head%}{% endblock %}
 </head>
 <body>

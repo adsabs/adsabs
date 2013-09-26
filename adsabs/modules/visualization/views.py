@@ -10,6 +10,7 @@ from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 from authorsnetwork import get_authorsnetwork
 from solrjsontowordcloudjson import wc_json
+#from alladinlite import get_objects
 
 visualization_blueprint = Blueprint('visualization', __name__, template_folder="templates", url_prefix='/visualization')
 
@@ -102,5 +103,27 @@ def word_cloud():
     return render_template('word_cloud_embedded.html', wordcloud_data=wc_json(resp.raw_response()))
 
 
-
-
+@visualization_blueprint.route('/alladin_lite', methods=['GET', 'POST'])
+def alladin_lite():
+    """
+    View that creates the data for alladin lite
+    """
+    #if there are not bibcodes, there should be a query to extract the authors
+    if not request.values.has_key('bibcode'):
+        bibcodes=[]
+        try:
+            query_components = json.loads(request.values.get('current_search_parameters'))
+        except (TypeError, JSONDecodeError):
+            #@todo: logging of the error
+            return render_template('errors/generic_error.html', error_message='Error. Please try later.')
+        #update the query parameters to return only what is necessary
+        query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.SEARCH_DEFAULT_ROWS)})
+        resp = solr.query(**query_components)
+        if resp.is_error():
+            return render_template('errors/generic_error.html', error_message='Error while creating the objects skymap. Please try later.')
+        for doc in resp.get_docset_objects():
+            bibcodes.append(doc.bibcode)
+    else:
+        bibcodes = request.values.getlist('bibcode')
+        
+    return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})
