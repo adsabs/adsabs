@@ -235,10 +235,21 @@
               var querystring=querypieces.join('');
     
             var finalURI= new Uri(baseurlandquery);
+            var facetregex=/&.*$/;
+            if (facetregex.test(finalURI.query())) 
+                  {
+                    var facetindex=finalURI.query().search(facetregex);
+                    var facets=finalURI.query().slice(facetindex);
+                  }
+            else
+                  {
+                    var facets='';
+                  };
             var orig_query=finalURI.getQueryParamValue('q');
             var newquery= orig_query+querystring
 
-            finalURI.setQuery('q='+newquery);
+            finalURI.setQuery('q='+newquery+facets);
+            alert('q='+newquery+facets)
             window.location.href = decodeURIComponent(finalURI.toString());
           }
     
