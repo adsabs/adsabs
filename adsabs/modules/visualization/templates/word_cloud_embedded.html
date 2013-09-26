@@ -222,18 +222,21 @@
         //function used when someone wants to facet search on selected authors  
         var generateSearch= function()
           {
-            querypieces=[];      
+            querypieces=[];   
+            querypieces.push(' AND (');   
         
-            for (var i=0; i<selected.length; i++)
+            for (var i=0; i<selected.length-1; i++)
             {
   
                 {
-                  querypieces.push('+AND+');
+                  
                   querypieces.push('"'+selected[i]+'"');
+                  querypieces.push('+OR+');
                 }
             }
+                  querypieces.push('"'+selected.slice(-1)+'")');
               var querystring=querypieces.join('');
-    
+               
             var finalURI= new Uri(baseurlandquery);
             var facetregex=/&.*$/;
             if (facetregex.test(finalURI.query())) 
