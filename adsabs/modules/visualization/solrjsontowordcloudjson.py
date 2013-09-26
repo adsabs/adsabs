@@ -208,9 +208,9 @@ def wc_json(j):
 	#penalizing concatenated words since they have a way higher idf
 	for f in finalfrequencydict.copy():
 		if f.count('-')==1:
-			finalfrequencydict[f]=finalfrequencydict[f] *0.5
+			finalfrequencydict[f]=finalfrequencydict[f] *.1
 		elif f.count('-')>1:
-			finalfrequencydict[f]=finalfrequencydict[f] *0.0025
+			finalfrequencydict[f]=finalfrequencydict[f] *0.00025
 		#bad parsing sometimes gets stuff like "subject headings: planets"
 		if 'headings' in f:
 			del finalfrequencydict[f]

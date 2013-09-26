@@ -38,7 +38,7 @@
 //initialize final word list
           var wordDict={{ wordcloud_data|tojson|safe }};
 
-          var baseurlandquery= window.location.href
+          var baseurlandquery= window.location.href;
 
 
       $(document).ready(function(){
@@ -106,7 +106,8 @@
                                       })
               .selectAll("text")
                 .data(words)
-              .enter().append("text")
+                .enter()
+                .append("text")
                 .classed("wordcloud_text", true)
                 .style("font-size", function(d) {return d.size + "px"; })
                 .style("fill", function(d, i) {return fill(d.origSize);})
@@ -116,7 +117,6 @@
                                         return "translate(" + [d.x, d.y] + ")";
                                     })
                 .text(function(d) { return d.text; })
-
                 .on("click", function(d){
                     if (d.select==false)
                         {
@@ -170,94 +170,78 @@
                                       {
                                         return '<li> Click on a term to add it to this list.</li> <li> Click again on the term to remove it.</li>'
                                       }
-                                    })
+                                })
 
-                      d3.select("#authorfacet")
-                                .on("click", generateSearch)
-                  }) //end on(click)
+                        d3.select("#authorfacet")
+                            .on("click", generateSearch)
+                            });//end on(click)
 
-            }//end draw()
+              
+                  var svg= d3.select("#wordcloud_container")
+                              .select("svg")
+                                
+                  var filter= svg
+                                  .append("filter")
+                                  .attr("id", "glow");
+
+                      filter.append("feColorMatrix")
+                              .attr("type", "matrix")
+                              .attr("values", "0 0 0 1  0  0 0 0 .35 0  0 0 0 0 0  0 0 0 1   0")
+                  
+                    var blur=  filter.append("feGaussianBlur")
+                              .attr("result", "coloredBlur");
+
+                    var feMerge=filter.append("feMerge");
+                            
+                            feMerge.append("feMergeNode")
+                                  .attr("in", "coloredBlur");
+                      
+                            feMerge.append("feMergeNode")
+                                    .attr("in", "SourceGraphic");
+
+                    var text= svg.selectAll(".wordcloud_text");
+
+                            text.on("mouseover", function(d)
+                                      { 
+                                        blur
+                                          .attr("stdDeviation", glowScale(d.origSize))
+                                          d3.select(this)
+                                            .attr("filter", "url(#glow)")
+                                      }
+                                  );
+
+                            text.on("mouseout", function()
+                                      {
+                                        d3.selectAll(".wordcloud_text")
+                                          .attr("filter", null)
+                                        d3.select("svg")
+                                      }
+                                  );
+                }//end draw()
 
         //function used when someone wants to facet search on selected authors  
         var generateSearch= function()
           {
-          var names=[],
-            querypieces=[];
-          if (selected.length==1)
-          {
-            var querystring = '0/'+selected[0];
-          }
-          else 
-          {
-            querypieces.push("(");
-            for (var i=0; i< selected.length; i++) 
+            querypieces=[];      
+        
+            for (var i=0; i<selected.length; i++)
             {
-                names.push('"0/'+selected[i]+'"');
-            }
-            for (var i=0; i<names.length; i++)
-            {
-                if (i==0)
+  
                 {
-                  querypieces.push(names[i]);
-                }
-                else
-                {
-                  querypieces.push('OR');
-                  querypieces.push(names[i]);
+                  querypieces.push('+AND+');
+                  querypieces.push('"'+selected[i]+'"');
                 }
             }
-              querypieces.push(")");
-              var querystring=querypieces[0];
-              querystring+=querypieces.slice(1,-1).join(' ');
-              querystring+=querypieces.slice(-1)
-            }//end else for multiple selected authors
+              var querystring=querypieces.join('');
     
             var finalURI= new Uri(baseurlandquery);
-            finalURI.addQueryParam('aut_f', querystring);
+            var orig_query=finalURI.getQueryParamValue('q');
+            var newquery= orig_query+querystring
+
+            finalURI.setQuery('q='+newquery);
             window.location.href = decodeURIComponent(finalURI.toString());
           }
     
-
-        var svg= d3.select("svg")
-            
-        var filter= svg
-                      .append("filter")
-                      .attr("id", "glow");
-
-            filter.append("feColorMatrix")
-                  .attr("type", "matrix")
-                  .attr("values", "0 0 0 1  0  0 0 0 .35 0  0 0 0 0 0  0 0 0 1   0")
-      
-        var blur=  filter.append("feGaussianBlur")
-                  .attr("result", "coloredBlur");
-
-        var feMerge=filter.append("feMerge");
-                
-                feMerge.append("feMergeNode")
-                      .attr("in", "coloredBlur");
-          
-                feMerge.append("feMergeNode")
-                        .attr("in", "SourceGraphic");
-
-        var text= svg.selectAll(".wordcloud_text");
-
-                text.on("mouseover", function(d)
-                          { 
-                            blur
-                              .attr("stdDeviation", glowScale(d.origSize))
-                              console.log(d.size)
-                              d3.select(this)
-                                .attr("filter", "url(#glow)")
-                          }
-                      );
-
-                text.on("mouseout", function()
-                          {
-                            d3.selectAll(".wordcloud_text")
-                              .attr("filter", null)
-                            d3.select("svg")
-                          }
-                      );
          }); //end document.ready()
 
 </script>
