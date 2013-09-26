@@ -9,6 +9,7 @@ from flask import (Blueprint, request, url_for, Response, current_app as app, ab
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 from authorsnetwork import get_authorsnetwork
+from solrjsontowordcloudjson import wc_json
 #from alladinlite import get_objects
 
 visualization_blueprint = Blueprint('visualization', __name__, template_folder="templates", url_prefix='/visualization')
@@ -49,6 +50,58 @@ def author_network():
             lists_of_authors.append(doc.author_norm)
         
     return render_template('author_network_embedded.html', network_data=get_authorsnetwork(lists_of_authors))
+
+
+@visualization_blueprint.route('/word_cloud', methods=['GET', 'POST'])
+def word_cloud():
+    """
+    View that creates the data for the word cloud
+    """
+
+    query_url = config.SOLRQUERY_URL
+    tvrh_query_url = query_url.rsplit('/', 1)[0] + '/tvrh'
+
+    #query
+    if not request.values.has_key('bibcode'):
+        try:
+            query_components = json.loads(request.values.get('current_search_parameters'))
+            original_query = query_components['q']
+        except (TypeError, JSONDecodeError):
+            #@todo: logging of the error
+            return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #1). Please try later.')
+
+        solr_data = {
+            'defType':'aqp', 
+            'df':'abstract', 
+            'rows': str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+            'tv.all': 'true', 
+            'tv.fl':'abstract', 
+            'fl':'id', 
+        }
+        
+        resp = solr.query(original_query, query_url=tvrh_query_url, **solr_data)
+
+    #allowing people to append own list of bibcodes(?)
+    else:
+        bibcodes = request.values.getlist('bibcode')
+        q = ' OR '.join(["bibcode:%s" % b for b in bibcodes])
+        
+        solr_data = {
+            'defType':'aqp',
+            'df':'abstract',
+            'rows':str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+            'tv.all': 'true',
+            'tv.fl':'abstract',
+            'fl':'id',
+        }
+
+        resp = solr.query(q, query_url=tvrh_query_url, **solr_data)
+
+    if resp.is_error():
+        return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
+    
+    return render_template('word_cloud_embedded.html', wordcloud_data=wc_json(resp.raw_response()))
+
 
 @visualization_blueprint.route('/alladin_lite', methods=['GET', 'POST'])
 def alladin_lite():

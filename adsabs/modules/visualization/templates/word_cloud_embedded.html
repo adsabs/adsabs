@@ -1,0 +1,258 @@
+<!-- Alex -->
+<div class="wordcloud_body">
+  <div class="container-fluid">
+    <div class="row-fluid">
+      <div class="span2" id="wordcloud_controlpanel">
+
+        <div class="dropdown">
+          <a class="btn dropdown-toggle wordcloud_button_format btn-block" data-toggle="dropdown" href="#">
+            What is the Word Cloud?
+             <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu wordcloud_ul wordcloud_explanation" role="menu" aria-labelledby="dLabel" >
+              <li>This visualization shows you interesting terms from the abstracts of papers yielded by your ADS search.
+                  If a term appears repeatedly in your search results, but rarely in the rest of ADS,
+                  it is considered particularly relevant and is more likely to appear here. <br/> <br/>You might
+                  see the occasional strange or seemingly irrelevant term--the word cloud is generated from the same data that ADS
+                  uses to facilitate search, so idiosyncracies from the parsing process sometimes make their way into the word cloud. <br/><br/>
+              To facet your ADS search, select words from the word cloud  and click the "Apply Filter to Search"
+                button.</li>
+          </ul>
+        </div> 
+
+
+        <div class="well well-small wordcloud_button_format ">
+           <p class="wordcloud_black"> Selected Terms: </p>
+            <ul class="wordcloud_ul" id="list">
+              <li> Click on a term to add it to this list.</li>
+              <li> Click again on the term to remove it.</li>
+            </ul>
+        </div> 
+      </div>
+
+      <div class="span10" id="wordcloud_container"></div>
+    </div>
+  </div>
+<script>
+
+//initialize final word list
+          var wordDict={{ wordcloud_data|tojson|safe }};
+
+          var baseurlandquery= window.location.href;
+
+
+      $(document).ready(function(){
+          var width = $(window).width()*.8,
+              height= $(window).height()*.95;
+
+          var selected=Array(),
+              findMinAndMax=function(object)
+                {
+                  var a =Array();
+                  for (var x in object) 
+                    {
+                      a.push(wordDict[x])}
+                      realMin=a.sort(function(a,b){return a-b})[0]
+                      realMax=a.sort(function(a,b){return a-b})[a.length-1]
+                      return [realMin, realMax]
+                    };
+
+          var minAndMax= findMinAndMax(wordDict),
+              min=minAndMax[0],
+              max=minAndMax[1];
+
+          var fill = d3.scale.log().domain([min,max]);
+                    fill.domain([0, .25, 0.5, 0.75, 1].map(fill.invert));
+                    fill.range(["#80E6FF", "#7575FF", "#7575FF", "#47008F"]).clamp(true);
+              
+          var pixelScale=d3.scale.log()
+                      .domain([min, max]).range([width/70, width/15]);
+
+          var glowScale=d3.scale.log()
+                      .domain([min, max]).range([2,4.5]);
+
+
+          var words=function ()
+                    {
+                      var a=Array();
+
+                      for (var entry in wordDict)
+                          {
+                            a.push({text: entry, size: pixelScale(wordDict[entry]), select:false, origSize: wordDict[entry]})
+                          };
+                            return a
+                    };
+
+          var words=words();
+
+          d3.layout.cloud().size([width, height])
+              .words(words)
+              .padding(3)
+              .rotate(function() { return 0})
+              .font("Arial")
+              .fontSize(function(d) { return d.size; })
+              .on("end", draw)
+              .start();
+
+          function draw(words) {
+            d3.select("#wordcloud_container")
+              .append("svg")
+              .attr('width', width)
+              .attr('height', height)
+              .append("g")
+              .attr("transform", function()
+                                      {
+                                          return "translate(" + width/2+" "+ height/2+")"
+                                      })
+              .selectAll("text")
+                .data(words)
+                .enter()
+                .append("text")
+                .classed("wordcloud_text", true)
+                .style("font-size", function(d) {return d.size + "px"; })
+                .style("fill", function(d, i) {return fill(d.origSize);})
+                .attr("text-anchor", "middle")
+                .attr("transform", function(d) 
+                                    {
+                                        return "translate(" + [d.x, d.y] + ")";
+                                    })
+                .text(function(d) { return d.text; })
+                .on("click", function(d){
+                    if (d.select==false)
+                        {
+                            d3.select(this)
+                              .transition()
+                              .duration(500)
+                              .style("fill", "orange")
+                              d.select=true
+                              selected.push(d.text)
+                            //removing current list
+                            d3.select("#list")
+                                .selectAll("li")
+                                .remove()
+                            for (var i=0; i<selected.length; i++)
+                                  {
+                                    d3.select("#list")
+                                    .append("li")
+                                    .text(selected[i]+"  ")
+                                  }
+                          }
+
+                    else
+                        {
+                          d3.select(this)
+                            .transition()
+                            .duration(500)
+                          .style("fill", function(d, i) {return fill(d.origSize)});
+                            d.select=false;
+                            var i=selected.indexOf(d.text);
+                            selected.splice(i, 1);
+                          d3.select("#list")
+                              .selectAll("li")
+                              .remove()
+                            for (var i=0; i<selected.length; i++)
+                                {
+                                  d3.select("#list")
+                                  .append("li")
+                                  .text(selected[i])
+                                }
+                        }
+
+                      d3.select("#list")
+                              .append("li")
+                              .html(function()
+                                  {
+                                    if (selected.length>0)
+                                      {
+                                        return '<button type="button" class="btn btn-info button-spacing btn-block" id="authorfacet" style="font-weight:200;margin-top:10px">Apply Filter to Search</button>'
+                                      }
+                                    else
+                                      {
+                                        return '<li> Click on a term to add it to this list.</li> <li> Click again on the term to remove it.</li>'
+                                      }
+                                })
+
+                        d3.select("#authorfacet")
+                            .on("click", generateSearch)
+                            });//end on(click)
+
+              
+                  var svg= d3.select("#wordcloud_container")
+                              .select("svg")
+                                
+                  var filter= svg
+                                  .append("filter")
+                                  .attr("id", "glow");
+
+                      filter.append("feColorMatrix")
+                              .attr("type", "matrix")
+                              .attr("values", "0 0 0 1  0  0 0 0 .35 0  0 0 0 0 0  0 0 0 1   0")
+                  
+                    var blur=  filter.append("feGaussianBlur")
+                              .attr("result", "coloredBlur");
+
+                    var feMerge=filter.append("feMerge");
+                            
+                            feMerge.append("feMergeNode")
+                                  .attr("in", "coloredBlur");
+                      
+                            feMerge.append("feMergeNode")
+                                    .attr("in", "SourceGraphic");
+
+                    var text= svg.selectAll(".wordcloud_text");
+
+                            text.on("mouseover", function(d)
+                                      { 
+                                        blur
+                                          .attr("stdDeviation", glowScale(d.origSize))
+                                          d3.select(this)
+                                            .attr("filter", "url(#glow)")
+                                      }
+                                  );
+
+                            text.on("mouseout", function()
+                                      {
+                                        d3.selectAll(".wordcloud_text")
+                                          .attr("filter", null)
+                                        d3.select("svg")
+                                      }
+                                  );
+                }//end draw()
+
+        //function used when someone wants to facet search on selected authors  
+        var generateSearch= function()
+          {
+            querypieces=[];      
+        
+            for (var i=0; i<selected.length; i++)
+            {
+  
+                {
+                  querypieces.push('+AND+');
+                  querypieces.push('"'+selected[i]+'"');
+                }
+            }
+              var querystring=querypieces.join('');
+    
+            var finalURI= new Uri(baseurlandquery);
+            var facetregex=/&.*$/;
+            if (facetregex.test(finalURI.query())) 
+                  {
+                    var facetindex=finalURI.query().search(facetregex);
+                    var facets=finalURI.query().slice(facetindex);
+                  }
+            else
+                  {
+                    var facets='';
+                  };
+            var orig_query=finalURI.getQueryParamValue('q');
+            var newquery= orig_query+querystring
+
+            finalURI.setQuery('q='+newquery+facets);
+            window.location.href = decodeURIComponent(finalURI.toString());
+          }
+    
+         }); //end document.ready()
+
+</script>
+</div>

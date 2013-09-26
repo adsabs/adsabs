@@ -51,12 +51,12 @@
 				{% endif %}		
 				{# Navbar on top of the results #}
 					<div class="row-fluid well well-small">
-						<div class="span6 firstspan">
+						<div class="span5 firstspan">
 							{{ render_toggle_all_paper_list() }}
 							{{ render_result_numbers(resp) }}
 						</div>
 						
-						<div class="span6 pull-right">
+						<div class="span7 pull-right">
 							{{ render_re_sort(resp, url_for('search.search')) }}
 							{{ render_export_menu() }}
 							{{ render_view_menu() }}

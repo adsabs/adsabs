@@ -138,9 +138,11 @@
 <div class="export_view_menu dropdown pull-right">
 	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-picture"></i> View<i class="caret"></i></a>
 	<ul class="dropdown-menu">
-		<!--li class="nav-header">records (this page or selected):</li-->
+		{# <li class="nav-header">records:</li> #}
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.view_author_network()">Author network</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.view_alladin_lite()">Objects skymap</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.view_word_cloud()">Word cloud</a></li>
+
 	</ul>
 </div>
 {% endmacro %}
