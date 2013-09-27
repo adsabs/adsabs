@@ -38,3 +38,4 @@ multiprocessing
 Markdown>=2.3.1
 path.py>=4.3
 mock>=1.0.1
+gspread==0.1.0

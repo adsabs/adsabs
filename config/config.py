@@ -219,7 +219,9 @@ class AppConfig(object):
     #sendmail configuration
     SMTP_HOST = 'localhost'
     API_WELCOME_FROM_EMAIL = 'jluker@cfa.harvard.edu'
-    
+    API_SIGNUP_SPREADSHEET_KEY = None
+    API_SIGNUP_SPREADSHEET_LOGIN = None    
+
     #flask-mail configuration
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
