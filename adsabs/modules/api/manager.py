@@ -5,6 +5,7 @@ Created on Jan 4, 2013
 '''
 
 import sys
+import gspread
 import simplejson
 
 from flask import current_app as app
@@ -51,7 +52,7 @@ def useradd(email=None, level=None):
         sendwelcome(dev_key=dev_key, no_prompt=True)
 
     if prompt_bool("Update Google Spreadsheet", True):
-        set_gspread_dev_key(user=user)    
+        update_spreadsheet(user=user)    
 
 @manager.command
 def userinfo(email=None, dev_key=None):
@@ -112,13 +113,12 @@ def sendwelcome(email=None, dev_key=None, no_prompt=False):
             app.logger.info("Welcome message sent")
 
 @manager.command
-def set_gspread_dev_key(email=None, user=None):
-    import gspread
+def update_spreadsheet(email=None, user=None):
+    """
+    update the google signup spreadsheet with the user's dev_key value
+    so that we know access has been granted
+    """
     import api_user
-
-    if config.API_SIGNUP_SPREADSHEET_KEY is None:
-        app.logger.error("Signup spreadsheet config is missing!")
-        sys.exit(1)
 
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -132,33 +132,86 @@ def set_gspread_dev_key(email=None, user=None):
         
     username = user.get_username()
     dev_key = user.get_dev_key()
+    sheet = SignupSheet()
     
-    try: 
-        gc = gspread.login(*config.API_SIGNUP_SPREADSHEET_LOGIN)
-        spreadsheet = gc.open_by_key(config.API_SIGNUP_SPREADSHEET_KEY)
-        sheet = spreadsheet.sheet1
-    except Exception, e:
-        app.logger.error(e)
-        sys.exit(1)
+    if not sheet.has_signup(username):
+        app.logger.info("No spreadsheet record found for user: %s" % username)
+        return
         
-    col_headers = sheet.row_values(1)
-    dev_key_col = col_headers.index('dev_key') + 1
-    
-    try:
-        user_row = sheet.find(username).row
-    except gspread.exceptions.CellNotFound:
-        app.logger.error("No spreadsheet record found for user: %s" % username)
-        sys.exit()
-    
-    dev_key_cell = sheet.cell(user_row, dev_key_col)
-    if dev_key_cell.value == dev_key:
+    if sheet.get_dev_key(username) == dev_key:
         app.logger.info("dev_key is already up-to-date for %s" % username)
     else:
         try:
-            sheet.update_cell(dev_key_cell.row, dev_key_cell.col, dev_key)
+            sheet.set_dev_key(username, dev_key)
             app.logger.info("woot! dev_key updated for %s!" % username)
         except Exception, e:
             app.logger.error("something went wrong updating the dev_key cell: %s" % e)
             sys.exit(1)
-   
-       
+
+@manager.command
+def signups(all=False):
+    """
+    print out the current api access signups
+    by default, will only show the ones with missing BEER logins and/or un-issued dev_keys
+    """
+    import api_user
+    import string
+    sheet = SignupSheet()
+    print '%-50s %6s %20s' % ('email/username', 'login?', 'dev_key?')
+    for email in sheet.signups():
+        user = api_user.AdsApiUser.from_email(email)
+        dev_key = sheet.get_dev_key(email)
+        if user and dev_key and not all:
+            continue
+        print '%-50s %6s %20s' % (email, str(user is not None), str(dev_key))
+
+
+class SignupSheet(object):
+    
+    def __init__(self):
+
+
+        if config.API_SIGNUP_SPREADSHEET_KEY is None:
+            raise RuntimeError("Signup spreadsheet config is missing!")
+        try: 
+            gc = gspread.login(*config.API_SIGNUP_SPREADSHEET_LOGIN)
+            spreadsheet = gc.open_by_key(config.API_SIGNUP_SPREADSHEET_KEY)
+        except Exception, e:
+            app.logger.error(e)
+            sys.exit(1)
+            
+        self.sheet = spreadsheet.sheet1
+
+        col_headers = self.sheet.row_values(1)
+        self.dev_key_col = col_headers.index('dev_key') + 1
+        self.email_col = col_headers.index('Email') + 1
+    
+    def get_cell(self, value):
+        try:
+            return self.sheet.find(value)
+        except gspread.exceptions.CellNotFound:
+            pass
+        
+    def has_signup(self, email):
+        return self.get_cell(email) is not None
+    
+    def get_dev_key(self, email):
+        email_cell = self.get_cell(email)
+        if email_cell is None:
+            raise RuntimeError("No such signup: %s" % email)
+        dev_key_cell = self.sheet.cell(email_cell.row, self.dev_key_col)
+        return dev_key_cell.value
+    
+    def set_dev_key(self, email, dev_key):
+        email_cell = self.get_cell(email)
+        if email_cell is None:
+            raise RuntimeError("No such signup: %s" % email)
+        dev_key_cell = self.sheet.cell(email_cell.row, self.dev_key_col)
+        self.sheet.update_cell(dev_key_cell.row, dev_key_cell.col, dev_key) 
+        
+    def signups(self):
+        # don't return the first entry--that's the header
+        return filter(lambda x: x and len(x.strip()), self.sheet.col_values(self.email_col)[1:])
+
+
+          
