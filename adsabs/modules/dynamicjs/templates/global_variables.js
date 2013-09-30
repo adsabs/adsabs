@@ -14,15 +14,9 @@ GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN = {{ config.EXPORT_DEFAULT_ROWS 
 GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY = '{{ url_for("export.get_bibcodes_from_query") }}';
 //Variable with the url of the view to export the bibcodes in other formats
 GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL = '{{ url_for("export.export_to_other_formats") }}';
-//Variable with the url of the view for the author network
-GlobalVariables.ADSABS2_AUTHOR_NETWORK = '{{ url_for("visualization.author_network") }}';
 
 GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citation_helper") }}';
 
 GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';
 
 GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/metrics/';
-
-GlobalVariables.ADSABS2_WORD_CLOUD = '{{ url_for("visualization.word_cloud") }}';
-
-GlobalVariables.ADSABS2_ALLADIN_LITE = '{{ url_for("visualization.alladin_lite") }}';

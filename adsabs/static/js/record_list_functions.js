@@ -1,6 +1,6 @@
 
 /**
- * Functions to manage the list of results
+ * module to manage the list of results
  */
 
 ResultListManager = new Object();
@@ -86,90 +86,22 @@ ResultListManager.export_records_in_other_format = function(format)
 	
 };
 
-
 /*
- * Function to visualize an author network for a list of papers or a query 
+ * load a visualization into fancybox
  */
-ResultListManager.view_author_network = function()
-{
+ResultListManager.visualize = function(url) {
+	
 	$.fancybox.showLoading();
 	//re-enable query parameters
 	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
 	//remove a hidden fields if exists
 	$('#search_results_form > input.ajaxHiddenField').remove();
 	
-	//if there are checked bibcodes
-	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-	{
-		//remove the query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-	}
-	
 	//submit the form via ajax
 	$.ajax({
 		type : "POST",
 		cache : false,
-		url : GlobalVariables.ADSABS2_AUTHOR_NETWORK,
-		data : $('#search_results_form').serializeArray(),
-		success: function(data) {
-			$.fancybox.hideLoading();
-			$.fancybox(data);
-		}
-	});
-};
-
-/*
- * Function to visualize word cloud of relevant terms
- */
-ResultListManager.view_word_cloud = function()
-{
-	$.fancybox.showLoading();
-	//re-enable query parameters
-	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenField').remove();
-
-	//if there are checked bibcodes
-	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-	{
-		//remove the query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-	}
-	
-	//submit the form via ajax
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : GlobalVariables.ADSABS2_WORD_CLOUD,
-		data : $('#search_results_form').serializeArray(),
-		success: function(data) {
-			$.fancybox.hideLoading();
-			$.fancybox(data);
-		}
-	});
-};
-
-
-ResultListManager.view_alladin_lite = function()
-{
-	$.fancybox.showLoading();
-	//re-enable query parameters
-	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenField').remove();
-
-	//if there are checked bibcodes
-	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-	{
-		//remove the query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-	}
-
-	//submit the form via ajax
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : GlobalVariables.ADSABS2_ALLADIN_LITE,
+		url : url,
 		data : $('#search_results_form').serializeArray(),
 		success: function(data) {
 			$.fancybox.hideLoading();
