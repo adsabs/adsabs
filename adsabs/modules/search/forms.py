@@ -45,7 +45,7 @@ class QueryForm(Form):
     year_to = IntegerField(u'Year To', [optional(), validators.NumberRange(min=1, max=2500, message='Ending year not valid')])
     article = BooleanField(u'Articles', description=u'Articles only')
     nr = SelectField(u'Number to view in page', [optional()], choices=[('', 'default results'), 
-                                                        ('20', '20 results'), ('50', '50 results'), ('50', '50 results'), ('100', '100 results'), 
+                                                        ('20', '20 results'), ('50', '50 results'), ('100', '100 results'), 
                                                         ('200', '200 results')] )
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
