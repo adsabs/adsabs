@@ -52,15 +52,11 @@ class CitationHarvester(Process):
             q = 'citations(bibcode:%s)' % bibcode
             fl= 'bibcode,property,reference'
             try:
-                if sys.platform == 'darwin':
-                    search_results = solr_req(config.SOLRQUERY_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
-                    result_field = 'response'
-                else:
-                    result_field = 'results'
+                result_field = 'results'
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                    search_results = resp.search_response()
+                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                search_results = resp.search_response()
                 # gather citations and put them into the results queue
                 citations = []
                 cits = []
@@ -103,15 +99,11 @@ class DataHarvester(Process):
             q = " OR ".join(map(lambda a: "bibcode:%s"%a, biblist))
             fl = 'bibcode,reference,author_norm,property,read_count'
             try:
-                if sys.platform == 'darwin':
-                    search_results = solr_req(config.SOLRQUERY_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
-                    result_field = 'response'
-                else:
-                    result_field = 'results'
+                result_field = 'results'
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                    search_results = resp.search_response()
+                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                search_results = resp.search_response()
                 # gather citations and put them into the results queue
                 self.result_queue.put(search_results[result_field]['docs'])
             except SolrCitationQueryError, e:
