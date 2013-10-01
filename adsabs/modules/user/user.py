@@ -553,8 +553,8 @@ def reset_user_password_step_one(form):
                                    }
         try:
             send_email_to_user(u"NASA ADS: confirmation required for login update", message_html, [form.login.data])
-        except:
-            app.logger.error('Failed to send reset email for user password.')
+        except Exception, e:
+            app.logger.error('Failed to send reset email for user password: %s' % e)
             return False, 'There are some technical problems: please try later.', 'error'
     return True, 'If the email you entered exists in our system, you will shortly receive a message at your e-mail address with further instructions on how to reset your password.', 'warning'
 

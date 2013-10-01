@@ -56,6 +56,8 @@ class AppConfig(object):
                          'max_age': 31356000
                          },  
                      }
+    USER_MIN_PASSWORD_LENGTH = 1
+    USER_MAX_PASSWORD_LENGTH = 100
     
     SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
     SOLRQUERY_TIMEOUT = 300
