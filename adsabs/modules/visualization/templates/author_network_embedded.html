@@ -1,15 +1,15 @@
 <!-- Code written by Alex Holachek -->
-<div class="authnet_body">
+<div class="vis_body">
 	<div class="container-fluid">
 		<div class="row-fluid">
 			<div class="span2" id="controlpanel"> 
 			
 				<div class="dropdown">
-					<a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+					<a class="btn dropdown-toggle vis_item_format btn-block" data-toggle="dropdown" href="#">
 					  What Is The Author Network?
 					   <span class="caret"></span>
 					</a>
-					<ul class="dropdown-menu authnet_ul authnet_explanation" style="text-indent: 10px;width:400px;" role="menu" aria-labelledby="dLabel" >
+					<ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
 				  		<li>This visualization uses a simulation of physical forces to
 				   			illustrate author networks within ADS search results. 
 				   			Author nodes repel one another while links between authors
@@ -27,11 +27,11 @@
 				</div> 
 			
 				<div class="dropdown">
-					<a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+					<a class="btn dropdown-toggle btn-block vis_item_format" data-toggle="dropdown" href="#">
 				  		How Do I Use It?
 				   		<span class="caret"></span>
 					</a>
-					<ul class="dropdown-menu authnet_ul authnet_explanation"  role="menu" style="width:400px" aria-labelledby="dLabel" >
+					<ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
 						<li><strong>Zoom</strong> in or out and pan to get a better look.</li>
 				    	<li> <strong>Filter</strong> ADS search results by selecting individual authors
 				    		and author clusters, then clicking on the 'filter search' button </li>
@@ -43,31 +43,34 @@
 				</div> 
 			
 				<div class="row-fluid">
-					<button type="button" class="btn authnet_button_format span6 btn-primary" id="staticmode">Static</button>
-					<button type="button" class="btn authnet_button_format span6" id="interactmode">Interactive</button> 
+					<button type="button" class="btn span6 vis_item_format vis_btn btn-primary" id="staticmode">Static</button>
+					<button type="button" class="btn span6 vis_item_format vis_btn " id="interactmode">Interactive</button> 
 				</div>
 			
 				<div class="row-fluid">
-					<button type="button" class="btn authnet_button_format span6 btn-primary" id="animatedmode" >Animate</button>
-					<button type="button" class="btn authnet_button_format span6" id="freezemode">Freeze</button>
+					<button type="button" class="btn span6 vis_item_format vis_btn btn-primary" id="animatedmode" >Animate</button>
+					<button type="button" class="btn span6 vis_item_format vis_btn " id="freezemode">Freeze</button>
 				</div>
 			
 				<div class="row-fluid">
-					<button type="button" class="btn authnet_button_format span6 btn-primary" id="singleauthor">Select Single</button> 
-					<button type="button" class="btn authnet_button_format span6" id="multiauthor">Select Group</button>
+					<button type="button" class="btn span6 vis_item_format vis_btn btn-primary " id="singleauthor">Select Single</button> 
+					<button type="button" class="btn span6 vis_item_format vis_btn " id="multiauthor">Select Group</button>
 				</div>
+
+
+			<div class="well well-small clearfix vis_item_format"><p>Search for an Author: 
+					</p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findauthor"> </input>
+					<button class ="btn pull-right btn-info vis_btn " id="searchsubmit" >Search</button>
+			</div>
 			
-				<div class="well well-small authnet_button_format ">
-					<p class="authnet_black"> Selected Authors: </p>
-				    <ul class="authnet_ul" id="list">
+				<div class="well well-small vis_item_format ">
+					<p> Selected Authors: </p>
+				    <ul class="vis_ul vis_select_list" id="list">
 				    	<li> Click on a name to add it to this list.</li>
 				    	<li> Click again on the name to remove it.</li>
 				    </ul>
+				    <button type="button" class="btn vis_item_format btn-block btn-info vis_btn" id="authorfacet" style="margin:20px 0 20px 0">Apply Filter To Search</button>
 				</div> 
-			  
-			<div class="well well-small clearfix authnet_button_format"><p class="authnet_black">Search for an Author: 
-							</p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findauthor"> </input><button class ="btn btn-info pull-right 
-							button-spacing" id="searchsubmit" >Search</button></div>
 			
 		</div>
 		
@@ -139,7 +142,7 @@
 			    var link=g.selectAll(".link")
 			          .data(json.links)
 			          .enter().append("line")
-			          .attr("class", "authnet_link")
+			          .attr("class", "vis_link")
 			          .style("stroke-width", function(d){
 			            return lineScale(d.value)
 			          });
@@ -232,11 +235,7 @@
 		            d3.select("#list")
 		              .append("li")
 		              .html(function(){
-		                    	if(selected.length>0)
-		                    	{
-		                    		return '<button type="button" class="btn btn-info button-spacing btn-block" id="authorfacet" style="font-weight:200;margin-top:10px">Apply Filter To Search</button>';
-		                    	}
-		                    	else
+		                    	if(selected.length==0)
 		                      	{
 		                    		return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>';
 		                    	}
@@ -249,8 +248,7 @@
 		            		.data(json.nodes)
 		            		.enter()
 		            		.append("text")
-		            		.attr("class", "authnet_node")
-		            		.classed("authnet_svgtext", true)
+		            		.classed("vis_node vis_hover_pointer vis_svgtext", true )
 		            		.each(function(d){
 		              			d.select=false;
 		            		})

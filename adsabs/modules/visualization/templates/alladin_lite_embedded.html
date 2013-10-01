@@ -11,18 +11,18 @@
 </style>
 
 <link rel="stylesheet" href="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.css" />
-<div class="authnet_body">
+<div class="vis_body">
 	<div class="container-fluid">
 		<div class="row-fluid">
 
 			<div class="span2" id="controlpanel"> 
 
                 <div class="dropdown">
-                    <a class="btn dropdown-toggle authnet_button_format btn-block" data-toggle="dropdown" href="#">
+                    <a class="btn dropdown-toggle btn-block vis_item_format" data-toggle="dropdown" href="#">
                       What Is The Object Skymap?
                        <span class="caret"></span>
                     </a>
-                    <ul class="dropdown-menu authnet_ul" style="text-indent: 10px;width:400px;" role="menu" aria-labelledby="dLabel" >
+                    <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
                         <li>This visualization utilizes CDS's excellent Alladin Lite web based sky visualization to
                             show the objects associated with a set of papers. The objects are color coded by their type.
                         </li>
@@ -37,12 +37,12 @@
                     </ul>
                 </div>
 
-                <button type="button" class="btn btn-info button-spacing btn-block" id="selectBtn" style="font-weight:200;margin-top:10px">Make a selection</button>
+                <button type="button" class="btn vis_item_format btn-info btn-block vis_btn" id="selectBtn">Make a selection</button>
                 
-				<button type="button" class="btn btn-info button-spacing btn-block" id="dofacet" style="display:none; font-weight:200;margin-top:10px">Filter Search By Selection</button>
-                <div class="well well-small">
+				<button type="button" class="btn vis_item_format btn-info btn-block vis_btn" id="dofacet" style="display:none;">Filter Search By Selection</button>
+                <div class="well well-small vis_item_format">
                     <p>Objects in search:</p>
-                    <p id="object_list" style="overflow: scroll;  height: 340px">
+                    <p id="object_list" class="vis_select_list">
 
                     </p>
                 </div> 	

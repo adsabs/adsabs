@@ -2,14 +2,14 @@
 <div class="wordcloud_body">
   <div class="container-fluid">
     <div class="row-fluid">
-      <div class="span2" id="wordcloud_controlpanel">
+      <div class="span2" id="wordcloud_controlpanel" style="margin-top:5%">
 
         <div class="dropdown">
-          <a class="btn dropdown-toggle wordcloud_button_format btn-block" data-toggle="dropdown" href="#">
+          <a class="btn dropdown-toggle vis_item_format btn-block" data-toggle="dropdown" href="#">
             What is the Word Cloud?
              <span class="caret"></span>
           </a>
-          <ul class="dropdown-menu wordcloud_ul wordcloud_explanation" role="menu" aria-labelledby="dLabel" >
+          <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
               <li>This visualization shows you interesting terms from the abstracts of papers yielded by your ADS search.
                   If a term appears repeatedly in your search results, but rarely in the rest of ADS,
                   it is considered particularly relevant and is more likely to appear here. <br/> <br/>You might
@@ -20,13 +20,13 @@
           </ul>
         </div> 
 
-
-        <div class="well well-small wordcloud_button_format ">
-           <p class="wordcloud_black"> Selected Terms: </p>
-            <ul class="wordcloud_ul" id="list">
+        <div class="well well-small vis_item_format ">
+           <p> Selected Terms: </p>
+            <ul class="vis_ul vis_select_list" id="list">
               <li> Click on a term to add it to this list.</li>
               <li> Click again on the term to remove it.</li>
             </ul>
+            <button type="button" class="btn btn-info btn-block vis_btn" id="authorfacet" style=style="margin:20px 0px 20px 0px">Apply Filter to Search</button>
         </div> 
       </div>
 
@@ -69,7 +69,7 @@
                       .domain([min, max]).range([width/70, width/15]);
 
           var glowScale=d3.scale.log()
-                      .domain([min, max]).range([2,4.5]);
+                      .domain([min, max]).range([1.5,4]);
 
 
           var words=function ()
@@ -108,7 +108,7 @@
                 .data(words)
                 .enter()
                 .append("text")
-                .classed("wordcloud_text", true)
+                .classed("wordcloud_text vis_hover_pointer", true)
                 .style("font-size", function(d) {return d.size + "px"; })
                 .style("fill", function(d, i) {return fill(d.origSize);})
                 .attr("text-anchor", "middle")
@@ -162,11 +162,8 @@
                               .append("li")
                               .html(function()
                                   {
-                                    if (selected.length>0)
-                                      {
-                                        return '<button type="button" class="btn btn-info button-spacing btn-block" id="authorfacet" style="font-weight:200;margin-top:10px">Apply Filter to Search</button>'
-                                      }
-                                    else
+                                    if (selected.length==0)
+
                                       {
                                         return '<li> Click on a term to add it to this list.</li> <li> Click again on the term to remove it.</li>'
                                       }
