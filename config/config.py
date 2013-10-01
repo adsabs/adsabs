@@ -56,6 +56,8 @@ class AppConfig(object):
                          'max_age': 31356000
                          },  
                      }
+    USER_MIN_PASSWORD_LENGTH = 1
+    USER_MAX_PASSWORD_LENGTH = 100
     
     SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
     SOLRQUERY_TIMEOUT = 300
@@ -129,9 +131,13 @@ class AppConfig(object):
     
     SOLR_MLT_FIELDS = ["abstract","title"]
     SOLR_MLT_PARAMS = [
-            ('boost', 'true'),
-            ('mlt.interestingTerms', 'list'),
-            ('mlt.match.include','true')
+            ('mlt.boost', 'true'),
+            ('mlt.interestingTerms', 'details'),
+            ('mlt.mintf',1),
+            ('mlt.mindf',20),
+            ('mlt.minwl',2),
+            ('mlt.maxwl',40),
+            ('mlt.maxqt',20)
         ]
     #dictionary of how the facets are mapped by default to the query or filter_query fields for the actual query to the solr
     #added also a default function to use
@@ -215,7 +221,9 @@ class AppConfig(object):
     #sendmail configuration
     SMTP_HOST = 'localhost'
     API_WELCOME_FROM_EMAIL = 'jluker@cfa.harvard.edu'
-    
+    API_SIGNUP_SPREADSHEET_KEY = None
+    API_SIGNUP_SPREADSHEET_LOGIN = None    
+
     #flask-mail configuration
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 25
