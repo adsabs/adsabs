@@ -495,11 +495,10 @@ div.absview div.row-fluid label {
 .vis_body {
   font-family: Helvetica, Arial, Sans-serif;
   background-color: #f9f9f9;
-  font-size:14px;
-  color:  #4C4C4C;
-  font-weight: 300;
+  font-size:13px;
+  color:  black;
+  font-weight: 200;
   margin: 0;
-  margin-top:2%;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -511,52 +510,49 @@ div.absview div.row-fluid label {
 .vis_explanation{
   width:400px;
   padding:25px;
-    }
+  background-color: #f9f9f9;
+ }
 
-  
+
 .vis_svgtext {
 	fill: #00006B;
 	font-weight: 400;
-    }
+ }
 
-.vis_button_format {
-  margin-top:30px;
- font-weight:200;
-  font-size: 13px;
-    }
+.vis_item_format {
+  margin-top:20px;
+  }
 
 .vis_btn{
   padding:2px;
   font-size: 12px;
-    }
+ }
 
 .vis_link {
 	stroke: gray;
 	stroke-opacity:.15;
-    }
+}
 
 .vis_ul {
-  padding:0;
+  padding:15px;
   margin-left: 0;
   list-style-type:none;
-    }
+}
 
 .vis_ul li {
   text-align: left;
   padding-left: 3px;
   padding-right:2px;
   font-size:13px;
-    }
-
-.vis_black {
-  color:black;
-  font-size: 14px;
-    }
+}
 
 .vis_hover_pointer:hover{
   cursor: pointer;
   cursor: hand;
  }
+
+ .vis_select_list{
+ 	overflow:auto;
+ 	height:250px;
+ }
  
- .vis_muted_button {
- background-color:#85ADFF;
