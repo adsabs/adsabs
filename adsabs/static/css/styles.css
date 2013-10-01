@@ -526,6 +526,7 @@ div.absview div.row-fluid label {
 .vis_btn{
   padding:2px;
   font-size: 12px;
+  font-weight:200;
  }
 
 .vis_link {
