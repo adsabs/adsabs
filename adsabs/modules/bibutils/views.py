@@ -116,7 +116,6 @@ def metrics(**args):
             response.status_code = 200
             xls_str = xls_file.read()
             xls_file.close()
-            os.remove(export_file)
             response.data = xls_str
             response_headers = Headers({
             'Pragma': "public",  # required,
