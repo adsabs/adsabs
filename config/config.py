@@ -11,6 +11,7 @@ class AppConfig(object):
     TESTING = False
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
+    PRINT_DEBUG_TEMPLATE_PARAM = None
     
     APP_VERSION = '2013_09_26_v1'
     
