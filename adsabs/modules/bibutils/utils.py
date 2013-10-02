@@ -24,6 +24,13 @@ from .errors import MongoQueryError
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
 
+def chunks(l, n):
+    """ 
+    Yield successive n-sized chunks from l.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
 def solr_req(url, **kwargs):
     kwargs['wt'] = 'json'
     query_params = urllib.urlencode(kwargs)
@@ -403,20 +410,24 @@ def get_references(**args):
     papers= []
     # This information can be retrieved with one single Solr query
     # (just an 'OR' query of a list of bibcodes)
-    q = " OR ".join(map(lambda a: "bibcode:%s"%a, args['bibcodes']))
-    try:
-        # Get the information from Solr
-        # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
-        # referenced by the paper at hand)
-        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
-    except SolrReferenceQueryError, e:
-        app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
-        raise
-    # Collect all bibcodes in a list (do NOT remove multiplicity)
-    search_results = resp.search_response()
-    for doc in search_results['results']['docs']:
-        if 'reference' in doc:
-            papers += doc['reference']
+    # To restrict the size of the query URL, we split the list of
+    # bibcodes up in a list of smaller lists
+    biblists = list(chunks(args['bibcodes'], config.METRICS_CHUNK_SIZE))
+    for biblist in biblists:
+        q = " OR ".join(map(lambda a: "bibcode:%s"%a, biblist))
+        try:
+            # Get the information from Solr
+            # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
+            # referenced by the paper at hand)
+            resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
+        except SolrReferenceQueryError, e:
+            app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
+            raise
+        # Collect all bibcodes in a list (do NOT remove multiplicity)
+        search_results = resp.search_response()
+        for doc in search_results['results']['docs']:
+            if 'reference' in doc:
+                papers += doc['reference']
     return papers
 
 def get_publications_from_query(q):
