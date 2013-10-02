@@ -7,11 +7,14 @@ Created on Jul 16, 2013
 # general module imports
 import sys
 import os
+import time
 import operator
+import glob
 from itertools import groupby
 from multiprocessing import Process, Queue, cpu_count
-import urllib
-import requests
+import xlwt
+import uuid
+import simplejson
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
 from flask.ext.adsdata import adsdata #@UnresolvedImport
@@ -23,19 +26,6 @@ from .errors import SolrMetaDataQueryError
 from .errors import MongoQueryError
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
-
-def chunks(l, n):
-    """ 
-    Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
-
-def solr_req(url, **kwargs):
-    kwargs['wt'] = 'json'
-    query_params = urllib.urlencode(kwargs)
-    r = requests.get(url, params=query_params)
-    return r.json()
 
 class CitationHarvester(Process):
     """
@@ -441,4 +431,209 @@ def get_publications_from_query(q):
 def get_bibcodes_from_private_library(id):
     sys.stderr.write('Private libraries are not yet implemented')
     return []
-    
+
+def legacy_format(data):
+    entry_mapping = {0:0, 1:2, 2:3, 3:1, 4:4, 5:6, 6:7, 7:5}
+    citation_histogram = {}
+    for (year,values) in data['citation histogram'].items():
+        entries = values.split(':') 
+        new_entries = [entries[entry_mapping[i]] for i in range(len(entries))]
+        citation_histogram[year] = ":".join(new_entries)
+    return data['all stats'],data['refereed stats'],data['all reads'],data['refereed reads'],data['paper histogram'],data['reads histogram'],citation_histogram,data['metrics series']
+
+def export_metrics(data):
+    stats = legacy_format(data)
+    Total = stats[0]
+    Refereed = stats[1]
+    totalReads = stats[2]
+    refereedReads = stats[3]
+    paperhist = stats[4]
+    readshist = stats[5]
+    citshist = stats[6]
+    series = stats[7]
+
+    papers_table = (('Number of papers', (Total, Refereed)), ('Normalized paper count', (Total, Refereed)), ('Total number of reads', (totalReads, refereedReads)), 
+                  ('Average number of reads', (totalReads, refereedReads)), ('Median number of reads', (totalReads, refereedReads)), 
+                  ('Total number of downloads', (totalReads, refereedReads)), ('Average number of downloads', (totalReads, refereedReads)), 
+                  ('Median number of downloads', (totalReads, refereedReads)))
+    citation_table = (('Number of citing papers', (Total, Refereed)), ('Total citations', (Total, Refereed)), ('Average citations', (Total, Refereed)), 
+                      ('Median citations', (Total, Refereed)), ('Normalized citations', (Total, Refereed)), ('Refereed citations', (Total, Refereed)), 
+                      ('Average refereed citations', (Total, Refereed)), ('Median refereed citations', (Total, Refereed)), ('Normalized refereed citations', (Total, Refereed)))
+    indices_table = (('H-index', (Total, Refereed)), ('g-index', (Total, Refereed)), ('e-index', (Total, Refereed)), 
+                     ('i10-index', (Total, Refereed)), ('tori index', (Total, Refereed)), ('roq index', (Total, Refereed)), ('m-index', (Total, Refereed)))
+    ############
+    #generation of an excel file
+    wbk = xlwt.Workbook(encoding='UTF-8')
+    #style to have bold
+    fnt = xlwt.Font()
+    fnt.bold = True
+    fnt.height = 250 #the font size
+    style = xlwt.XFStyle()
+    style.font = fnt
+    #Writing the page with the tables of statistics
+    sheet = wbk.add_sheet('Papers, citations, indices')
+    #counter of rows
+    row = 0
+    sheet.write(row, 0, 'Papers', style)
+    row += 1
+    sheet.write(row, 1, 'Total')
+    sheet.write(row, 2, 'Refereed')
+    row += 1
+    for elem in papers_table:
+        #I write the line
+        sheet.write(row, 0, elem[0])
+        sheet.write(row, 1, elem[1][0][elem[0]])
+        sheet.write(row, 2, elem[1][1][elem[0]])
+        row+=1
+    row += 1
+    sheet.write(row, 0, 'Citations', style)
+    row += 1
+    sheet.write(row, 1, 'Total')
+    sheet.write(row, 2, 'Refereed')
+    row += 1
+    for elem in citation_table:
+        #I write the line
+        sheet.write(row, 0, elem[0])
+        sheet.write(row, 1, elem[1][0][elem[0]])
+        sheet.write(row, 2, elem[1][1][elem[0]])
+        row+=1
+    row += 1
+    sheet.write(row, 0, 'Indices', style)
+    row += 1
+    sheet.write(row, 1, 'Total')
+    sheet.write(row, 2, 'Refereed')
+    row += 1
+    for elem in indices_table:
+        #I write the line
+        sheet.write(row, 0, elem[0])
+        sheet.write(row, 1, elem[1][0][elem[0]])
+        sheet.write(row, 2, elem[1][1][elem[0]])
+        row+=1
+    #Writing the page with the data for the plot #1
+    sheet = wbk.add_sheet('Publications per year')
+    #I delete useless keys in the dictionary
+    del paperhist['type']
+    row = 0
+    #I write the name of the data 
+    sheet.write(row, 0, 'Publications per year', style)
+    row += 1
+    #I write the labels on the first row
+    sheet.write(row, 0, 'Year')
+    sheet.write(row, 1, 'Refereed')
+    sheet.write(row, 2, 'Non Refereed')
+    sheet.write(row, 3, 'Normalized Refereed')
+    sheet.write(row, 4, 'Normalized Non Refereed')
+    row += 1
+    years = paperhist.keys()
+    years.sort()
+    for year in years:
+        sheet.write(row, 0, year)
+        datan = paperhist[year].split(':')
+        sheet.write(row, 1, float(datan[1]))
+        sheet.write(row, 2, float(datan[0]) - float(datan[1]))
+        sheet.write(row, 3, float(datan[3]))
+        sheet.write(row, 4, float(datan[2]) - float(datan[3]))
+        row += 1
+    #Writing the page with the data for the plot #2
+    sheet = wbk.add_sheet('Reads per year')
+    #I delete useless keys in the dictionary
+    del readshist['type']
+    row = 0
+    #I write the name of the data 
+    sheet.write(row, 0, 'Reads per year', style)
+    row += 1
+    #I write the labels on the first row
+    sheet.write(row, 0, 'Year')
+    sheet.write(row, 1, 'Refereed')
+    sheet.write(row, 2, 'Non Refereed')
+    sheet.write(row, 3, 'Normalized Refereed')
+    sheet.write(row, 4, 'Normalized Non Refereed')
+    row += 1
+    years = readshist.keys()
+    years.sort()
+    for year in years:
+        sheet.write(row, 0, year)
+        datan = readshist[year].split(':')
+        sheet.write(row, 1, float(datan[1]))
+        sheet.write(row, 2, float(datan[0]) - float(datan[1]))
+        sheet.write(row, 3, float(datan[3]))
+        sheet.write(row, 4, float(datan[2]) - float(datan[3]))
+        row += 1
+    #Writing the page with the data for the plot #3
+    sheet = wbk.add_sheet('Citations per year')
+    del citshist['type']
+    row = 0
+    #I write the name of the data 
+    sheet.write(row, 0, 'Citations per year', style)
+    row += 1
+    #I write the labels on the first row
+    sheet.write(row, 0, 'Year')
+    sheet.write(row, 1, 'Ref. citations to ref. papers')
+    sheet.write(row, 2, 'Ref. citations to non ref. papers')
+    sheet.write(row, 3, 'Non ref. citations to ref. papers')
+    sheet.write(row, 4, 'Non ref. citations to non ref. papers')
+    sheet.write(row, 5, 'Normalized Ref. citations to ref. papers')
+    sheet.write(row, 6, 'Normalized Ref. citations to non ref. papers')
+    sheet.write(row, 7, 'Normalized Non ref. citations to ref. papers')
+    sheet.write(row, 8, 'Normalized Non ref. citations to non ref. papers')
+    row += 1
+    years = citshist.keys()
+    years.sort()
+    for year in years:
+        sheet.write(row, 0, year)
+        datan = citshist[year].split(':')
+        # extract the two groups of data
+        from_all_to_all, from_all_to_ref, from_ref_to_ref, from_ref_to_all = float(datan[0]), float(datan[1]), float(datan[2]), float(datan[3])
+        norm_from_all_to_all, norm_from_all_to_ref, norm_from_ref_to_ref, norm_from_ref_to_all = float(datan[4]), float(datan[5]), float(datan[6]), float(datan[7])
+        # compute the missing for the normal
+        from_all_to_notref = from_all_to_all - from_all_to_ref
+        from_ref_to_notref = from_ref_to_all - from_ref_to_ref
+        from_notref_to_ref = from_all_to_ref - from_ref_to_ref
+        from_notref_to_notref = from_all_to_notref - from_ref_to_notref
+        # and then for the normalized
+        norm_from_all_to_notref = norm_from_all_to_all - norm_from_all_to_ref
+        norm_from_ref_to_notref = norm_from_ref_to_all - norm_from_ref_to_ref
+        norm_from_notref_to_ref = norm_from_all_to_ref - norm_from_ref_to_ref
+        norm_from_notref_to_notref = norm_from_all_to_notref - norm_from_ref_to_notref
+        sheet.write(row, 1, from_ref_to_ref)
+        sheet.write(row, 2, from_ref_to_notref)
+        sheet.write(row, 3, from_notref_to_ref)
+        sheet.write(row, 4, from_notref_to_notref)
+        sheet.write(row, 5, norm_from_ref_to_ref)
+        sheet.write(row, 6, norm_from_ref_to_notref)
+        sheet.write(row, 7, norm_from_notref_to_ref)
+        sheet.write(row, 8, norm_from_notref_to_notref)
+        row += 1
+    # Writing the page with the data for the plot #4
+    sheet = wbk.add_sheet('Indices')
+    del series['type']
+    row = 0
+    # Write the name of the data 
+    sheet.write(row, 0, 'Indices', style)
+    row += 1
+    # Write the labels on the first row
+    sheet.write(row, 0, 'Year')
+    sheet.write(row, 1, 'h-index')
+    sheet.write(row, 2, 'g-index')
+    sheet.write(row, 3, 'i10-index')
+    sheet.write(row, 4, 'tori-index')
+    row += 1
+    years = series.keys()
+    years.sort()
+    for year in years:
+        sheet.write(row, 0, str(year))
+        datan = series[year].split(':')
+        sheet.write(row, 1, float(datan[0]))
+        sheet.write(row, 2, float(datan[1]))
+        sheet.write(row, 3, float(datan[2]))
+        sheet.write(row, 4, float(datan[3]))
+        row += 1
+    # Save the spreadsheet to a temporary file
+    filename = config.METRICS_TMP_DIR + '/Metrics' + str(uuid.uuid4())
+    wbk.save(filename)
+    # Remove all temporary files older than 2 hours
+    now = time.time()
+    stale_tmp_files = filter(lambda f: now-os.stat(f).st_mtime > 7200, glob.glob("%s/Metrics*"%config.METRICS_TMP_DIR))
+    for entry in stale_tmp_files:
+        os.remove(entry)
+    return os.path.basename(filename)
