@@ -141,7 +141,7 @@
 	</div>
 </div><!-- Footer -->
 
-{% if config.PRINT_DEBUG_TEMPLATE %}
+{% if config.PRINT_DEBUG_TEMPLATE or request.values.get(config.PRINT_DEBUG_TEMPLATE_PARAM, False) %}
 	<div id="debugSection">
 		DEBUG ON <br/>
 		{% block debugSection %}{% endblock %}
