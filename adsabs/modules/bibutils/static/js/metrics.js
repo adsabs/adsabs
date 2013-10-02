@@ -783,6 +783,11 @@ function size_plot_series(size)
 //function that shows the tooltip for the graph
 function showTooltip(x, y, contents) 
 {
+    if ($("#content").length > 0) {
+        TARGET = "#content";
+    } else {
+        TARGET = "body";
+    }
     $('<div id="tooltip">' + contents + '</div>').css( {
         position: 'absolute',
         display: 'none',
@@ -794,7 +799,7 @@ function showTooltip(x, y, contents)
         opacity: 0.90,
         'font-size':'0.9em',
         'font-weight':'bold',
-    }).appendTo("body").fadeIn(200);
+    }).appendTo(TARGET).fadeIn(200);
 }
 
 

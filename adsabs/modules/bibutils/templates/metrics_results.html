@@ -427,8 +427,8 @@
 				</div>
 				<div id="paperhist_legend" class="plot_legend"></div>
 				<div id="paperhist_buttons" class="plot_buttons">
-					View as <select onchange="show_plot_paperhist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-					Size <select onchange="size_plot_paperhist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+					View as <select onchange="show_plot_paperhist(this.value);" class="input-small"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+					Size <select onchange="size_plot_paperhist(this.value);" class="input-small"><option value="1">Default</option><option value="2">Large</option></select>
 				</div>
 			</div>
 		{% endif %}
@@ -449,8 +449,8 @@
 			</div>
 			<div id="readshist_legend" class="plot_legend"></div>
 			<div id="readshist_buttons" class="plot_buttons">
-				View as <select onchange="show_plot_readshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-				Size <select onchange="size_plot_readshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+				View as <select onchange="show_plot_readshist(this.value);" class="input-small"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+				Size <select onchange="size_plot_readshist(this.value);" class="input-small"><option value="1">Default</option><option value="2">Large</option></select>
 			</div>
 		</div>
 		<div id="citshist_wrap" class="wrapper plot_wrapper 
@@ -475,8 +475,8 @@
 			
 			<div id="citshist_legend" class="plot_legend"></div>
 			<div id="citshist_buttons" class="plot_buttons">
-				View as <select onchange="show_plot_citshist(this.value);"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
-				Size <select onchange="size_plot_citshist(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+				View as <select onchange="show_plot_citshist(this.value);" class="input-small"><option value="hist">Histogram</option><option value="points">Points</option><option value="lines">Lines</option></select>
+				Size <select onchange="size_plot_citshist(this.value);" class="input-small"><option value="1">Default</option><option value="2">Large</option></select>
 			</div>
 		</div>
 		{% if results['mode'] == 'normal' %}
@@ -493,8 +493,8 @@
 				</div>
 				<div id="series_legend" class="plot_legend"></div>
 				<div id="series_buttons" class="plot_buttons">
-					View as <select onchange="show_plot_series(this.value);"><option value="points">Points</option><option value="lines">Lines</option></select>
-					Size <select onchange="size_plot_series(this.value);"><option value="1">Default</option><option value="2">Large</option></select>
+					View as <select onchange="show_plot_series(this.value);" class="input-small"><option value="points">Points</option><option value="lines">Lines</option></select>
+					Size <select onchange="size_plot_series(this.value);" class="input-small"><option value="1">Default</option><option value="2">Large</option></select>
 				</div>
 			</div>
 		{% endif %}
