@@ -148,7 +148,6 @@ def get_attributes(args):
     """
     Gather all data necessary for metrics calculations
     """
-    solr_url = config.SOLRQUERY_URL
     max_hits = config.METRICS_MAX_HITS
     threads  = config.METRICS_THREADS
     chunk_size = config.METRICS_CHUNK_SIZE
