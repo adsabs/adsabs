@@ -33,3 +33,6 @@ cache = Cache()
 
 from flask.ext.solrquery import FlaskSolrQuery #@UnresolvedImport
 solr = FlaskSolrQuery()
+
+from flask.ext.adsdata import FlaskAdsdata #@UnresolvedImport
+adsdata = FlaskAdsdata()

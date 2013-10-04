@@ -14,7 +14,7 @@ import urllib
 import requests
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
-import adsdata
+from flask.ext.adsdata import adsdata #@UnresolvedImport
 # local imports
 from config import config
 from .errors import SolrCitationQueryError
@@ -126,14 +126,13 @@ class MongoHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def run(self):
         while True:
             bibcode = self.task_queue.get()
             if bibcode is None:
                 break
             try:
-                doc = self.session.get_doc(bibcode)
+                doc = adsdata.get_doc(bibcode)
                 self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
@@ -148,16 +147,15 @@ class MongoCitationHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def _get_references_number(self,bbc):
-        collection = self.session.get_collection('references')
+        collection = adsdata.get_collection('references')
         res = collection.find_one({'_id': bbc})
         Nrefs = 0
         if res:
             Nrefs = len(res.get('references',[]))
         return Nrefs
     def _is_refereed(self,bbc):
-        collection = self.session.get_collection('refereed')
+        collection = adsdata.get_collection('refereed')
         res = collection.find_one({'_id': bbc})
         if res:
             return True
@@ -175,7 +173,7 @@ class MongoCitationHarvester(Process):
                 bibcode = bbc
             try:
                 pubyear = int(bibcode[:4])
-                cit_collection = self.session.get_collection('citations')
+                cit_collection = adsdata.get_collection('citations')
                 res1 = cit_collection.find_one({'_id': bibcode})
                 if res1:
                     citations = res1.get('citations',[])
@@ -200,7 +198,6 @@ class MongoCitationListHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def run(self):
         while True:
             bibcode = self.task_queue.get()
@@ -208,7 +205,7 @@ class MongoCitationListHarvester(Process):
                 break
             try:
                 pubyear = int(bibcode[:4])
-                cit_collection = self.session.get_collection('citations')
+                cit_collection = adsdata.get_collection('citations')
                 res1 = cit_collection.find_one({'_id': bibcode})
                 if res1:
                     citations = res1.get('citations',[])
