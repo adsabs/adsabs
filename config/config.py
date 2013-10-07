@@ -261,7 +261,7 @@ class AppConfig(object):
     BIBUTILS_THRESHOLD_FREQUENCY = 1
     BIBUTILS_DEFAULT_SUGGESTIONS = 10
     BIBUTILS_DEFAULT_FORMAT = 'score'
-    BIBUTILS_CITATION_SOURCE = 'SOLR'
+    BIBUTILS_CITATION_SOURCE = 'MONGO'
     # configuration parameters for the metrics module
     METRICS_DEFAULT_MODELS = ['statistics','histograms','metrics','series']
     METRICS_THREADS = 8
