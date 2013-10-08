@@ -69,7 +69,9 @@
 				{% endfor %}
 				</div>
 			</form>
-			{{ render_pagination(resp.get_pagination()) }}
+			{% if resp.get_hits() > 0 %}
+				{{ render_pagination(resp.get_pagination()) }}
+			{% endif %}
 		</div>
 	</div>
 </div>
