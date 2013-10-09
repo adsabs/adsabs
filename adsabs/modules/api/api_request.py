@@ -33,9 +33,14 @@ class ApiSearchRequest(object):
         
         if self.form.fl.data:
             fields = list(set(self.form.fl.data.split(',') + config.SOLR_SEARCH_REQUIRED_FIELDS))
-            req.set_fields(fields)
         else:
-            req.set_fields(self.user.get_allowed_fields())
+            fields = self.user.get_allowed_fields()
+
+        # TODO: this is a short term hack
+        if '[citations]' in fields:
+            fields.remove('[citations]')
+
+        req.set_fields(fields)
             
         if self.form.rows.data:
             req.set_rows(self.form.rows.data)

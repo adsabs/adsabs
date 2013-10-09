@@ -97,17 +97,8 @@ class AppConfig(object):
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     WORD_CLOUD_DEFAULT_FIRST_RESULTS = 200
     
-#    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-#                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
-#    
-#    SEARCH_DEFAULT_SOLR_FACETS = [
-#        ('bibstem_facet', 100, 1),
-#        ('author_facet',1000, 1), 
-
-#    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader']
-    SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
+                                  'pubdate','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader', '[citations]']
     
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year"
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all year"
@@ -206,7 +197,7 @@ class AppConfig(object):
     API_SOLR_DEFAULT_SORT = [('pubdate_sort','desc'),('bibcode','desc')]
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
-                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate']
+                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]']
     API_SOLR_EXTRA_FIELDS = ['full','references','ack','score']
     API_SOLR_HIGHLIGHT_FIELDS = ['title','abstract','full','ack']
     

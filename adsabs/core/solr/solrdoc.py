@@ -49,21 +49,31 @@ class SolrDocument(object):
     
     def has_references(self):
         """Checks if references are present and returns a boolean"""
-        return self.reference and True or False
+        if '[citations]' in self.data and 'num_references' in self.data['[citations]'] and \
+            self.data['[citations]']['num_references'] > 0:
+            return True
+        return False
     
     def get_references_count(self):
         """Returns the number of references"""
-        return self.reference and len(self.reference) or 0
+        if self.has_references():
+            return self.data['[citations]']['num_references']
+        return 0
     
     def has_citations(self):
         """Checks if citations are present and returns a boolean"""
-        return self.citation_count and True or False
+        if '[citations]' in self.data and 'num_citations' in self.data['[citations]'] and \
+            self.data['[citations]']['num_citations'] > 0:
+            return True
+        return False
         
     def get_citation_count(self):
         """Returns the number of citations
            Now it is useless, but if we change the way we compute the citations this method can be pretty useful
         """
-        return self.citation_count or 0
+        if self.has_references():
+            return self.data['[citations]']['num_citations']
+        return 0
     
     def has_toc(self):
         """Checks if abstract has a Table of contents"""
