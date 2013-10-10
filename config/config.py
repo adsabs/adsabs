@@ -94,7 +94,7 @@ class AppConfig(object):
 
     EXPORT_DEFAULT_ROWS = 300
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
-    WORD_CLOUD_DEFAULT_FIRST_RESULTS = 200
+    WORD_CLOUD_DEFAULT_FIRST_RESULTS = 1000
     
 #    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
 #                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']

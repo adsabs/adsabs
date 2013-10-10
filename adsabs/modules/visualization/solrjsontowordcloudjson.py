@@ -1,44 +1,142 @@
+    # -*- coding: UTF-8 -*- #
 from __future__ import division
 import re
-import json
-import copy
-
-#title will be added later
 
 
+##here are the variables that you can change to affect the words that appear in the word cloud
+#how much to bump up acronyms
+ACRONYM_WEIGHT=1
+SYNONYM_WEIGHT=.75
+TITLE_WEIGHT=None
+#only count an abstract if it appears in a certain ratio of abstracts
+#right now it's at 5%
+MIN_ABSTRACT_APPEARANCE=.05
+#tokens can be no shorter than this
+MIN_LEN_TOKEN=2
+#might want to penalize words for having dashes, since they will have higher idf
+ONE_DASH_PENALTY_WEIGHT=.75
+TWO_DASH_PENALTY_WEIGHT=.75
+#max # of times to count a word that appears in a single abstract
+INDIVIDUAL_ABSTRACT_LIMIT=3
 
 def list_to_dict(l):
     """
     takes awkward list of list data structure returned in solr json and dictifies it
     """
     d={}
-    try:
-        for index, item in enumerate(l[::2]):
-            key=item
-            value=l[index*2+1]
-            if isinstance(value, list) and value!=[]:
-                d[key]=list_to_dict(value)
-            else:
-                if key in d:
-                    d[key].append(value)
-                else:
-                    d[key]=[value]
-    except Exception:
-        pass
+    for index, item in enumerate(l[::2]):
+        key=item
+        value=l[index*2+1]
+        if isinstance(value, list) and value!=[]:
+            d[key]=list_to_dict(value)
+        else:
+            d.setdefault(key, []).append(value)
     return d
+
+def refine_json(terminfodict):
+    """
+    takes json, returns less json
+    by culling tokens that appear fewer than MIN_ABSTRACT_APPEARANCE
+    """
+    abstract_prevalence={}
+    total_num_abstracts=len(terminfodict)
+
+    for t in terminfodict.keys():
+        if 'abstract' not in terminfodict[t]:
+            del terminfodict[t]
+
+    for t in terminfodict:
+        #building a dictionary of word frequencies on a per-abstract basis
+        for wordkey in terminfodict[t]['abstract']:
+            abstract_prevalence[wordkey]=abstract_prevalence.get(wordkey, 0)+1
+
+    for t in terminfodict.keys():
+        for wordkey in terminfodict[t]['abstract'].keys():
+                if abstract_prevalence[wordkey]/total_num_abstracts<=MIN_ABSTRACT_APPEARANCE:
+                    del terminfodict[t]['abstract'][wordkey]
+                else:
+                    #remove position data because we never use it
+                    del terminfodict[t]['abstract'][wordkey]['positions']
+    return terminfodict
+
+def reduce_tf_for_duplicate(rec1, rec2, terminfodict, a):
+    rec1_offsets = terminfodict[a]['abstract'][rec1]['offsets']
+    rec2_offsets = terminfodict[a]['abstract'][rec2]['offsets']
+    for o in rec2_offsets['start']:
+        if o in rec1_offsets['start']:
+            #catching the first time a word is altered in its tf to find
+            #the idf, which we will use later
+            if 'idf' not in terminfodict[a]['abstract'][rec2]:
+                tf_idf=terminfodict[a]['abstract'][rec2]['tf-idf'][0]
+                tf=terminfodict[a]['abstract'][rec2]['tf'][0]
+                terminfodict[a]['abstract'][rec2]['idf']=[tf_idf/tf]
+       
+  
+
+def find_concatenated_word_instance(wordkey, wordkey1, terminfodict, start_offsets, end_offsets, a):
+    #we know wordkey1 itself fits into wordkey. Now we have to look to see if any set of offsets for wordkey1 
+    #fit into wordkey. If so, how many? We need to reduce tf for wordkey1 by that amount, and completely reduce
+    #wordkey's tf to 0. So for a word like  "non", which presumably only ever appears as a component word, tf
+    #should always reach 0
+    entries=[]
+    for index1, s in enumerate(start_offsets):
+        for index2, entry in enumerate(terminfodict[a]['abstract'][wordkey1]['offsets']['start']):
+            if entry>=s and terminfodict[a]['abstract'][wordkey1]['offsets']['end'][index2]<=end_offsets[index1]:            
+                #these are the start and end indexes of one instance of component word
+                indexes=[entry,terminfodict[a]['abstract'][wordkey1]['offsets']['end'][index2]]
+                entries.append(indexes)
+    if entries:
+        if 'idf' not in terminfodict[a]['abstract'][wordkey1] and terminfodict[a]['abstract'][wordkey1]['tf'][0]>0:
+            #the tf has not been altered for this particular word
+            tf_idf=terminfodict[a]['abstract'][wordkey1]['tf-idf'][0]
+            tf=terminfodict[a]['abstract'][wordkey1]['tf'][0]
+            terminfodict[a]['abstract'][wordkey1]['idf']=[tf_idf/tf]
+
+        for entry in entries:
+            #at least one instance of wordkey1 being a component word of wordkey
+            #it's a match:
+            terminfodict[a]['abstract'][wordkey1]['tf'][0]-=1
+        #and removing wordkey (which looks like "staradslike") from contention
+        terminfodict[a]['abstract'][wordkey]['tf-idf'][0]=0
+        terminfodict[a]['abstract'][wordkey]['tf'][0]=0
+        # it is confirmed that wordkey1 has at least 1 instance of being a component word of wordkey
+        return wordkey1, entries[0][0]
+
+def calculate_new_abstract_tfidfs(termrec):
+    for t in termrec:
+        for a in termrec[t]['abstract']:
+            tf=termrec[t]['abstract'][a]['tf'][0]
+            if tf<=0:
+                #in this case 
+                termrec[t]['abstract'][a]['tf-idf']=[0]
+            else:
+                #penalizing words that lost tf because they were repeats
+                if 'idf' in termrec[t]['abstract'][a]:
+                    new_tf=termrec[t]['abstract'][a]['tf'][0]
+
+                    new_tf_idf=new_tf*termrec[t]['abstract'][a]['idf'][0]
+                    termrec[t]['abstract'][a]['tf-idf']=[new_tf_idf]
+
+                else:
+                    #if there was no idf inserted, the tfidf does not need to
+                    #be altered
+                    pass
+    return termrec
+
 
 def solr_term_clean_up(terminfodict):
     """
-    Taking care of acronym duplicates, synonym duplicates, concatenated duplicates, and inserting dashes 
-    in between concatenated words. A few complications of the loops: we don't want to remove a concatenated 
-    word from consideration just because it's a synonym (though we can count it for a synonym entry as well)
-    Also, things are being removed so later iterations through the copy of the dict need to check that it exists
+    Taking care of acronym duplicates, synonym duplicates, concatenated duplicates, unicode/ascii duplicates,
+    and inserting dashes in between concatenated words.
+    The loops use a term's tf as a key to know whether or not it should be counted/manipulated--if another
+    loop has set the tf to 0, the term should be ignored in succeeding loops from then on
+
     """
-    terminfodictcopy=copy.deepcopy(terminfodict)
-    safe_indexes=[]
     #getting rid of ascii repeats
-    for t in terminfodictcopy:
-        for wordkey in terminfodictcopy[t]['abstract']:
+    for a in terminfodict:
+        new_recs={}
+        wordkeys=terminfodict[a]['abstract']
+        for wordkey in wordkeys:
             if wordkey[:5]!='acr::' and wordkey[:5] != 'syn::':
                 try:
                     wordkey.encode('ascii')
@@ -47,225 +145,177 @@ def solr_term_clean_up(terminfodict):
                     continue
                 except UnicodeEncodeError:
                     pass
-                possible_dup=None
-                start_offset=terminfodictcopy[t]['abstract'][wordkey]['offsets']['start'][0]
-                end_offset=terminfodictcopy[t]['abstract'][wordkey]['offsets']['end'][0]
-                for wordkey1 in terminfodictcopy[t]['abstract']:
+
+                start_offsets=terminfodict[a]['abstract'][wordkey]['offsets']['start']
+                end_offsets=terminfodict[a]['abstract'][wordkey]['offsets']['end']
+                for wordkey1 in wordkeys:
                     #might be multiple instances of this word w/different offsets
-                    for index, entry in enumerate(terminfodictcopy[t]['abstract'][wordkey1]['offsets']['start']):
-                        if (entry==start_offset
-                            and terminfodictcopy[t]['abstract'][wordkey1]['offsets']['end'][index]==end_offset
+                    for index, entry in enumerate(terminfodict[a]['abstract'][wordkey1]['offsets']['start']):
+                        if (entry in start_offsets
+                            and terminfodict[a]['abstract'][wordkey1]['offsets']['end'][index]in end_offsets
                             and wordkey1!=wordkey
                             and wordkey1[:5]!='acr::'
                             and wordkey1[:5]!='syn::'):
-                            possible_dup=wordkey1
-                if possible_dup:
-                    try:
-                        del terminfodict[t]['abstract'][possible_dup]
-                    except KeyError:
-                        #occasionally parsing errors mean that a component of a word (even a single letter) is given the longer
-                        #offset of the word itself, which messes everything up. In addition there might be multiple 
-                        #instances of this word. So we just catch the error in case it's already gone
-                        pass
 
-        #putting dashes in between concatenated words
-        for wordkey in terminfodictcopy[t]['abstract']:
-            if wordkey[:5]!='acr::' and wordkey[:5] != 'syn::' and wordkey in terminfodict[t]['abstract']:
-                    start_offset=terminfodictcopy[t]['abstract'][wordkey]['offsets']['start'][0]
-                    end_offset=terminfodictcopy[t]['abstract'][wordkey]['offsets']['end'][0]
-                    substrings=[]
-                    for wordkey1 in terminfodictcopy[t]['abstract']:
-                        #might be multiple instances of this word
-                        for index, entry in enumerate(terminfodictcopy[t]['abstract'][wordkey1]['offsets']['start']):
-                            if (entry>=start_offset
-                                and terminfodictcopy[t]['abstract'][wordkey1]['offsets']['end'][index]<=end_offset
-                                and wordkey!=wordkey1
-                                and len(wordkey)> len(wordkey1)
-                                and wordkey1[:5]!='acr::'
-                                and wordkey1[:5]!='syn::'
-                                #finally, check to make sure it wasn't removed as an ascii duplicate
-                                and wordkey1 in terminfodict[t]['abstract']):
+                            reduce_tf_for_duplicate(wordkey, wordkey1, terminfodict=terminfodict, a=a)
+                            #you can break out of the offset loop because this function takes
+                            #care of all repeats
+                            break
 
-                                substrings.append((wordkey1, entry))
-                                #and lets subtract 1 point for all component words (can't delete because it 
-                                #may have shown up independently elsewhere)
-                                tf=terminfodict[t]['abstract'][wordkey1]['tf'][0]
-                                tfidf=terminfodict[t]['abstract'][wordkey1]['tf-idf'][0]
-                                new_tf=tf-1
-
-                                terminfodict[t]['abstract'][wordkey1]['tf-idf']= [new_tf * (tfidf/tf)]
-                                terminfodict[t]['abstract'][wordkey1]['tf']=[new_tf]
-                                if terminfodict[t]['abstract'][wordkey1]['tf'][0]<1:
-                                    del terminfodict[t]['abstract'][wordkey1]                     
-                    
+        for wordkey in [w for w in wordkeys if terminfodict[a]['abstract'][w]['tf'][0]!=0]:
+            #anything that is a syn, acr, or has already had tf placed to zero in this loop, 
+            #could be a concatenated word
+            if wordkey[:5]!='syn::' and wordkey[:5]!='acr::':
+                #check to see if it is a smooshed together word that should have dashes in between
+                start_offsets=terminfodict[a]['abstract'][wordkey]['offsets']['start']
+                end_offsets=terminfodict[a]['abstract'][wordkey]['offsets']['end']
+                #we will need this info if it turns out there is a match
+                wordkey_tf=terminfodict[a]['abstract'][wordkey]['tf'][0]
+                wordkey_tf_idf=terminfodict[a]['abstract'][wordkey]['tf-idf'][0]
+                substrings=[]
+                for wordkey1 in wordkeys:
+                    if (wordkey1 in wordkey and wordkey!=wordkey1):
+                        pos_results=find_concatenated_word_instance(wordkey, wordkey1, terminfodict, start_offsets, end_offsets, a)
+                        if pos_results:
+                            substrings.append(pos_results)
+                if len(substrings)>1:
+                    #why if len(substrings)>1 rather than just if substrings? Because parsing errors sometimes lead to a
+                    #component word having a slightly wrong offset and being picked up
                     substrings=sorted(substrings, key=lambda x: x[1])
                     #if we found substrings we can be confident this is a concatenated word
-                    #we will replace its listing with a dashed word in the terminfodict
-                    # we say >1 rather than >0 because parsing errors sometimes screw up offset info
-                    if len(substrings)>1:
-                        new_combined_word='-'.join([x[0] for x in substrings])
-                        data=terminfodictcopy[t]['abstract'][wordkey]
-                        del terminfodict[t]['abstract'][wordkey]
-                        terminfodict[t]['abstract'][new_combined_word]=data
-                        safe_indexes.extend([start_offset])
-                
-        #flagging synonyms so words don't get double-counted 
-        for wordkey in terminfodictcopy[t]['abstract']:
-            if wordkey[:5]=='syn::':
-                #find offset so you can get rid of individual words with this synonym
-                start_offsets= terminfodictcopy[t]['abstract'][wordkey]['offsets']['start']
-                for other_word in terminfodictcopy[t]['abstract']:
-                    for offset in terminfodictcopy[t]['abstract'][other_word]['offsets']['start']:
-                        if (offset in start_offsets
-                            and other_word[:5]!='syn::'
-                            and other_word[:5]!='acr::'
-                            and terminfodictcopy[t]['abstract'][other_word]['offsets']['start'] not in safe_indexes
-                            and other_word in terminfodict[t]['abstract']):
-                            #flag it
-                            terminfodict[t]['abstract'][other_word]['dontcount']=True
-                            safe_indexes.extend(start_offsets)
+                    new_combined_word='-'.join([x[0] for x in substrings])
+                    #this doesn't have an offset so it won't be touched by the ensuing two loops
+                    new_recs[new_combined_word]={'tf': [wordkey_tf], 'tf-idf':[wordkey_tf_idf]}   
 
-        #making sure that only acronyms, not their tokenized counterparts, are counted
-        for wordkey in terminfodictcopy[t]['abstract']:
-            if wordkey[:5]=='acr::':
-                #first, weight it a bit
-                terminfodict[t]['abstract'][wordkey]['tf-idf'][0]*=2
-                start_offsets=terminfodictcopy[t]['abstract'][wordkey]['offsets']['start']
-                #find at least 1, possibly more, other words with same offset, and delete them
-                for other_word in terminfodictcopy[t]['abstract']:
-                    for offset in terminfodictcopy[t]['abstract'][other_word]['offsets']['start']:
-                        if (offset in start_offsets
-                            and other_word[:5]!='syn::'
-                            and other_word[:5]!='acr::'
-                            and terminfodictcopy[t]['abstract'][other_word]['offsets']['start'] not in safe_indexes
-                            and 'dontcount' not in terminfodictcopy[t]['abstract'][other_word]
-                            and other_word in terminfodict[t]['abstract']):
-                            terminfodict[t]['abstract'][other_word]['dontcount']=True
-                            safe_indexes.extend(start_offsets)
+        for n in new_recs:
+            terminfodict[a]['abstract'][n] = new_recs[n]
+        # end loop through abstract
+
+    terminfodict=calculate_new_abstract_tfidfs(terminfodict)
     return terminfodict
-
-
-def delete_unwanted_words(terminfodict):
-    """
-    culling unwanted words
-    """
-    terminfodictcopy=copy.deepcopy(terminfodict)
-
-    for t in terminfodictcopy:
-        for wordkey in terminfodictcopy[t]['abstract']:
-            if terminfodict[t]['abstract'][wordkey]['df'][0]<5:
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif (re.search(r'(.*sub.*sub)|(.*sup.*sup)', wordkey, flags=re.I)
-                or re.search(r'(^sub$)|(^sup$)', wordkey.strip(), flags=re.I)):
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif len(wordkey)<3 or ('::' in wordkey and len(wordkey[5:])<2):
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif re.search(r'^\d+$', ''.join([w for w in wordkey if w.isalnum()])):
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif '-' in wordkey and len(''.join([w for w in wordkey if w.isalnum()]))<4:
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif wordkey=='deg' or 'degree' in wordkey or wordkey=='syn::deg' or wordkey=='syn::degree' :
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True
-            elif re.search(r'acr::sup|acr::sub', wordkey, flags=re.I):
-                terminfodict[t]['abstract'][wordkey]['dontcount']=True   
-
-    return terminfodict
-
 
 def initialize_final_frequency_dict(terminfodict):
     finalfrequencydict={}
 
-    terminfodictcopy=copy.deepcopy(terminfodict)
-    #finally, lets see how many abstracts each word appeared in
-    abstract_prevalence={}
-    total_num_abstracts=len(terminfodict)
-
-    for t in terminfodictcopy:
-        for wordkey in terminfodictcopy[t]['abstract']:
-            abstract_prevalence[wordkey]=abstract_prevalence.get(wordkey, 0)+1
-
     #calculating tf-idf for each word
-    for t in terminfodictcopy:
-        for wordkey in terminfodictcopy[t]['abstract']:
-            if 'dontcount' not in terminfodictcopy[t]['abstract'][wordkey]:
+    for t in terminfodict:
+        for wordkey in terminfodict[t]['abstract']:
                 #cutting off tf of words that appear a bunch of times in a single abstract
-                #also ignoring words that only occur in one abstract (<.005 times)
-                if abstract_prevalence[wordkey]/total_num_abstracts<=.005:
-                    continue
                 tfidf=finalfrequencydict.get(wordkey, 0)
-                if terminfodict[t]['abstract'][wordkey]['tf']<3:
+                if terminfodict[t]['abstract'][wordkey]['tf'][0]<=INDIVIDUAL_ABSTRACT_LIMIT:
                     tfidf+=terminfodict[t]['abstract'][wordkey]['tf-idf'][0]
                 else:
-                    tfidf+=(terminfodict[t]['abstract'][wordkey]['tf-idf'][0]/terminfodict[t]['abstract'][wordkey]['tf'][0])*3      
-                finalfrequencydict[wordkey]=tfidf
+                    tfidf+=(terminfodict[t]['abstract'][wordkey]['tf-idf'][0]/
+                            terminfodict[t]['abstract'][wordkey]['tf'][0]*INDIVIDUAL_ABSTRACT_LIMIT)  
+                if tfidf==0:
+                    continue
+                else:
+                    finalfrequencydict[wordkey]=tfidf
 
     #penalizing concatenated words since they have a way higher idf
-    for f in finalfrequencydict.copy():
+    finalfrequencykeys=finalfrequencydict.keys()
+    for f in finalfrequencykeys:
         if f.count('-')==1:
-            finalfrequencydict[f]=finalfrequencydict[f] *0.35
+            finalfrequencydict[f]*=ONE_DASH_PENALTY_WEIGHT
         elif f.count('-')>1:
-            finalfrequencydict[f]=finalfrequencydict[f] *0.0025
-        #bad parsing sometimes gets stuff like "subject headings: planets"
-        if 'headings' in f:
+            finalfrequencydict[f]*=TWO_DASH_PENALTY_WEIGHT
+    return dict(sorted(finalfrequencydict.items(), key=lambda x:x[1], reverse=True))
+
+def post_process(finalfrequencydict):
+    """
+    culling unwanted words
+    """
+
+    for f in finalfrequencydict.keys():       
+        if (re.search(r'(.*sub.*sub)|(.*sup.*sup)', f, flags=re.I)
+            or re.search(r'\bsub\b|\bsup\b', f.strip(), flags=re.I)):
             del finalfrequencydict[f]
-    return dict(sorted(finalfrequencydict.items(), key=lambda x:x[1], reverse=True)[:100])
+        elif 'www' in f or 'http' in f or 'fig' in f or f=='by':
+            del finalfrequencydict[f]
+        elif len(f)<MIN_LEN_TOKEN or ('::' in f and len(f[5:])<MIN_LEN_TOKEN):
+            del finalfrequencydict[f]
+        elif re.search(r'^\d+$', ''.join([w for w in f if w.isalnum()])):
+             del finalfrequencydict[f]
+        elif '-' in f and len(''.join([w for w in f if w.isalnum()]))<=MIN_LEN_TOKEN:
+           del finalfrequencydict[f]
+        elif f=='deg' or 'degree' in f or f=='syn::deg' or f=='syn::degree' :
+            del finalfrequencydict[f]
+        elif re.search(r'acr::sup|acr::sub', f, flags=re.I):
+            del finalfrequencydict[f]
 
 
-def post_process(finalfrequencydict, terminfodict):
-    """
-    finding a better word to represent synonyms by using the most common original word across doc entries
-    and capitalizing acronyms
-    """
-    terminfodictcopy=copy.deepcopy(terminfodict)
-    for f in finalfrequencydict.copy():
+    for f in finalfrequencydict.keys():     
         if f[:5]=='syn::':
-            syn_dict={}
-            for t in terminfodictcopy:
-                for wordkey in terminfodictcopy[t]['abstract']:
-                #check to see if this synonym is in this doc
-                    if f==wordkey:
-                        #find its start offset so we can locate alternatives
-                        start_offsets= terminfodictcopy[t]['abstract'][wordkey]['offsets']['start']
-                        for other_word in terminfodictcopy[t]['abstract']:
-                            #if it matches, it is one of the synonyms or the synonym itself
-                            for i, entry in enumerate(terminfodictcopy[t]['abstract'][other_word]['offsets']['start']):
-                                if (entry in start_offsets
-                                    and other_word[:5]!='syn::'
-                                    and other_word[:5]!='acr::'
-                                    #let's not let the synonym be <3 letters
-                                    and len(other_word)>2):
-                                    syn_dict[other_word]=syn_dict.get(other_word, 0) + \
-                                    terminfodictcopy[t]['abstract'][other_word]['tf'][0]
-            syn_dict_sorted=sorted(syn_dict.items(), key=lambda x: x[1], reverse=True)
-            try:
-                preferred_word=syn_dict_sorted[0][0]
-                weight=finalfrequencydict[f]
-                del finalfrequencydict[f]
-                finalfrequencydict[preferred_word]=weight
-            except IndexError:
-                #for whatever reason, sometimes synonyms exist in the doc info but don't 
-                #actually reference the real offsets (?) 
-                #also sometimes we've deleted the references because they are components of concatenated words
-                del finalfrequencydict[f]
+            val=finalfrequencydict[f]
+            del finalfrequencydict[f]
+            finalfrequencydict[f[5:]]=val*SYNONYM_WEIGHT
+
         elif f[:5]=='acr::':
             newf=f[5:].upper()
             data=finalfrequencydict[f]
             del finalfrequencydict[f]
-            finalfrequencydict[newf]=data
+            finalfrequencydict[newf]=data*ACRONYM_WEIGHT
+
+    #finding possible duplicates. Order of precedence goes: dash, acronym, space
+    dup_dict={}
+    for f in finalfrequencydict.keys():
+        f_stripped=''.join([l.lower() for l in f if l.isalpha()])
+        dup_dict[f_stripped]=[]
+
+    for d in dup_dict:
+        for f in finalfrequencydict.keys():
+            f_stripped=''.join([l.lower() for l in f if l.isalpha()])
+            if f_stripped==d:
+                dup_dict[d].append(f)
+
+    class BreakLoop(Exception):
+            pass
+
+    for key in [d for d in dup_dict if len(dup_dict[d])>1]:
+        l=dup_dict[key]
+        try:
+            for word in l:
+                if '-' in word:
+                    val=0
+                    for e in l:
+                        val+=finalfrequencydict[e]
+                        del finalfrequencydict[e]
+                    finalfrequencydict[word]=val
+                    raise BreakLoop
+            for word in l:
+                if word.isupper():
+                    val=0
+                    for e in l:
+                        val+=finalfrequencydict[e]
+                        del finalfrequencydict[e]
+                    finalfrequencydict[word]=val
+                    raise BreakLoop
+            for word in l:
+                if ' ' in word:
+                    val=0
+                    for e in l:
+                        val+=finalfrequencydict[e]
+                        del finalfrequencydict[e]
+                    finalfrequencydict[word]=val
+        except BreakLoop:
+            pass
 
     finalfrequencydict=dict(sorted(finalfrequencydict.items(), key=lambda x:x[1], reverse=True)[:50])
+
     return finalfrequencydict
+
 
 def wc_json(j):
-    #terminfodict is a dict with keys=paper ids, values= nested dicts with tf info
     terminfodict=list_to_dict(j['termVectors'][2:])
+    terminfodict=refine_json(terminfodict)
+
+    for t in terminfodict.keys():
+        if 'abstract' not in terminfodict[t]:
+            del terminfodict[t]
 
     terminfodict=solr_term_clean_up(terminfodict)
-       
-    terminfodict= delete_unwanted_words(terminfodict)
-
     finalfrequencydict=initialize_final_frequency_dict(terminfodict)
-
-    finalfrequencydict=post_process(finalfrequencydict, terminfodict)
-
+    finalfrequencydict=post_process(finalfrequencydict)
+ 
     return finalfrequencydict
+ 
