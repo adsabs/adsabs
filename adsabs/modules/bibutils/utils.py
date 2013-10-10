@@ -14,7 +14,7 @@ import urllib
 import requests
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
-import adsdata
+from flask.ext.adsdata import adsdata #@UnresolvedImport
 # local imports
 from config import config
 from .errors import SolrCitationQueryError
@@ -23,6 +23,13 @@ from .errors import SolrMetaDataQueryError
 from .errors import MongoQueryError
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
+
+def chunks(l, n):
+    """ 
+    Yield successive n-sized chunks from l.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
 
 def solr_req(url, **kwargs):
     kwargs['wt'] = 'json'
@@ -52,15 +59,11 @@ class CitationHarvester(Process):
             q = 'citations(bibcode:%s)' % bibcode
             fl= 'bibcode,property,reference'
             try:
-                if sys.platform == 'darwin':
-                    search_results = solr_req(config.SOLRQUERY_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
-                    result_field = 'response'
-                else:
-                    result_field = 'results'
+                result_field = 'results'
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                    search_results = resp.search_response()
+                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                search_results = resp.search_response()
                 # gather citations and put them into the results queue
                 citations = []
                 cits = []
@@ -103,15 +106,11 @@ class DataHarvester(Process):
             q = " OR ".join(map(lambda a: "bibcode:%s"%a, biblist))
             fl = 'bibcode,reference,author_norm,property,read_count'
             try:
-                if sys.platform == 'darwin':
-                    search_results = solr_req(config.SOLRQUERY_URL + '/select', q=q, fl=fl, rows=config.BIBUTILS_MAX_HITS)
-                    result_field = 'response'
-                else:
-                    result_field = 'results'
+                result_field = 'results'
                 # do the query and filter out the results without the bibcode field
                 # (publications without citations return an empty document)
-                    resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                    search_results = resp.search_response()
+                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
+                search_results = resp.search_response()
                 # gather citations and put them into the results queue
                 self.result_queue.put(search_results[result_field]['docs'])
             except SolrCitationQueryError, e:
@@ -127,14 +126,13 @@ class MongoHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def run(self):
         while True:
             bibcode = self.task_queue.get()
             if bibcode is None:
                 break
             try:
-                doc = self.session.get_doc(bibcode)
+                doc = adsdata.get_doc(bibcode)
                 self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
@@ -149,16 +147,15 @@ class MongoCitationHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def _get_references_number(self,bbc):
-        collection = self.session.get_collection('references')
+        collection = adsdata.get_collection('references')
         res = collection.find_one({'_id': bbc})
         Nrefs = 0
         if res:
             Nrefs = len(res.get('references',[]))
         return Nrefs
     def _is_refereed(self,bbc):
-        collection = self.session.get_collection('refereed')
+        collection = adsdata.get_collection('refereed')
         res = collection.find_one({'_id': bbc})
         if res:
             return True
@@ -176,7 +173,7 @@ class MongoCitationHarvester(Process):
                 bibcode = bbc
             try:
                 pubyear = int(bibcode[:4])
-                cit_collection = self.session.get_collection('citations')
+                cit_collection = adsdata.get_collection('citations')
                 res1 = cit_collection.find_one({'_id': bibcode})
                 if res1:
                     citations = res1.get('citations',[])
@@ -201,7 +198,6 @@ class MongoCitationListHarvester(Process):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.session = adsdata.get_session()
     def run(self):
         while True:
             bibcode = self.task_queue.get()
@@ -209,7 +205,7 @@ class MongoCitationListHarvester(Process):
                 break
             try:
                 pubyear = int(bibcode[:4])
-                cit_collection = self.session.get_collection('citations')
+                cit_collection = adsdata.get_collection('citations')
                 res1 = cit_collection.find_one({'_id': bibcode})
                 if res1:
                     citations = res1.get('citations',[])
@@ -411,20 +407,24 @@ def get_references(**args):
     papers= []
     # This information can be retrieved with one single Solr query
     # (just an 'OR' query of a list of bibcodes)
-    q = " OR ".join(map(lambda a: "bibcode:%s"%a, args['bibcodes']))
-    try:
-        # Get the information from Solr
-        # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
-        # referenced by the paper at hand)
-        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
-    except SolrReferenceQueryError, e:
-        app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
-        raise
-    # Collect all bibcodes in a list (do NOT remove multiplicity)
-    search_results = resp.search_response()
-    for doc in search_results['results']['docs']:
-        if 'reference' in doc:
-            papers += doc['reference']
+    # To restrict the size of the query URL, we split the list of
+    # bibcodes up in a list of smaller lists
+    biblists = list(chunks(args['bibcodes'], config.METRICS_CHUNK_SIZE))
+    for biblist in biblists:
+        q = " OR ".join(map(lambda a: "bibcode:%s"%a, biblist))
+        try:
+            # Get the information from Solr
+            # We only need the contents of the 'reference' field (i.e. the list of bibcodes 
+            # referenced by the paper at hand)
+            resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
+        except SolrReferenceQueryError, e:
+            app.logger.error("Solr references query for %s blew up (%s)" % (q,e))
+            raise
+        # Collect all bibcodes in a list (do NOT remove multiplicity)
+        search_results = resp.search_response()
+        for doc in search_results['results']['docs']:
+            if 'reference' in doc:
+                papers += doc['reference']
     return papers
 
 def get_publications_from_query(q):

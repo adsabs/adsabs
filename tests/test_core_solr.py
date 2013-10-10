@@ -98,8 +98,8 @@ class TestSolrDoc(unittest.TestCase):
         self.assertFalse(SolrDocument({}).has_coreads())
         
     def test_has_references(self):
-        self.assertTrue(SolrDocument({'reference': ['foo']}).has_references())
-        self.assertFalse(SolrDocument({'reference': []}).has_references())
+        self.assertTrue(SolrDocument({'[citations]': {'num_citations':2, 'num_references':2}}).has_references())
+        self.assertFalse(SolrDocument({'[citations]': {'num_citations':2, 'num_references':0}}).has_references())
         self.assertFalse(SolrDocument({}).has_references())
 
     def test_has_toc(self):
@@ -108,12 +108,12 @@ class TestSolrDoc(unittest.TestCase):
         self.assertFalse(SolrDocument({}).has_toc())
 
     def test_has_citations(self):
-        self.assertTrue(SolrDocument({'citation_count': 5}).has_citations())
-        self.assertFalse(SolrDocument({'citation_count': 0}).has_citations())
+        self.assertTrue(SolrDocument({'[citations]': {'num_citations':2, 'num_references':0}}).has_citations())
+        self.assertFalse(SolrDocument({'[citations]': {'num_citations':0, 'num_references':0}}).has_citations())
         self.assertFalse(SolrDocument({}).has_citations())
     
     def test_counts(self):
-        doc = SolrDocument({'reference': ['foo','bar'], 'citation_count': 3})
+        doc = SolrDocument({'[citations]': {'num_citations':3, 'num_references':2}})
         self.assertEqual(doc.get_citation_count(), 3)
         self.assertEqual(doc.get_references_count(), 2)
         

@@ -61,7 +61,8 @@ class ApiQueryForm(Form):
         """
         if not len(field.data):
             return
-        if re.search('[^a-z\,\_]', field.data, re.I):
+        # field names can contain '[' and ']', e.g. '[citations]'
+        if re.search('[^a-z\,\_\[\]]', field.data, re.I):
             raise ValidationError("Invalid field selection: value must be a comma-separated (no whitespace) list of field names")
         for field_name in field.data.split(','):
             if field_name not in config.API_SOLR_DEFAULT_FIELDS + config.API_SOLR_EXTRA_FIELDS:

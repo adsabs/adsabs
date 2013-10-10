@@ -11,8 +11,9 @@ class AppConfig(object):
     TESTING = False
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
+    PRINT_DEBUG_TEMPLATE_PARAM = None
     
-    APP_VERSION = '2013_09_26_v1'
+    APP_VERSION = '2013_10_10_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -96,17 +97,8 @@ class AppConfig(object):
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     WORD_CLOUD_DEFAULT_FIRST_RESULTS = 1000
     
-#    SEARCH_DEFAULT_SOLR_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-#                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links']
-#    
-#    SEARCH_DEFAULT_SOLR_FACETS = [
-#        ('bibstem_facet', 100, 1),
-#        ('author_facet',1000, 1), 
-
-#    SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','score','property','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
     SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-                                  'pubdate','citation_count','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader']
-    SOLR_DOCUMENT_DEFAULT_FIELDS = ['id','bibcode','bibstem','title','author','pub','property','abstract','keyword','doi','aff','pubdate','citation_count', 'links_data', 'ids_data', 'abstract']
+                                  'pubdate','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader', '[citations]']
     
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year"
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all year"
@@ -205,7 +197,7 @@ class AppConfig(object):
     API_SOLR_DEFAULT_SORT = [('pubdate_sort','desc'),('bibcode','desc')]
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
-                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate']
+                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]']
     API_SOLR_EXTRA_FIELDS = ['full','references','ack','score']
     API_SOLR_HIGHLIGHT_FIELDS = ['title','abstract','full','ack']
     
@@ -267,14 +259,16 @@ class AppConfig(object):
     METRICS_MIN_BIBLIO_LENGTH = 5
     METRICS_CHUNK_SIZE = 100
     METRICS_MAX_HITS = 100000
+    METRICS_TMP_DIR = '/tmp'
+
+    # config for the adsdata extension
     ADSDATA_MONGO_DATABASE = 'adsdata'
     ADSDATA_MONGO_HOST = "localhost"
     ADSDATA_MONGO_PORT = 27017
     ADSDATA_MONGO_SAFE = True
     ADSDATA_MONGO_USER = 'adsdata'
     ADSDATA_MONGO_PASSWORD = ''
-    ADSDATA_MONGO_DOCS_COLLECTION = 'docs'
-    ADSDATA_MONGO_DOCS_DEREF_FIELDS = [('docs','full'), ('docs','ack')]
+
     # configuration parameters for the recommender
     RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
     RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'

@@ -39,3 +39,4 @@ Markdown>=2.3.1
 path.py>=4.3
 mock>=1.0.1
 gspread==0.1.0
+https://github.com/adsabs/adsdata/releases/download/v0.2/adsdata-0.2.tar.gz

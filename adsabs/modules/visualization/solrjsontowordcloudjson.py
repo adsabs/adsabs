@@ -309,9 +309,8 @@ def wc_json(j):
     terminfodict=list_to_dict(j['termVectors'][2:])
     terminfodict=refine_json(terminfodict)
 
-    for t in terminfodict.keys():
-        if 'abstract' not in terminfodict[t]:
-            del terminfodict[t]
+   # filter out entries lacking an abstract
+    terminfodict = dict((k,v) for k,v in terminfodict.iteritems() if 'abstract' in v)
 
     terminfodict=solr_term_clean_up(terminfodict)
     finalfrequencydict=initialize_final_frequency_dict(terminfodict)
