@@ -228,9 +228,9 @@ def post_process(finalfrequencydict):
 
     for f in finalfrequencydict.keys():       
         if (re.search(r'(.*sub.*sub)|(.*sup.*sup)', f, flags=re.I)
-            or re.search(r'\bsub\b|\bsup\b', f.strip(), flags=re.I)):
+            or re.search(r'\bsub\b|\bsup\b|\bftp\b', f.strip(), flags=re.I)):
             del finalfrequencydict[f]
-        elif 'www' in f or 'http' in f or 'fig' in f or f=='by':
+        elif 'www' in f or 'http' in f or 'fig' in f or f=='by' or f=='yr':
             del finalfrequencydict[f]
         elif len(f)<MIN_LEN_TOKEN or ('::' in f and len(f[5:])<MIN_LEN_TOKEN):
             del finalfrequencydict[f]
