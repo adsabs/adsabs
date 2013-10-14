@@ -637,3 +637,10 @@ def export_metrics(data):
     for entry in stale_tmp_files:
         os.remove(entry)
     return os.path.basename(filename)
+
+def chunks(l, n):
+    """ 
+    Yield successive n-sized chunks from l.
+    """
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]

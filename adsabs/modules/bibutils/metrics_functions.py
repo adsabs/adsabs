@@ -11,6 +11,7 @@ from utils import get_citations
 from utils import get_mongo_data
 from utils import get_publication_data
 from utils import get_publications_from_query
+from utils import chunks
 # Get all pertinent configs
 from config import config
 # Every type of 'metric' is calculated in a 'model'
@@ -24,13 +25,6 @@ def sort_list_of_lists(L, index, rvrs=True):
     Sort a list of lists with 'index' as sort key
     """
     return sorted(L, key=operator.itemgetter(index), reverse=rvrs)
-
-def chunks(l, n):
-    """ 
-    Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
 
 def flatten(items):
     """
