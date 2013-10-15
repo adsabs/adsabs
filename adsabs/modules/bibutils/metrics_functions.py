@@ -11,6 +11,7 @@ from utils import get_citations
 from utils import get_mongo_data
 from utils import get_publication_data
 from utils import get_publications_from_query
+from utils import chunks
 # Get all pertinent configs
 from config import config
 # Every type of 'metric' is calculated in a 'model'
@@ -24,13 +25,6 @@ def sort_list_of_lists(L, index, rvrs=True):
     Sort a list of lists with 'index' as sort key
     """
     return sorted(L, key=operator.itemgetter(index), reverse=rvrs)
-
-def chunks(l, n):
-    """ 
-    Yield successive n-sized chunks from l.
-    """
-    for i in xrange(0, len(l), n):
-        yield l[i:i+n]
 
 def flatten(items):
     """
@@ -227,7 +221,7 @@ def format_results(data_dict,**args):
 
 # Uglify output results into how the old metrics module produced it output
 def legacy_format(data):
-    entry_mapping = {1:1, 2:3, 3:4, 4:2, 5:5, 6:7, 7:8, 8:6}
+    entry_mapping = {0:0, 1:2, 2:3, 3:1, 4:4, 5:6, 6:7, 7:5}
     citation_histogram = {}
     for (year,values) in data['citation histogram'].items():
         entries = values.split(':') 

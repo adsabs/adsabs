@@ -7,10 +7,15 @@ Created on Jul 16, 2013
 from .forms import CitationHelperInputForm
 from .forms import MetricsInputForm
 from flask import (Blueprint, render_template, flash, request, jsonify, g, current_app as app)
+from flask import Response
+from werkzeug.datastructures import Headers
+import os
 from adsabs.core.form_functs import is_submitted_cust
 from config import config #the global config object
 from .biblio_functions import get_suggestions
 from .metrics_functions import generate_metrics
+from .metrics_functions import legacy_format
+from .utils import export_metrics
 from .errors import CitationHelperCannotGetResults
 
 __all__ = ['bibutils_blueprint', 'index_bibutils', 'citation_helper','metrics']
@@ -99,6 +104,33 @@ def metrics(**args):
         bibcodes = request.args.getlist('bibcode')
     except:
         bibcodes = []
+    if request.method == 'POST':
+        export_id = request.form.get('exportid','')
+        if export_id:
+            export_file = config.METRICS_TMP_DIR + '/' + export_id
+            try:
+                xls_file = open(export_file)
+            except Exception, err:
+                app.logger.error('ID %s. Unable retrieve saved metrics file: %s! (%s)' % (g.user_cookie_id,export_file,err))
+            response = Response()
+            response.status_code = 200
+            xls_str = xls_file.read()
+            xls_file.close()
+            response.data = xls_str
+            response_headers = Headers({
+            'Pragma': "public",  # required,
+            'Expires': '0',
+            'Cache-Control': 'must-revalidate, post-check=0, pre-check=0',
+            'Cache-Control': 'private',  # required for certain browsers,
+            'Content-Type': 'text/xls; charset=UTF-8',
+            'Content-Disposition': 'attachment; filename=\"Metrics.xls\";',
+            'Content-Transfer-Encoding': 'binary',
+            'Content-Length': len(response.data)
+            })
+            response.headers = response_headers
+            response.set_cookie('fileDownload', 'true', path='/')
+            return response
+
     results = None
     format = ''
     layout = 'YES'
@@ -126,6 +158,10 @@ def metrics(**args):
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
             return render_template('metrics_no_results.html', include_layout=layout)
     if results:
+        try:
+            excel_id = export_metrics(results)
+        except:
+            excel_id = ''
         mode = 'normal'
         if len(bibcodes) == 1:
             mode = 'singlebibcode'
@@ -133,5 +169,5 @@ def metrics(**args):
         if format == 'json':
             return jsonify(metrics=results)
         else:
-            return render_template('metrics_results.html', results=results, include_layout=layout)
+            return render_template('metrics_results.html', results=results, include_layout=layout, export_id=excel_id)
     return render_template('metrics.html', form=form)
