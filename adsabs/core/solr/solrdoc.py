@@ -71,7 +71,7 @@ class SolrDocument(object):
         """Returns the number of citations
            Now it is useless, but if we change the way we compute the citations this method can be pretty useful
         """
-        if self.has_references():
+        if self.has_citations():
             return self.data['[citations]']['num_citations']
         return 0
     
