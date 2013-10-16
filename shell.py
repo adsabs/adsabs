@@ -142,6 +142,38 @@ def tools():
     python manage.py runserver
     """
 
+mongo_manager = Manager("Mongo operations", with_default_commands=False)
+
+@mongo_manager.command
+def init():
+    pass
+
+@mongo_manager.command
+def dump(outdir=None):
+    if outdir is None:
+        from datetime import datetime
+        outdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dumps', datetime.today().isoformat())
+        outdir = prompt("Output directory", outdir)
+    app.logger.info("Dumping %s database to %s" % (config.MONGOALCHEMY_DATABASE, outdir))
+    subprocess.call(["mongodump", 
+                     "-d", config.MONGOALCHEMY_DATABASE, 
+                     "-u", config.MONGOALCHEMY_USER, 
+                     "-p", config.MONGOALCHEMY_PASSWORD, 
+                     "-o", outdir])
+
+@mongo_manager.command
+def restore(indir=None):
+    if indir is None:
+        indir = prompt("Input database directory")
+    app.logger.info("Restoring %s database from %s" % (config.MONGOALCHEMY_DATABASE, indir))
+    subprocess.call(["mongorestore", 
+                     "-d", config.MONGOALCHEMY_DATABASE, 
+                     "-u", config.MONGOALCHEMY_USER, 
+                     "-p", config.MONGOALCHEMY_PASSWORD, 
+                     os.path.join(indir, config.MONGOALCHEMY_DATABASE)])
+
+manager.add_command('mongo', mongo_manager)
+
 # register sub-managers
 from adsabs.modules.api import manager as api_manager
 manager.add_command('api', api_manager)
