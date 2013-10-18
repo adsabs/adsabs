@@ -459,6 +459,13 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
             self.assertEqual(actual, expected)
+            
+class TestSearchFormValidation(AdsabsBaseTestCase):
+    
+    def test_db_multi_select_validation(self):
+        with self.app.test_request_context('/search/?q=author%3A"hoekstra%2C+h"&db_f=%28"physics"+OR+"astronomy"%29'):
+            form = QueryForm.init_with_defaults(request.values)
+            self.assertTrue(form.validate())
 
 class buildSingledocComponentsTestCase(AdsabsBaseTestCase):
        

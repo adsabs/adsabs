@@ -3,7 +3,7 @@ Created on Sep 19, 2012
 
 @author: jluker
 '''
-
+import re
 from flask.ext.wtf import Form #@UnresolvedImport
 from wtforms import (TextField, SelectField, IntegerField, BooleanField, #HiddenField, #SubmitField, RadioField, #@UnresolvedImport
                           validators) #@UnresolvedImport
@@ -13,6 +13,23 @@ from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 
 __all__ = ["QueryForm", "AdvancedQueryForm"]
 
+class MultiFacetSelectField(SelectField):
+
+    """
+    custom field that is able to correctly validate input coming from multi-facet selection.
+    e.g., a user selects both "astronomy" and "phyiscs" database in facets; value of db_f
+    field would be '("astronomy" AND "physics")'
+    """
+    def pre_validate(self, form):
+        if not len(self.data):
+            return
+        values = re.split("(?:OR|AND)", self.data)
+        values = map(lambda x: x.strip(' "()'), values)
+        choices = [x[0] for x in self.choices]
+        for v in values:
+            if v not in choices:
+                raise ValueError("Not a valid choice")
+        
 class QueryForm(Form):
     
     default_if_missing = MultiDict([('db_f', ''), ])
@@ -37,7 +54,7 @@ class QueryForm(Form):
     """Form for the basic search"""
     q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
 
-    db_f =  SelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('general', 'general'), ('', 'all') ], description=u'Database')
+    db_f =  MultiFacetSelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('general', 'general'), ('', 'all') ], description=u'Database')
     
     month_from = IntegerField(u'Month From', [optional(), validators.NumberRange(min=1, max=12, message='Starting month not valid: allowed values from 01 to 12')])
     month_to = IntegerField(u'Month To', [optional(), validators.NumberRange(min=1, max=12, message='Ending month not valid: allowed values from 01 to 12')])
@@ -50,6 +67,6 @@ class QueryForm(Form):
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
     
-    
+   
 class AdvancedQueryForm(QueryForm):
     pass
