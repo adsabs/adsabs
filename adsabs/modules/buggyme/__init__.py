@@ -1,5 +1,5 @@
 from .views import buggyme_blueprint as blueprint, is_message_dismissed
-from flask import flash, session, g, get_flashed_messages
+from flask import flash, session, g, get_flashed_messages, url_for
 from adsabs.core import set_global_messages, get_global_messages
 
 def setup(app):
@@ -24,7 +24,7 @@ def setup(app):
                 $(document).ready(function() {
                       $('div#globalmsg').find('button.close').click(
                      function(){
-                        $.get('/buggyme',{msg: $(this).parent().find('span').html(), });
+                        $.get(window.location.pathname + '/buggyme',{msg: $(this).parent().find('span').html(), });
                      });
                 });""", 'javascript');
                 
