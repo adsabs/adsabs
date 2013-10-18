@@ -17,6 +17,7 @@ import itertools
 
 
 from config import config
+from adsabs.core import get_global_messages
 
 
 def quote_url(value):
@@ -381,3 +382,11 @@ def configure_template_filters(app):
     def n_f_t_h(facets_list):
         return numeric_facets_to_histogram(facets_list)
     
+    @app.template_filter('get_messages')
+    def g_g_m(categories):
+        return get_global_messages(with_categories=True, category_filter=categories)
+    
+    # like this we can make a filter available inside templates (macros)
+    # ie. like get_flashed_messages() - however it is not a good practice
+    # we should use it very carefully
+    #app.jinja_env.globals.update(get_x_messages=g_g_m)

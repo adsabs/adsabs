@@ -115,16 +115,14 @@
                 		{% set pre_text = 'Error! ' %}
                 	{% elif category == 'info' %}
                 		{% set alert_class = 'alert-info' %}
-                		{% set pre_text = 'Info! ' %}
                 	{% else %}
                 		{% set alert_class = 'alert-block' %}
-                		{% set pre_text = 'Warning! ' %}
                 	{% endif %}
                 	<div class="row">
                 		<div class="span12">
-		                    <div class="alert {{ alert_class }} flash_message">
+		                    <div class="alert {{ alert_class }} {{category}} flash_message">
 		                    	<button type="button" class="close" data-dismiss="alert">&times;</button>
-		                    	<strong>{{ pre_text }}</strong>{{ msg|safe }}
+		                    	<strong>{{ pre_text }}</strong><span class="message">{{ msg|safe }}</span>
 		                    </div>
 	                    </div>
                     </div>
@@ -133,4 +131,27 @@
             {% endif %}
         {% endwith %}
     {% endblock %}
+{% endmacro %}
+
+
+{% macro render_messages(categories) %}
+    {% with messages = categories|get_messages %}
+      {% for category, msg in messages %}
+        {% if 'javascript' in category %}
+          <!-- msg category: {{category}} -->
+          {{ msg|safe }}
+        {% elif 'htm' in category %}
+          <div class="row">
+          <div class="span12">
+              <div class="alert info {{category}} global_message">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <span class="message">{{ msg|safe }}</span>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          {{ msg|safe }}
+        {% endif %}
+      {% endfor %}
+    {% endwith %}
 {% endmacro %}
