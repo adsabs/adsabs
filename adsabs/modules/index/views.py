@@ -1,8 +1,3 @@
-'''
-Created on Feb 19, 2013
-
-@author: dimilia
-'''
 from flask import Blueprint, render_template, request, current_app
 import os
 
