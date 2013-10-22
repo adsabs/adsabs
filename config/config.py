@@ -192,7 +192,7 @@ class AppConfig(object):
     ADS_CLASSIC_LINKOUT_LINK_TYPE_MAP = {'coreads': 'AR'}
     ADS_LOGIN_URL = None
 
-    API_CURRENT_VERSION = '0.1'
+    API_CURRENT_VERSION = '0.1.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
     API_SOLR_DEFAULT_SORT = [('pubdate_sort','desc'),('bibcode','desc')]
     

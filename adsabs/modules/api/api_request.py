@@ -36,10 +36,6 @@ class ApiSearchRequest(object):
         else:
             fields = self.user.get_allowed_fields()
 
-        # TODO: this is a short term hack
-        if '[citations]' in fields:
-            fields.remove('[citations]')
-
         req.set_fields(fields)
             
         if self.form.rows.data:
