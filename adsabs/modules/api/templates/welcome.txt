@@ -17,6 +17,8 @@ Access to the API currently requires an access token, or ''dev_key''. Your ''dev
 
 The API access and authentication mechanism is not designed to be highly secure at this point, and is one of the things we anticipate will change in the future. In the meantime, please do not share your ''dev_key''.
 
-To help you get started there is a Github repository at https://github.com/adsabs/adsabs-dev-api with an overview of the service and example code (in python). This is also a work in progress. Feel free to use the ''Issues'' section of the repository to inform us of problems you find. You can also contact me (jluker@cfa.harvard.edu) directly via e-mail.
+To help you get started there is a Github repository at https://github.com/adsabs/adsabs-dev-api with an overview of the service and example code (in python). This is also a work in progress. Feel free to use the ''Issues'' section of the repository to inform us of problems you find.
+
+Announcements and discussion related to the Developer API are available via a Google Group at https://groups.google.com/forum/#!forum/adsabs-dev-api. We encourage all API users to subscribe, as the functionality of the API, format of responses, etc., will likely be improving and changing rapidly.
 
 Thanks on behalf of the entire the ADS Team!
