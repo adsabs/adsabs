@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block body %}
+	<h2>App {{theapp.basic.fqin}}</h2>
+    <h3>App Info</h3>
+  <iframe width="100%" src="/app/{{ theapp.basic.fqin}}"></iframe width="100%">
+  <hr/>
+  <h3>Members</h3>
+    <h5>Members In</h5>
+  <iframe width="100%" src="/app/{{ theapp.basic.fqin}}/members"></iframe width="100%">
+
+  <h3>Items</h3>
+    <h5>Items In</h5>
+  <iframe width="100%" width="100%" src="/app/{{ theapp.basic.fqin}}/items"></iframe width="100%">
+{% endblock %}

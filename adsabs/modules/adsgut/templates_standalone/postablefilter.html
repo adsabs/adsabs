@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block sidebar %}
+<ul class="nav nav-list" id="stags">
+</ul>
+{% endblock %}
+
+{% block body %}
+{% if pflavor=='udg' %}
+<h3>Saved Items for {{useras.nick}}</h3>
+{% elif pflavor=='pub' %}
+<h3>Public Items</h3>
+{% else %}
+<h3>Items in {{ p.classname }} <a href="/postable/{{p.basic.fqin}}/filter/html">{{p.basic.fqin}}</a></h3>
+<p>
+  <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.nick }}
+</p>
+{% endif %}
+<p id="breadcrumb">
+{{ querystring }}
+</p>
+<!--ul id="items">
+</ul-->
+<div id="items">
+</div>
+{% endblock %}
+
+{% block coffeescript %}
+$=jQuery
+console.log "In PostableFilter"
+
+
+$ ->
+  vars="{{ querystring | safe }}"
+  $.get "/postable/{{ p.basic.fqin}}/tags?#{vars}", (data) ->
+    #console.log "Tag Count", data.count, vars
+    for own k,v of data.tags
+      format_tags(k, $('#stags'), get_tags(v, '{{ tqtype }}'), '{{ tqtype }}')
+  $.get "/postable/{{ p.basic.fqin}}/items?#{vars}", (data) ->
+    #console.log "Item Count", data.count, vars
+    theitems=data.items
+    thecount=data.count
+    itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+    itemsq=itemlist.join("&")
+    console.log "itemsq", itemlist, itemsq
+    $.get "/items/taggingsandpostings?#{itemsq}", (data)->
+      [stags, notes]=get_taggings(data)
+      postings={}
+      for own k,v of data.postings
+        #console.log "2>>>", k,v[0],v[1]
+        if v[0] > 0
+          postings[k]=(e.thething.postfqin for e in v[1])
+        else
+          postings[k]=[]
+      #format_items $('#items'), "{{useras.nick}}", theitems, thecount, stags, notes, postings, "li"
+      ido=
+        stags:stags
+        postings:postings
+        notes:notes
+        $el:$('#items')
+        items: theitems
+        nameable: false
+        itemtype:'ads/pub'
+        memberable:'{{useras.nick}}'
+
+      plinv=new itemsdo.ItemsFilterView(ido)
+      plinv.render()
+  $ua=$('#useradder')
+  nonqloc=document.location.href.split('?')[0]
+  if $ua.attr('data') is 'off'
+    if nonqloc is document.location.href
+      urla=document.location+"?userthere=true"
+    else
+      urla=document.location+"&userthere=true"
+    $ua.attr('href', urla)
+    $ua.attr('data', 'on')
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+                {% block sidebar %}{% endblock %}            
+          </div><!--/.well -->
+        </div><!--/span3-->
+        <div class="span9">
+          <div class="row-fluid page">
+                {% block localbody %}{% endblock %}
+          </div><!--/row-->
+        </div><!--/span9-->
+    </div><!--/row-fluid-->
+</div><!--/.fluid-container-->
+{% endblock %}
+<!-- Le javascript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+{% block head %}
+<!--link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link-->
+<script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='teacup.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='widgets.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='funcs.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='syncs.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='userprofile.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='libraryprofile.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='groupprofile.js') }}"></script>
+<script src="{{ url_for('adsgut.static', filename='itemsview.js') }}"></script>
+{% block scripturls %}{% endblock %}
+<script>
+{% block script %}{% endblock %}
+</script>
+<script type="text/coffeescript">
+{% block coffeescript %}{% endblock %}
+</script>
+{% endblock %}
+

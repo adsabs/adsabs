@@ -1,0 +1,42 @@
+{% extends "layout_local.html" %}
+{% block localbody %}
+<h3>Group {{thegroup.basic.fqin}}</h3>
+  <!--iframe width="100%" src="/group/{{ thegroup.basic.fqin}}"></iframe-->
+  <div id="info" style="display:none"></div>
+  <hr/>
+  <h4>Members</h4>
+  <!--iframe width="100%" src="/group/{{ thegroup.basic.fqin}}/members"></iframe-->
+  <div id="members" style="display:none"></div>
+  {% if owner %}
+  <h4>Invitations</h4>
+  <div id="invitedform" style="display:none"></div>
+  <div id="inviteds" style="display:none"></div>
+  {% endif %}
+{% endblock %}
+{% block coffeescript %}
+$=jQuery
+$ -> 
+  prefix='/adsgut'
+  model={}
+  console?.log "Hello World"
+  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}", (data) ->
+    console?.log data
+    content=views.group_info data, templates.group_info
+    $('div#info').append(content)
+    $('div#info').show()
+  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}/members", (data) ->
+    plinv=new groupprofile.PostableListView(users:data.users, fqpn:'{{ thegroup.basic.fqin}}', owner:'{{owner}}', $e_el:$('div#members'))
+    #content=views.postable_members "{{ thegroup.basic.fqin}}", "{{owner}}", data, templates.postable_members, true
+    #$('div#members').append(content)
+    plinv.render()
+    $('div#members').show()
+  {% if owner %}
+  view=new views.InviteUser({postable: "{{ thegroup.basic.fqin}}", withcb:false})
+  $('div#invitedform').append(view.render().$el)
+  $('div#invitedform').show()
+  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}/inviteds", (data) ->
+    content=views.postable_inviteds "{{ thegroup.basic.fqin}}", data, templates.postable_inviteds, true
+    $('div#inviteds').append(content)
+    $('div#inviteds').show()
+  {% endif %}
+{% endblock %}

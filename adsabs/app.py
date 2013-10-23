@@ -109,7 +109,7 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
-    from adsabs.extensions import login_manager, mongodb, pushrod, mail, cache, solr, adsdata
+    from adsabs.extensions import login_manager, mongodb, pushrod, mail, cache, solr, adsdata, mongoengine
     from adsabs.modules.user import AdsUser
     from adsabs.core.solr import SolrResponse, SolrRequestAdapter
     
@@ -162,6 +162,9 @@ def _configure_extensions(app):
      
     app.logger.debug("initializing adsdata extension")
     adsdata.init_app(app) 
+
+    #RAHUL
+    mongoengine.init_app(app)
     
 def _configure_error_handlers(app):
     """

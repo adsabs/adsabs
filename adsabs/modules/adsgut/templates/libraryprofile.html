@@ -1,0 +1,51 @@
+{% extends "layout_local.html" %}
+{% block localbody %}
+<h3>Library {{thelibrary.basic.fqin}}</h3>
+  <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}"></iframe-->
+  <div id="info" style="display:none"></div>
+  <hr/>
+  <h4>Members</h4>
+  <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}/members"></iframe-->
+  <div id="members" style="display:none"></div>
+  {% if owner %}
+  <h4>Invitations</h4>
+  <div id="invitedform" style="display:none"></div>
+  <div id="inviteds" style="display:none"></div>
+  {% endif %}
+{% endblock %}
+{% block coffeescript %}
+$=jQuery
+$ -> 
+  prefix='/adsgut'
+  console?.log "Hello World"
+  model={}
+  $.get "#{prefix}/library/{{ thelibrary.basic.fqin}}", (data) ->
+    console?.log data
+    content=views.library_info data, templates.library_info
+    $('div#info').append(content)
+    $('div#info').show()
+  $.get "#{prefix}/library/{{ thelibrary.basic.fqin}}/members", (data) ->
+    plinv=new libraryprofile.PostableListView(users:data.users, fqpn:'{{ thelibrary.basic.fqin}}', owner:'{{owner}}', $e_el:$('div#members'))
+    #console.log "hi"
+    #content=views.postable_members "{{thelibrary.basic.fqin}}", "{{owner}}", data, templates.postable_members, false
+    #console.log "fi"
+    #$('div#members').append(content)
+    $('div#members').show()
+    plinv.render()
+
+  {% if owner %}
+  view=new views.InviteUser({postable: "{{ thelibrary.basic.fqin}}", withcb:true})
+  $('div#invitedform').append(view.render().$el)
+
+  $.get "#{prefix}/user/{{useras.nick}}/groupsuserisin", (data) ->
+    groups=data.groups
+    view=new views.AddGroup({postable: "{{ thelibrary.basic.fqin}}", groups:groups, withcb:true} )
+    $('div#invitedform').append(view.render().$el)
+    $('div#invitedform').show()
+  $.get "#{prefix}/library/{{ thelibrary.basic.fqin}}/inviteds", (data) ->
+    content=views.postable_inviteds "{{ thelibrary.basic.fqin}}", data, templates.postable_inviteds, false
+    $('div#inviteds').append(content)
+    $('div#inviteds').show()
+
+  {% endif %}
+{% endblock %}

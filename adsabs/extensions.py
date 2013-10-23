@@ -36,3 +36,7 @@ solr = FlaskSolrQuery()
 
 from flask.ext.adsdata import FlaskAdsdata #@UnresolvedImport
 adsdata = FlaskAdsdata()
+
+#RAHUL:added
+from flask.ext.mongoengine import MongoEngine
+mongoengine=MongoEngine()

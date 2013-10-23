@@ -1,0 +1,10 @@
+-e git+https://github.com/MongoEngine/mongoengine.git@0.8#egg=mongoengine
+pymongo
+Flask>=0.8
+Flask-Login>=0.1
+simplejson
+ipython
+-e git+https://github.com/MongoEngine/flask-mongoengine.git#egg=flask-mongoengine
+Flask-DebugToolbar==0.6.3.1
+Flask-WTF==0.6
+six>=1.0
