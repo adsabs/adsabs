@@ -48,12 +48,12 @@ render_postable = (usernick, plist, $pel, ptype, invite) ->
   plinv.render()
 
 $ -> 
-  $.get "{{ url_for('adsgut.userInfo', nick=theuser.nick) }}", (data) ->
+  $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->
     userdict=userprofile.parse_userinfo(data)
     usernick=userdict.userinfo.nick
     console.log userdict
     content=widgets.info_layout(userdict.userinfo, name:'Name', nick:'Nickname', whenjoined:'Joined')
-    content=content+"<a href=\"{{ url_for('adsgut.udgHtml', nick=theuser.nick) }}\">My Items</a>"
+    content=content+"<a href=\"{{ url_for('adsgut.udgHtml', nick=useras.nick) }}\">My Items</a>"
     content=content+"&nbsp;&nbsp;&nbsp;<a href=\"{{ url_for('adsgut.publicHtml') }}\">Public Items</a>"
     $('#userinfo').append(content)
     $('#userinfo').show()
