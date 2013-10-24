@@ -70,8 +70,13 @@ def userinfo(email=None, dev_key=None):
     if not user:
         app.logger.info("User not found")
     else:
-        app.logger.info("User dev_key: %s" % user.get_dev_key())
-        app.logger.info(simplejson.dumps(user.get_dev_perms(), indent=True))
+        user_data = {
+            'dev_key': user.get_dev_key(),
+            'username': user.get_username(),
+            'cookie': user.get_id(),
+            'dev_perms': user.get_dev_perms(),
+            }
+        app.logger.info(simplejson.dumps(user_data, indent=True))
         
 @manager.command
 def userdel(email=None, dev_key=None):
