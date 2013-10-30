@@ -1,19 +1,12 @@
-<!doctype html>
-<html>
-<head>
-<title>Flask MongoEngine</title>
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}">
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "layout_empty.html" %}
+{% block body_el %}
 <div class="container-fluid">
-          {% block localbody %}{% endblock %}
+   {% block localbody %}{% endblock %}
 </div><!--/.fluid-container-->
-<!-- Le javascript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-<script src="{{ url_for('adsgut.static', filename='bootstrap/js/bootstrap.js') }}"></script>
+{% endblock %}
+
+{% block head_el %}
+<link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link>
 <script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
@@ -32,5 +25,4 @@
 <script type="text/coffeescript">
 {% block coffeescript %}{% endblock %}
 </script>
-</body>
-</html>
+{% endblock %}

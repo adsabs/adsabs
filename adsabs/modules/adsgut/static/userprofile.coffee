@@ -22,6 +22,7 @@ parse_userinfo = (data) ->
         librariesinvitedto: (e.fqpn for e in postablesinvitedto when e.ptype is 'library')
         userinfo:
             nick: data.user.nick
+            email: data.user.adsid
             whenjoined: data.user.basic.whencreated
             name: data.user.basic.name
     return userdict

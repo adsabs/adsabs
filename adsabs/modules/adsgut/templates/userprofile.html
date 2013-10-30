@@ -1,6 +1,6 @@
 {% extends "layout_local.html" %}
 {% block localbody %}
-  <h3>User {{theuser.nick}}</h3>
+  <h3>User {{theuser.adsid}}</h3>
   <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
   <div id="userinfo" style="display:none"></div>
   <br/>
@@ -52,7 +52,7 @@ $ ->
     userdict=userprofile.parse_userinfo(data)
     usernick=userdict.userinfo.nick
     console.log userdict
-    content=widgets.info_layout(userdict.userinfo, name:'Name', nick:'Nickname', whenjoined:'Joined')
+    content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
     content=content+"<a href=\"{{ url_for('adsgut.udgHtml', nick=useras.nick) }}\">My Items</a>"
     content=content+"&nbsp;&nbsp;&nbsp;<a href=\"{{ url_for('adsgut.publicHtml') }}\">Public Items</a>"
     $('#userinfo').append(content)

@@ -233,27 +233,46 @@ def _tagspecsget(qdict):
     return tagspecs
 
 #x
+import uuid
 @adsgut.before_request
 def before_request():
     #username=session.get('username', None)
     #BUG: currently get first part of email
-    print "CURRENT_USWER", dir(current_user)
     try:
-        username=current_user.get_username().split('@')[0]
+        #username=current_user.get_username().split('@')[0]
+        adsid=current_user.get_username()
     except:
-        username=None
-    print "USER", username
+        adsid=None
+    print "USER", adsid
     p=itemsandtags.Postdb(mongoengine)
     w=p.whosdb
     g.db=w
     g.dbp=p
-    if not username:
-        username='adsgut'
+    #BUG; this should change towards an anonymous user being sent back
+    if not adsid:
+        adsid='anonymouse'
+        user=g.db.getUserForAdsid(None, adsid)
+    else:
+        try:
+            user=w.getUserForAdsid(None, adsid)
+            print "---------->IN HERE", adsid
+        except:
+            print "<----------OR HERE", adsid, sys.exc_info()
+            adsgutuser=w.getUserForNick(None, 'adsgut')
+            adsuser=w.getUserForNick(adsgutuser, 'ads')
+            #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
+            #this removes the possibility of the user adding a custom nick, for now
+            cookieid=current_user.get_id()
+            #user=w.addUser(adsgutuser,{'adsid':adsid})
+            user=w.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+            #add the user to the flagship ads app, at the very least
+            user, adspubapp = w.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
+
     #superuser if no login BUG: use only for testing
 
     #currently set to sysuser. Atherwise have user login and set.
     #This should set a user into our mongodb table if needed. BUG
-    g.currentuser=g.db.getUserForNick(None, username)
+    g.currentuser=user
 
 
 # @adsgut.route('/login', methods=['GET', 'POST'])
@@ -306,13 +325,18 @@ def userProfileHtml(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
     return render_template('userprofile.html', theuser=user, useras=g.currentuser)
 
+@adsgut.route('/email/<adsid>/profile/html')
+def userProfileFromAdsidHtml(adsid):
+    user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
+    return render_template('userprofile.html', theuser=user, useras=g.currentuser)
+
 @adsgut.route('/user/<nick>/postablesuserisin')
 def postablesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     allpostables=g.db.postablesForUser(g.currentuser, useras)
-    groups=[e['fqpn'] for e in allpostables if e['pt']=='group']
-    libraries=[e['fqpn'] for e in allpostables if e['pt']=='library']
-    apps=[e['fqpn'] for e in allpostables if e['pt']=='app']
+    groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
+    libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
+    apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
     groups.remove("adsgut/group:public")
     groups.remove(useras.nick+"/group:default")
     return jsonify(groups=groups, libraries=libraries, apps=apps)
@@ -451,7 +475,7 @@ def createLibrary():
     else:
         doabort("BAD_REQ", "GET not supported")
 
-@adsgut.route('/postable/<powner>/<pt>:<pname>/changes', methods=['POST'])#user/op
+@adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
 def doPostableChanges(po, pt, pn):
     #add permit to match user with groupowner
     fqpn=po+"/"+pt+":"+pn
@@ -602,7 +626,7 @@ def addMemberToLibrary_or_libraryMembers(libraryowner, libraryname):
         userdict=getMembersOfPostable(g, request, fqln)
         return jsonify(userdict)
 
-@adsgut.route('/postable/<powner>/<pt>:<pname>/members', methods=['GET', 'POST'])#user
+@adsgut.route('/postable/<po>/<pt>:<pn>/members', methods=['GET', 'POST'])#user
 def addMemberToPostable_or_postableMembers(po, pt, pn):
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
@@ -860,7 +884,7 @@ def groupItems(groupowner, groupname):
 #CHECK: and is it secure?
 #this is post tagging into postable for POST
 
-@adsgut.route('/postable/<po>/<pt>:<pname>/taggings', methods=['GET', 'POST'])
+@adsgut.route('/postable/<po>/<pt>:<pn>/taggings', methods=['GET', 'POST'])
 def taggingsForPostable(po, pt, pn):
     #userthere/fqin/fqtn
     #q={sort?, criteria?, postable}
