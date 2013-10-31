@@ -12,7 +12,7 @@
 <h3>Public Items</h3>
 {% else %}
 <h3>Items in {{ p.classname }} <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.fqin}}</a></h3>
-
+<p>(UUID is {{ p.nick }})</p>
 <p>
   <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.adsid }}
 </p>

@@ -243,7 +243,7 @@ def before_request():
         adsid=current_user.get_username()
     except:
         adsid=None
-    print "USER", adsid
+    print "USER", adsid, current_user.get_id()
     p=itemsandtags.Postdb(mongoengine)
     w=p.whosdb
     g.db=w
@@ -1269,6 +1269,50 @@ def postForm(itemtypens, itemtypename):
                 nameable=nameable,
                 itemtype=itemtypename,
                 useras=g.currentuser)
+
+
+#making the import:
+
+#ADS_CLASSIC_LIBRARIES_URL = config.ADS_CLASSIC_LIBRARIES_URL
+ADS_CLASSIC_LIBRARIES_URL = "http://adsabs.harvard.edu/cgi-bin/maint/export_privlib"
+import requests
+
+def perform_classic_library_query(parameters, headers, service_url):
+    """
+    function that performs a get request and returns a json object
+    """
+    #Perform the request
+    r = requests.get(service_url, params=parameters, headers=headers)
+    #Check for problems
+    try:
+        r.raise_for_status()
+    except Exception, e:
+        exc_info = sys.exc_info()
+        app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+    
+    try:
+        user_json = r.json()
+    except Exception, e:
+        exc_info = sys.exc_info()
+        app.logger.error("Author JSON decode error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+        r = None
+        user_json = {}
+    return user_json
+
+@adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
+def get_classic_libraries(cookieid, password=None):
+    #headers BUG add http auth headers here, user ads, password?
+    #should also check that we have appropriate cookie somehow?
+    headers = {'User-Agent':'ADS Script Request Agent'}
+    parameters = {'cookie':cookieid}
+    libjson=perform_classic_library_query(parameters, headers, ADS_CLASSIC_LIBRARIES_URL)
+    useras=g.db.getUserForCookieid(g.currentuser, cookieid)
+    ret=g.dbp.populateLibraries(g.currentuser, useras, libjson)
+    if ret:
+        return redirect(url_for('adsgut.userProfileHtml', nick=useras.nick))
+    else:
+        return redirect('/')
+
 
 if __name__ == "__main__":
     adsgut.run(host="0.0.0.0", port=4000)
