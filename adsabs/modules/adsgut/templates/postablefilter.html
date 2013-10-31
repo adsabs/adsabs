@@ -7,14 +7,14 @@
 
 {% block localbody %}
 {% if pflavor=='udg' %}
-<h3>Saved Items for {{useras.nick}}</h3>
+<h3>Saved Items for {{useras.adsid}}</h3>
 {% elif pflavor=='pub' %}
 <h3>Public Items</h3>
 {% else %}
 <h3>Items in {{ p.classname }} <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.fqin}}</a></h3>
 
 <p>
-  <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.nick }}
+  <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.adsid }}
 </p>
 {% endif %}
 <p id="breadcrumb">

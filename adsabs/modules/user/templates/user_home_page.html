@@ -25,6 +25,7 @@
     		<div class="listbox">
     			<h4>Advanced Account Setting</h4>
     			<ul class="unstyled">
+                    <li><a href="{{ url_for('adsgut.userProfileFromAdsidHtml', adsid=current_user.get_username()) }}">Your Libraries and Groups</a></li>
     				<li><a class="disabled">Delete Your Account</a></li>
     			</ul>
     		</div>
