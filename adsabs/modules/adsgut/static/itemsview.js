@@ -46,7 +46,7 @@
     };
 
     ItemView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable;
+      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform;
       return console.log("PVIN", this.memberable);
     };
 
@@ -60,7 +60,9 @@
       content = content + htmlstring;
       additional = format_stuff(fqin, this.memberable, cdict(fqin, this.stags), cdict(fqin, this.postings), cdict(fqin, this.notes));
       content = content + additional;
-      content = content + w.postalnote_form("make note");
+      if (this.noteform) {
+        content = content + w.postalnote_form("make note");
+      }
       this.$el.append(content);
       return this;
     };

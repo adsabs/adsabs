@@ -58,7 +58,7 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@stags, @notes, @item, @postings, @memberable} = options
+    {@stags, @notes, @item, @postings, @memberable, @noteform} = options
     console.log "PVIN",  @memberable
 
   render: =>
@@ -70,7 +70,8 @@ class ItemView extends Backbone.View
     content = content + htmlstring
     additional= format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
     content = content + additional
-    content = content + w.postalnote_form("make note")
+    if @noteform
+        content = content + w.postalnote_form("make note")
     #content = w.table_from_dict_partial(@memberable, w.single_button_label(@rwmode, "Toggle"))
     #dahtml= "<td>a</td><td>b</td>"
     #console.log 'rendering', @$el, content

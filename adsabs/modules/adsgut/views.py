@@ -1053,8 +1053,8 @@ def tagsForItem(ns, itemname):
         for ti in tagspecs:
             tagspec=_setupTagspec(ti, useras)
             print "TAGSPEC IS", tagspec
-            i,t,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
-            newtaggings.append(td)
+            i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
+            newtaggings.append(it)
 
         #returning the taggings requires a commit at this point
         taggings={'status':'OK', 'info':{'item': i.basic.fqin, 'tagging':[td for td in newtaggings]}}
@@ -1094,8 +1094,8 @@ def itemsTaggings():
             i=g.dbp.saveItem(g.currentuser, useras, itemspec)
             for ti in tagspecs:
                 tagspec=_setupTagspec(ti, useras)
-                i,t,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
-                newtaggings.append(td)
+                i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
+                newtaggings.append(it)
         itemtaggings={'status':'OK', 'taggings':newtaggings}
         return jsonify(itemtaggings)
     else:
