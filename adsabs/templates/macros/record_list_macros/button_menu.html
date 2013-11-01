@@ -64,12 +64,12 @@
 				{% else %}
 				href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc"
 				{% endif %}
-				>by citation num
+				>by citations
 				{% if re_sort_type == 'CITED' %}
 				<i class="icon-ok-sign"></i>
 				{% endif %}</a>
 				<ul class="dropdown-menu">
-					<li class="nav-header">by citation num</li>
+					<li class="nav-header">by citations</li>
 					<li><a tabindex="-1" href="{{ base_re_sort_url }}&re_sort_type=CITED&re_sort_dir=desc">Descending
 						{% if re_sort_type == 'CITED' and re_sort_dir=='desc' %}
 						<i class="icon-ok-sign"></i>
