@@ -22,7 +22,7 @@ def send_feedback(form):
     except:
         url_from = ''
     message_body = "Sent from url: %s \n\nMessage:\n%s" % (url_from, form.feedback_text.data)
-    msg = Message(u"ADSABS2 feedback: %s" % form.feedback_type.data,
+    msg = Message(u"ADSABS2 feedback from %s: %s" % (form.email.data, form.feedback_type.data),
                   body=message_body,
                   sender=form.email.data,
                   recipients=config.FEEDBACK_RECIPIENTS)

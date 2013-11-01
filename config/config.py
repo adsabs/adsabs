@@ -212,7 +212,7 @@ class AppConfig(object):
     
     #sendmail configuration
     SMTP_HOST = 'localhost'
-    API_WELCOME_FROM_EMAIL = 'jluker@cfa.harvard.edu'
+    API_WELCOME_FROM_EMAIL = 'adshelp@cfa.harvard.edu'
     API_SIGNUP_SPREADSHEET_KEY = None
     API_SIGNUP_SPREADSHEET_LOGIN = None    
 
