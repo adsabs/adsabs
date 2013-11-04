@@ -63,6 +63,7 @@
 				</div>
 				<div class="row-fluid">
 					<div class="span12 abstractAbstract">
+                                                <abbr class="unapi-id" title="{{ solrdoc.bibcode }}"></abbr>
 						<span class="abstract">
 							{% if not private_abstract %}
 								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape|safe }}{% else %}Abstract not available.{% endif %}
@@ -296,5 +297,5 @@
 	{% if arxiv_id %}
 		<meta name="citation_arxiv_id" content="{{ arxiv_id[0] }}" />
 	{% endif %}
-	
+	<link rel="unapi-server" type="application/xml" title="unAPI" href="/ui/unapi/" />	
 {% endmacro %}
