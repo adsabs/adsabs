@@ -35,7 +35,9 @@
   });
 
   table_from_dict_partial = h.renderable(function(k, v) {
-    h.td(k);
+    h.td(function() {
+      return h.raw(k);
+    });
     return h.td(function() {
       return h.raw(v);
     });
@@ -85,7 +87,6 @@
   };
 
   one_col_table_partial = h.renderable(function(k) {
-    console.log("HTMLOUT", k, h.html);
     return h.td(function() {
       return h.raw(k);
     });

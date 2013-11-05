@@ -9,7 +9,7 @@ from flask import (Blueprint, request, url_for, Response, current_app as app, ab
 import flask
 import simplejson as json
 from random import choice
-
+from mongogut.commondefs import gettype
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.mongoengine.wtf import model_form
 from flask_debugtoolbar import DebugToolbarExtension
@@ -496,19 +496,27 @@ def doPostableChanges(po, pt, pn):
         if not op:
             doabort("BAD_REQ", "No Op Specified")
         if op=="invite":
+            memberable=g.db.getUserForAdsid(g.currentuser, memberable)
             utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
         elif op=='accept':
+            memberable=g.db.getUserForAdsid(g.currentuser, memberable)
             me, p=g.db.acceptInviteToPostable(g.currentuser, fqpn, memberable)
             return jsonify({'status':'OK', 'info': {'invited':me.nick, 'to': fqpn, 'accepted':True}})
         elif op=='decline':
+            memberable=g.db.getUserForAdsid(g.currentuser, memberable)
             #BUG add something to invitations to mark declines.
             return jsonify({'status': 'OK', 'info': {'invited':memberable, 'to': fqpn, 'accepted':False}})
         elif op=='changeowner':
             #you must be the current owner
+            memberable=g.db.getUserForAdsid(g.currentuser, memberable)
             newo, p=g.db.changeOwnershipOfPostable(g.currentuser, g.currentuser, fqpn, memberable)
             return jsonify({'status': 'OK', 'info': {'changedto':memberable, 'for': fqpn}})
         elif op=='togglerw':
+            #here memberable could be a user or a group (whose membership to library you are toggling)
+            #in either case here we need the fqin
+            mtype=gettype(memberable)
+            memberable=g.db.getMemberableforFqin(g.currentuser, mtype, memberable)
             mem, p = g.db.toggleRWForMembership(g.currentuser, g.currentuser, fqpn, memberable)
             return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
         else:

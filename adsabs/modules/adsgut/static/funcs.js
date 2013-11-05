@@ -267,13 +267,17 @@
   };
 
   postable_info_layout = renderable(function(_arg) {
-    var a, basic, owner, url;
+    var a, basic, description, owner, url;
     basic = _arg.basic, owner = _arg.owner;
+    description = basic.description;
+    if (description === "") {
+      description = "not provided";
+    }
     url = "" + prefix + "/postable/" + basic.fqin + "/filter/html";
     a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.fqin + "</a>";
     dl('.dl-horizontal', function() {
       dt("Description");
-      dd(basic.description);
+      dd(description);
       dt("Owner");
       dd(owner);
       dt("Creator");
@@ -334,7 +338,7 @@
     };
 
     InviteUser.prototype.inviteUserEH = function() {
-      var cback, changerw, eback, loc, rwmode, usernick;
+      var adsid, cback, changerw, eback, loc, rwmode;
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
@@ -354,8 +358,8 @@
           changerw = false;
         }
       }
-      usernick = this.$('.txt').val();
-      return syncs.invite_user("adsgut/user:" + usernick, this.postable, changerw, cback, eback);
+      adsid = this.$('.txt').val();
+      return syncs.invite_user(adsid, this.postable, changerw, cback, eback);
     };
 
     return InviteUser;

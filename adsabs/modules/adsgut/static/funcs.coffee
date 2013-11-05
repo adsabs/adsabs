@@ -150,11 +150,14 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 
 postable_info_layout = renderable ({basic, owner}) ->
+  description=basic.description
+  if description is ""
+    description = "not provided"
   url= "#{prefix}/postable/#{basic.fqin}/filter/html"
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
   dl '.dl-horizontal', ->
     dt "Description"
-    dd basic.description
+    dd description
     dt "Owner"
     dd owner
     dt "Creator"
@@ -217,8 +220,8 @@ class InviteUser extends Backbone.View
         changerw=true
       else
         changerw=false
-    usernick=@$('.txt').val()
-    syncs.invite_user("adsgut/user:#{usernick}", @postable, changerw, cback, eback)
+    adsid=@$('.txt').val()
+    syncs.invite_user(adsid, @postable, changerw, cback, eback)
 
 class AddGroup extends Backbone.View
 

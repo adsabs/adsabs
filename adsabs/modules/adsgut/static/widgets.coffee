@@ -14,7 +14,8 @@ regular_list = h.renderable (items) ->
             h.li i
 
 table_from_dict_partial = h.renderable (k,v) ->
-    h.td k
+    h.td ->
+        h.raw k
     h.td ->
         h.raw v
 
@@ -44,7 +45,6 @@ $table_from_dict = (kcol, vcol, vlist) ->
 
 
 one_col_table_partial = h.renderable (k) ->
-    console.log "HTMLOUT",k,h.html
     h.td ->
         h.raw k
 

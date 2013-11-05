@@ -89,7 +89,6 @@
 
     PostableListView.prototype.render = function() {
       var $widget, k, rendered, u, userlist, v, views;
-      console.log("RENDERING", this.owner);
       if (this.owner === 'True') {
         views = (function() {
           var _results;
@@ -112,8 +111,6 @@
           }
           return _results;
         })();
-        console.log("RENDER1", rendered);
-        console.log("RENDER2");
         $widget = w.$one_col_table("User", rendered);
         this.$el.append($widget);
       } else {

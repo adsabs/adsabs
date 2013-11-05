@@ -74,11 +74,11 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return xhr = doajax(params);
   };
 
-  change_ownership = function(fqmn, fqpn, cback, eback) {
+  change_ownership = function(adsid, fqpn, cback, eback) {
     var data, url;
     url = prefix + "/postable/" + fqpn + "/changes";
     data = {
-      memberable: fqmn,
+      memberable: adsid,
       op: 'changeowner'
     };
     return send_params(url, data, cback, eback);
@@ -94,21 +94,21 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
-  accept_invitation = function(fqmn, fqpn, cback, eback) {
+  accept_invitation = function(adsid, fqpn, cback, eback) {
     var data, url;
     url = prefix + "/postable/" + fqpn + "/changes";
     data = {
-      memberable: fqmn,
+      memberable: adsid,
       op: 'accept'
     };
     return send_params(url, data, cback, eback);
   };
 
-  invite_user = function(fqmn, postable, changerw, cback, eback) {
+  invite_user = function(adsid, postable, changerw, cback, eback) {
     var data, url;
     url = prefix + "/postable/" + postable + "/changes";
     data = {
-      memberable: fqmn,
+      memberable: adsid,
       op: 'invite',
       changerw: changerw
     };

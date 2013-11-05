@@ -46,12 +46,9 @@ class PostableListView extends Backbone.View
     @owner=options.owner
 
   render: =>
-    console.log "RENDERING", @owner
     if @owner is 'True'
         views=(new PostableView({rwmode:@users[u], fqpn:@fqpn, memberable:u}) for u of @users)
         rendered = (v.render().el for v in views)
-        console.log "RENDER1", rendered
-        console.log "RENDER2"
         $widget=w.$one_col_table("User", rendered)
         #$widget=w.$table_from_dict("User", "Can User/Group Post?", rendered)
         @$el.append($widget)

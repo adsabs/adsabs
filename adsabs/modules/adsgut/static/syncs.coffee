@@ -55,10 +55,10 @@ do_get = (url, cback, eback) ->
         error:eback
     xhr=doajax(params)
 
-change_ownership = (fqmn, fqpn, cback, eback) ->
+change_ownership = (adsid, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
-        memberable:fqmn
+        memberable:adsid
         op:'changeowner'
     send_params(url, data, cback, eback)
 
@@ -69,17 +69,17 @@ toggle_rw = (fqmn, fqpn, cback, eback) ->
         op:'togglerw'
     send_params(url, data, cback, eback)
 
-accept_invitation = (fqmn, fqpn, cback, eback) ->
+accept_invitation = (adsid, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
-        memberable:fqmn
+        memberable:adsid
         op:'accept'
     send_params(url, data, cback, eback)
 
-invite_user = (fqmn, postable, changerw, cback, eback) ->
+invite_user = (adsid, postable, changerw, cback, eback) ->
     url= prefix+"/postable/"+postable+"/changes"
     data=
-        memberable:fqmn
+        memberable:adsid
         op:'invite'
         changerw:changerw
     send_params(url, data, cback, eback)
