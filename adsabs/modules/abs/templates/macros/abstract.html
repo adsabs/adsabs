@@ -63,7 +63,10 @@
 				</div>
 				<div class="row-fluid">
 					<div class="span12 abstractAbstract">
-                                                <abbr class="unapi-id" title="{{ solrdoc.bibcode }}"></abbr>
+                        <abbr class="unapi-id" title="{{ solrdoc.bibcode }}"></abbr>
+                        <form id="search_results_form" method="post" action="" >
+                        <input type="hidden" value="{{ solrdoc.bibcode }}" name="bibcode" checked/>
+                        </form>
 						<span class="abstract">
 							{% if not private_abstract %}
 								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape|safe }}{% else %}Abstract not available.{% endif %}

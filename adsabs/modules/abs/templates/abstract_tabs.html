@@ -2,6 +2,8 @@
 {% from "macros/list_articles.html" import render_list_articles with context %}
 {% from "macros/abstract.html" import render_abstract, render_abstract_macro_tags with context %}
 {% from "macros/classic_log_request.html" import render_classic_log_request_js with context %}
+{# Global import #}
+{% from "macros/record_list_macros/button_menu.html" import render_export_menu with context %}
 
 {% extends "layout.html" %}
 
@@ -20,10 +22,7 @@
 		<div class="span12 well well-small ">
 			<div class="span2 firstspan bibcodeHeader">{{ inveniodoc.bibcode }}</div>
 			<div class="dropdown pull-right">
-				<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> View<span class="caret"></span></a>
-				<ul class="dropdown-menu">
-					<li class="nav-header">abstract</li>
-					<li><a tabindex="-1" href="{{ solrdoc.classic_url() }}">in ADS Classic</a></li>
+					{{ render_export_menu() }}
 				</ul>
 			</div>
 		</div>
