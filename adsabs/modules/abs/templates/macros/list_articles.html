@@ -6,7 +6,7 @@
 {% macro render_list_articles(list_articles, list_type, bibcode) %}
 
 {# set query_components={'q':list_articles.request.get_param('q'), 'sort':(list_articles.request.get_param('sort').split(' ')[0], list_articles.request.get_param('sort').split(' ')[1])} #}
-{% set query_components={'q':list_articles.request.get_param('q') %}
+{% set query_components={'q':list_articles.request.get_param('q')} %}
 
 <form id="search_results_form" action="">
 	<input type="hidden" value='{{ query_components|tojson|safe }}' name="current_search_parameters" />
