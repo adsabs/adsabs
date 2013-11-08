@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_ownership, do_get, doajax, get_postables, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_posts, submit_tags, toggle_rw;
+  var $, accept_invitation, add_group, change_ownership, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_posts, submit_tags, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -132,6 +132,13 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return do_get(url, cback, eback);
   };
 
+  get_postables_writable = function(user, cback, eback) {
+    var nick, url;
+    nick = user;
+    url = prefix + "/user/" + nick + "/postablesusercanwriteto";
+    return do_get(url, cback, eback);
+  };
+
   submit_note = function(item, note, cback, eback) {
     var data, itemtype, tagtype, url;
     tagtype = "ads/tagtype:note";
@@ -190,7 +197,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
   submit_posts = function(items, postables, cback, eback) {
     var data, i, itemnames, itemtype, url;
     itemtype = "ads/itemtype:pub";
-    console.log(items, '|||');
+    console.log(items, '|||', postables);
     itemnames = (function() {
       var _i, _len, _results;
       _results = [];
@@ -239,6 +246,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     change_ownership: change_ownership,
     toggle_rw: toggle_rw,
     get_postables: get_postables,
+    get_postables_writable: get_postables_writable,
     submit_note: submit_note,
     submit_tags: submit_tags,
     submit_posts: submit_posts,

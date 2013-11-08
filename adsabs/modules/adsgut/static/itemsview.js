@@ -39,7 +39,7 @@
 
     ItemView.prototype.tagName = 'div';
 
-    ItemView.prototype.className = 'control-group postalnote';
+    ItemView.prototype.className = 'control-group';
 
     ItemView.prototype.events = {
       "click .notebtn": "submitNote"
@@ -47,7 +47,8 @@
 
     ItemView.prototype.initialize = function(options) {
       this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform;
-      return console.log("PVIN", this.memberable);
+      console.log("PVIN", this.memberable);
+      return this.hv = void 0;
     };
 
     ItemView.prototype.render = function() {
@@ -58,12 +59,22 @@
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
-      additional = format_stuff(fqin, this.memberable, cdict(fqin, this.stags), cdict(fqin, this.postings), cdict(fqin, this.notes));
+      additional = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable);
+      additional = additional + format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable);
       content = content + additional;
-      if (this.noteform) {
-        content = content + w.postalnote_form("make note");
-      }
       this.$el.append(content);
+      if (this.noteform) {
+        this.hv = new w.HideableView({
+          state: 0,
+          widget: w.postalnote_form("make note", 2, 0),
+          theclass: ".postalnote"
+        });
+        this.$el.append(this.hv.render("Notes:").$el);
+        if (this.hv.state === 0) {
+          this.hv.hide();
+        }
+      }
+      this.$el.append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable));
       return this;
     };
 
@@ -76,7 +87,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = location;
+        return window.location = loc;
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -146,10 +157,12 @@
         return alert('Did not succeed');
       };
       cback = function(data) {
+        var libs;
         console.log(data);
-        return $ctrls.append(w.postalall_form(this.nameable, this.itemtype, data.groups, data.libraries));
+        libs = _.union(data.libraries, data.groups);
+        return $ctrls.append(w.postalall_form(this.nameable, this.itemtype, libs));
       };
-      syncs.get_postables(this.memberable, cback, eback);
+      syncs.get_postables_writable(this.memberable, cback, eback);
       return this;
     };
 
@@ -158,7 +171,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = location;
+        return window.location = loc;
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -170,16 +183,12 @@
     };
 
     ItemsView.prototype.submitPosts = function() {
-      var cback, eback, groups, libs, loc, makepublic, postables;
+      var cback, eback, libs, loc, makepublic, postables;
       libs = this.$('.multilibrary').val();
       if (libs === null) {
         libs = [];
       }
-      groups = this.$('.multigroup').val();
-      if (groups === null) {
-        groups = [];
-      }
-      postables = libs.concat(groups);
+      postables = libs;
       makepublic = this.$('.makepublic').is(':checked');
       console.log("MAKEPUBLIC", makepublic);
       if (makepublic) {
@@ -188,7 +197,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = location;
+        return window.location = loc;
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -241,7 +250,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = location;
+        return window.location = loc;
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -268,7 +277,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform;
       return console.log("ITEMS", this.items);
     };
 
@@ -284,7 +293,8 @@
           notes: this.notes[fqin],
           postings: this.postings[fqin],
           item: i,
-          memberable: this.memberable
+          memberable: this.memberable,
+          noteform: this.noteform
         };
         console.log("INS", ins);
         v = new ItemView(ins);

@@ -1,8 +1,8 @@
 {% extends "layoutnocol.html" %}
 {% block localbody %}
   <div id="items" class="row">
-      <div class="span8 items"></div>
-      <div class="span4 ctrls"></div>
+      <div class="span6 items"></div>
+      <div class="span6 ctrls"></div>
   </div>
 {% endblock %}
 
@@ -33,6 +33,7 @@ $ ->
         #console.log "2>>>", k,v[0],v[1]
         if v[0] > 0
           postings[k]=(e.thething.postfqin for e in v[1])
+          console.log "POSTINGSSSSSSSSSSSSSSSS", postings[k]
         else
           postings[k]=[]
       #{@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype}

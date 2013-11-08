@@ -341,6 +341,17 @@ def postablesUserIsIn(nick):
     groups.remove(useras.nick+"/group:default")
     return jsonify(groups=groups, libraries=libraries, apps=apps)
 
+@adsgut.route('/user/<nick>/postablesusercanwriteto')
+def postablesUserCanWriteTo(nick):
+    useras=g.db.getUserInfo(g.currentuser, nick)
+    allpostables=g.db.postablesUserCanWriteTo(g.currentuser, useras)
+    groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
+    libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
+    apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
+    groups.remove("adsgut/group:public")
+    groups.remove(useras.nick+"/group:default")
+    return jsonify(groups=groups, libraries=libraries, apps=apps)
+
 #x
 @adsgut.route('/user/<nick>/groupsuserisin')
 def groupsUserIsIn(nick):
@@ -375,7 +386,7 @@ def appsUserIsIn(nick):
 @adsgut.route('/user/<nick>/appsusercanwriteto')
 def appsUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    apps=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "app")]
+    apps=[e['fqpn'] for e in g.db.postablesUserCanWriteTo(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
 #x
@@ -405,7 +416,7 @@ def librariesUserIsIn(nick):
 @adsgut.route('/user/<nick>/librariesusercanwriteto')
 def librariesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.postablesUserCanWriteTo(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #x
@@ -1125,6 +1136,7 @@ def itemsPostings():
     #q={useras?, sort?, items}
     if request.method=='POST':
         jsonpost=dict(request.json)
+        print "JSONPOST", request.json
         useras = _userpostget(g, jsonpost)
         items = _itemspostget(jsonpost)
         fqpo = _postablesget(jsonpost)
@@ -1165,7 +1177,7 @@ def itemsTaggingsAndPostings():
         items = _itemsget(query)
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, sort)
+            items, None, sort)
         taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         #print "MEEP",taggingsdict, postingsdict

@@ -34,7 +34,7 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
 format_notes_for_item = (fqin, notes, nick) ->
   t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
   if t3list.length >0
-    return "<p>Notes:<br/>"+t3list.join("<br/>")+"</p>"
+    return "<p>"+t3list.join("")+"</p>"
   else
     return ""
 
@@ -270,6 +270,9 @@ root.format_items = format_items
 root.format_tags = format_tags
 root.get_groups= get_groups
 root.format_stuff = format_stuff
+root.format_postings_for_item = format_postings_for_item
+root.format_notes_for_item = format_notes_for_item
+root.format_tags_for_item = format_tags_for_item
 root.views = 
   library_info: postable_info
   group_info: postable_info

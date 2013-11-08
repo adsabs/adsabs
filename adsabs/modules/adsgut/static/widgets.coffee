@@ -138,17 +138,59 @@ single_button_label = h.renderable (ltext, btext) ->
 #   </label>
 # </div>
 #postalnote_form = h.renderable (htmlstring, additional, btext, nrows=2) ->
+
+class HideableView extends Backbone.View
+    tagName: 'div'
+    className: 'hideable'
+
+    events:
+        "click .hider" : "toggle"
+
+    initialize: (options) ->
+        {@widget, @state, @theclass} = options
+
+    toggle: () =>
+        console.log "in toggle", @state
+        if @state is 0
+            console.log "ih0"
+            @state=1
+            @$(@theclass).show()
+            @$('.hider i').attr("class", "icon-minus")
+        else if @state is 1
+            console.log "ih1"
+            @state=0
+            @$(@theclass).hide()
+            @$('.hider i').attr("class", "icon-plus")
+        return false
+
+    hide: () =>
+        console.log "HIDE"
+        @$(@theclass).hide()
+
+    render: (htext) =>
+        content = h.render ->
+            h.span ->
+                h.text htext
+                h.raw "&nbsp;"
+                h.a ".btn.btn-mini.hider", href:'#', ->
+                    h.i ".icon-plus"
+        @$el.append(content+@widget)
+        return this
+    
+
 postalnote_form = h.renderable (btext, nrows=2) ->
     #h.div ".control-group.postalnote", ->
     #h.raw htmlstring
     #h.br()
     #h.raw additional
-    h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
-    h.label ".control-label", ->
-        h.input ".control.cb", type:'checkbox'
-        h.text "note private?"
-        h.raw "&nbsp;&nbsp;"
-    h.button '.btn.btn-primary.btn-mini.notebtn', type:'button', btext
+    #<a class="btn" href="#"><i class="icon-align-justify"></i></a>
+    h.div ".postalnote", ->    
+        h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
+        h.label ".control-label", ->
+            h.input ".control.cb", type:'checkbox'
+            h.text "note private?"
+            h.raw "&nbsp;&nbsp;"
+        h.button '.btn.btn-primary.btn-mini.notebtn', type:'button', btext
 
 #     <legend>Tagging and Posting</legend>
 #     {% if nameable %}
@@ -182,8 +224,8 @@ multiselect = h.renderable (daclass, choices) ->
             h.option c
 
 #this should not be here. it should be built up hierarchically from other widgets and should itself be in views.
-postalall_form = h.renderable (nameable, itemtype, groupchoices, librarychoices) ->
-    h.legend "Post ALL"
+postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
+    h.legend "Post all of these items"
     if nameable
         h.div ".control-group", ->
             h.label ".control-label", "Name this #{itemtype}"
@@ -191,22 +233,19 @@ postalall_form = h.renderable (nameable, itemtype, groupchoices, librarychoices)
     h.div ".control-group", ->
         h.label ".checkbox.control-label", ->
             h.input ".controls.makepublic", type:"checkbox"
-            h.text "Make Public"
+            h.text "Endorse these items publicly!"
     h.div ".control-group", ->
         h.label ".control-label", "Libraries"
         #h.input ".controls.librariesinput.input-xxlarge", type:"text", placeholder:"Lib names, comma separated" 
         multiselect("library", librarychoices)
-    h.div ".control-group", ->
-        h.label ".control-label", "Groups"
-        #h.input ".controls.groupsinput.input-xxlarge", type:"text", placeholder:"Grp names, comma separated"
-        multiselect("group",groupchoices)
     h.button ".btn.btn-primary.post", type:'button', "Post"
     h.br()
     h.br()
-    h.legend "Tag ALL"
+    h.legend "Tag all of these items"
+    h.p "Note: Tags will be automatically visible in the groups these items are posted to! Tags may not contain commas."
     #h.div ".control-group", ->
         #h.label ".control-label", "Tags"
-    h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"Tag names, comma separated"
+    h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"tags, comma separated"
     h.button ".btn.btn-primary.tag", type:'button', "Tag"
     h.br()
     h.button ".btn.btn-inverse.done.pull-right", type:'button', "I'm done"
@@ -233,3 +272,4 @@ root.widgets =
     one_submit_with_cb: one_submit_with_cb
     dropdown_submit_with_cb: dropdown_submit_with_cb
     link: link
+    HideableView: HideableView

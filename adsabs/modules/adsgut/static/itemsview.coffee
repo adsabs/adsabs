@@ -52,7 +52,7 @@ cdict=(fqin, l)->
 class ItemView extends Backbone.View
      
   tagName: 'div'
-  className: 'control-group postalnote'
+  className: 'control-group'
 
   events:
     "click .notebtn" : "submitNote"
@@ -60,6 +60,7 @@ class ItemView extends Backbone.View
   initialize: (options) ->
     {@stags, @notes, @item, @postings, @memberable, @noteform} = options
     console.log "PVIN",  @memberable
+    @hv=undefined
 
   render: =>
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
@@ -68,15 +69,21 @@ class ItemView extends Backbone.View
     fqin=@item.basic.fqin
     content = ''
     content = content + htmlstring
-    additional= format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
+    #additional = format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
+    additional = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable)
+    additional = additional + format_postings_for_item(fqin, cdict(fqin, @postings), @memberable)
     content = content + additional
-    if @noteform
-        content = content + w.postalnote_form("make note")
-    #content = w.table_from_dict_partial(@memberable, w.single_button_label(@rwmode, "Toggle"))
-    #dahtml= "<td>a</td><td>b</td>"
-    #console.log 'rendering', @$el, content
     @$el.append(content)
+    if @noteform
+        @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, 0), theclass: ".postalnote"})
+        @$el.append(@hv.render("Notes:").$el)
+        if @hv.state is 0
+            @hv.hide()
+    #w.postalnote_form("make note")
+    @$el.append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable))
     return this
+
+  
 
   submitNote: =>
     console.log "IN SUBMIT NOTE"
@@ -86,7 +93,7 @@ class ItemView extends Backbone.View
     loc=window.location
     cback = (data) ->
         console.log "return data", data, loc
-        window.location=location
+        window.location=loc
     eback = (xhr, etext) ->
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -128,15 +135,16 @@ class ItemsView extends Backbone.View
         alert 'Did not succeed'
     cback = (data) ->
         console.log data
-        $ctrls.append(w.postalall_form(@nameable, @itemtype, data.groups, data.libraries))
-    syncs.get_postables(@memberable, cback, eback)
+        libs=_.union(data.libraries, data.groups)
+        $ctrls.append(w.postalall_form(@nameable, @itemtype, libs))
+    syncs.get_postables_writable(@memberable, cback, eback)
     return this
 
   iDone: =>
     loc=window.location
     cback = (data) ->
         console.log "return data", data, loc
-        window.location=location
+        window.location=loc
     eback = (xhr, etext) ->
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -150,10 +158,7 @@ class ItemsView extends Backbone.View
     libs=@$('.multilibrary').val()
     if libs is null
         libs=[]
-    groups=@$('.multigroup').val()
-    if groups is null
-        groups=[]
-    postables=libs.concat groups
+    postables=libs
     makepublic=@$('.makepublic').is(':checked')
     console.log "MAKEPUBLIC", makepublic
     if makepublic
@@ -161,7 +166,7 @@ class ItemsView extends Backbone.View
     loc=window.location
     cback = (data) ->
         console.log "return data", data, loc
-        window.location=location
+        window.location=loc
     eback = (xhr, etext) ->
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -182,7 +187,7 @@ class ItemsView extends Backbone.View
     loc=window.location
     cback = (data) ->
         console.log "return data", data, loc
-        window.location=location
+        window.location=loc
     eback = (xhr, etext) ->
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -194,7 +199,7 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform} = options
     console.log "ITEMS", @items
 
   render: =>
@@ -207,6 +212,7 @@ class ItemsFilterView extends Backbone.View
             postings: @postings[fqin]
             item: i
             memberable: @memberable
+            noteform: @noteform
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)

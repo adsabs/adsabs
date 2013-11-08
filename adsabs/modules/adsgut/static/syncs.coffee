@@ -99,6 +99,14 @@ get_postables = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesuserisin"
     do_get(url, cback, eback)
 
+get_postables_writable = (user, cback, eback) ->
+    #bug:possibly buggy split
+    #ary=user.split(':')
+    #nick=ary[ary.length-1]
+    nick=user
+    url= prefix+"/user/"+nick+"/postablesusercanwriteto"
+    do_get(url, cback, eback)
+
 submit_note = (item, note, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
@@ -124,7 +132,7 @@ submit_tags = (items, tags, cback, eback) ->
 
 submit_posts = (items, postables, cback, eback) ->
     itemtype= "ads/itemtype:pub"
-    console.log items, '|||'
+    console.log items, '|||', postables
     itemnames= (i.basic.name for i in items)
     url= prefix+"/items/postings"
     if postables.length >0
@@ -151,6 +159,7 @@ root.syncs=
     change_ownership: change_ownership
     toggle_rw: toggle_rw
     get_postables: get_postables
+    get_postables_writable: get_postables_writable
     submit_note:submit_note
     submit_tags:submit_tags
     submit_posts:submit_posts
