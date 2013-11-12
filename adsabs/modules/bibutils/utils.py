@@ -122,7 +122,7 @@ class MongoHarvester(Process):
             if bibcode is None:
                 break
             try:
-                doc = adsdata.get_doc(bibcode)
+                doc = adsdata.get_doc(bibcode, manipulate=False)
                 self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
