@@ -6,19 +6,24 @@
   <br/>
   <p> Import Classic libraries into ADS 2.0 by clicking <a href="{{ url_for('adsgut.get_classic_libraries', cookieid=theuser.cookieid)}}">here</a> </p>
   <br/>
-  <h4>Groups</h4>
-    <div class="row" id="groups">
-      <div class="span3 ow"></div>
-      <div class="span3 in"></div>
-      <div class="span3 iv"></div>
-    </div>
-  <br/>
-  <h4>Libraries</h4>
+ 
+  <h3>Libraries</h3>
+    <div id="createlibraries"></div>
     <div class="row" id="libraries">
       <div class="span3 ow"></div>
       <div class="span3 in"></div>
       <div class="span3 iv"></div>
     </div>
+
+  <br/>
+  <h3>Groups</h3>
+    <div id="creategroups"></div>
+    <div class="row" id="groups">
+      <div class="span3 ow"></div>
+      <div class="span3 in"></div>
+      <div class="span3 iv"></div>
+    </div>
+
   <!--h3>Groups</h3>
     <h5>Groups In</h5>
   <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisin"></iframe width="100%">
@@ -50,6 +55,10 @@ render_postable = (userdict, plist, $pel, ptype, invite, libmode) ->
   plinv.render()
 
 $ -> 
+  viewg=new views.CreatePostable({postabletype: "group"})
+  viewl=new views.CreatePostable({postabletype: "library"})
+  $('div#createlibraries').append(viewl.render().$el)
+  $('div#creategroups').append(viewg.render().$el)
   $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->
     userdict=userprofile.parse_userinfo(data)
     console.log userdict

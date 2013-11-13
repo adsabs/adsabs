@@ -248,7 +248,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"tags, comma separated"
     h.button ".btn.btn-primary.tag", type:'button', "Tag"
     h.br()
-    h.button ".btn.btn-inverse.done.pull-right", type:'button', "I'm done"
+    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Save"
 
 link = h.renderable (url, txt) ->
     h.raw "<a href=\"#{url}\">#{txt}</a>"

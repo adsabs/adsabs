@@ -84,6 +84,13 @@ invite_user = (adsid, postable, changerw, cback, eback) ->
         changerw:changerw
     send_params(url, data, cback, eback)
 
+#BUG: should we explicitly pass useras below?
+create_postable = (postable, postabletype, cback, eback) ->
+    url= prefix+"/#{postabletype}"
+    data=
+        name:postable
+    send_params(url, data, cback, eback)
+
 add_group = (selectedgrp, postable, changerw, cback, eback) ->
     url= prefix+"/postable/"+postable+"/members"
     data=
@@ -164,6 +171,7 @@ root.syncs=
     submit_tags:submit_tags
     submit_posts:submit_posts
     save_items:save_items
+    create_postable: create_postable
 
 
 

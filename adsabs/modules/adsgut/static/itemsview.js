@@ -34,6 +34,9 @@
       this.render = function() {
         return ItemView.prototype.render.apply(_this, arguments);
       };
+      this.update = function(postings, notes, tags) {
+        return ItemView.prototype.update.apply(_this, arguments);
+      };
       return ItemView.__super__.constructor.apply(this, arguments);
     }
 
@@ -51,8 +54,15 @@
       return this.hv = void 0;
     };
 
+    ItemView.prototype.update = function(postings, notes, tags) {
+      this.stags = tags;
+      this.notes = notes;
+      return this.postings = postings;
+    };
+
     ItemView.prototype.render = function() {
       var additional, adslocation, content, fqin, htmlstring, url;
+      this.$el.empty();
       adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
       url = adslocation + ("" + this.item.basic.name);
       htmlstring = "<a href=\"" + url + "\">" + this.item.basic.name + "</a><br/>";
@@ -119,6 +129,9 @@
       this.render = function() {
         return ItemsView.prototype.render.apply(_this, arguments);
       };
+      this.update_postings_taggings = function() {
+        return ItemsView.prototype.update_postings_taggings.apply(_this, arguments);
+      };
       return ItemsView.__super__.constructor.apply(this, arguments);
     }
 
@@ -129,14 +142,67 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype;
-      return console.log("ITEMS", this.items);
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc;
+      return console.log("ITEMS", this.items, this.loc);
+    };
+
+    ItemsView.prototype.update_postings_taggings = function() {
+      var i, itemlist, itemsq,
+        _this = this;
+      this.postings = {};
+      console.log("itys", this.items);
+      itemlist = (function() {
+        var _i, _len, _ref, _results;
+        _ref = this.items;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          i = _ref[_i];
+          _results.push("items=" + (encodeURIComponent(i.basic.fqin)));
+        }
+        return _results;
+      }).call(this);
+      itemsq = itemlist.join("&");
+      return $.get("/adsgut/items/taggingsandpostings?" + itemsq, function(data) {
+        var e, fqin, k, v, _i, _len, _ref, _ref1, _ref2, _results;
+        _ref = get_taggings(data), _this.stags = _ref[0], _this.notes = _ref[1];
+        _ref1 = data.postings;
+        for (k in _ref1) {
+          if (!__hasProp.call(_ref1, k)) continue;
+          v = _ref1[k];
+          if (v[0] > 0) {
+            _this.postings[k] = (function() {
+              var _i, _len, _ref2, _results;
+              _ref2 = v[1];
+              _results = [];
+              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+                e = _ref2[_i];
+                _results.push(e.thething.postfqin);
+              }
+              return _results;
+            })();
+            console.log("POSTINGSSSSSSSSSSSSSSSS", _this.postings[k]);
+          } else {
+            _this.postings[k] = [];
+          }
+        }
+        _ref2 = _this.items;
+        _results = [];
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          i = _ref2[_i];
+          fqin = i.basic.fqin;
+          _this.itemviews[fqin].update(_this.postings[fqin], _this.notes[fqin], _this.stags[fqin]);
+          _results.push(_this.itemviews[fqin].render());
+        }
+        return _results;
+      });
     };
 
     ItemsView.prototype.render = function() {
-      var $ctrls, $lister, cback, eback, fqin, i, ins, v, _i, _len, _ref;
+      var $ctrls, $lister, cback, eback, fqin, i, ins, v, _i, _len, _ref,
+        _this = this;
       $lister = this.$('.items');
       $ctrls = this.$('.ctrls');
+      this.itemviews = {};
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -151,30 +217,32 @@
         console.log("INS", ins);
         v = new ItemView(ins);
         $lister.append(v.render().el);
+        this.itemviews[fqin] = v;
       }
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
+        console.log("ERROR", etext);
         return alert('Did not succeed');
       };
       cback = function(data) {
         var libs;
         console.log(data);
         libs = _.union(data.libraries, data.groups);
-        return $ctrls.append(w.postalall_form(this.nameable, this.itemtype, libs));
+        return $ctrls.append(w.postalall_form(_this.nameable, _this.itemtype, libs));
       };
       syncs.get_postables_writable(this.memberable, cback, eback);
       return this;
     };
 
     ItemsView.prototype.iDone = function() {
-      var cback, eback, loc;
-      loc = window.location;
+      var cback, eback,
+        _this = this;
       cback = function(data) {
-        console.log("return data", data, loc);
-        return window.location = loc;
+        console.log("return data", data, _this.loc);
+        alert(_this.loc);
+        return window.location = _this.loc;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
+        console.log("ERROR", etext, _this.loc);
         return alert('Did not succeed');
       };
       syncs.save_items(this.items, cback, eback);
@@ -183,7 +251,8 @@
     };
 
     ItemsView.prototype.submitPosts = function() {
-      var cback, eback, libs, loc, makepublic, postables;
+      var cback, eback, libs, loc, makepublic, postables,
+        _this = this;
       libs = this.$('.multilibrary').val();
       if (libs === null) {
         libs = [];
@@ -197,7 +266,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = loc;
+        return _this.update_postings_taggings();
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -208,7 +277,8 @@
     };
 
     ItemsView.prototype.submitTags = function() {
-      var cback, e, eback, loc, tags, tagstring;
+      var cback, e, eback, loc, tags, tagstring,
+        _this = this;
       tagstring = this.$('.tagsinput').val();
       console.log("TAGSTRING", tagstring);
       if (tagstring === "") {
@@ -250,7 +320,8 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = loc;
+        _this.$('.tagsinput').val("");
+        return _this.update_postings_taggings();
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);

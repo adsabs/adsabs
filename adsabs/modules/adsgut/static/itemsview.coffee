@@ -62,7 +62,13 @@ class ItemView extends Backbone.View
     console.log "PVIN",  @memberable
     @hv=undefined
 
+  update: (postings, notes, tags) =>
+    @stags=tags
+    @notes=notes
+    @postings=postings
+
   render: =>
+    @$el.empty()
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
     htmlstring = "<a href=\"#{url}\">#{@item.basic.name}</a><br/>"
@@ -101,7 +107,7 @@ class ItemView extends Backbone.View
     syncs.submit_note(item, notetext, cback, eback)
     return false
 
-#Collection
+#Collection for change postform
 class ItemsView extends Backbone.View
 
   events:
@@ -110,12 +116,33 @@ class ItemsView extends Backbone.View
     "click .done" : "iDone"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype} = options
-    console.log "ITEMS", @items
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc} = options
+    console.log "ITEMS", @items, @loc
+
+  update_postings_taggings: () =>
+    @postings={}
+    console.log("itys", @items)
+    itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in @items)
+    itemsq=itemlist.join("&")
+    $.get "/adsgut/items/taggingsandpostings?#{itemsq}", (data)=>
+        [@stags, @notes]=get_taggings(data)
+        for own k,v of data.postings
+            #console.log "2>>>", k,v[0],v[1]
+            if v[0] > 0
+                @postings[k]=(e.thething.postfqin for e in v[1])
+                console.log "POSTINGSSSSSSSSSSSSSSSS", @postings[k]
+            else
+                @postings[k]=[]
+        for i in @items
+            fqin=i.basic.fqin
+            @itemviews[fqin].update(@postings[fqin], @notes[fqin], @stags[fqin])
+            @itemviews[fqin].render()
+
 
   render: =>
     $lister=@$('.items')
     $ctrls=@$('.ctrls')
+    @itemviews={}
     for i in @items
         fqin=i.basic.fqin
         ins = 
@@ -127,13 +154,14 @@ class ItemsView extends Backbone.View
         console.log "INS", ins
         v=new ItemView(ins)
         $lister.append(v.render().el)
+        @itemviews[fqin]=v
     # for v in views
     #     $lister.append(v.render().el)
-    eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+    eback = (xhr, etext) =>
+        console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
-    cback = (data) ->
+    cback = (data) =>
         console.log data
         libs=_.union(data.libraries, data.groups)
         $ctrls.append(w.postalall_form(@nameable, @itemtype, libs))
@@ -141,14 +169,16 @@ class ItemsView extends Backbone.View
     return this
 
   iDone: =>
-    loc=window.location
-    cback = (data) ->
-        console.log "return data", data, loc
-        window.location=loc
-    eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+    #loc=window.location
+    cback = (data) =>
+        console.log "return data", data, @loc
+        alert(@loc)
+        window.location=@loc
+    eback = (xhr, etext) =>
+        console.log "ERROR", etext, @loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
+    #if you dont do things, atleast save items
     syncs.save_items(@items, cback, eback)
     #SHOULD HAVE A TAB CLOSE
     window.close()
@@ -164,10 +194,11 @@ class ItemsView extends Backbone.View
     if makepublic
         postables=postables.concat ['adsgut/group:public']
     loc=window.location
-    cback = (data) ->
+    cback = (data) =>
         console.log "return data", data, loc
-        window.location=loc
-    eback = (xhr, etext) ->
+        #window.location=loc
+        @update_postings_taggings()
+    eback = (xhr, etext) =>
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
@@ -185,10 +216,12 @@ class ItemsView extends Backbone.View
         tags=(e.trim() for e in tagstring.split(','))
         tags=(e for e in tags when e != "")
     loc=window.location
-    cback = (data) ->
+    cback = (data) =>
         console.log "return data", data, loc
-        window.location=loc
-    eback = (xhr, etext) ->
+        #window.location=loc
+        @$('.tagsinput').val("")
+        @update_postings_taggings()
+    eback = (xhr, etext) =>
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'

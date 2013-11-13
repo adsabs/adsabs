@@ -389,7 +389,7 @@
     h.br();
     return h.button(".btn.btn-inverse.done.pull-right", {
       type: 'button'
-    }, "I'm done");
+    }, "Save");
   });
 
   link = h.renderable(function(url, txt) {

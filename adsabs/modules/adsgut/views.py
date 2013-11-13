@@ -8,6 +8,7 @@ import mongogut
 from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify)
 import flask
 import simplejson as json
+#from simplejson import JSONDecodeError
 from random import choice
 from mongogut.commondefs import gettype
 from flask.ext.mongoengine import MongoEngine
@@ -43,6 +44,7 @@ else:
     adsgut_app=app
     adsgut=adsgut_blueprint
     from adsabs.extensions import mongoengine
+    from adsabs.extensions import solr
     #adsgut_app.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
 
 #print dir(adsgut), type(adsgut)
@@ -244,6 +246,7 @@ def before_request():
     except:
         adsid=None
     print "USER", adsid, current_user.get_id()
+    #print "POSTER", url_for('adsgut.postForm', itemtypens='ads', itemtypename='pub')
     p=itemsandtags.Postdb(mongoengine)
     w=p.whosdb
     g.db=w
@@ -466,7 +469,7 @@ def createPostable(g, request, ptstr):
 def createGroup():
     if request.method == 'POST':
         newgroup=createPostable(g, request, "group")
-        return jsonify(newgroup)
+        return jsonify(postable=newgroup)
     else:
         doabort("BAD_REQ", "GET not supported")
 
@@ -474,7 +477,7 @@ def createGroup():
 def createApp():
     if request.method == 'POST':
         newapp=createPostable(g, request, "app")
-        return jsonify(newapp)
+        return jsonify(postable=newapp)
     else:
         doabort("BAD_REQ", "GET not supported")
 
@@ -482,7 +485,7 @@ def createApp():
 def createLibrary():
     if request.method == 'POST':
         newlibrary=createPostable(g, request, "library")
-        return jsonify(newlibrary)
+        return jsonify(postable=newlibrary)
     else:
         doabort("BAD_REQ", "GET not supported")
 
@@ -1252,43 +1255,131 @@ def itemsinfo():
     theitems=[{'basic':{'name':i.split('/')[-1], 'fqin':i}} for i in items]
     return jsonify({'items': theitems, 'count':len(theitems)})
 
+# @visualization_blueprint.route('/alladin_lite', methods=['GET', 'POST'])
+# def alladin_lite():
+#     """
+#     View that creates the data for alladin lite
+#     """
+#     #if there are not bibcodes, there should be a query to extract the authors
+#     if request.values.has_key('bibcode'):
+#         bibcodes = request.values.getlist('bibcode')
+#     else:
+#         try:
+#             query_components = json.loads(request.values.get('current_search_parameters'))
+#         except (TypeError, JSONDecodeError):
+#             #@todo: logging of the error
+#             return render_template('errors/generic_error.html', error_message='Error. Please try later.')
+
+#         #update the query parameters to return only what is necessary
+#         query_components.update({
+#             'facets': [],
+#             'fields': ['bibcode'],
+#             'highlights': [],
+#             'rows': str(config.SEARCH_DEFAULT_ROWS)
+#             })
+
+#         resp = solr.query(**query_components)
+
+#         if resp.is_error():
+#             return render_template('errors/generic_error.html', error_message='Error while creating the objects skymap. Please try later.')
+
+#         bibcodes = [x.bibcode for x in resp.get_docset_objects()]
+
+#     return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})
+#'{{ url_for('adsgut.PostForm', itemtypens='ads', itemtypename='pub') }}'
+from config import config
+
 @adsgut.route('/postform/<itemtypens>/<itemtypename>/html', methods=['POST', 'GET'])
 def postForm(itemtypens, itemtypename):
+    qstring=""
     print "NS,NAME", itemtypens, itemtypename
     itemtype=itemtypens+"/"+itemtypename
     if request.method=='POST':
-        return "Not Yet Done"
+        if itemtype=="ads/pub": 
+            print "RVALS", request.values
+            current_page=request.referrer
+            if request.values.has_key('bibcode'):
+                bibcodes = request.values.getlist('bibcode')
+                print "got bibcodes here", bibcodes
+            else:
+                try:
+                    query_components = json.loads(request.values.get('current_search_parameters'))
+                except:
+                    #except (TypeError, JSONDecodeError):
+                    #@todo: logging of the error
+                    return render_template('errors/generic_error.html', error_message='Error. Please try later.')
+
+                #update the query parameters to return only what is necessary
+                query_components.update({
+                    'facets': [],
+                    'fields': ['bibcode'],
+                    'highlights': [],
+                    'rows': str(config.SEARCH_DEFAULT_ROWS)
+                    })
+
+                resp = solr.query(**query_components)
+
+                if resp.is_error():
+                    return render_template('errors/generic_error.html', error_message='Error while loading bibcodes for posting. Please try later.')
+
+                bibcodes = [x.bibcode for x in resp.get_docset_objects()]
+                print "g2bc here", bibcodes
+            items=["ads/"+i for i in bibcodes]
+            print "ITTEMS", items
+        elif itemtype=="ads/search":
+            itemstring=query.get('items',[''])[0]
     else:
         print "ITEMTYPE", itemtype
         query=dict(request.args)
         querystring=request.query_string
         itemstring=query.get('items',[''])[0]
         items=itemstring.split(':')
-        theitems=[]
-        if itemtype=="ads/pub":
-            theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
-        if itemtype=="ads/search":
-            theitems=[{ 'basic':{'name':itemstring,'fqin':'ads/'+itemstring}}]
-        print "THEITEMS", theitems
-        #How do we BUG get itemtype. we should redofqin to ads/pub:name as the itemtype
-        #always determines the namespace of the item. This would mean name had to be
-        #globally unique rather than locally for user usage, unless we have a dual name
-        #currently get from url
-        singlemode=False
-        if len(theitems) ==1:
-            singlemode=True
-        #this ought to be got from itemtype, currently BUG hack
-        nameable=False
-        if itemtype=="ads/search":
-            nameable=True  
-        if nameable and singlemode:
-            nameable=True
+        if query.get('currpage', ''):
+            current_page = query.get('currpage')[0]
+        else:
+            current_page = request.referrer
+            if current_page==None:
+                current_page=request.url
+    theitems=[]
+    if itemtype=="ads/pub":
+        theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
+    elif itemtype=="ads/search":
+        theitems=[{ 'basic':{'name':itemstring,'fqin':'ads/'+itemstring}}]
+    print "THEITEMS", theitems
+    #How do we BUG get itemtype. we should redofqin to ads/pub:name as the itemtype
+    #always determines the namespace of the item. This would mean name had to be
+    #globally unique rather than locally for user usage, unless we have a dual name
+    #currently get from url
+    singlemode=False
+    if len(theitems) ==1:
+        singlemode=True
+    #this ought to be got from itemtype, currently BUG hack
+    nameable=False
+    if itemtype=="ads/pub":
+        qstring=":".join(items)
+    elif itemtype=="ads/search":
+        nameable=True
+        qstring=itemstring
+    if nameable and singlemode:
+        nameable=True
+    print "QSTRING", qstring, current_page
+    if request.method=="POST":
+        return render_template('postform_fancy.html', items=theitems, 
+            querystring=qstring, 
+            singlemode=singlemode,
+            nameable=nameable,
+            itemtype=itemtypename,
+            curpage=current_page,
+            useras=g.currentuser)
+    else:
+        print "Rendering in postform2"
         return render_template('postform2.html', items=theitems, 
-                querystring=querystring, 
-                singlemode=singlemode,
-                nameable=nameable,
-                itemtype=itemtypename,
-                useras=g.currentuser)
+            querystring=qstring, 
+            singlemode=singlemode,
+            nameable=nameable,
+            itemtype=itemtypename,
+            curpage=current_page,
+            useras=g.currentuser)
 
 
 #making the import:

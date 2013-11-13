@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_ownership, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_posts, submit_tags, toggle_rw;
+  var $, accept_invitation, add_group, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_posts, submit_tags, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -111,6 +111,15 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       memberable: adsid,
       op: 'invite',
       changerw: changerw
+    };
+    return send_params(url, data, cback, eback);
+  };
+
+  create_postable = function(postable, postabletype, cback, eback) {
+    var data, url;
+    url = prefix + ("/" + postabletype);
+    data = {
+      name: postable
     };
     return send_params(url, data, cback, eback);
   };
@@ -250,7 +259,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     submit_note: submit_note,
     submit_tags: submit_tags,
     submit_posts: submit_posts,
-    save_items: save_items
+    save_items: save_items,
+    create_postable: create_postable
   };
 
 }).call(this);

@@ -45,8 +45,15 @@ format_tags_for_item = (fqin, stags, nick) ->
   else
     return ""
 
+parse_fortype = (fqin) -> 
+    vals = fqin.split(':')
+    vals2 = vals[-2+vals.length].split('/')
+    return vals2[-1+vals2.length]
+
 format_postings_for_item = (fqin, postings, nick) ->
-  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt "#{nick}/group:default")
+  publ= "adsgut/group:public"
+  priv= "#{nick}/group:default"
+  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
   if p2list.length >0
     return "<span>Posted in "+p2list.join(", ")+"</span><br/>"
   else
@@ -264,6 +271,33 @@ class AddGroup extends Backbone.View
     syncs.add_group(groupchosen, @postable, changerw, cback, eback)
 
 
+class CreatePostable extends Backbone.View
+
+  tagName: 'div'
+
+  events:
+    "click .sub" : "createPostableEH"
+
+  initialize: (options) ->
+    {@postabletype} = options
+    @content=widgets.one_submit("Start a new #{@postabletype}", "Create")
+
+  render: () =>
+    @$el.html(@content)
+    return this
+
+  createPostableEH: =>
+    loc=window.location
+    cback = (data) ->
+            console.log "return data", data, loc
+            window.location=location
+    eback = (xhr, etext) ->
+        console.log "ERROR", etext, loc
+        #replace by a div alert from bootstrap
+        alert "Did not succeed: #{etext}"
+    postable=@$('.txt').val()
+    syncs.create_postable(postable, @postabletype, cback, eback)
+
 root.get_tags = get_tags
 root.get_taggings = get_taggings
 root.format_items = format_items
@@ -279,6 +313,7 @@ root.views =
   postable_inviteds: postable_inviteds
   InviteUser: InviteUser
   AddGroup: AddGroup
+  CreatePostable: CreatePostable
 root.templates =
   library_info: library_info_template
   group_info: group_info_template

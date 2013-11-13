@@ -165,6 +165,7 @@ def _configure_extensions(app):
 
     #RAHUL
     mongoengine.init_app(app)
+    #print "ME", dir(mongoengine), dir(mongoengine.connection)
     
 def _configure_error_handlers(app):
     """

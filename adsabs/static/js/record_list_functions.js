@@ -117,6 +117,7 @@ var ResultListManager = function() {
 			this.remove_hidden();
 			this.disable_sorting();
 
+<<<<<<< HEAD
 			// if bibcodes are selected simply submit the form to the export url
 			if (this.bibcodes_checked().length > 0) {
 				this.enable_query_params();
@@ -243,3 +244,36 @@ var ResultListManager = function() {
         }
 	}
 }();
+
+
+ResultListManager.export_to_libraries = function()
+{
+    $.fancybox.showLoading();
+    //re-enable query parameters
+    $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+    //remove a hidden fields if exists
+    $('#search_results_form > input.ajaxHiddenField').remove();
+    var url='/adsgut/postform/ads/pub/html';
+    console.log("KKKKKKK", $('#search_results_form').serializeArray());
+    //alert(url);
+    //submit the form via ajax
+    $.ajax({
+        type : "POST",
+        cache : false,
+        url : url,
+        data : $('#search_results_form').serializeArray(),
+        success: function(outdata) {
+            //console.log("OUTDATA", outdata)
+            $.fancybox.hideLoading();
+            $.fancybox({
+                'width'         : '75%',
+                'height'        : '75%',
+                'autoScale'     : false,
+                'type'          : 'iframe',
+                'content'       : outdata
+            });
+        }
+    });
+    
+    
+};

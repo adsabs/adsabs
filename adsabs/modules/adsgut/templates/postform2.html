@@ -11,13 +11,14 @@ $=jQuery
 console.log "In Postform"
 #currently below only works for pubs, but ought to work otherwise too
 $ -> 
+  loc="{{curpage | safe}}"
   nam=false
   {% if nameable %}
   nam=true
   {% endif %}
   vars="{{ querystring | safe }}"
   console.log "VARS",vars
-  $.get "{{ url_for('adsgut.itemsinfo') }}?#{vars}", (data) ->
+  $.get "{{ url_for('adsgut.itemsinfo') }}?items=#{vars}", (data) ->
     console.log "Item Count", data.count, data.items, vars, data
     theitems=data.items
     thecount=data.count
@@ -47,6 +48,7 @@ $ ->
         nameable: nam
         itemtype:'{{itemtype}}'
         memberable:'{{useras.nick}}'
+        loc: loc
 
       plinv=new itemsdo.ItemsView(ido)
       plinv.render()
