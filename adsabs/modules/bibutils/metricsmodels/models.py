@@ -40,10 +40,9 @@ def get_subset(mlist,year):
     for entry in mlist:
         if int(entry[0][:4]) > int(year):
             continue
-        newvec = entry[:9]
-        citations = entry[8]
-        citations = filter(lambda a: int(a[0][:4]) <= int(year), citations)
-        newvec.append(citations)
+        newvec = entry[:8]
+        citations = entry[8]['citations']
+        citations = filter(lambda a: int(a[:4]) <= int(year), citations)
         newvec[2]  = len(citations)
         newlist.append(newvec)
     return newlist
@@ -146,10 +145,9 @@ class Metrics():
         except:
             e = 'NA'
         # get the Tori index
-        tori_list = [item for sublist in cls.tori_data for item in sublist]
-        tori = sum(map(lambda c: 1.0/float(c), 
-                   map(lambda b: max(b[1],config.METRICS_MIN_BIBLIO_LENGTH)*b[2],
-                   filter(lambda a: len(a) > 0, tori_list))))
+        rn_citations = map(lambda a: a['rn_citations'], cls.metrics_data)
+        auth_nums    = map(lambda a: 1.0/float(a['author_num']), cls.metrics_data)
+        tori = vector_product(rn_citations,auth_nums)
         try:
             riq = int(1000.0*sqrt(float(tori))/float(cls.time_span))
         except:
@@ -249,12 +247,8 @@ class TimeSeries():
         maxYear = today.year
         cls.series = {}
         cls.pre_process()
-        tori_list = [item for sublist in cls.tori_data for item in sublist]
         for year in range(minYear, maxYear+1):
-            year_data = filter(lambda a: int(a[0][:4]) <= year and a[3] <= year, tori_list)
-            tori = sum(map(lambda c: 1.0/float(c), 
-                   map(lambda b: max(b[1],config.METRICS_MIN_BIBLIO_LENGTH)*b[2],
-                   filter(lambda a: len(a) > 0, year_data))))
+            tori = sum([value for d in cls.metrics_data for (yr,value) in d['rn_citations_hist'].items() if int(yr) <= year])
             new_list = get_subset(cls.attributes,year)
             new_list = sort_list_of_lists(new_list,2)
             citations = map(lambda a: a[2], new_list)
@@ -443,14 +437,14 @@ class RefereedCitationStatistics(Statistics):
 
 class TotalMetrics(Metrics):
     config_data_name = 'metrics'
-
+    # Tori follows from 'rn_normalized' citation values and the inverse author number for each paper
     @classmethod
     def pre_process(cls):
         biblist = map(lambda a: a[0], cls.attributes)
         cls.time_span = get_timespan(biblist)
         cls.refereed = 0
         cls.citations = map(lambda a: a[2], cls.attributes)
-        cls.tori_data = map(lambda a: a[8], cls.attributes)
+        cls.metrics_data = map(lambda a: a[8], cls.attributes)
 
     @classmethod
     def post_process(cls):
@@ -474,7 +468,7 @@ class RefereedMetrics(Metrics):
         cls.refereed = 1
         cls.citations = map(lambda b: b[2],
                            filter(lambda a: a[1] == 1, cls.attributes))
-        cls.tori_data = map(lambda a: a[9], cls.attributes)
+        cls.metrics_data = map(lambda b: b[8], filter(lambda a: a[1] == 1, cls.attributes))
 
     @classmethod
     def post_process(cls):
@@ -558,12 +552,10 @@ class AllCitationsHistogram(Histogram):
         min_year = 9999
         for vec in cls.attributes:
             min_year = min(int(vec[0][:4]), min_year)
-            for citation in vec[8]:
-                data.append((int(citation[0][:4]), 1.0/float(vec[4])))
+            for citation in vec[8]['citations']:
+                data.append((int(citation[:4]), 1.0/float(vec[4])))
                 if vec[1]:
-                    refereed_data.append((int(citation[0][:4]), 1.0/float(vec[4])))
-#                else:
-#                    data.append((int(citation[0][:4]), 1.0/float(vec[4])))
+                    refereed_data.append((int(citation[:4]), 1.0/float(vec[4])))
         cls.data = data
         cls.refereed_data = refereed_data
         cls.min_year = min_year
@@ -593,12 +585,10 @@ class RefereedCitationsHistogram(Histogram):
         min_year = 9999
         for vec in cls.attributes:
             min_year = min(int(vec[0][:4]), min_year)
-            for citation in vec[9]:
-                data.append((int(citation[0][:4]), 1.0/float(vec[4])))
+            for citation in vec[8]['refereed_citations']:
+                data.append((int(citation[:4]), 1.0/float(vec[4])))
                 if vec[1]:
-                    refereed_data.append((int(citation[0][:4]), 1.0/float(vec[4])))
-#                else:
-#                    data.append((int(citation[0][:4]), 1.0/float(vec[4])))
+                    refereed_data.append((int(citation[:4]), 1.0/float(vec[4])))
         cls.data = data
         cls.refereed_data = refereed_data
         cls.min_year = min_year
@@ -628,12 +618,10 @@ class NonRefereedCitationsHistogram(Histogram):
         min_year = 9999
         for vec in cls.attributes:
             min_year = min(int(vec[0][:4]), min_year)
-            for citation in vec[10]:
+            for citation in filter(lambda a: a not in vec[8]['refereed_citations'], vec[8]['citations']):
                 data.append((int(citation[0][:4]), 1.0/float(vec[4])))
                 if vec[1]:
                     refereed_data.append((int(citation[0][:4]), 1.0/float(vec[4])))
-#                else:
-#                    data.append((int(citation[0][:4]), 1.0/float(vec[4])))
         cls.data = data
         cls.refereed_data = refereed_data
         cls.min_year = min_year
@@ -653,7 +641,12 @@ class MetricsSeries(TimeSeries):
 
     @classmethod
     def pre_process(cls):
-        cls.tori_data = map(lambda a: a[8], cls.attributes)
+        cls.metrics_data = []
+        # divide the values of the reference-normalized citation histogram by the number of
+        # authors of cited paper (so that Tori is just sum of the values)
+        for md in map(lambda a: a[8], cls.attributes):
+            md['rn_citations_hist'].update((k,float(v)/float(md['author_num'])) for k, v in md['rn_citations_hist'].items())
+            cls.metrics_data.append(md)
 
     @classmethod
     def post_process(cls):

@@ -13,7 +13,6 @@ from itertools import groupby
 from flask import current_app as app
 from config import config
 from utils import get_references
-from utils import get_citations
 from utils import get_citing_papers
 from utils import get_meta_data
  

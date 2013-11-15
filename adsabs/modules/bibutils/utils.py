@@ -15,6 +15,7 @@ from multiprocessing import Process, Queue, cpu_count
 import xlwt
 import uuid
 import simplejson
+import pymongo
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
 from flask.ext.adsdata import adsdata #@UnresolvedImport
@@ -26,58 +27,6 @@ from .errors import SolrMetaDataQueryError
 from .errors import MongoQueryError
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
-
-class CitationHarvester(Process):
-    """
-    Class to allow parallel retrieval from citation lists from Solr
-    """
-    def __init__(self, task_queue, result_queue):
-        Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
-
-    def run(self):
-        while True:
-            bbc = self.task_queue.get()
-            if bbc is None:
-                break
-            Nauths = 1
-            try:
-                bibcode,Nauths = bbc.split('/')
-            except:
-                bibcode = bbc
-            q = 'citations(bibcode:%s)' % bibcode
-            fl= 'bibcode,property,reference'
-            try:
-                result_field = 'results'
-                # do the query and filter out the results without the bibcode field
-                # (publications without citations return an empty document)
-                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                search_results = resp.search_response()
-                # gather citations and put them into the results queue
-                citations = []
-                cits = []
-                ref_cits = []
-                non_ref_cits = []
-                for doc in search_results[result_field]['docs']:
-                    if not 'bibcode' in doc:
-                        continue
-                    pubyear = int(bibcode[:4])
-                    try:
-                        Nrefs = len(doc['reference'])
-                    except:
-                        Nrefs = 0
-                    citations.append(doc['bibcode'])
-                    cits.append((doc['bibcode'],Nrefs,int(Nauths),pubyear))
-                    if 'REFEREED' in doc['property']:
-                        ref_cits.append((doc['bibcode'],Nrefs,int(Nauths),pubyear))
-                    else:
-                        non_ref_cits.append((doc['bibcode'],Nrefs,int(Nauths),pubyear))
-                self.result_queue.put({'bibcode':bibcode,'citations':citations,'cit_info':cits,'ref_cit_info':ref_cits,'non_ref_cit_info':non_ref_cits})
-            except SolrCitationQueryError, e:
-                app.logger.error("Solr citation query for %s blew up (%s)" % (bibcode,e))
-                raise
-        return
 
 class DataHarvester(Process):
     """
@@ -129,57 +78,6 @@ class MongoHarvester(Process):
                 raise
         return
 
-class MongoCitationHarvester(Process):
-    """
-    Class to allow parallel retrieval from citation data from Mongo
-    """
-    def __init__(self, task_queue, result_queue):
-        Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
-    def _get_references_number(self,bbc):
-        collection = adsdata.get_collection('references')
-        res = collection.find_one({'_id': bbc})
-        Nrefs = 0
-        if res:
-            Nrefs = len(res.get('references',[]))
-        return Nrefs
-    def _is_refereed(self,bbc):
-        collection = adsdata.get_collection('refereed')
-        res = collection.find_one({'_id': bbc})
-        if res:
-            return True
-        else:
-            return False
-    def run(self):
-        while True:
-            bbc = self.task_queue.get()
-            if bbc is None:
-                break
-            Nauths = 1
-            try:
-                bibcode,Nauths = bbc.split('/')
-            except:
-                bibcode = bbc
-            try:
-                pubyear = int(bibcode[:4])
-                cit_collection = adsdata.get_collection('citations')
-                res1 = cit_collection.find_one({'_id': bibcode})
-                if res1:
-                    citations = res1.get('citations',[])
-                    refereed_citations = filter(lambda a: self._is_refereed(a)==True, citations)
-                    non_refereed_citations = filter(lambda a: a not in refereed_citations, citations)
-                    cits = [(x,self._get_references_number(x),int(Nauths),pubyear) for x in citations]
-                    ref_cits = [(x,self._get_references_number(x),int(Nauths),pubyear) for x in refereed_citations]
-                    non_ref_cits = [(x,self._get_references_number(x),int(Nauths),pubyear) for x in non_refereed_citations]
-                else:
-                    citations = cits = ref_cits = non_ref_cits = []
-                self.result_queue.put({'bibcode':bibcode,'citations':citations,'cit_info':cits,'ref_cit_info':ref_cits,'non_ref_cit_info':non_ref_cits})
-            except MongoQueryError, e:
-                app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
-                raise
-        return
-
 class MongoCitationListHarvester(Process):
     """
     Class to allow parallel retrieval of citation data from Mongo
@@ -207,7 +105,32 @@ class MongoCitationListHarvester(Process):
                 raise
         return
 
-def get_citations(**args):
+class MetricsDataHarvester(Process):
+    """
+    Class to allow parallel retrieval of citation data from Mongo
+    """
+    def __init__(self, task_queue, result_queue):
+        Process.__init__(self)
+        self.task_queue = task_queue
+        self.result_queue = result_queue
+        client = pymongo.MongoClient(config.METRICS_MONGO_HOST,config.METRICS_MONGO_PORT)
+        db = client[config.METRICS_DATABASE]
+        db.authenticate(config.METRICS_MONGO_USER, config.METRICS_MONGO_PASSWORD)
+        self.metrics_collection = db[config.METRICS_COLLECTION]
+    def run(self):
+        while True:
+            bibcode = self.task_queue.get()
+            if bibcode is None:
+                break
+            try:
+                metr_data = self.metrics_collection.find_one({'_id': bibcode})
+                self.result_queue.put(metr_data)
+            except MongoQueryError, e:
+                app.logger.error("Mongo metrics data query for %s blew up (%s)" % (bibcode,e))
+                raise
+        return
+
+def get_metrics_data(**args):
     """
     Method to prepare the actual citation dictionary creation
     """
@@ -215,25 +138,11 @@ def get_citations(**args):
     tasks = Queue()
     results = Queue()
     # how many threads are there to be used
-    if 'threads' in args:
-        threads = args['threads']
-    else:
-        threads = cpu_count()
-    # for the metrics module we need more metadata
-    if 'type' in args:
-        data_type = args['type']
-    else:
-        data_type = 'default'
-    if data_type == 'metrics':
-        pubdata = args['pubdata']
-        bibcodes = map(lambda a: "%s/%s"%(a,max(1,len(pubdata[a].get('author_norm',0)))),args['bibcodes'])
-    else:
-        bibcodes = args['bibcodes']
-    # initialize the "harvesters" (each harvester get the citations for a bibcode)
-    if config.BIBUTILS_CITATION_SOURCE == 'SOLR':
-        harvesters = [ CitationHarvester(tasks, results) for i in range(threads)]
-    else:
-        harvesters = [ MongoCitationHarvester(tasks, results) for i in range(threads)]
+    threads = args.get('threads',cpu_count())
+    # get the bibcodes for which to get metrics data
+    bibcodes = args.get('bibcodes',[])
+    # initialize the "harvesters" (each harvester get the metrics data for a bibcode)
+    harvesters = [ MetricsDataHarvester(tasks, results) for i in range(threads)]
     # start the harvesters
     for b in harvesters:
         b.start()
@@ -245,59 +154,16 @@ def get_citations(**args):
     # add some 'None' values at the end of the tasks list, to faciliate proper closure
     for i in range(threads):
         tasks.put(None)
-    # gather all results into one citation dictionary
-    cit_dict = {}
-    ref_cit_dict = {}
-    non_ref_cit_dict = {}
+    # gather all results into one metrics data dictionary
+    metrics_data_dict = {}
     while num_jobs:
         data = results.get()
-        if len(data['citations']) > 0:
-            if data_type == 'default':
-                cit_dict[data['bibcode']] = data['citations']
-            else:
-                cit_dict[data['bibcode']] = data['cit_info']
-                ref_cit_dict[data['bibcode']] = data['ref_cit_info']
-                non_ref_cit_dict[data['bibcode']] = data['non_ref_cit_info']
+        try:
+            metrics_data_dict[data['_id']] = data
+        except:
+            pass
         num_jobs -= 1
-
-    if data_type == 'default':
-        return cit_dict
-    else:
-        return cit_dict,ref_cit_dict,non_ref_cit_dict
-
-def get_publication_data(**args):
-    """
-    Method to prepare the actual citation dictionary creation
-    """
-    # create the queues
-    tasks = Queue()
-    results = Queue()
-    # how many threads are there to be used
-    if 'threads' in args:
-        threads = args['threads']
-    else:
-        threads = cpu_count()
-    # initialize the "harvesters" (each harvester get the citations for a bibcode)
-    harvesters = [ DataHarvester(tasks, results) for i in range(threads)]
-    # start the harvesters
-    for b in harvesters:
-        b.start()
-    # put the bibcodes in the tasks queue
-    num_jobs = 0
-    for biblist in args['biblists']:
-        tasks.put(biblist)
-        num_jobs += 1
-    # add some 'None' values at the end of the tasks list, to faciliate proper closure
-    for i in range(threads):
-        tasks.put(None)
-    # gather all results into one publication dictionary
-    publication_data = {}
-    while num_jobs:
-        data = results.get()
-        for item in data:
-            publication_data[item['bibcode']] = item
-        num_jobs -= 1
-    return publication_data
+    return metrics_data_dict
 
 def get_meta_data(**args):
     """
