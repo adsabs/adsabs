@@ -24,3 +24,4 @@ class MetricsInputForm(Form):
     """
     bibcodes = TextAreaField('bibcodes')
     layout = TextField('layout')
+    current_search_parameters = TextField('current_search_parameters')

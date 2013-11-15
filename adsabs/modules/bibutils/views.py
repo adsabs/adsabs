@@ -10,12 +10,14 @@ from flask import (Blueprint, render_template, flash, request, jsonify, g, curre
 from flask import Response
 from werkzeug.datastructures import Headers
 import os
+import simplejson as json
 from adsabs.core.form_functs import is_submitted_cust
 from config import config #the global config object
 from .biblio_functions import get_suggestions
 from .metrics_functions import generate_metrics
 from .metrics_functions import legacy_format
 from .utils import export_metrics
+from .utils import get_publications_from_query
 from .errors import CitationHelperCannotGetResults
 
 __all__ = ['bibutils_blueprint', 'index_bibutils', 'citation_helper','metrics']
@@ -144,7 +146,17 @@ def metrics(**args):
             layout = 'NO'
         # the form was submitted, so get the contents from the submit box
         # make sure we have a list of what seem to be bibcodes
-        bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
+        query_bibcodes = []
+        try:
+            query_par = str(form.current_search_parameters.data.strip())
+            query = json.loads(query_par)['q']
+            query_bibcodes = get_publications_from_query(query)
+        except:
+            pass
+        if len(query_bibcodes) == 0:
+            bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
+        else:
+            bibcodes = query_bibcodes
         bibcodes = filter(lambda a: len(a) == 19, bibcodes)
         # no bibcodes? display message and re-display input form
         if len(bibcodes) == 0:
