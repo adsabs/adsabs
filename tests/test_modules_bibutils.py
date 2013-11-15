@@ -35,14 +35,6 @@ class TestCitationHelper(AdsabsBaseTestCase):
             self.app.preprocess_request()
             self.assertEqual(bf.get_suggestions(), [])
 
-    def test_citation_list(self):
-        import types
-        with self.app.test_request_context('/bibutils'):
-            self.app.preprocess_request()
-            cits = utils.get_citations(bibcodes=['1996ApJ...469..437S'])
-            self.assertEqual(type(cits),types.DictType)
-            self.assertTrue(len(cits)>0)
-
     def test_reference_list(self):
         import types
         with self.app.test_request_context('/bibutils'):
