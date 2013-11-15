@@ -153,7 +153,7 @@ def metrics(**args):
     if len(bibcodes) > 0:
         # we have a list of bibcodes, so start working
         try:
-            results = generate_metrics(bibcodes=bibcodes, types='statistics,histograms,metrics,series', fmt=format)
+            results = generate_metrics(bibcodes=bibcodes, fmt=format)
         except Exception, err:
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
             return render_template('metrics_no_results.html', include_layout=layout)
