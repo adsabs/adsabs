@@ -23,7 +23,7 @@ from adsabs.modules.api.api_user import AdsApiUser, PERMISSION_LEVELS
 from config import config
 from adsabs.app import create_app
 
-class AdsabsBaseTestCase(fixtures.TestWithFixtures):
+class AdsabsBaseTestCase(fixtures.TestWithFixtures, unittest.TestCase):
     
     def setUp(self):
         self.box = mongobox.MongoBox(scripting=True, auth=True)
