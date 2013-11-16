@@ -286,7 +286,7 @@ def get_references(**args):
 def get_publications_from_query(q):
     try:
         # Get the information from Solr
-        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['reference'])
+        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'])
     except SolrReferenceQueryError, e:
         app.logger.error("Solr publications query for %s blew up (%s)" % (q,e))
         raise

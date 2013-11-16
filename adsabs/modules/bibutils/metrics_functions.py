@@ -77,10 +77,15 @@ def get_attributes(args):
     # keyed on bibcode
     ads_data = get_mongo_data(bibcodes=bibcodes)
     missing_bibcodes = filter(lambda a: a not in ads_data.keys(), bibcodes)
-    app.logger.error("Bibcodes found with missing metadata: %s" % ",".join(missing_bibcodes))
+    if len(missing_bibcodes) > 0:
+        app.logger.error("Bibcodes found with missing metadata: %s" % ",".join(missing_bibcodes))
     bibcodes = filter(lambda a: a not in missing_bibcodes, bibcodes)
     # Get precomputed and citation data
     metrics_data = get_metrics_data(bibcodes=bibcodes)
+    missing_bibcodes = filter(lambda a: a not in metrics_data.keys(), bibcodes)
+    if len(missing_bibcodes) > 0:
+        app.logger.error("Bibcodes found with missing metrics data: %s" % ",".join(missing_bibcodes))
+    bibcodes = filter(lambda a: a not in missing_bibcodes, bibcodes)
     # Get the number of citing papers
     Nciting = len(list(set(itertools.chain(*map(lambda a: a['citations'], metrics_data.values())))))
     Nciting_ref = len(list(set(itertools.chain(*map(lambda a: a['refereed_citations'], metrics_data.values())))))
