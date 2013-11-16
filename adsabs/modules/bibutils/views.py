@@ -156,7 +156,7 @@ def metrics(**args):
         if len(query_bibcodes) == 0:
             bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
         else:
-            bibcodes = query_bibcodes
+            bibcodes = query_bibcodes[:config.EXPORT_DEFAULT_ROWS]
         bibcodes = filter(lambda a: len(a) == 19, bibcodes)
         # no bibcodes? display message and re-display input form
         if len(bibcodes) == 0:
