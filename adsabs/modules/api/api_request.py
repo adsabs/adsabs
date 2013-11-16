@@ -73,7 +73,10 @@ class ApiSearchRequest(object):
         
         if len(self.form.hl.data):
             for hl in self.form.hl.data:
-                req.add_highlight(hl.split(':'))
+                if ':' in hl:
+                    req.add_highlight(*hl.split(':'))
+                else:
+                    req.add_highlight(hl)
                 
         if len(self.form.filter.data):
             for fltr in self.form.filter.data:

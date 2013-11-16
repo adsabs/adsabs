@@ -536,6 +536,44 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         resp = json.loads(rv.data)
         self.assertIn('id', resp)
              
+    
+    @unittest.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
+    def test_returned_highlights(self):
+        self.insert_user("foo", developer=True, level="devel")
+        api_user = AdsApiUser.from_dev_key("foo_dev_key")
+        
+        rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract')
+        resp = json.loads(rv.data)
+        for doc in resp['results']['docs']:
+            self.assertIn('highlights', doc)
+            self.assertIn('abstract', doc['highlights'])
+            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            
+        rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract:2')
+        resp = json.loads(rv.data)
+        maxh = 0
+        for doc in resp['results']['docs']:
+            self.assertIn('highlights', doc)
+            self.assertIn('abstract', doc['highlights'])
+            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            if len(doc['highlights']['abstract']) > maxh:
+                maxh = len(doc['highlights']['abstract'])
+        
+        self.assertTrue(maxh == 2, "Twere were too few/many hightlights returned, requested=2, returned=%s" % maxh )
+        
+        # multiple fields
+        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2013MNRAS.435.3559T&qf=full+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=full:3')
+        resp = json.loads(rv.data)
+        for doc in resp['results']['docs']:
+            self.assertIn('highlights', doc)
+            self.assertIn('abstract', doc['highlights'])
+            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            self.assertIn('full', doc['highlights'])
+            self.assertIn('<em>black', doc['highlights']['full'][0])
+            self.assertTrue(len(doc['highlights']['abstract']) == 1, "Too many highlights")
+            self.assertTrue(len(doc['highlights']['full']) == 3, "Too few highlights")    
+        
+             
          
      
 if __name__ == '__main__':
