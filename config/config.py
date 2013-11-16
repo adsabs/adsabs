@@ -100,8 +100,9 @@ class AppConfig(object):
     SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
                                   'pubdate','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader', '[citations]']
     
-    SOLR_SEARCH_DEFAULT_QUERY_FIELDS = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all full^0.1 year"
-    SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY = "author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all year"
+    SOLR_SEARCH_DEFAULT_QUERY_FIELDS = None # None=use the defaults configured by our search service
+    SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY = "first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all year"
+
 
     SOLR_SEARCH_DEFAULT_FACETS = [
         # tuple format: (solr field name, limit, mincount, output key, prefix)
