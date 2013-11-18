@@ -46,7 +46,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
   doajax = $.ajax;
 
-  prefix = "/adsgut";
+  prefix = GlobalVariables.ADS_PREFIX + "/adsgut";
 
   send_params = function(url, data, cback, eback) {
     var params, xhr;

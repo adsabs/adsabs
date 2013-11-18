@@ -15,7 +15,7 @@
 
   w = widgets;
 
-  prefix = "/adsgut";
+  prefix = GlobalVariables.ADS_PREFIX + "/adsgut";
 
   format_tags = function(tagtype, $sel, tags, tagqkey) {
     var htmlstring, k, nonqloc, t, url, urla, v, _i, _len, _ref;

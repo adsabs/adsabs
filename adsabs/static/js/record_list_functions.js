@@ -253,8 +253,8 @@ ResultListManager.export_to_libraries = function()
     $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
     //remove a hidden fields if exists
     $('#search_results_form > input.ajaxHiddenField').remove();
-    var url='/adsgut/postform/ads/pub/html';
-    console.log("KKKKKKK", $('#search_results_form').serializeArray());
+    var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
+    //console.log("KKKKKKK", $('#search_results_form').serializeArray());
     //alert(url);
     //submit the form via ajax
     $.ajax({

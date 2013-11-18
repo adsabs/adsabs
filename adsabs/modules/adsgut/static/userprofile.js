@@ -15,7 +15,7 @@
 
   w = widgets;
 
-  prefix = "/adsgut";
+  prefix = GlobalVariables.ADS_PREFIX + "/adsgut";
 
   parse_fqin = function(fqin) {
     var vals;

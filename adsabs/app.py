@@ -190,6 +190,7 @@ def _configure_misc_handlers(app):
     @app.route('/robots.txt')
     def robots():
         return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
+
     
 #def _configure_global_variables(app):
 #    """
@@ -200,4 +201,3 @@ def _configure_misc_handlers(app):
 #        g.conf_params = {}
 #        g.conf_params['PRINT_DEBUG_TEMPLATE'] = config.PRINT_DEBUG_TEMPLATE
 #        g.conf_params['APP_VERSION'] = config.APP_VERSION
-    

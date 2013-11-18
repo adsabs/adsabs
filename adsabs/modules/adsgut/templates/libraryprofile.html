@@ -16,7 +16,7 @@
 {% block coffeescript %}
 $=jQuery
 $ -> 
-  prefix='/adsgut'
+  prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   console?.log "Hello World"
   model={}
   $.get "#{prefix}/library/{{ thelibrary.basic.fqin}}", (data) ->

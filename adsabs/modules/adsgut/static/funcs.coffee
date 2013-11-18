@@ -3,7 +3,7 @@ $=jQuery
 console.log "In Funcs"
 {renderable, ul, li, dl, dt, dd, raw, br, strong} = teacup
 w = widgets
-prefix = "/adsgut"
+prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
   htmlstring="<li class=\"nav-header\">#{tagtype}</li>"

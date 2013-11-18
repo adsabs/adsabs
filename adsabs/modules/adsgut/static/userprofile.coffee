@@ -4,7 +4,7 @@ $=jQuery
 console.log "In userprofile"
 h = teacup
 w = widgets
-prefix = "/adsgut"
+prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
 parse_fqin = (fqin) -> 
     vals=fqin.split(':')

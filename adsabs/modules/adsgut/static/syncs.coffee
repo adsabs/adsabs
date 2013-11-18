@@ -34,7 +34,7 @@ $=jQuery
 console.log "In Funcs"
 h = teacup
 doajax=$.ajax
-prefix = "/adsgut"
+prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 send_params = (url, data, cback, eback) ->
     params=
         type:'POST'
