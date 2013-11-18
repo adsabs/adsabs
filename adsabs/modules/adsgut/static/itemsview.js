@@ -238,7 +238,6 @@
         _this = this;
       cback = function(data) {
         console.log("return data", data, _this.loc);
-        alert(_this.loc);
         return window.location = _this.loc;
       };
       eback = function(xhr, etext) {

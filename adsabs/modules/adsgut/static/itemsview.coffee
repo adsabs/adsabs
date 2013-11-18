@@ -171,7 +171,7 @@ class ItemsView extends Backbone.View
     #loc=window.location
     cback = (data) =>
         console.log "return data", data, @loc
-        alert(@loc)
+        #alert(@loc)
         window.location=@loc
     eback = (xhr, etext) =>
         console.log "ERROR", etext, @loc
