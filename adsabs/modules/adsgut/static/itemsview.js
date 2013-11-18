@@ -162,7 +162,7 @@
         return _results;
       }).call(this);
       itemsq = itemlist.join("&");
-      return $.get(prefix + ("items/taggingsandpostings?" + itemsq), function(data) {
+      return $.get(prefix + ("/items/taggingsandpostings?" + itemsq), function(data) {
         var e, fqin, k, v, _i, _len, _ref, _ref1, _ref2, _results;
         _ref = get_taggings(data), _this.stags = _ref[0], _this.notes = _ref[1];
         _ref1 = data.postings;
