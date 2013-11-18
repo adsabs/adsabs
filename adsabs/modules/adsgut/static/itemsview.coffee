@@ -123,7 +123,7 @@ class ItemsView extends Backbone.View
     console.log("itys", @items)
     itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in @items)
     itemsq=itemlist.join("&")
-    $.get prefix+"items/taggingsandpostings?#{itemsq}", (data)=>
+    $.get prefix+"/items/taggingsandpostings?#{itemsq}", (data)=>
         [@stags, @notes]=get_taggings(data)
         for own k,v of data.postings
             #console.log "2>>>", k,v[0],v[1]
