@@ -11,7 +11,6 @@ from simplejson import dumps
 
 from flask.ext.solrquery import solr #@UnresolvedImport
 
-from adsabs.core.invenio import record_url
 from adsabs.core.classic import abstract_url
 
 class SolrDocument(object):
@@ -86,11 +85,14 @@ class SolrDocument(object):
     def classic_url(self):
         return abstract_url(self.bibcode)
     
-    def invenio_url(self):
-        return record_url(self.recid)
+    def invenio_url(self, of=None):
+        if not of:
+            return config.INVENIO_BASEURL + '/record/' + quote(str(self.recid))
+        else:
+            return config.INVENIO_BASEURL + '/record/' + quote(str(self.recid)) + '?' + urlencode({'of': of})
     
     def invenio_marcxml_url(self):
-        return record_url(self.recid, of='xm')
+        return self.invenio_url(of='xm')
     
     def joined(self, field, sep=','):
         val = self.__getattr__(field)

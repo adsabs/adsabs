@@ -7,7 +7,7 @@ import json
 
 def field_to_json(field_list):
     """
-    Function that transforms a solr o invenio field that contains a list of json strings to a list of json structures
+    Function that transforms a solr field that contains a list of json strings to a list of json structures
     """
     def str_to_json(json_str):
         try:
