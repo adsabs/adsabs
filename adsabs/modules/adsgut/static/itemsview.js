@@ -31,6 +31,9 @@
       this.submitNote = function() {
         return ItemView.prototype.submitNote.apply(_this, arguments);
       };
+      this.update_note = function(data) {
+        return ItemView.prototype.update_note.apply(_this, arguments);
+      };
       this.render = function() {
         return ItemView.prototype.render.apply(_this, arguments);
       };
@@ -88,8 +91,18 @@
       return this;
     };
 
+    ItemView.prototype.update_note = function(data) {
+      var fqin, notes, stags, _ref;
+      fqin = this.item.basic.fqin;
+      _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
+      this.stags = stags[fqin];
+      this.notes = notes[fqin];
+      return this.render();
+    };
+
     ItemView.prototype.submitNote = function() {
-      var cback, eback, item, loc, notetext;
+      var cback, eback, item, loc, notetext,
+        _this = this;
       console.log("IN SUBMIT NOTE");
       item = this.item.basic.fqin;
       notetext = this.$('.txt').val();
@@ -97,7 +110,7 @@
       loc = window.location;
       cback = function(data) {
         console.log("return data", data, loc);
-        return window.location = loc;
+        return _this.update_note(data);
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext, loc);
@@ -142,7 +155,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform;
       return console.log("ITEMS", this.items, this.loc);
     };
 
@@ -201,6 +214,7 @@
       var $ctrls, $lister, cback, eback, fqin, i, ins, v, _i, _len, _ref,
         _this = this;
       $lister = this.$('.items');
+      $lister.append('<legend>Selected Items</legend>');
       $ctrls = this.$('.ctrls');
       this.itemviews = {};
       _ref = this.items;
@@ -212,7 +226,8 @@
           notes: this.notes[fqin],
           postings: this.postings[fqin],
           item: i,
-          memberable: this.memberable
+          memberable: this.memberable,
+          noteform: this.noteform
         };
         console.log("INS", ins);
         v = new ItemView(ins);

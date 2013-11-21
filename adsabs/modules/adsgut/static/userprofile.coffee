@@ -13,10 +13,18 @@ parse_fqin = (fqin) ->
 parse_userinfo = (data) ->
     publ= "adsgut/group:public"
     priv= data.user.nick+"/group:default"
-    postablesin=data.user.postablesin
+    postablesin=[]
     postablesowned=data.user.postablesowned
+    powfqin=(p.fqpn for p in postablesowned)
+    pinfqin=(p.fqpn for p in data.user.postablesin)
+    console.log "JJJ",powfqin, pinfqin
+    pinfqin=_.difference(pinfqin, powfqin)
+    console.log "POSARASTAIN", pinfqin
+    for p in data.user.postablesin
+        if p.fqpn in pinfqin
+            postablesin.push(p)
     postablesinvitedto=data.user.postablesinvitedto
-
+    console.log "POSARASTAIN", postablesin
     userdict=
         groupsin: (e.fqpn for e in postablesin when e.ptype is 'group' and e.fqpn not in [publ, priv])
         groupsowned: (e.fqpn for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publ, priv])
@@ -37,12 +45,12 @@ parse_userinfo = (data) ->
     return userdict
 
 make_postable_link = h.renderable (fqpn, libmode) ->
-    h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
+    h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
         h.text parse_fqin(fqpn)
     if libmode is true
         h.raw "&nbsp;("
-        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
-            h.text "items"
+        h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
+            h.text "admin"
         h.raw ")"
 
 

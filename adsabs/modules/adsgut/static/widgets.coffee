@@ -225,7 +225,7 @@ multiselect = h.renderable (daclass, choices) ->
 
 #this should not be here. it should be built up hierarchically from other widgets and should itself be in views.
 postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
-    h.legend "Post all of these items"
+    h.legend "Save all of these items"
     if nameable
         h.div ".control-group", ->
             h.label ".control-label", "Name this #{itemtype}"
@@ -233,12 +233,12 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     h.div ".control-group", ->
         h.label ".checkbox.control-label", ->
             h.input ".controls.makepublic", type:"checkbox"
-            h.text "Endorse these items publicly!"
+            h.text "Post to Public feed"
     h.div ".control-group", ->
         h.label ".control-label", "Libraries"
         #h.input ".controls.librariesinput.input-xxlarge", type:"text", placeholder:"Lib names, comma separated" 
         multiselect("library", librarychoices)
-    h.button ".btn.btn-primary.post", type:'button', "Post"
+    h.button ".btn.btn-primary.post", type:'button', "Save"
     h.br()
     h.br()
     h.legend "Tag all of these items"
@@ -248,7 +248,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"tags, comma separated"
     h.button ".btn.btn-primary.tag", type:'button', "Tag"
     h.br()
-    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Save"
+    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Done"
 
 link = h.renderable (url, txt) ->
     h.raw "<a href=\"#{url}\">#{txt}</a>"

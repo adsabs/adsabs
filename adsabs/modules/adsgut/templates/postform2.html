@@ -50,6 +50,9 @@ $ ->
         memberable:'{{useras.nick}}'
         loc: loc
 
+      if thecount == 1
+        ido.noteform=true
+
       plinv=new itemsdo.ItemsView(ido)
       plinv.render()
 {% endblock %}

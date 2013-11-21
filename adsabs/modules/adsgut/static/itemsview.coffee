@@ -88,7 +88,12 @@ class ItemView extends Backbone.View
     @$el.append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable))
     return this
 
-  
+  update_note: (data) =>
+    fqin=@item.basic.fqin
+    [stags, notes]=get_taggings(data)
+    @stags=stags[fqin]
+    @notes=notes[fqin]
+    @render()
 
   submitNote: =>
     console.log "IN SUBMIT NOTE"
@@ -96,10 +101,11 @@ class ItemView extends Backbone.View
     notetext= @$('.txt').val()
     console.log notetext
     loc=window.location
-    cback = (data) ->
+    cback = (data) =>
         console.log "return data", data, loc
-        window.location=loc
-    eback = (xhr, etext) ->
+        #window.location=loc
+        @update_note(data)
+    eback = (xhr, etext) =>
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
@@ -115,7 +121,7 @@ class ItemsView extends Backbone.View
     "click .done" : "iDone"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform} = options
     console.log "ITEMS", @items, @loc
 
   update_postings_taggings: () =>
@@ -140,6 +146,7 @@ class ItemsView extends Backbone.View
 
   render: =>
     $lister=@$('.items')
+    $lister.append('<legend>Selected Items</legend>')
     $ctrls=@$('.ctrls')
     @itemviews={}
     for i in @items
@@ -150,6 +157,7 @@ class ItemsView extends Backbone.View
             postings: @postings[fqin]
             item: i
             memberable: @memberable
+            noteform: @noteform
         console.log "INS", ins
         v=new ItemView(ins)
         $lister.append(v.render().el)

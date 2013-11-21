@@ -3,13 +3,15 @@
 <h3>Library {{thelibrary.basic.fqin}}</h3>
   <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}"></iframe-->
   <div id="info" style="display:none"></div>
-  <hr/>
-  <h4>Members</h4>
+  <br/><hr/>
+  <h4>Members</h4><br/>
   <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}/members"></iframe-->
   <div id="members" style="display:none"></div>
   {% if owner %}
-  <h4>Invitations</h4>
+
   <div id="invitedform" style="display:none"></div>
+  <br/><hr/>
+  <h4>Invitations</h4><br/>
   <div id="inviteds" style="display:none"></div>
   {% endif %}
 {% endblock %}
@@ -34,16 +36,18 @@ $ ->
     plinv.render()
 
   {% if owner %}
-  view=new views.InviteUser({postable: "{{ thelibrary.basic.fqin}}", withcb:true})
-  $('div#invitedform').append(view.render().$el)
+  viewu=new views.InviteUser({postable: "{{ thelibrary.basic.fqin}}", withcb:true})
+  
 
   $.get "#{prefix}/user/{{useras.nick}}/groupsuserisin", (data) ->
     groups=data.groups
     view=new views.AddGroup({postable: "{{ thelibrary.basic.fqin}}", groups:groups, withcb:true} )
     $('div#invitedform').append(view.render().$el)
+    
     $('div#invitedform').show()
   $.get "#{prefix}/library/{{ thelibrary.basic.fqin}}/inviteds", (data) ->
     content=views.postable_inviteds "{{ thelibrary.basic.fqin}}", data, templates.postable_inviteds, false
+    $('div#inviteds').append(viewu.render().$el)
     $('div#inviteds').append(content)
     $('div#inviteds').show()
 

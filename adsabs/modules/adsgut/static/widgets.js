@@ -350,7 +350,7 @@
   });
 
   postalall_form = h.renderable(function(nameable, itemtype, librarychoices) {
-    h.legend("Post all of these items");
+    h.legend("Save all of these items");
     if (nameable) {
       h.div(".control-group", function() {
         h.label(".control-label", "Name this " + itemtype);
@@ -365,7 +365,7 @@
         h.input(".controls.makepublic", {
           type: "checkbox"
         });
-        return h.text("Endorse these items publicly!");
+        return h.text("Post to Public feed");
       });
     });
     h.div(".control-group", function() {
@@ -374,7 +374,7 @@
     });
     h.button(".btn.btn-primary.post", {
       type: 'button'
-    }, "Post");
+    }, "Save");
     h.br();
     h.br();
     h.legend("Tag all of these items");
@@ -389,7 +389,7 @@
     h.br();
     return h.button(".btn.btn-inverse.done.pull-right", {
       type: 'button'
-    }, "Save");
+    }, "Done");
   });
 
   link = h.renderable(function(url, txt) {

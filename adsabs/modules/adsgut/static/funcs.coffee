@@ -143,9 +143,9 @@ get_groups = (nick, cback) ->
 postable_inviteds_template = renderable (fqpn, users, scmode=false) ->
   if scmode
     userlist= (k for k,v of users)
-    w.one_col_table "Users", userlist
+    w.one_col_table "Invited Users", userlist
   else
-    w.table_from_dict("User", "Can User Write", users)
+    w.table_from_dict("Invited User", "Can User Write", users)
 
 # #Bug: these need to become collection Views
 # postable_members = (fqpn, owner, data, template, scmode=false) ->

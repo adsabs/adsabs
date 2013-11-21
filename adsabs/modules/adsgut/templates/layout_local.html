@@ -5,11 +5,10 @@
         <div class="span3">
           <div class="well sidebar-nav">
                 <ul class="nav nav-list" id="header">
-                  <li class="nav-header">Useful</li>
-                  <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Groups and Libraries</a></span></li>
-                  <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">Saved Items</a></span></li>
-                  <li><span><a href="{{ url_for('adsgut.publicHtml') }}">Public Items</a></span></li>
-
+                  <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a></span></li>
+                  <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">My Saved Items</a></span></li>
+                  <li><span><a href="{{ url_for('adsgut.publicHtml') }}">Public Feed</a></span></li>
+                  <li><span><a href="{{ url_for('user.index') }}">Settings</a></span></li>
                 </ul>
                 {% block sidebar %}
 

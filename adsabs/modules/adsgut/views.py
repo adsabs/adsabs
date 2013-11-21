@@ -1,8 +1,8 @@
 from __future__ import with_statement
 
 import sys, os
-sys.path
-sys.path.append('/home/rahul/Projects')
+#sys.path
+#sys.path.append('/home/rahul/Projects')
 
 import mongogut
 from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify)
@@ -332,6 +332,16 @@ def userProfileHtml(nick):
 def userProfileFromAdsidHtml(adsid):
     user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
     return render_template('userprofile.html', theuser=user, useras=g.currentuser)
+
+@adsgut.route('/user/<nick>/profilegroups/html')
+def userProfileGroupsHtml(nick):
+    user=g.db.getUserInfo(g.currentuser, nick)
+    return render_template('userprofilegroups.html', theuser=user, useras=g.currentuser)
+
+@adsgut.route('/email/<adsid>/profilegroups/html')
+def userProfileGroupsFromAdsidHtml(adsid):
+    user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
+    return render_template('userprofilegroups.html', theuser=user, useras=g.currentuser)
 
 @adsgut.route('/user/<nick>/postablesuserisin')
 def postablesUserIsIn(nick):
@@ -1076,11 +1086,18 @@ def tagsForItem(ns, itemname):
             tagspec=_setupTagspec(ti, useras)
             print "TAGSPEC IS", tagspec
             i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
-            newtaggings.append(it)
+            newtaggings.append(td)
 
         #returning the taggings requires a commit at this point
-        taggings={'status':'OK', 'info':{'item': i.basic.fqin, 'tagging':[td for td in newtaggings]}}
-        return jsonify(taggings)
+        # taggings={'status':'OK', 'info':{'item': i.basic.fqin, 'tagging':newtaggings}}
+        # taggingsdict={}
+        # taggingsdict[i.basic.fqin]=(newtaggings.length, newtaggings)
+        # return jsonify(taggings=taggingsdict)
+        taggingsdict= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None)
+        # taggingsdict={}
+        # taggingsdict[ifqin]=(count, taggings)
+        #return jsonify({'tags':tags, 'count':count})
+        return jsonify(taggings=taggingsdict)
     else:
         print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
@@ -1095,8 +1112,12 @@ def tagsForItem(ns, itemname):
         # criteria.append(['field':'thething__thingtopostfqin', 'op':'eq', 'value':ifqin])
         # count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
         #     query, usernick, criteria, sort)
-        count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
-        return jsonify({'tags':tags, 'count':count})
+        #count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
+        taggingsdict= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
+        # taggingsdict={}
+        # taggingsdict[ifqin]=(count, taggings)
+        #return jsonify({'tags':tags, 'count':count})
+        return jsonify(taggings=taggingsdict)
 ####These are the fromSpec family of functions for GET
 
 #multi item multi tag tagging on POST and get taggings
@@ -1117,9 +1138,12 @@ def itemsTaggings():
             for ti in tagspecs:
                 tagspec=_setupTagspec(ti, useras)
                 i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
-                newtaggings.append(it)
-        itemtaggings={'status':'OK', 'taggings':newtaggings}
-        return jsonify(itemtaggings)
+                newtaggings.append(td)
+        # itemtaggings={'status':'OK', 'taggings':newtaggings}
+        # return jsonify(taggings=newtaggings)
+        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, None)
+        return jsonify(taggings=taggingsdict)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
@@ -1130,7 +1154,7 @@ def itemsTaggings():
         #By this time query is popped down
         taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
-        return jsonify(taggingsdict)
+        return jsonify(taggings=taggingsdict)
 
 #multi item multi postable posting on POST and get posts
 @adsgut.route('/items/postings', methods=['POST', 'GET'])
@@ -1151,8 +1175,11 @@ def itemsPostings():
             for fqpn in fqpo:                
                 i,pd=g.dbp.postItemIntoPostable(g.currentuser, useras, fqpn, i)
                 pds.append(pd)
-        itempostings={'status':'OK', 'postings':pds}
-        return jsonify(itempostings)
+        #itempostings={'status':'OK', 'postings':pds}
+        # return jsonify(postings=pds)
+        postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, None)
+        return jsonify(postings=postingsdict)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
@@ -1163,7 +1190,7 @@ def itemsPostings():
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
-        return jsonify(postingsdict)
+        return jsonify(postings=postingsdict)
 
 @adsgut.route('/items/taggingsandpostings', methods=['POST', 'GET'])
 def itemsTaggingsAndPostings():

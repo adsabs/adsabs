@@ -262,9 +262,9 @@
         }
         return _results;
       })();
-      return w.one_col_table("Users", userlist);
+      return w.one_col_table("Invited Users", userlist);
     } else {
-      return w.table_from_dict("User", "Can User Write", users);
+      return w.table_from_dict("Invited User", "Can User Write", users);
     }
   });
 
