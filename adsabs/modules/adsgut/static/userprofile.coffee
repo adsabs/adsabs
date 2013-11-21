@@ -44,14 +44,28 @@ parse_userinfo = (data) ->
 
     return userdict
 
-make_postable_link = h.renderable (fqpn, libmode) ->
-    h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
-        h.text parse_fqin(fqpn)
-    if libmode is true
+make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
+    if libmode is "lib"
+        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
+            h.text parse_fqin(fqpn)
         h.raw "&nbsp;("
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
-            h.text "admin"
+            if ownermode
+                h.text "admin"
+            else
+                h.text "info"
         h.raw ")"
+    else if  libmode is "group"
+        h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
+            h.text parse_fqin(fqpn)
+        h.raw "&nbsp;("
+        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
+            h.text "library"
+        h.raw ")"
+    else
+        h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
+            h.text parse_fqin(fqpn)
+
 
 
 class Postable extends Backbone.Model
@@ -66,13 +80,14 @@ class PostableView extends Backbone.View
     
     initialize: (options) ->
         @libmode=options.libmode
+        @ownermode=options.ownermode
 
     render: =>
 
         if @model.get('invite')
-            @$el.html(w.table_from_dict_partial(make_postable_link(@model.get('fqpn'), false), w.single_button('Yes')))
+            @$el.html(w.table_from_dict_partial(make_postable_link(@model.get('fqpn'), libmode=false), w.single_button('Yes')))
         else
-            content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode))
+            content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
             console.log "CONTENT", content
             @$el.html(content)
         return this
@@ -113,9 +128,10 @@ class PostableListView extends Backbone.View
     initialize: (options) ->
         @$el=options.$e_el
         @libmode=options.libmode
+        @ownermode=options.ownermode
 
     render: =>
-        views = (new PostableView(model:m, libmode:@libmode) for m in @collection.models)
+        views = (new PostableView(model:m, libmode:@libmode, ownermode:@ownermode) for m in @collection.models)
         rendered = (v.render().el for v in views)
         console.log "RENDER1", rendered
         console.log "RENDER2"

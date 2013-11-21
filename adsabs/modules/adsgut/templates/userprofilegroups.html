@@ -36,11 +36,11 @@
 {% block coffeescript %}
 $=jQuery
 
-render_postable = (userdict, plist, $pel, ptype, invite, libmode) ->
+render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
   plin=new userprofile.PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
   plin.add((new userprofile.Postable(fqpn:p, invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
   console.log "THIS", this, libmode
-  plinv=new userprofile.PostableListView(collection:plin, $e_el:$pel, libmode:libmode)
+  plinv=new userprofile.PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
   plinv.render()
 
 $ -> 
@@ -56,9 +56,9 @@ $ ->
     console.log 'GROUPS'
 
     #$('#groups div.ow').append(widgets.one_col_table('Owned', userdict.groupsowned))
-    plgrpow=render_postable(userdict.userinfo, userdict.groupsowned, $('#groups div.ow'), 'ow', false, false)
+    plgrpow=render_postable(userdict.userinfo, userdict.groupsowned, $('#groups div.ow'), 'ow', false, "group", true)
 
-    plgrpin=render_postable(userdict.userinfo, userdict.groupsin, $('#groups div.in'), 'in', false, false)
-    plgrpiv=render_postable(userdict.userinfo, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true, false)
+    plgrpin=render_postable(userdict.userinfo, userdict.groupsin, $('#groups div.in'), 'in', false, "group", false)
+    plgrpiv=render_postable(userdict.userinfo, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true, "group", false)
 
 {% endblock %}

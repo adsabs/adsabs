@@ -139,20 +139,49 @@
     return userdict;
   };
 
-  make_postable_link = h.renderable(function(fqpn, libmode) {
-    h.a({
-      href: prefix + ("/postable/" + fqpn + "/filter/html")
-    }, function() {
-      return h.text(parse_fqin(fqpn));
-    });
-    if (libmode === true) {
+  make_postable_link = h.renderable(function(fqpn, libmode, ownermode) {
+    if (libmode == null) {
+      libmode = false;
+    }
+    if (ownermode == null) {
+      ownermode = false;
+    }
+    if (libmode === "lib") {
+      h.a({
+        href: prefix + ("/postable/" + fqpn + "/filter/html")
+      }, function() {
+        return h.text(parse_fqin(fqpn));
+      });
       h.raw("&nbsp;(");
       h.a({
         href: prefix + ("/postable/" + fqpn + "/profile/html")
       }, function() {
-        return h.text("admin");
+        if (ownermode) {
+          return h.text("admin");
+        } else {
+          return h.text("info");
+        }
       });
       return h.raw(")");
+    } else if (libmode === "group") {
+      h.a({
+        href: prefix + ("/postable/" + fqpn + "/profile/html")
+      }, function() {
+        return h.text(parse_fqin(fqpn));
+      });
+      h.raw("&nbsp;(");
+      h.a({
+        href: prefix + ("/postable/" + fqpn + "/filter/html")
+      }, function() {
+        return h.text("library");
+      });
+      return h.raw(")");
+    } else {
+      return h.a({
+        href: prefix + ("/postable/" + fqpn + "/profile/html")
+      }, function() {
+        return h.text(parse_fqin(fqpn));
+      });
     }
   });
 
@@ -190,15 +219,16 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      return this.libmode = options.libmode;
+      this.libmode = options.libmode;
+      return this.ownermode = options.ownermode;
     };
 
     PostableView.prototype.render = function() {
-      var content, libmode;
+      var content, libmode, ownermode;
       if (this.model.get('invite')) {
-        this.$el.html(w.table_from_dict_partial(make_postable_link(this.model.get('fqpn'), false), w.single_button('Yes')));
+        this.$el.html(w.table_from_dict_partial(make_postable_link(this.model.get('fqpn'), libmode = false), w.single_button('Yes')));
       } else {
-        content = w.one_col_table_partial(make_postable_link(this.model.get('fqpn'), libmode = this.libmode));
+        content = w.one_col_table_partial(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode));
         console.log("CONTENT", content);
         this.$el.html(content);
       }
@@ -266,7 +296,8 @@
 
     PostableListView.prototype.initialize = function(options) {
       this.$el = options.$e_el;
-      return this.libmode = options.libmode;
+      this.libmode = options.libmode;
+      return this.ownermode = options.ownermode;
     };
 
     PostableListView.prototype.render = function() {
@@ -279,7 +310,8 @@
           m = _ref[_i];
           _results.push(new PostableView({
             model: m,
-            libmode: this.libmode
+            libmode: this.libmode,
+            ownermode: this.ownermode
           }));
         }
         return _results;
