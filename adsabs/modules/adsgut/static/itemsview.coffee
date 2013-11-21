@@ -244,6 +244,7 @@ class ItemsFilterView extends Backbone.View
 
   render: =>
     console.log "EL", @$el
+    @$el.append('<hr/>')
     for i in @items
         fqin=i.basic.fqin
         ins = 
@@ -256,7 +257,7 @@ class ItemsFilterView extends Backbone.View
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)
-
+        @$el.append('<hr/>')
     return this
 
 

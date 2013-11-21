@@ -369,6 +369,7 @@
     ItemsFilterView.prototype.render = function() {
       var fqin, i, ins, v, _i, _len, _ref;
       console.log("EL", this.$el);
+      this.$el.append('<hr/>');
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -384,6 +385,7 @@
         console.log("INS", ins);
         v = new ItemView(ins);
         this.$el.append(v.render().el);
+        this.$el.append('<hr/>');
       }
       return this;
     };

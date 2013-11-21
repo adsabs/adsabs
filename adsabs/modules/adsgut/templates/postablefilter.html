@@ -7,11 +7,11 @@
 
 {% block localbody %}
 {% if pflavor=='udg' %}
-<h3>Saved Items for {{useras.adsid}}</h3>
+<h3>All items for {{useras.adsid}}</h3>
 {% elif pflavor=='pub' %}
-<h3>Publicly Endorsed Items</h3>
+<h3>Public Feed</h3>
 {% else %}
-<h3>Items in Library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h3>
+<h3>Items saved in Library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h3>
 <p>(Owned by {{p.owner}}, created by {{p.basic.creator}}. UUID is {{ p.nick }})</p>
 <p>
   <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.adsid }}

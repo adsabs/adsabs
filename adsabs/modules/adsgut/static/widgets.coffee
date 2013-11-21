@@ -176,7 +176,25 @@ class HideableView extends Backbone.View
                     h.i ".icon-plus"
         @$el.append(content+@widget)
         return this
-    
+
+#widget most be a div widget implementing the hoverhelp class
+#using delegation, hovering anywhere inside that div will pop up a help text    
+class HoverHelpDecoratorView extends Backbone.View
+
+    initialize: (options) ->
+        {@titletext, @helptext, @position, @htype} = options
+
+    render: () =>
+        optpo=
+            placement: @position
+            trigger: 'hover'
+            title: @titletext
+            content: @helptext
+        if @htype is "tooltip"
+            @$el.find('.hoverhelp').tooltip(optpo)
+        else if @htype is "popover"
+            @$el.find('.hoverhelp').popover(optpo)
+        return this
 
 postalnote_form = h.renderable (btext, nrows=2) ->
     #h.div ".control-group.postalnote", ->
@@ -273,3 +291,4 @@ root.widgets =
     dropdown_submit_with_cb: dropdown_submit_with_cb
     link: link
     HideableView: HideableView
+    HoverHelpDecoratorView: HoverHelpDecoratorView

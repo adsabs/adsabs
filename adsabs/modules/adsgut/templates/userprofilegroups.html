@@ -5,7 +5,7 @@
   <div id="userinfo" style="display:none"></div>
   <br/>
 
-  <h3>Groups</h3>
+  <h3 id="groupsh3"><span class="hoverhelp">Groups</span></h3>
     <div id="creategroups"></div>
     <div id="groups">
       <div class="row ow"></div>
@@ -60,5 +60,16 @@ $ ->
 
     plgrpin=render_postable(userdict.userinfo, userdict.groupsin, $('#groups div.in'), 'in', false, "group", false)
     plgrpiv=render_postable(userdict.userinfo, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true, "group", false)
+
+    awopt = 
+      el: document.getElementById('groupsh3')
+      position: 'right'
+      titletext: "Lorem Ipsum ate a potato"
+      helptext: 'Lorem Ipsum ate a potato'
+      htype: 'tooltip'
+
+    #aw= new widgets.HoverHelpDecoratorView(awopt)
+    #aw.render('A title', 'Lorem Ipsum ate a potato')
+    #aw.render()
 
 {% endblock %}
