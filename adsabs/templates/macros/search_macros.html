@@ -120,7 +120,8 @@
 	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'arXiv:1012.5859','');">Find publication corresponding with arXiv ID '1012.5859'</a></small></dd>
 	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'doi:10.1086/345794','');">Find publication corresponding with DOI '10.1086/345794'</a></small></dd>
 	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot;   bibstem:&quot;ApJ&quot;','');">Find publications in the Astrophysical Journal with John Huchra as first author</a></small></dd>
-							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot; OR &quot;cfa redshift survey&quot;  -title:&quot;2MASS&quot;','');">Find publications with 'John Huchra' as first author or with the phrase 'cfa redshift survey' but without '2MASS' in the title</a></small></dd>
+							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'pos(author:&quot;Huchra, John&quot;,1) OR &quot;cfa redshift survey&quot;  -title:&quot;2MASS&quot;','');">Find publications with 'John Huchra' as first author or with the phrase 'cfa redshift survey' but without '2MASS' in the title</a></small></dd>
+							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'pos(author:&quot;Oort, J&quot;,2)','');">Find publications with 'Jan Oort' as second author</a></small></dd>
 	                    </dl>
 	                </div>
 	            </div>
