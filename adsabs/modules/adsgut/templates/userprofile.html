@@ -56,7 +56,7 @@ $ ->
     console.log userdict
     content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
     content=content+"<a href=\"{{ url_for('adsgut.udgHtml', nick=useras.nick) }}\">My Saved Items</a>"
-    content=content+"&nbsp;&nbsp;&nbsp;<a href=\"{{ url_for('adsgut.publicHtml') }}\">Public Feed</a>"
+    #content=content+"&nbsp;&nbsp;&nbsp;<a href=\"{{ url_for('adsgut.publicHtml') }}\">Public Feed</a>"
     $('#userinfo').append(content)
     $('#userinfo').show()
 

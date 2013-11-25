@@ -11,15 +11,21 @@
 {% elif pflavor=='pub' %}
 <h3>Public Feed</h3>
 {% else %}
-<h3>Items saved in Library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h3>
-<p>(Owned by {{p.owner}}, created by {{p.basic.creator}}. UUID is {{ p.nick }})</p>
-<p>
-  <a href="" id="useradder" data="off">Add user filter</a> for currentuser {{ useras.adsid }}
-</p>
+{% if p.classname=="library" %}
+<h3>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h3>
+{% elif p.classname=="group" %}
+<h3>Items saved in group library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h3>
+ {% endif %}
+<!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
+<div id="info" style="display:none"></div>
+<span>
+  Only from <a href="" id="useradder" data="off">{{ useras.adsid }}</a> | Query: 
+</span>
 {% endif %}
-<p id="breadcrumb">
+<span id="breadcrumb">
 {{ querystring }}
-</p>
+</span>
+
 <!--ul id="items">
 </ul-->
 <div id="items">
@@ -32,6 +38,21 @@ console.log "In PostableFilter"
 
 
 $ ->
+  prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
+
+  {% if pflavor!= 'udg' and pflavor!='pub' %}
+
+  $.get "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}", (data) ->
+    {% if p.classname=="library" %}
+    content=views.library_info data, templates.library_itemsinfo
+    {% elif p.classname=="group" %}
+    content=views.group_info data, templates.group_itemsinfo
+    {% endif %}
+    $('div#info').append(content)
+    $('div#info').show()
+  {% endif %}
+  
+
   vars="{{ querystring | safe }}"
   $.get "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}", (data) ->
     #console.log "Tag Count", data.count, vars

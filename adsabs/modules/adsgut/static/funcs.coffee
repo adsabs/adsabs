@@ -156,24 +156,44 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 
 
-postable_info_layout = renderable ({basic, owner}) ->
+postable_info_layout = renderable ({basic, owner, nick}, mode="filter") ->
   description=basic.description
   if description is ""
     description = "not provided"
-  url= "#{prefix}/postable/#{basic.fqin}/filter/html"
+  if mode is "filter"
+    modetext = "Items"
+  else if mode is "profile"
+    modetext = "Info"
+  url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
   dl '.dl-horizontal', ->
     dt "Description"
     dd description
+    dt "UUID"
+    dd nick
     dt "Owner"
     dd owner
     dt "Creator"
     dd basic.creator
     dt "Created on"
     dd basic.whencreated
-  br()
-  strong "Items:"
-  raw a
+    dt "#{modetext}:"
+    dd ->
+      raw a
+
+postable_info_layout2 = renderable ({basic, owner, nick}, mode="profile") ->
+  if mode is "filter"
+    modetext = "Items"
+  else if mode is "profile"
+    modetext = "Info"
+  url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
+  a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
+  dl '.dl-horizontal', ->
+    dt "Owner"
+    dd owner
+    dt "#{modetext}:"
+    dd ->
+      raw a
 
 library_info_template = renderable (data) ->
   postable_info_layout data.library
@@ -181,7 +201,11 @@ library_info_template = renderable (data) ->
 group_info_template = renderable (data) ->
   postable_info_layout data.group
   
+library_itemsinfo_template = renderable (data) ->
+  postable_info_layout2 data.library
 
+group_itemsinfo_template = renderable (data) ->
+  postable_info_layout2 data.group
 
 #controller style stuff should be added here.
 postable_info = (data, template) ->
@@ -317,4 +341,6 @@ root.views =
 root.templates =
   library_info: library_info_template
   group_info: group_info_template
+  library_itemsinfo: library_itemsinfo_template
+  group_itemsinfo: group_itemsinfo_template
   postable_inviteds: postable_inviteds_template

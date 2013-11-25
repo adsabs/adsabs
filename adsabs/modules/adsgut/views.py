@@ -151,9 +151,10 @@ def _sortget(qdict):
     #a serialixed dict of ascending and field
     sortstring=_dictg('sort', qdict)
     if not sortstring:
-        return None
+        return {'field':'thething__whenposted', 'ascending':False}
     sort={}
     sort['field'], sort['ascending'] = sortstring.split(':')
+    sort['ascending']=(sort['ascending']=='True')
     return sort
 
 #criteria is a multiple ampersand list, with colon separators.
@@ -540,7 +541,7 @@ def doPostableChanges(po, pt, pn):
             #here memberable could be a user or a group (whose membership to library you are toggling)
             #in either case here we need the fqin
             mtype=gettype(memberable)
-            memberable=g.db.getMemberableforFqin(g.currentuser, mtype, memberable)
+            memberable=g.db.getMemberableForFqin(g.currentuser, mtype, memberable)
             mem, p = g.db.toggleRWForMembership(g.currentuser, g.currentuser, fqpn, memberable)
             return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
         else:
@@ -764,6 +765,11 @@ def libraryFilterHtml(libraryowner, libraryname):
 def udgHtml(nick):
     return postableFilterHtml(nick, "group", "default")
 
+@adsgut.route('/postablefromadsid/<adsid>/group:default/filter/html')
+def udgHtmlFromAdsid(adsid):
+    user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
+    return postableFilterHtml(user.nick, "group", "default")
+
 @adsgut.route('/postable/adsgut/group:public/filter/html')
 def publicHtml():
     return postableFilterHtml("adsgut", "group", "public")
@@ -790,6 +796,7 @@ def postableFilterHtml(po, pt, pn):
 #        {'postables':[library.basic.fqin]} )
 #     libdict={'count':num, 'items':[json.loads(v.to_json()) for v in vals]}
 #     return jsonify(libdict)
+
 
 #######################################################################################################################
 #######################################################################################################################
