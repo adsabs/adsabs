@@ -149,6 +149,12 @@ class Metrics():
         auth_nums    = map(lambda a: 1.0/float(a['author_num']), cls.metrics_data)
         tori = vector_product(rn_citations,auth_nums)
         try:
+            read10_reads = map(lambda a: a[7][-1], cls.reads10data)
+            read10_auths = map(lambda a: 1.0/float(a[4]), cls.reads10data)
+            read10 = vector_product(read10_reads, read10_auths)
+        except:
+            read10 = 0
+        try:
             riq = int(1000.0*sqrt(float(tori))/float(cls.time_span))
         except:
             riq = "NA"
@@ -156,9 +162,11 @@ class Metrics():
         cls.g_index = g
         cls.m_index = '%.1f' % round(float(h)/float(cls.time_span), 2)
         cls.i10_index = len(filter(lambda a: a >= 10, citations))
+        cls.i100_index= len(filter(lambda a: a >= 100, citations))
         cls.e_index = '%.1f' % round(e,1)
         cls.tori = '%.1f' % round(tori,1)
         cls.riq  = '%.1f' % round(riq,1)
+        cls.read10 = int(round(read10))
 
         cls.post_process()
 
@@ -248,6 +256,18 @@ class TimeSeries():
         cls.series = {}
         cls.pre_process()
         for year in range(minYear, maxYear+1):
+            if year < 1996:
+                read10 = 0
+            else:
+                threshold = year - 10
+                year_index = year - 1996
+                reads10data = filter(lambda a: len(a[7]) > 0 and int(a[0][:4]) > threshold, cls.attributes)
+                try:
+                    read10_reads = map(lambda a: a[7][year_index], reads10data)
+                    read10_auths = map(lambda a: 1.0/float(a[4]), reads10data)
+                    read10 = vector_product(read10_reads, read10_auths)
+                except:
+                    read10 = 0
             tori = sum([value for d in cls.metrics_data for (yr,value) in d['rn_citations_hist'].items() if int(yr) <= year])
             new_list = get_subset(cls.attributes,year)
             new_list = sort_list_of_lists(new_list,2)
@@ -266,9 +286,10 @@ class TimeSeries():
                 rank += 1
             TimeSpan = year - minYear + 1
             i10 = len(filter(lambda a: a >= 10, citations))
+            i100= len(filter(lambda a: a >= 100, citations))
             m = float(h)/float(TimeSpan)
             roq = int(1000.0*math.sqrt(float(tori))/float(TimeSpan))
-            indices = "%s:%s:%s:%s:%s:%s" %(h,g,i10,tori,m,roq)
+            indices = "%s:%s:%s:%s:%s:%s:%s:%s" % (h,g,i10,tori,m,roq,i100,int(round(read10)*0.1))
             cls.series[str(year)] = indices
 
         cls.post_process()
@@ -440,6 +461,9 @@ class TotalMetrics(Metrics):
     # Tori follows from 'rn_normalized' citation values and the inverse author number for each paper
     @classmethod
     def pre_process(cls):
+        today = datetime.today()
+        threshold = today.year - 10
+        cls.reads10data = filter(lambda a: len(a[7]) > 0 and int(a[0][:4]) > threshold, cls.attributes)
         biblist = map(lambda a: a[0], cls.attributes)
         cls.time_span = get_timespan(biblist)
         cls.refereed = 0
@@ -454,15 +478,20 @@ class TotalMetrics(Metrics):
         cls.results['g-index (Total)'] = cls.g_index
         cls.results['m-index (Total)'] = cls.m_index
         cls.results['i10-index (Total)'] = cls.i10_index
+        cls.results['i100-index (Total)'] = cls.i100_index
         cls.results['e-index (Total)'] = cls.e_index
         cls.results['tori index (Total)'] = cls.tori
         cls.results['roq index (Total)'] = cls.riq
+        cls.results['read10 index (Total)'] = cls.read10
 
 class RefereedMetrics(Metrics):
     config_data_name = 'refereed_metrics'
 
     @classmethod
     def pre_process(cls):
+        today = datetime.today()
+        threshold = today.year - 10
+        cls.reads10data = filter(lambda a: len(a[7]) > 0 and a[1] == 1 and int(a[0][:4]) > threshold, cls.attributes)
         biblist = map(lambda a: a[0], cls.attributes)
         cls.time_span = get_timespan(biblist)
         cls.refereed = 1
@@ -478,9 +507,11 @@ class RefereedMetrics(Metrics):
         cls.results['g-index (Refereed)'] = cls.g_index
         cls.results['m-index (Refereed)'] = cls.m_index
         cls.results['i10-index (Refereed)'] = cls.i10_index
+        cls.results['i100-index (Refereed)'] = cls.i100_index
         cls.results['e-index (Refereed)'] = cls.e_index
         cls.results['tori index (Refereed)'] = cls.tori
         cls.results['roq index (Refereed)'] = cls.riq
+        cls.results['read10 index (Refereed)'] = cls.read10
 
 class PublicationHistogram(Histogram):
     config_data_name = 'publication_histogram'
