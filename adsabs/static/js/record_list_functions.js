@@ -200,3 +200,47 @@ ResultListManager.metrics = function()
                 }
         });
 };
+
+ResultListManager.single_metrics = function()
+{
+        $.fancybox.showLoading();
+        //re-enable query parameters
+        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+        //remove a hidden fields if exists
+        $('#search_results_form > input.ajaxHiddenField').remove();
+        //if there are checked bibcodes
+        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
+        {
+                //remove the query parameters
+                checked_bibcodes = new Array();
+                var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
+                $inputs.each(function() {
+                    checked_bibcodes.push($(this).attr('value'));
+                });
+                var collapsed_bibcodes = checked_bibcodes.join('\n');
+                var original_query = "NA";
+        }
+        else
+        {
+                bibcodes = new Array();
+                var $inputs = $('#search_results_form').find('input[name="bibcode"]');
+                $inputs.each(function() {
+                    bibcodes.push($(this).attr('value'));
+                });
+                var collapsed_bibcodes = bibcodes.join('\n');
+        }
+        alert(collapsed_bibcodes);
+        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+        $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
+        //submit the form via ajax
+        $.ajax({
+                type : "POST",
+                cache : false,
+                url : GlobalVariables.ADSABS2_METRICS_BASE_URL,
+                data : $('#search_results_form').serializeArray(),
+                success: function(data) {
+                    $.fancybox.hideLoading();
+                    $.fancybox(data);
+                }
+        });
+};
