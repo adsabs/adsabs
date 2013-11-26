@@ -18,8 +18,8 @@ from config import config
 # Every type of 'metric' is calculated in a 'model'
 import metricsmodels
 # memory mapped data
-manager = Manager()
-model_results = manager.list([])
+#manager = Manager()
+#model_results = manager.list([])
 # Helper functions
 def sort_list_of_lists(L, index, rvrs=True):
     """
@@ -101,7 +101,8 @@ def get_attributes(args):
 #    in parallel
 def generate_data(model_class):
     model_class.generate_data()
-    model_results.append(model_class.results)
+#    model_results.append(model_class.results)
+    return model_class.results
 
 # F. Format and export the end results
 #    In theory we could build in other formats by e.g. a 'format=foo' in the
@@ -160,7 +161,10 @@ def generate_metrics(**args):
         model_class.results = {}
         stats_models.append(model_class)
     # The metrics calculations are sent off in parallel
-    rez=Pool(config.METRICS_THREADS).map(generate_data, stats_models)
+#    rez=Pool(config.METRICS_THREADS).map(generate_data, stats_models)
+    po = Pool()
+    rez = po.map_async(generate_data, stats_models)
+    model_results = rez.get()
     # Now shape the results in the final format
     results = format_results(model_results)
     # Send the result back to our caller

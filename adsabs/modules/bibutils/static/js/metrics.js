@@ -695,7 +695,22 @@ function plot_series()
 			xaxis: {tickDecimals: 0},
 			yaxis: {
 				min: 0, 
-				tickDecimals: 0
+				tickDecimals: 0,
+			},
+			grid: { hoverable: true, clickable: true },
+			legend:{container: $("#series_legend")},
+			lines: { show: true },
+            points: { show: show_points },
+	};
+	var options_log = {
+			//bars: {show: true, barWidth: 0.8},
+			//lines: { show: true, fill: true, steps: false },
+			xaxis: {tickDecimals: 0},
+			yaxis: {
+				min: 0.001, 
+				tickDecimals: 1,
+				ticks: [0.1,1,10,100,1000,10000],
+				transform:  function(v) {return Math.log(v+0.0001); /*move away from zero*/} ,
 			},
 			grid: { hoverable: true, clickable: true },
 			legend:{container: $("#series_legend")},
@@ -719,13 +734,25 @@ function plot_series()
 			    	data:data_to_plot[2], 
 			    },
 			    {
+			    	label: "i100-index",
+			    	data:data_to_plot[6], 
+			    },
+			    {
 			    	label: "tori-index",
 			    	data:data_to_plot[3], 
+			    },
+			    {
+			    	label: "read10-index",
+			    	data:data_to_plot[7], 
 			    },
 			    //for the moment I ignore the 4 and 5
 			    /*{
 			    	label: "m-index",
 			    	data:data_to_plot[4], 
+			    },
+			    {
+			    	label: "read10-index",
+			    	data:data_to_plot[7], 
 			    },
 			    {
 			    	label: "roq-index",
