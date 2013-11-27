@@ -1,4 +1,6 @@
 <link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link>
+<link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='localstyle.css') }}"></link>
+  <script src="{{ url_for('adsgut.static', filename='bootstrap-tags.js') }}"></script>
   <script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
   <script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
   <script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
@@ -13,7 +15,7 @@
 <div class="container-fluid">
 
   <div id="items" class="row">
-      <div class="span6 items"></div>
+      <div class="span6 items"><legend>Selected Items</legend></div>
       <div class="span6 ctrls"></div>
   </div>
 </div><!--/.fluid-container-->
@@ -29,7 +31,6 @@
 </script>
 <script type="text/coffeescript" id="source">
 $=jQuery
-console.log "In Postform"
 #currently below only works for pubs, but ought to work otherwise too
 $ ->
   loc="{{curpage | safe }}" 
@@ -38,7 +39,6 @@ $ ->
   nam=true
   {% endif %}
   vars="{{ querystring | safe }}"
-  console.log "VARS",vars
   $.get "{{ url_for('adsgut.itemsinfo') }}?items=#{vars}", (data) ->
     console.log "Item Count", data.count, data.items, vars, data
     theitems=data.items

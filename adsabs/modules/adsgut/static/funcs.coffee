@@ -6,14 +6,15 @@ w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
-  htmlstring="<li class=\"nav-header\">#{tagtype}</li>"
+  typestring = tagtype.split(':')[1]
+  htmlstring="<li class=\"nav-header\">Filter by: #{typestring}</li>"
   for [k,v] in tags
     if tagqkey is 'stags'
       t=v[0]
     else if tagqkey is 'tagname'
       t=k
     else
-      t="CRAP"
+      t = "CRAP"
     nonqloc=document.location.href.split('?')[0]
     if tagqkey is 'tagname'
       url=nonqloc+"?query=tagtype:#{tagtype}&query=#{tagqkey}:#{t}"
@@ -34,16 +35,23 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
 format_notes_for_item = (fqin, notes, nick) ->
   t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
   if t3list.length >0
-    return "<p>"+t3list.join("")+"</p>"
+    return "<p class='notespan'>"+t3list.join("")+"</p>"
   else
     return ""
 
+# format_tags_for_item = (fqin, stags, nick) ->
+#   t2list=("<a href=\"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
+#   if t2list.length >0
+#     return "<span><i class='icon-tags'></i> "+t2list.join(", ")+"</span><br/>"
+#   else
+#     return ""
+
 format_tags_for_item = (fqin, stags, nick) ->
-  t2list=("<a href=\"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
+  t2list=("<a class='tag-link' href=\"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
   if t2list.length >0
-    return "<span>Tagged as "+t2list.join(", ")+"</span><br/>"
+    return t2list
   else
-    return ""
+    return []
 
 parse_fortype = (fqin) -> 
     vals = fqin.split(':')
@@ -55,9 +63,18 @@ format_postings_for_item = (fqin, postings, nick) ->
   priv= "#{nick}/group:default"
   p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
   if p2list.length >0
-    return "<span>Posted in "+p2list.join(", ")+"</span><br/>"
+    return "<span><i class='icon-book'></i> "+p2list.join(", ")+"</span><br/>"
   else
     return ""
+
+format_postings_for_item = (fqin, postings, nick) ->
+  publ= "adsgut/group:public"
+  priv= "#{nick}/group:default"
+  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
+  if p2list.length >0
+    return p2list
+  else
+    return []
 
 format_stuff = (fqin, nick, stags, postings, notes) ->
   htmlstring= ""

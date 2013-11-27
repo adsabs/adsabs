@@ -19,8 +19,9 @@
 <!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
 <div id="info" style="display:none"></div>
 <span>
-  Only from <a href="" id="useradder" data="off">{{ useras.adsid }}</a> | Query: 
+  Only from <a href="" id="useradder" class="hoverhelp" data="off">{{ useras.adsid }}</a> | Query: 
 </span>
+<hr/>
 {% endif %}
 <span id="breadcrumb">
 {{ querystring }}
@@ -39,7 +40,7 @@ console.log "In PostableFilter"
 
 $ ->
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
-
+  widgets.decohelp('#useradder', 'help me', 'popover', 'left')
   {% if pflavor!= 'udg' and pflavor!='pub' %}
 
   $.get "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}", (data) ->
@@ -48,7 +49,7 @@ $ ->
     {% elif p.classname=="group" %}
     content=views.group_info data, templates.group_itemsinfo
     {% endif %}
-    $('div#info').append(content)
+    $('div#info').append(content+'<hr/>')
     $('div#info').show()
   {% endif %}
   

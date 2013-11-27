@@ -155,12 +155,14 @@ class HideableView extends Backbone.View
             console.log "ih0"
             @state=1
             @$(@theclass).show()
-            @$('.hider i').attr("class", "icon-minus")
+            #@$('.hider i').attr("class", "icon-minus")
+            @$('.hider .i').html('-&nbsp;')
         else if @state is 1
             console.log "ih1"
             @state=0
             @$(@theclass).hide()
-            @$('.hider i').attr("class", "icon-plus")
+            #@$('.hider i').attr("class", "icon-plus")
+            @$('.hider .i').html('+')
         return false
 
     hide: () =>
@@ -170,15 +172,20 @@ class HideableView extends Backbone.View
     render: (htext) =>
         content = h.render ->
             h.span ->
-                h.text htext
+                h.raw htext
                 h.raw "&nbsp;"
-                h.a ".btn.btn-mini.hider", href:'#', ->
-                    h.i ".icon-plus"
+                #h.a ".btn.btn-link.hider", href:'#', ->
+                    #h.i ".icon-plus"
+                h.a ".hider", href='#', ->
+                    h.span '.i.label.label-info', '+'
         @$el.append(content+@widget)
         return this
 
 #widget most be a div widget implementing the hoverhelp class
-#using delegation, hovering anywhere inside that div will pop up a help text    
+#using delegation, hovering anywhere inside that div will pop up a help text 
+$.fn.andFind = (expr) ->
+  return this.find(expr).add(this.filter(expr))
+ 
 class HoverHelpDecoratorView extends Backbone.View
 
     initialize: (options) ->
@@ -191,10 +198,19 @@ class HoverHelpDecoratorView extends Backbone.View
             title: @titletext
             content: @helptext
         if @htype is "tooltip"
-            @$el.find('.hoverhelp').tooltip(optpo)
+            @$el.andFind('.hoverhelp').tooltip(optpo)
         else if @htype is "popover"
-            @$el.find('.hoverhelp').popover(optpo)
+            @$el.andFind('.hoverhelp').popover(optpo)
         return this
+
+decohelp  = (el, helptext, htype, position) ->
+    opt = 
+        titletext: ""
+        helptext: helptext
+        position: position
+        htype: htype
+        el: el
+    return new HoverHelpDecoratorView(opt).render()
 
 postalnote_form = h.renderable (btext, nrows=2) ->
     #h.div ".control-group.postalnote", ->
@@ -292,3 +308,4 @@ root.widgets =
     link: link
     HideableView: HideableView
     HoverHelpDecoratorView: HoverHelpDecoratorView
+    decohelp: decohelp

@@ -27,7 +27,8 @@
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 {% block head %}
-<!--link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link-->
+<link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='localstyle.css') }}"></link>
+<script src="{{ url_for('adsgut.static', filename='bootstrap-tags.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>

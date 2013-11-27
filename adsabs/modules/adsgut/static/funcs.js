@@ -18,8 +18,9 @@
   prefix = GlobalVariables.ADS_PREFIX + "/adsgut";
 
   format_tags = function(tagtype, $sel, tags, tagqkey) {
-    var htmlstring, k, nonqloc, t, url, urla, v, _i, _len, _ref;
-    htmlstring = "<li class=\"nav-header\">" + tagtype + "</li>";
+    var htmlstring, k, nonqloc, t, typestring, url, urla, v, _i, _len, _ref;
+    typestring = tagtype.split(':')[1];
+    htmlstring = "<li class=\"nav-header\">Filter by: " + typestring + "</li>";
     for (_i = 0, _len = tags.length; _i < _len; _i++) {
       _ref = tags[_i], k = _ref[0], v = _ref[1];
       if (tagqkey === 'stags') {
@@ -61,7 +62,7 @@
       return _results;
     })();
     if (t3list.length > 0) {
-      return "<p>" + t3list.join("") + "</p>";
+      return "<p class='notespan'>" + t3list.join("") + "</p>";
     } else {
       return "";
     }
@@ -75,14 +76,14 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
-        _results.push("<a href=\"" + prefix + "/postable/" + nick + "/group:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1] + "\">" + t[0] + "</a>");
+        _results.push("<a class='tag-link' href=\"" + prefix + "/postable/" + nick + "/group:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1] + "\">" + t[0] + "</a>");
       }
       return _results;
     })();
     if (t2list.length > 0) {
-      return "<span>Tagged as " + t2list.join(", ") + "</span><br/>";
+      return t2list;
     } else {
-      return "";
+      return [];
     }
   };
 
@@ -110,9 +111,32 @@
       return _results;
     })();
     if (p2list.length > 0) {
-      return "<span>Posted in " + p2list.join(", ") + "</span><br/>";
+      return "<span><i class='icon-book'></i> " + p2list.join(", ") + "</span><br/>";
     } else {
       return "";
+    }
+  };
+
+  format_postings_for_item = function(fqin, postings, nick) {
+    var p, p2list, priv, publ;
+    publ = "adsgut/group:public";
+    priv = "" + nick + "/group:default";
+    p2list = (function() {
+      var _i, _len, _ref, _results;
+      _ref = postings[fqin];
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        p = _ref[_i];
+        if (p !== publ && p !== priv && parse_fortype(p) !== "app") {
+          _results.push("<a href=\"" + prefix + "/postable/" + p + "/filter/html\">" + p + "</a>");
+        }
+      }
+      return _results;
+    })();
+    if (p2list.length > 0) {
+      return p2list;
+    } else {
+      return [];
     }
   };
 

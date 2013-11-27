@@ -45,7 +45,7 @@
 
     ItemView.prototype.tagName = 'div';
 
-    ItemView.prototype.className = 'control-group';
+    ItemView.prototype.className = 'itemcontainer';
 
     ItemView.prototype.events = {
       "click .notebtn": "submitNote"
@@ -64,25 +64,37 @@
     };
 
     ItemView.prototype.render = function() {
-      var additional, adslocation, content, fqin, htmlstring, url;
+      var additional, additionalpostings, adslocation, content, fqin, htmlstring, tagdict, thepostings, thetags, url;
       this.$el.empty();
       adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
       url = adslocation + ("" + this.item.basic.name);
-      htmlstring = "<a href=\"" + url + "\">" + this.item.basic.name + "</a><br/>";
+      htmlstring = "<span class='itemtitle'><a href=\"" + url + "\">" + this.item.basic.name + "</a></span><br/>";
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
-      additional = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable);
-      additional = additional + format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable);
+      thetags = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable);
+      additional = "<span class='tagls'></span><br/>";
+      thepostings = format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable);
+      additionalpostings = "<span class='postls'><strong>In Libraries</strong>: " + (thepostings.join(', ')) + "</span><br/>";
+      additional = additional + additionalpostings;
       content = content + additional;
       this.$el.append(content);
+      tagdict = {
+        values: thetags,
+        templates: {
+          pill: '<span class="badge badge-default tag-badge">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
+          add_pill: '<span class="badge badge-info tag-badge">new tag</span>&nbsp;',
+          input_pill: '<span></span>&nbsp;'
+        }
+      };
+      this.$('.tagls').tags(tagdict);
       if (this.noteform) {
         this.hv = new w.HideableView({
           state: 0,
           widget: w.postalnote_form("make note", 2, 0),
           theclass: ".postalnote"
         });
-        this.$el.append(this.hv.render("Notes:").$el);
+        this.$el.append(this.hv.render("Notes: ").$el);
         if (this.hv.state === 0) {
           this.hv.hide();
         }
@@ -155,8 +167,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform;
-      return console.log("ITEMS", this.items, this.loc);
+      return this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, options;
     };
 
     ItemsView.prototype.update_postings_taggings = function() {
@@ -193,7 +204,6 @@
               }
               return _results;
             })();
-            console.log("POSTINGSSSSSSSSSSSSSSSS", _this.postings[k]);
           } else {
             _this.postings[k] = [];
           }
@@ -214,7 +224,6 @@
       var $ctrls, $lister, cback, eback, fqin, i, ins, v, _i, _len, _ref,
         _this = this;
       $lister = this.$('.items');
-      $lister.append('<legend>Selected Items</legend>');
       $ctrls = this.$('.ctrls');
       this.itemviews = {};
       _ref = this.items;
@@ -229,7 +238,6 @@
           memberable: this.memberable,
           noteform: this.noteform
         };
-        console.log("INS", ins);
         v = new ItemView(ins);
         $lister.append(v.render().el);
         this.itemviews[fqin] = v;
@@ -252,7 +260,6 @@
       var cback, eback,
         _this = this;
       cback = function(data) {
-        console.log("return data", data, _this.loc);
         return window.location = _this.loc;
       };
       eback = function(xhr, etext) {
@@ -273,13 +280,11 @@
       }
       postables = libs;
       makepublic = this.$('.makepublic').is(':checked');
-      console.log("MAKEPUBLIC", makepublic);
       if (makepublic) {
         postables = postables.concat(['adsgut/group:public']);
       }
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return _this.update_postings_taggings();
       };
       eback = function(xhr, etext) {
@@ -294,7 +299,6 @@
       var cback, e, eback, loc, tags, tagstring,
         _this = this;
       tagstring = this.$('.tagsinput').val();
-      console.log("TAGSTRING", tagstring);
       if (tagstring === "") {
         console.log("a");
         tags = [];
@@ -333,7 +337,6 @@
       }
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         _this.$('.tagsinput').val("");
         return _this.update_postings_taggings();
       };
@@ -369,7 +372,6 @@
     ItemsFilterView.prototype.render = function() {
       var fqin, i, ins, v, _i, _len, _ref;
       console.log("EL", this.$el);
-      this.$el.append('<hr/>');
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];

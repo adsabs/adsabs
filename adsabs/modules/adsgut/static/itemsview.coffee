@@ -1,47 +1,8 @@
-#we'll start with user profile funcs
 root = exports ? this
 $=jQuery
 h = teacup
 w = widgets
 prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
-# format_notes_for_item = (fqin, notes) ->
-#   t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
-#   if t3list.length >0
-#     return "<p>Notes:<br/>"+t3list.join("<br/>")+"</p>"
-#   else
-#     return ""
-
-# format_tags_for_item = (fqin, stags, nick) ->
-#   t2list=("<a href=\"/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
-#   if t2list.length >0
-#     return "<span>Tagged as "+t2list.join(", ")+"</span><br/>"
-#   else
-#     return ""
-
-# format_postings_for_item = (fqin, postings, nick) ->
-#   p2list=("<a href=\"/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt "#{nick}/group:default")
-#   if p2list.length >0
-#     return "<span>Posted in "+p2list.join(", ")+"</span><br/>"
-#   else
-#     return ""
-
-# format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asform=false) ->
-#   adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
-#   htmlstring = ""
-#   for i in items
-#     fqin=i.basic.fqin
-#     url=adslocation + "#{i.basic.name}"
-#     htmlstring = htmlstring + "<#{formatter}><a href=\"#{url}\">#{i.basic.name}</a><br/>"
-#     htmlstring=htmlstring+format_tags_for_item(fqin, stags, nick)
-#     htmlstring=htmlstring+format_postings_for_item(fqin, postings, nick)
-#     htmlstring=htmlstring+format_notes_for_item(fqin, notes, nick)  
-#     htmlstring=htmlstring+"</#{formatter}>"
-#     if asform
-#       htmlstring=htmlstring+w.postalnote_form()
-
-#     $sel.prepend(htmlstring)
-#   $('#breadcrumb').append("#{count} items")
-#Model, This should do the Individual notes too
 
 cdict=(fqin, l)->
     d={}
@@ -51,7 +12,7 @@ cdict=(fqin, l)->
 class ItemView extends Backbone.View
      
   tagName: 'div'
-  className: 'control-group'
+  className: 'itemcontainer'
 
   events:
     "click .notebtn" : "submitNote"
@@ -70,18 +31,28 @@ class ItemView extends Backbone.View
     @$el.empty()
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
-    htmlstring = "<a href=\"#{url}\">#{@item.basic.name}</a><br/>"
+    htmlstring = "<span class='itemtitle'><a href=\"#{url}\">#{@item.basic.name}</a></span><br/>"
     fqin=@item.basic.fqin
     content = ''
     content = content + htmlstring
     #additional = format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
-    additional = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable)
-    additional = additional + format_postings_for_item(fqin, cdict(fqin, @postings), @memberable)
+    thetags = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable)
+    additional = "<span class='tagls'></span><br/>"
+    thepostings = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable)
+    additionalpostings = "<span class='postls'><strong>In Libraries</strong>: #{thepostings.join(', ')}</span><br/>"
+    additional = additional + additionalpostings
     content = content + additional
     @$el.append(content)
+    tagdict = 
+        values: thetags
+        templates:
+            pill: '<span class="badge badge-default tag-badge">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
+            add_pill: '<span class="badge badge-info tag-badge">new tag</span>&nbsp;',
+            input_pill: '<span></span>&nbsp;',
+    @.$('.tagls').tags(tagdict)
     if @noteform
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, 0), theclass: ".postalnote"})
-        @$el.append(@hv.render("Notes:").$el)
+        @$el.append(@hv.render("Notes: ").$el)
         if @hv.state is 0
             @hv.hide()
     #w.postalnote_form("make note")
@@ -113,6 +84,8 @@ class ItemView extends Backbone.View
     return false
 
 #Collection for change postform
+
+#This needs to be redone to show changes but not actually do them.
 class ItemsView extends Backbone.View
 
   events:
@@ -122,7 +95,6 @@ class ItemsView extends Backbone.View
 
   initialize: (options) ->
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform} = options
-    console.log "ITEMS", @items, @loc
 
   update_postings_taggings: () =>
     @postings={}
@@ -135,7 +107,6 @@ class ItemsView extends Backbone.View
             #console.log "2>>>", k,v[0],v[1]
             if v[0] > 0
                 @postings[k]=(e.thething.postfqin for e in v[1])
-                console.log "POSTINGSSSSSSSSSSSSSSSS", @postings[k]
             else
                 @postings[k]=[]
         for i in @items
@@ -146,7 +117,7 @@ class ItemsView extends Backbone.View
 
   render: =>
     $lister=@$('.items')
-    $lister.append('<legend>Selected Items</legend>')
+    #$lister.append('<legend>Selected Items</legend>')
     $ctrls=@$('.ctrls')
     @itemviews={}
     for i in @items
@@ -158,7 +129,6 @@ class ItemsView extends Backbone.View
             item: i
             memberable: @memberable
             noteform: @noteform
-        console.log "INS", ins
         v=new ItemView(ins)
         $lister.append(v.render().el)
         @itemviews[fqin]=v
@@ -178,7 +148,6 @@ class ItemsView extends Backbone.View
   iDone: =>
     #loc=window.location
     cback = (data) =>
-        console.log "return data", data, @loc
         #alert(@loc)
         window.location=@loc
     eback = (xhr, etext) =>
@@ -197,12 +166,10 @@ class ItemsView extends Backbone.View
         libs=[]
     postables=libs
     makepublic=@$('.makepublic').is(':checked')
-    console.log "MAKEPUBLIC", makepublic
     if makepublic
         postables=postables.concat ['adsgut/group:public']
     loc=window.location
     cback = (data) =>
-        console.log "return data", data, loc
         #window.location=loc
         @update_postings_taggings()
     eback = (xhr, etext) =>
@@ -214,7 +181,6 @@ class ItemsView extends Backbone.View
 
   submitTags: =>
     tagstring=@$('.tagsinput').val()
-    console.log "TAGSTRING", tagstring
     if tagstring is ""
         console.log "a"
         tags=[]
@@ -224,7 +190,6 @@ class ItemsView extends Backbone.View
         tags=(e for e in tags when e != "")
     loc=window.location
     cback = (data) =>
-        console.log "return data", data, loc
         #window.location=loc
         @$('.tagsinput').val("")
         @update_postings_taggings()
@@ -244,7 +209,7 @@ class ItemsFilterView extends Backbone.View
 
   render: =>
     console.log "EL", @$el
-    @$el.append('<hr/>')
+    #@$el.append('<hr/>')
     for i in @items
         fqin=i.basic.fqin
         ins = 
