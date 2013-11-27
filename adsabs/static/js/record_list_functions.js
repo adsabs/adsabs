@@ -176,18 +176,12 @@ ResultListManager.metrics = function()
                 });
                 var collapsed_bibcodes = checked_bibcodes.join('\n');
                 var original_query = "NA";
+                $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
         }
         else
         {
-                bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]');
-                $inputs.each(function() {
-                    bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = bibcodes.join('\n');
+                $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
         }        
-        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-        $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
         //submit the form via ajax
         $.ajax({
                 type : "POST",

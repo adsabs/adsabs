@@ -148,15 +148,20 @@ def metrics(**args):
         # make sure we have a list of what seem to be bibcodes
         query_bibcodes = []
         try:
-            query_par = str(form.current_search_parameters.data.strip())
-            query = json.loads(query_par)['q']
-            query_bibcodes = get_publications_from_query(query)
+            bibcodes = filter(lambda b: len(b) == 19, map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n')))
         except:
-            pass
-        if len(query_bibcodes) == 0:
-            bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
-        else:
-            bibcodes = query_bibcodes[:config.METRICS_MAX_EXPORT]
+            bibcodes = []
+        if len(bibcodes) == 0:
+            try:
+                query_par = str(form.current_search_parameters.data.strip())
+                query = json.loads(query_par)['q']
+                bibcodes = get_publications_from_query(query)[:config.METRICS_MAX_EXPORT]
+            except:
+                bibcodes = []
+#        if len(query_bibcodes) == 0:
+#            bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
+#        else:
+#            bibcodes = query_bibcodes[:config.METRICS_MAX_EXPORT]
         bibcodes = filter(lambda a: len(a) == 19, bibcodes)
         # no bibcodes? display message and re-display input form
         if len(bibcodes) == 0:
