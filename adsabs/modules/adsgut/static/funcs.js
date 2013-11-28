@@ -62,7 +62,7 @@
       return _results;
     })();
     if (t3list.length > 0) {
-      return "<p class='notespan'>" + t3list.join("") + "</p>";
+      return "<p class='notes'>" + t3list.join("") + "</p>";
     } else {
       return "";
     }
@@ -76,10 +76,15 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
-        _results.push("<a class='tag-link' href=\"" + prefix + "/postable/" + nick + "/group:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1] + "\">" + t[0] + "</a>");
+        _results.push({
+          url: "" + prefix + "/postable/" + nick + "/group:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1],
+          text: "" + t[0],
+          id: "" + t[0]
+        });
       }
       return _results;
     })();
+    console.log("T@LIST", t2list);
     if (t2list.length > 0) {
       return t2list;
     } else {

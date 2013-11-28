@@ -22,6 +22,7 @@
 
         can_delete: true,
         can_add: true,
+        ajax_submit: false,
 
         double_hilight: '#0B3549',
 
@@ -48,8 +49,19 @@
         onError: function(num, msg) {
             alert(msg);
         },
+        enhanceValue: function(value) {
+            return value;
+        },
         onBeforeAdd: function(pill, value) {
             return pill;
+        },
+        addWithoutAjax: function(value, cback) {
+            console.log("CALLED WITHOUT AJAX");
+            cback();
+        },
+        addWithAjax: function(value, cback) {
+            console.log("CALLED WITH AJAX");
+            cback();
         },
         onLoadSuggestions: function(values) {
             return values;
@@ -62,7 +74,7 @@
         this.options = $.extend(true, {}, defaults, params);
 
         var $self = this;
-
+        $self.values_done = false;
         if($self.options.values_url) {
             $.ajax({
                 dataType: 'json', type: 'get', async: false, url: $self.options.values_url
@@ -80,7 +92,8 @@
         $.each($self.options.values, function(key, value) {
             $self.addTag(pills_list, value);
         });
-
+        //RAHUL: values done so set values_done to true
+        $self.values_done = true;
         if($self.options.can_add) {
 
             var labels = [], mapped = [];
@@ -258,6 +271,8 @@
 
         var num = value.num > 0 ? $self.options.templates.number.format(value.num) : '';
 
+        value = $self.options.enhanceValue(value);
+
         var tag = $($self.options.templates.pill.format(value.text))
             .attr('data-tag-id', value.id)
             .append(num, icon, $(document.createElement('input'))
@@ -274,12 +289,27 @@
             });
 
         tag = $self.options.onBeforeAdd(tag, value);
-
-        pills_list.append(tag);
-
-        $('[data-toggle="tooltip"]').tooltip();
-
-        return true;
+        if ($self.values_done===false) {
+            pills_list.append(tag);
+            $('[data-toggle="tooltip"]').tooltip();
+            return true;
+        }
+        if ($self.values_done===true && $self.options.ajax_submit===true){
+            $self.options.addWithAjax(value, function(){
+                pills_list.append(tag);
+                $('[data-toggle="tooltip"]').tooltip();
+                return true;
+            });
+        }
+        if ($self.values_done===true && $self.options.ajax_submit===false){
+            $self.options.addWithoutAjax(value, function(){
+                pills_list.append(tag);
+                $('[data-toggle="tooltip"]').tooltip();
+                return true;
+            });
+        }
+        //one more case remains when we dont want to ajax submit but add to tags array for item
+        return true;   
     }
 
     Tags.prototype.removeTag = function(tag) {
@@ -296,9 +326,9 @@
         });
     }
 
-    $.fn.tags = function(params) {
+    $.fn.tags = function(jslist, params) {
         return this.each(function() {
-            new Tags($(this), params);
+            jslist.push(new Tags($(this), params));
         })
     }
 }(window.jQuery));

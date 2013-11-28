@@ -430,13 +430,7 @@
     h.br();
     h.legend("Tag all of these items");
     h.p("Note: Tags will be automatically visible in the groups these items are posted to! Tags may not contain commas.");
-    h.input(".controls.tagsinput.input-xxlarge", {
-      type: "text",
-      placeholder: "tags, comma separated"
-    });
-    h.button(".btn.btn-primary.tag", {
-      type: 'button'
-    }, "Tag");
+    h.span("#alltags.tagls");
     h.br();
     return h.button(".btn.btn-inverse.done.pull-right", {
       type: 'button'

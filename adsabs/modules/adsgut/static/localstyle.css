@@ -1,5 +1,6 @@
-.notespan {
-    margin-left:100px;
+.notes {
+    margin-left:25px;
+    display: block;
 }
 .hider .i {
     font-weight: bold;
@@ -25,6 +26,13 @@
     line-height: 10px;
     padding: 0;
 }
+
+
+
+
+.pills-list .tag-badge {
+            margin-right: 5px;
+}
 */
 
 .tagls .tag-badge {
@@ -33,7 +41,8 @@
             font-weight: 100;
             font-size: 14px;
             line-height: 20px;
-        }
+}
+
 .tagls .tag-icon {
     margin-left: 5px;
     margin-right: -3px;

@@ -35,7 +35,7 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
 format_notes_for_item = (fqin, notes, nick) ->
   t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
   if t3list.length >0
-    return "<p class='notespan'>"+t3list.join("")+"</p>"
+    return "<p class='notes'>"+t3list.join("")+"</p>"
   else
     return ""
 
@@ -47,7 +47,8 @@ format_notes_for_item = (fqin, notes, nick) ->
 #     return ""
 
 format_tags_for_item = (fqin, stags, nick) ->
-  t2list=("<a class='tag-link' href=\"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
+  t2list=({url:"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}"} for t in stags[fqin])
+  console.log("T@LIST", t2list)
   if t2list.length >0
     return t2list
   else

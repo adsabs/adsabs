@@ -9,6 +9,35 @@ cdict=(fqin, l)->
     d[fqin]=l
     return d
 
+#bug we dont have target set for this
+enval = (tag) ->
+    ename = encodeURIComponent(tag.text)
+    if not tag.url
+        tag.url = "#{prefix}/postable/#{@memberable}/group:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
+        title = tag.title ? ' data-toggle="tooltip" title="' + tag.title + '"' : '';
+        #tag.text = '<a class="tag-link" ' + title + ' target="' + tagger.options.tag_link_target + '" href="' + tag.url + '">' + tag.text + '</a>';
+        tag.id = tag.text
+        tag.text = '<a class="tag-link" ' + title +  '" href="' + tag.url + '">' + tag.text + '</a>';
+
+        console.log("taggb",tag);
+    return tag
+
+addwa = (tag, cback) ->
+    tags = [tag.id]
+    items = [@item]
+    console.log items, tags
+    eback = (xhr, etext) =>
+        console.log "ERROR", etext
+        #replace by a div alert from bootstrap
+        alert 'Did not succeed'
+    syncs.submit_tags(items, tags, cback, eback)
+
+addwoa = (tag, cback) ->
+    console.log "NEWTAG", tag
+    @update_tags(tag.id)
+    cback()
+    console.log "NEWTAGS", @newtags
+
 class ItemView extends Backbone.View
      
   tagName: 'div'
@@ -18,14 +47,27 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@stags, @notes, @item, @postings, @memberable, @noteform} = options
+    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit} = options
     console.log "PVIN",  @memberable
     @hv=undefined
+    @newtags = []
+    @newnotes = []
+    @newposts = []
 
   update: (postings, notes, tags) =>
     @stags=tags
     @notes=notes
     @postings=postings
+
+  update_tags: (newtag) =>
+    console.log(">>>",newtag)
+    @newtags.push(newtag)
+
+  update_posts: (newpost) =>
+    @newposts.push(newpost)
+
+  update_notes: (newnote) =>
+    @newnotes.push(newnote)
 
   render: =>
     @$el.empty()
@@ -43,13 +85,21 @@ class ItemView extends Backbone.View
     additional = additional + additionalpostings
     content = content + additional
     @$el.append(content)
+
     tagdict = 
         values: thetags
+        enhanceValue: _.bind(enval, this)
+        addWithAjax: _.bind(addwa, this)
+        addWithoutAjax: _.bind(addwoa, this)
+        ajax_submit: @tagajaxsubmit
         templates:
-            pill: '<span class="badge badge-default tag-badge">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
-            add_pill: '<span class="badge badge-info tag-badge">new tag</span>&nbsp;',
-            input_pill: '<span></span>&nbsp;',
-    @.$('.tagls').tags(tagdict)
+            pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
+            add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">new tag</span>&nbsp;',
+            input_pill: '<span></span>&nbsp;'
+    jslist=[]
+    @.$('.tagls').tags(jslist,tagdict)
+    @tagsobject = jslist[0]
+    console.log("TAGSOBJECT", @tagsobject)
     if @noteform
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, 0), theclass: ".postalnote"})
         @$el.append(@hv.render("Notes: ").$el)
@@ -59,7 +109,7 @@ class ItemView extends Backbone.View
     @$el.append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable))
     return this
 
-  update_note: (data) =>
+  update_note_ajax: (data) =>
     fqin=@item.basic.fqin
     [stags, notes]=get_taggings(data)
     @stags=stags[fqin]
@@ -75,7 +125,7 @@ class ItemView extends Backbone.View
     cback = (data) =>
         console.log "return data", data, loc
         #window.location=loc
-        @update_note(data)
+        @update_note_ajax(data)
     eback = (xhr, etext) =>
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -84,7 +134,10 @@ class ItemView extends Backbone.View
     return false
 
 #Collection for change postform
-
+addwoata = (tag, cback) ->
+    console.log "IN ADVOATA", tag
+    @update_tags(tag)
+    cback()
 #This needs to be redone to show changes but not actually do them.
 class ItemsView extends Backbone.View
 
@@ -114,6 +167,11 @@ class ItemsView extends Backbone.View
             @itemviews[fqin].update(@postings[fqin], @notes[fqin], @stags[fqin])
             @itemviews[fqin].render()
 
+  update_tags: (newtag) =>
+    for i in @items
+        fqin=i.basic.fqin
+        @itemviews[fqin].update_tags(newtag.id)
+        @itemviews[fqin].tagsobject.addTag(@itemviews[fqin].$('.pills-list'), newtag)
 
   render: =>
     $lister=@$('.items')
@@ -129,6 +187,7 @@ class ItemsView extends Backbone.View
             item: i
             memberable: @memberable
             noteform: @noteform
+            tagajaxsubmit: false
         v=new ItemView(ins)
         $lister.append(v.render().el)
         @itemviews[fqin]=v
@@ -142,6 +201,18 @@ class ItemsView extends Backbone.View
         console.log data
         libs=_.union(data.libraries, data.groups)
         $ctrls.append(w.postalall_form(@nameable, @itemtype, libs))
+        tagdict = 
+            enhanceValue: _.bind(enval, this)
+            addWithAjax: _.bind(addwa, this)
+            addWithoutAjax: _.bind(addwoata, this)
+            ajax_submit: false
+            templates:
+                pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
+                add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">new tag</span>&nbsp;',
+                input_pill: '<span></span>&nbsp;'
+        jslist=[]
+        @.$('#alltags').tags(jslist,tagdict)
+        @globaltagsobject = jslist[0]
     syncs.get_postables_writable(@memberable, cback, eback)
     return this
 
@@ -219,6 +290,7 @@ class ItemsFilterView extends Backbone.View
             item: i
             memberable: @memberable
             noteform: @noteform
+            tagajaxsubmit: true
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)

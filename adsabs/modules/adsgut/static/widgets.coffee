@@ -279,8 +279,9 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     h.p "Note: Tags will be automatically visible in the groups these items are posted to! Tags may not contain commas."
     #h.div ".control-group", ->
         #h.label ".control-label", "Tags"
-    h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"tags, comma separated"
-    h.button ".btn.btn-primary.tag", type:'button', "Tag"
+    #h.input ".controls.tagsinput.input-xxlarge", type:"text", placeholder:"tags, comma separated"
+    #h.button ".btn.btn-primary.tag", type:'button', "Tag"
+    h.span "#alltags.tagls"
     h.br()
     h.button ".btn.btn-inverse.done.pull-right", type:'button', "Done"
 
