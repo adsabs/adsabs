@@ -223,7 +223,6 @@ ResultListManager.single_metrics = function()
                 });
                 var collapsed_bibcodes = bibcodes.join('\n');
         }
-        alert(collapsed_bibcodes);
         $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
         $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
         //submit the form via ajax
