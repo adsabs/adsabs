@@ -114,28 +114,72 @@ get_postables_writable = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesusercanwriteto"
     do_get(url, cback, eback)
 
-submit_note = (item, note, cback, eback) ->
+submit_note = (item, itemname, note, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
+    ts={}
+    ts[itemname] = [{content:note, tagtype:tagtype}]
     data=
-        tagspecs:[{content:note, tagtype:tagtype}]
+        tagspecs: ts
         itemtype:itemtype
     if note != ""
+        send_params(url, data, cback, eback)
+
+submit_tag = (item, itemname, tag, cback, eback) ->
+    tagtype= "ads/tagtype:tag"
+    itemtype= "ads/itemtype:pub"
+    url= prefix+"/tags/"+item
+    ts={}
+    ts[itemname] = [{name: tag, tagtype:tagtype}]
+    data=
+        tagspecs: ts
+        itemtype:itemtype
+    if tag != ""
         send_params(url, data, cback, eback)
 
 submit_tags = (items, tags, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
-    itemnames= (i.basic.name for i in items)
     url= prefix+"/items/taggings"
     console.log "TAGS ARE", tags
-    if tags.length >0
+    ts={}
+    inames=[]
+    for i in items
+        fqin=i.basic.fqin
+        name=i.basic.name
+        if tags[fqin].length > 0
+            inames.push(name)
+            ts[name] = ({name:t, tagtype:tagtype} for t in tags[fqin])
+    if inames.length >0
         data=
-            tagspecs:({name:tag, tagtype:tagtype} for tag in tags)
+            tagspecs: ts
             itemtype:itemtype
-            items:itemnames
+            items:inames
         send_params(url, data, cback, eback)
+    else
+        cback()
+
+submit_notes = (items, notes, cback, eback) ->
+    tagtype= "ads/tagtype:note"
+    itemtype= "ads/itemtype:pub"
+    url= prefix+"/items/taggings"
+    ts={}
+    inames=[]
+    for i in items
+        fqin=i.basic.fqin
+        name=i.basic.name
+        if notes[fqin].length > 0
+            inames.push(name)
+            ts[name] = ({content:note, tagtype:tagtype} for note in notes[fqin])
+    if inames.length >0
+        data=
+            tagspecs: ts
+            itemtype:itemtype
+            items:inames
+        send_params(url, data, cback, eback)
+    else
+        cback()
 
 submit_posts = (items, postables, cback, eback) ->
     itemtype= "ads/itemtype:pub"
@@ -148,7 +192,10 @@ submit_posts = (items, postables, cback, eback) ->
             itemtype:itemtype
             items:itemnames
         send_params(url, data, cback, eback)
+    else
+        cback()
 
+#there will always be items so no guarding required
 save_items = (items, cback, eback) ->
     itemtype= "ads/itemtype:pub"
     console.log items, '|||'
@@ -168,7 +215,9 @@ root.syncs=
     get_postables: get_postables
     get_postables_writable: get_postables_writable
     submit_note:submit_note
+    submit_tag:submit_tag
     submit_tags:submit_tags
+    submit_notes:submit_notes
     submit_posts:submit_posts
     save_items:save_items
     create_postable: create_postable

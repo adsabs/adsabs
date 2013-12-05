@@ -231,7 +231,7 @@ def _itemstagsget(qdict):
 def _tagspecsget(qdict):
     tagspecs=_dictp('tagspecs', qdict)
     if not tagspecs:
-        return []
+        return {}
     #Possible security hole bug
     return tagspecs
 
@@ -1029,7 +1029,8 @@ def tags():
         useras = _userpostget(g, jsonpost)
         tagspecs=_tagspecsget(jsonpost)
         newtags=[]
-        for ti in tagspecs:
+        #SPEC: if u want to create new tags jusr create the dictionary with the key tags.
+        for ti in tagspecs['tags']:
             if not ti.has_key('name'):
                 doabort('BAD_REQ', "No name specified for tag")
             if not ti.has_key('tagtype'):
@@ -1089,7 +1090,9 @@ def tagsForItem(ns, itemname):
         i=g.dbp.saveItem(g.currentuser, useras, itemspec)
         tagspecs=_tagspecsget(jsonpost)
         newtaggings=[]
-        for ti in tagspecs:
+        if not tagspecs.has_key(itemname):
+            doabort('BAD_REQ', "No itemname specified to tag")
+        for ti in tagspecs[itemname]:
             tagspec=_setupTagspec(ti, useras)
             print "TAGSPEC IS", tagspec
             i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
@@ -1142,7 +1145,9 @@ def itemsTaggings():
         for name in items:
             itemspec={'name':name, 'itemtype':itemtype}
             i=g.dbp.saveItem(g.currentuser, useras, itemspec)
-            for ti in tagspecs:
+            if not tagspecs.has_key(name):
+                doabort('BAD_REQ', "No itemname specified to tag")
+            for ti in tagspecs[name]:
                 tagspec=_setupTagspec(ti, useras)
                 i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
                 newtaggings.append(td)

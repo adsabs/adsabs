@@ -3,6 +3,10 @@ $=jQuery
 console.log "In Funcs"
 h = teacup
 
+parse_fqin = (fqin) -> 
+    vals=fqin.split(':')
+    return vals[-1+vals.length]
+
 inline_list = h.renderable (items) ->
     h.ul '.inline',  ->
         for i in items
@@ -152,22 +156,22 @@ class HideableView extends Backbone.View
     toggle: () =>
         console.log "in toggle", @state
         if @state is 0
-            console.log "ih0"
-            @state=1
-            @$(@theclass).show()
-            #@$('.hider i').attr("class", "icon-minus")
-            @$('.hider .i').html('-&nbsp;')
-        else if @state is 1
-            console.log "ih1"
-            @state=0
-            @$(@theclass).hide()
-            #@$('.hider i').attr("class", "icon-plus")
-            @$('.hider .i').html('+')
+            @show()
+        else
+            @hide()
         return false
 
     hide: () =>
         console.log "HIDE"
+        @$('.hider .i').html('+')
+        @state = 0
         @$(@theclass).hide()
+
+    show: () =>
+        @state=1
+        @$(@theclass).show()
+        #@$('.hider i').attr("class", "icon-minus")
+        @$('.hider .i').html('-&nbsp;')
 
     render: (htext) =>
         content = h.render ->
@@ -252,27 +256,33 @@ postalnote_form = h.renderable (btext, nrows=2) ->
 #     </div>
 #     <button type="submit" class="btn">Submit</button>
 
-multiselect = h.renderable (daclass, choices) -> 
+multiselect = h.renderable (daclass, choices, choicedict) -> 
+    console.log "IN MULTISELECT"
     h.select ".multi#{daclass}", multiple:"multiple", ->
         for c in choices
-            h.option c
+            h.option  value: c, choicedict[c]
 
 #this should not be here. it should be built up hierarchically from other widgets and should itself be in views.
 postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
+    librarychoicedict={}
+    for c in librarychoices
+        librarychoicedict[c]=parse_fqin(c)
+    console.log "WEE", librarychoicedict
+
     h.legend "Save all of these items"
     if nameable
         h.div ".control-group", ->
             h.label ".control-label", "Name this #{itemtype}"
             h.input ".controls", type:text, placeholder:"Name for #{itemtype}"
-    h.div ".control-group", ->
-        h.label ".checkbox.control-label", ->
-            h.input ".controls.makepublic", type:"checkbox"
-            h.text "Post to Public feed"
+    # h.div ".control-group", ->
+    #     h.label ".checkbox.control-label", ->
+    #         h.input ".controls.makepublic", type:"checkbox"
+    #         h.text "Post to Public feed"
     h.div ".control-group", ->
         h.label ".control-label", "Libraries"
         #h.input ".controls.librariesinput.input-xxlarge", type:"text", placeholder:"Lib names, comma separated" 
-        multiselect("library", librarychoices)
-    h.button ".btn.btn-primary.post", type:'button', "Save"
+        multiselect("library", librarychoices, librarychoicedict)
+    h.button ".btn.btn-primary.post", type:'button', "Add"
     h.br()
     h.br()
     h.legend "Tag all of these items"
@@ -283,7 +293,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     #h.button ".btn.btn-primary.tag", type:'button', "Tag"
     h.span "#alltags.tagls"
     h.br()
-    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Done"
+    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Save"
 
 link = h.renderable (url, txt) ->
     h.raw "<a href=\"#{url}\">#{txt}</a>"

@@ -4,6 +4,9 @@ console.log "In Funcs"
 {renderable, ul, li, dl, dt, dd, raw, br, strong} = teacup
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
+parse_fqin = (fqin) -> 
+    vals=fqin.split(':')
+    return vals[-1+vals.length]
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
   typestring = tagtype.split(':')[1]
@@ -35,7 +38,7 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
 format_notes_for_item = (fqin, notes, nick) ->
   t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
   if t3list.length >0
-    return "<p class='notes'>"+t3list.join("")+"</p>"
+    return t3list.join("")
   else
     return ""
 
@@ -59,19 +62,19 @@ parse_fortype = (fqin) ->
     vals2 = vals[-2+vals.length].split('/')
     return vals2[-1+vals2.length]
 
-format_postings_for_item = (fqin, postings, nick) ->
-  publ= "adsgut/group:public"
-  priv= "#{nick}/group:default"
-  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
-  if p2list.length >0
-    return "<span><i class='icon-book'></i> "+p2list.join(", ")+"</span><br/>"
-  else
-    return ""
+# format_postings_for_item = (fqin, postings, nick) ->
+#   publ= "adsgut/group:public"
+#   priv= "#{nick}/group:default"
+#   p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{parse_fqin(p)}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
+#   if p2list.length >0
+#     return "<span><i class='icon-book'></i> "+p2list.join(", ")+"</span><br/>"
+#   else
+#     return ""
 
 format_postings_for_item = (fqin, postings, nick) ->
   publ= "adsgut/group:public"
   priv= "#{nick}/group:default"
-  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
+  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{parse_fqin(p)}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
   if p2list.length >0
     return p2list
   else

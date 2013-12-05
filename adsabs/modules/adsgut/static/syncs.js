@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_posts, submit_tags, toggle_rw;
+  var $, accept_invitation, add_group, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -148,18 +148,20 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return do_get(url, cback, eback);
   };
 
-  submit_note = function(item, note, cback, eback) {
-    var data, itemtype, tagtype, url;
+  submit_note = function(item, itemname, note, cback, eback) {
+    var data, itemtype, tagtype, ts, url;
     tagtype = "ads/tagtype:note";
     itemtype = "ads/itemtype:pub";
     url = prefix + "/tags/" + item;
+    ts = {};
+    ts[itemname] = [
+      {
+        content: note,
+        tagtype: tagtype
+      }
+    ];
     data = {
-      tagspecs: [
-        {
-          content: note,
-          tagtype: tagtype
-        }
-      ],
+      tagspecs: ts,
       itemtype: itemtype
     };
     if (note !== "") {
@@ -167,39 +169,105 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     }
   };
 
-  submit_tags = function(items, tags, cback, eback) {
-    var data, i, itemnames, itemtype, tag, tagtype, url;
+  submit_tag = function(item, itemname, tag, cback, eback) {
+    var data, itemtype, tagtype, ts, url;
     tagtype = "ads/tagtype:tag";
     itemtype = "ads/itemtype:pub";
-    itemnames = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = items.length; _i < _len; _i++) {
-        i = items[_i];
-        _results.push(i.basic.name);
+    url = prefix + "/tags/" + item;
+    ts = {};
+    ts[itemname] = [
+      {
+        name: tag,
+        tagtype: tagtype
       }
-      return _results;
-    })();
+    ];
+    data = {
+      tagspecs: ts,
+      itemtype: itemtype
+    };
+    if (tag !== "") {
+      return send_params(url, data, cback, eback);
+    }
+  };
+
+  submit_tags = function(items, tags, cback, eback) {
+    var data, fqin, i, inames, itemtype, name, t, tagtype, ts, url, _i, _len;
+    tagtype = "ads/tagtype:tag";
+    itemtype = "ads/itemtype:pub";
     url = prefix + "/items/taggings";
     console.log("TAGS ARE", tags);
-    if (tags.length > 0) {
-      data = {
-        tagspecs: (function() {
-          var _i, _len, _results;
+    ts = {};
+    inames = [];
+    for (_i = 0, _len = items.length; _i < _len; _i++) {
+      i = items[_i];
+      fqin = i.basic.fqin;
+      name = i.basic.name;
+      if (tags[fqin].length > 0) {
+        inames.push(name);
+        ts[name] = (function() {
+          var _j, _len1, _ref, _results;
+          _ref = tags[fqin];
           _results = [];
-          for (_i = 0, _len = tags.length; _i < _len; _i++) {
-            tag = tags[_i];
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            t = _ref[_j];
             _results.push({
-              name: tag,
+              name: t,
               tagtype: tagtype
             });
           }
           return _results;
-        })(),
+        })();
+      }
+    }
+    if (inames.length > 0) {
+      data = {
+        tagspecs: ts,
         itemtype: itemtype,
-        items: itemnames
+        items: inames
       };
       return send_params(url, data, cback, eback);
+    } else {
+      return cback();
+    }
+  };
+
+  submit_notes = function(items, notes, cback, eback) {
+    var data, fqin, i, inames, itemtype, name, note, tagtype, ts, url, _i, _len;
+    tagtype = "ads/tagtype:note";
+    itemtype = "ads/itemtype:pub";
+    url = prefix + "/items/taggings";
+    ts = {};
+    inames = [];
+    for (_i = 0, _len = items.length; _i < _len; _i++) {
+      i = items[_i];
+      fqin = i.basic.fqin;
+      name = i.basic.name;
+      if (notes[fqin].length > 0) {
+        inames.push(name);
+        ts[name] = (function() {
+          var _j, _len1, _ref, _results;
+          _ref = notes[fqin];
+          _results = [];
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            note = _ref[_j];
+            _results.push({
+              content: note,
+              tagtype: tagtype
+            });
+          }
+          return _results;
+        })();
+      }
+    }
+    if (inames.length > 0) {
+      data = {
+        tagspecs: ts,
+        itemtype: itemtype,
+        items: inames
+      };
+      return send_params(url, data, cback, eback);
+    } else {
+      return cback();
     }
   };
 
@@ -224,6 +292,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
         items: itemnames
       };
       return send_params(url, data, cback, eback);
+    } else {
+      return cback();
     }
   };
 
@@ -257,7 +327,9 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     get_postables: get_postables,
     get_postables_writable: get_postables_writable,
     submit_note: submit_note,
+    submit_tag: submit_tag,
     submit_tags: submit_tags,
+    submit_notes: submit_notes,
     submit_posts: submit_posts,
     save_items: save_items,
     create_postable: create_postable

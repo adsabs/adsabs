@@ -322,6 +322,7 @@
                 });
             }
             $self.options.onRemove($this);
+            console.log("At", $this, tag, $self);
             $this.remove();
         });
     }
