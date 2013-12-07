@@ -69,6 +69,14 @@ toggle_rw = (fqmn, fqpn, cback, eback) ->
         op:'togglerw'
     send_params(url, data, cback, eback)
 
+change_description = (description, fqpn, cback, eback) ->
+    url= prefix+"/postable/"+fqpn+"/changes"
+    data=
+        memberable:"crap"
+        op:'description'
+        description:description
+    send_params(url, data, cback, eback)
+
 accept_invitation = (adsid, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
@@ -88,7 +96,8 @@ invite_user = (adsid, postable, changerw, cback, eback) ->
 create_postable = (postable, postabletype, cback, eback) ->
     url= prefix+"/#{postabletype}"
     data=
-        name:postable
+        name:postable.name
+        description:postable.description
     send_params(url, data, cback, eback)
 
 add_group = (selectedgrp, postable, changerw, cback, eback) ->
@@ -221,6 +230,7 @@ root.syncs=
     submit_posts:submit_posts
     save_items:save_items
     create_postable: create_postable
+    change_description: change_description
 
 
 

@@ -16,15 +16,32 @@
 {% endblock %}
 {% block coffeescript %}
 $=jQuery
-$ -> 
+$ ->
+  cback = () ->
+    console.log "cback"
+  eback = () ->
+    console.log "eback" 
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   model={}
   console?.log "Hello World"
+  fqpn='{{ thegroup.basic.fqin}}'
   $.get "#{prefix}/group/{{ thegroup.basic.fqin}}", (data) ->
     console?.log data
     content=views.group_info data, templates.group_info
-    $('div#info').append(content)
-    $('div#info').show()
+    $infodiv = $('div#info')
+    $infodiv.append(content)
+    $.fn.editable.defaults.mode = 'inline'
+    $infodiv.find('.edtext').editable(
+      type:'textarea'
+      rows: 2
+      url: (params) ->
+        syncs.change_description(params.value,fqpn, cback, eback)
+    )
+    $infodiv.find('.edclick').click (e) ->
+      e.stopPropagation()
+      e.preventDefault()
+      $infodiv.find('.edtext').editable('toggle')
+    $infodiv.show()
   $.get "#{prefix}/group/{{ thegroup.basic.fqin}}/members", (data) ->
     plinv=new groupprofile.PostableListView(users:data.users, fqpn:'{{ thegroup.basic.fqin}}', owner:'{{owner}}', $e_el:$('div#members'))
     #content=views.postable_members "{{ thegroup.basic.fqin}}", "{{owner}}", data, templates.postable_members, true

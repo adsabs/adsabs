@@ -3,6 +3,14 @@ $=jQuery
 console.log "In Funcs"
 h = teacup
 
+editable_text =  (text) ->
+    return h.render ->
+        h.span ".edsp", ->
+            h.span ".edtext", text
+            h.a ".edclick", href:'#', ->
+                h.i ".icon-pencil", style:"padding-left: 5px;"
+        
+
 parse_fqin = (fqin) -> 
     vals=fqin.split(':')
     return vals[-1+vals.length]
@@ -47,13 +55,45 @@ $table_from_dict = (kcol, vcol, vlist) ->
         $f.append(k)
     return $f
 
+table_from_dict_partial_many = h.renderable (k,vlist) ->
+    h.td ->
+        h.raw k
+    for ele in vlist
+        h.td ->
+            h.raw ele
+
+table_from_dict_many = h.renderable (kcol, vcollist, dict) ->
+    h.table '.table.table-bordered.table-condensed.table-striped',  ->
+        h.thead ->
+            h.tr ->
+                h.th kcol
+                for ele in vcollist
+                    h.th ele
+        h.tbody ->
+            for k,vlist of dict
+                h.tr ->
+                    table_from_dict_partial_many(k,vlist)
+
+$table_from_dict_many = (kcol, vcollist, vlist) ->
+    f=h.renderable (kcol, vcollist) ->
+        h.table '.table.table-bordered.table-condensed.table-striped',  ->
+            h.thead ->
+                h.tr ->
+                    h.th kcol
+                    for ele in vcollist
+                        h.th ele
+            h.tbody
+    $f=$(f(kcol,vcollist))
+    for k in vlist
+        $f.append(k)
+    return $f
 
 one_col_table_partial = h.renderable (k) ->
     h.td ->
         h.raw k
 
 one_col_table = h.renderable (kcol, tlist) ->
-    h.table '.table.table-bordered.table-condensed',  ->
+    h.table '.table.table-bordered.table-condensed.table-striped',  ->
         h.thead ->
             h.tr ->
                 h.th kcol
@@ -64,7 +104,7 @@ one_col_table = h.renderable (kcol, tlist) ->
 
 $one_col_table = (kcol, vlist) ->
     f=h.renderable (kcol) ->
-        h.table '.table.table-bordered.table-condensed',  ->
+        h.table '.table.table-bordered.table-condensed.table-striped',  ->
             h.thead ->
                 h.tr ->
                     h.th kcol
@@ -73,6 +113,7 @@ $one_col_table = (kcol, vlist) ->
     for k in vlist
         $f.append(k)
     return $f
+
 
 # <div class="input-append">
 #   <input class="span2" id="appendedInputButton" type="text">
@@ -86,6 +127,19 @@ one_submit = h.renderable (ltext, btext) ->
         h.raw "&nbsp;&nbsp;&nbsp;"
         h.button ".btn.btn-primary.sub", type: 'button', btext
 
+two_submit = h.renderable (ltext1, ltext2, btext) ->
+    h.form ".form-horizontal", ->
+        h.div ".control-group", ->
+            h.label ".control-label",  ltext1
+            h.div ".controls", ->
+                h.input ".span3.txt1", type: 'text'
+        h.div ".control-group", ->
+            h.label ".control-label", ltext2
+            h.div ".controls", ->
+                h.textarea ".span3.txt2", rows:2
+                h.raw "&nbsp;&nbsp;&nbsp;"
+                h.button ".btn.btn-primary.sub", type: 'button', btext
+
 one_submit_with_cb = h.renderable (ltext, btext, ctext) ->
     h.label ltext
     h.form ".form-inline", ->
@@ -97,21 +151,21 @@ one_submit_with_cb = h.renderable (ltext, btext, ctext) ->
         h.raw "&nbsp;&nbsp;&nbsp;"
         h.button ".btn.btn-primary.sub", type: 'button', btext
 
-dropdown_submit = h.renderable (selects, ltext, btext) ->
+dropdown_submit = h.renderable (selects, selectnames, ltext, btext) ->
     h.label ltext
     h.form '##{wname}.form-inline', ->
         h.select ".sel", ->
             for s in selects
-                h.option s
+                h.option value:s, selectnames[s]
         h.raw "&nbsp;&nbsp;&nbsp;"
         h.button ".btn.btn-primary.sub", type: 'button', btext
 
-dropdown_submit_with_cb = h.renderable (selects, ltext, btext, ctext) ->
+dropdown_submit_with_cb = h.renderable (selects, selectnames, ltext, btext, ctext) ->
     h.label ltext
     h.form '.form-inline', ->
         h.select ".sel", ->
             for s in selects
-                h.option s
+                h.option value:s, selectnames[s]
         h.raw "&nbsp;&nbsp;"
         h.label '.checkbox', ->
             h.input ".cb", type: 'checkbox'
@@ -307,11 +361,14 @@ root.widgets =
     regular_list: regular_list
     info_layout: info_layout
     one_col_table_partial: one_col_table_partial
-    table_from_dict_partial: table_from_dict_partial
     one_col_table: one_col_table
     $one_col_table: $one_col_table
+    table_from_dict_partial: table_from_dict_partial
     table_from_dict: table_from_dict
     $table_from_dict: $table_from_dict
+    table_from_dict_partial_many: table_from_dict_partial_many
+    table_from_dict_many: table_from_dict_many
+    $table_from_dict_many: $table_from_dict_many
     one_submit: one_submit
     dropdown_submit: dropdown_submit
     one_submit_with_cb: one_submit_with_cb
@@ -320,3 +377,5 @@ root.widgets =
     HideableView: HideableView
     HoverHelpDecoratorView: HoverHelpDecoratorView
     decohelp: decohelp
+    two_submit: two_submit
+    editable_text: editable_text

@@ -25,7 +25,7 @@
   };
 
   parse_userinfo = function(data) {
-    var e, p, pinfqin, postablesin, postablesinvitedto, postablesowned, powfqin, priv, publ, userdict, _i, _len, _ref, _ref1;
+    var e, groupsin, groupsinvitedto, groupsowned, librariesin, librariesinvitedto, librariesowned, p, pinfqin, postablesin, postablesinvitedto, postablesowned, powfqin, priv, publ, userdict, _i, _len, _ref, _ref1;
     publ = "adsgut/group:public";
     priv = data.user.nick + "/group:default";
     postablesin = [];
@@ -61,40 +61,43 @@
     }
     postablesinvitedto = data.user.postablesinvitedto;
     console.log("POSARASTAIN", postablesin);
+    groupsin = (function() {
+      var _j, _len1, _ref2, _results;
+      _results = [];
+      for (_j = 0, _len1 = postablesin.length; _j < _len1; _j++) {
+        e = postablesin[_j];
+        if (e.ptype === 'group' && ((_ref2 = e.fqpn) !== publ && _ref2 !== priv)) {
+          _results.push(e);
+        }
+      }
+      return _results;
+    })();
+    groupsowned = (function() {
+      var _j, _len1, _ref2, _results;
+      _results = [];
+      for (_j = 0, _len1 = postablesowned.length; _j < _len1; _j++) {
+        e = postablesowned[_j];
+        if (e.ptype === 'group' && ((_ref2 = e.fqpn) !== publ && _ref2 !== priv)) {
+          _results.push(e);
+        }
+      }
+      return _results;
+    })();
+    groupsinvitedto = (function() {
+      var _j, _len1, _results;
+      _results = [];
+      for (_j = 0, _len1 = postablesinvitedto.length; _j < _len1; _j++) {
+        e = postablesinvitedto[_j];
+        if (e.ptype === 'group') {
+          _results.push(e);
+        }
+      }
+      return _results;
+    })();
     userdict = {
-      groupsin: (function() {
-        var _j, _len1, _ref2, _results;
-        _results = [];
-        for (_j = 0, _len1 = postablesin.length; _j < _len1; _j++) {
-          e = postablesin[_j];
-          if (e.ptype === 'group' && ((_ref2 = e.fqpn) !== publ && _ref2 !== priv)) {
-            _results.push(e.fqpn);
-          }
-        }
-        return _results;
-      })(),
-      groupsowned: (function() {
-        var _j, _len1, _ref2, _results;
-        _results = [];
-        for (_j = 0, _len1 = postablesowned.length; _j < _len1; _j++) {
-          e = postablesowned[_j];
-          if (e.ptype === 'group' && ((_ref2 = e.fqpn) !== publ && _ref2 !== priv)) {
-            _results.push(e.fqpn);
-          }
-        }
-        return _results;
-      })(),
-      groupsinvitedto: (function() {
-        var _j, _len1, _results;
-        _results = [];
-        for (_j = 0, _len1 = postablesinvitedto.length; _j < _len1; _j++) {
-          e = postablesinvitedto[_j];
-          if (e.ptype === 'group') {
-            _results.push(e.fqpn);
-          }
-        }
-        return _results;
-      })(),
+      groupsin: groupsin,
+      groupsowned: groupsowned,
+      groupsinvitedto: groupsinvitedto,
       userinfo: {
         nick: data.user.nick,
         email: data.user.adsid,
@@ -102,39 +105,42 @@
         name: data.user.basic.name
       }
     };
-    userdict.librariesin = _.union((function() {
+    librariesin = _.union((function() {
       var _j, _len1, _results;
       _results = [];
       for (_j = 0, _len1 = postablesin.length; _j < _len1; _j++) {
         e = postablesin[_j];
         if (e.ptype === 'library') {
-          _results.push(e.fqpn);
+          _results.push(e);
         }
       }
       return _results;
-    })(), userdict.groupsin);
-    userdict.librariesowned = _.union((function() {
+    })(), groupsin);
+    librariesowned = _.union((function() {
       var _j, _len1, _results;
       _results = [];
       for (_j = 0, _len1 = postablesowned.length; _j < _len1; _j++) {
         e = postablesowned[_j];
         if (e.ptype === 'library') {
-          _results.push(e.fqpn);
+          _results.push(e);
         }
       }
       return _results;
-    })(), userdict.groupsowned);
-    userdict.librariesinvitedto = _.union((function() {
+    })(), groupsowned);
+    librariesinvitedto = _.union((function() {
       var _j, _len1, _results;
       _results = [];
       for (_j = 0, _len1 = postablesinvitedto.length; _j < _len1; _j++) {
         e = postablesinvitedto[_j];
         if (e.ptype === 'library') {
-          _results.push(e.fqpn);
+          _results.push(e);
         }
       }
       return _results;
-    })(), userdict.groupsinvitedto);
+    })(), groupsinvitedto);
+    userdict.librariesin = librariesin;
+    userdict.librariesowned = librariesowned;
+    userdict.librariesinvitedto = librariesinvitedto;
     console.log("LIBGRPSSIN", userdict.librariesin);
     return userdict;
   };
@@ -146,6 +152,7 @@
     if (ownermode == null) {
       ownermode = false;
     }
+    console.log("FQPN", fqpn);
     if (libmode === "lib") {
       h.a({
         href: prefix + ("/postable/" + fqpn + "/filter/html")
@@ -226,9 +233,9 @@
     PostableView.prototype.render = function() {
       var content, libmode, ownermode;
       if (this.model.get('invite')) {
-        this.$el.html(w.table_from_dict_partial(make_postable_link(this.model.get('fqpn'), libmode = false), w.single_button('Yes')));
+        this.$el.html(w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = false), [this.model.get('description'), w.single_button('Yes')]));
       } else {
-        content = w.one_col_table_partial(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode));
+        content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('description')]);
         console.log("CONTENT", content);
         this.$el.html(content);
       }
@@ -328,9 +335,9 @@
       console.log("RENDER1", rendered);
       console.log("RENDER2");
       if (this.collection.invite) {
-        $widget = w.$table_from_dict("Invitations", "Accept?", rendered);
+        $widget = w.$table_from_dict_many("Invitations", ["Description", "Accept?"], rendered);
       } else {
-        $widget = w.$one_col_table(this.tmap[this.collection.listtype], rendered);
+        $widget = w.$table_from_dict_many(this.tmap[this.collection.listtype], ["Description"], rendered);
       }
       this.$el.append($widget);
       return this;

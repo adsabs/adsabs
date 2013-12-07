@@ -264,6 +264,7 @@
     if (scmode == null) {
       scmode = false;
     }
+    console.log("USERS", users);
     if (scmode) {
       userlist = (function() {
         var _results;
@@ -288,12 +289,14 @@
   };
 
   postable_info_layout = renderable(function(_arg, mode) {
-    var a, basic, description, modetext, nick, owner, url;
+    var a, basic, description, dtext, modetext, nick, owner, url;
     basic = _arg.basic, owner = _arg.owner, nick = _arg.nick;
     if (mode == null) {
       mode = "filter";
     }
     description = basic.description;
+    dtext = w.editable_text(description);
+    console.log("DTEXT", dtext);
     if (description === "") {
       description = "not provided";
     }
@@ -306,7 +309,9 @@
     a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.fqin + "</a>";
     return dl('.dl-horizontal', function() {
       dt("Description");
-      dd(description);
+      dd(function() {
+        return raw(dtext);
+      });
       dt("UUID");
       dd(nick);
       dt("Owner");
@@ -451,11 +456,18 @@
     };
 
     AddGroup.prototype.initialize = function(options) {
+      var g, _i, _len, _ref;
       this.withcb = options.withcb, this.postable = options.postable, this.groups = options.groups;
+      this.groupnames = {};
+      _ref = this.groups;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        g = _ref[_i];
+        this.groupnames[g] = parse_fqin(g);
+      }
       if (this.withcb) {
-        return this.content = widgets.dropdown_submit_with_cb(this.groups, "Add a group you are a member of:", "Add", "Can Post?");
+        return this.content = widgets.dropdown_submit_with_cb(this.groups, this.groupnames, "Add a group you are a member of:", "Add", "Can Post?");
       } else {
-        return this.content = widgets.dropdown_submit(this.groups, "Add a group you are a member of:", "Add");
+        return this.content = widgets.dropdown_submit(this.groups, this.groupnames, "Add a group you are a member of:", "Add");
       }
     };
 
@@ -517,7 +529,7 @@
 
     CreatePostable.prototype.initialize = function(options) {
       this.postabletype = options.postabletype;
-      return this.content = widgets.one_submit("Start a new " + this.postabletype, "Create");
+      return this.content = widgets.two_submit("Start a new " + this.postabletype, "Description", "Create");
     };
 
     CreatePostable.prototype.render = function() {
@@ -536,7 +548,9 @@
         console.log("ERROR", etext, loc);
         return alert("Did not succeed: " + etext);
       };
-      postable = this.$('.txt').val();
+      postable = {};
+      postable.name = this.$('.txt1').val();
+      postable.description = this.$('.txt2').val();
       return syncs.create_postable(postable, this.postabletype, cback, eback);
     };
 

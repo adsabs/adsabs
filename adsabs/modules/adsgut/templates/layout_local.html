@@ -7,7 +7,7 @@
                 <ul class="nav nav-list" id="header">
                   <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a></span></li>
                   <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">My Saved Items</a></span></li>
-                  <li><span><a href="{{ url_for('adsgut.publicHtml') }}">Public Feed</a></span></li>
+                  <!--li><span><a href="{{ url_for('adsgut.publicHtml') }}">Public Feed</a></span></li-->
                   <li><span><a href="{{ url_for('user.index') }}">Settings</a></span></li>
                 </ul>
                 {% block sidebar %}
@@ -28,6 +28,8 @@
 <!-- Placed at the end of the document so the pages load faster -->
 {% block head %}
 <link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='localstyle.css') }}"></link>
+<link href="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>
 <script src="{{ url_for('adsgut.static', filename='bootstrap-tags.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>

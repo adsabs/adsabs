@@ -162,6 +162,7 @@ get_groups = (nick, cback) ->
 #     w.inline_list userlist
 
 postable_inviteds_template = renderable (fqpn, users, scmode=false) ->
+  console.log "USERS", users
   if scmode
     userlist= (k for k,v of users)
     w.one_col_table "Invited Users", userlist
@@ -179,6 +180,8 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 postable_info_layout = renderable ({basic, owner, nick}, mode="filter") ->
   description=basic.description
+  dtext = w.editable_text(description)
+  console.log "DTEXT", dtext
   if description is ""
     description = "not provided"
   if mode is "filter"
@@ -189,7 +192,8 @@ postable_info_layout = renderable ({basic, owner, nick}, mode="filter") ->
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
   dl '.dl-horizontal', ->
     dt "Description"
-    dd description
+    dd ->
+      raw dtext
     dt "UUID"
     dd nick
     dt "Owner"
@@ -284,10 +288,13 @@ class AddGroup extends Backbone.View
 
   initialize: (options) ->
     {@withcb, @postable, @groups} = options
+    @groupnames={}
+    for g in @groups
+      @groupnames[g] = parse_fqin(g)
     if @withcb
-      @content=widgets.dropdown_submit_with_cb(@groups,"Add a group you are a member of:","Add", "Can Post?")
+      @content=widgets.dropdown_submit_with_cb(@groups, @groupnames, "Add a group you are a member of:","Add", "Can Post?")
     else
-      @content=widgets.dropdown_submit(@groups,"Add a group you are a member of:","Add")
+      @content=widgets.dropdown_submit(@groups, @groupnames, "Add a group you are a member of:","Add")
 
   render: () =>
     @$el.html(@content)
@@ -325,7 +332,7 @@ class CreatePostable extends Backbone.View
 
   initialize: (options) ->
     {@postabletype} = options
-    @content=widgets.one_submit("Start a new #{@postabletype}", "Create")
+    @content=widgets.two_submit("Start a new #{@postabletype}", "Description", "Create")
 
   render: () =>
     @$el.html(@content)
@@ -340,7 +347,9 @@ class CreatePostable extends Backbone.View
         console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert "Did not succeed: #{etext}"
-    postable=@$('.txt').val()
+    postable={}
+    postable.name=@$('.txt1').val()
+    postable.description=@$('.txt2').val()
     syncs.create_postable(postable, @postabletype, cback, eback)
 
 root.get_tags = get_tags

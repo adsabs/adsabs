@@ -544,6 +544,10 @@ def doPostableChanges(po, pt, pn):
             memberable=g.db.getMemberableForFqin(g.currentuser, mtype, memberable)
             mem, p = g.db.toggleRWForMembership(g.currentuser, g.currentuser, fqpn, memberable)
             return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
+        elif op=='description':
+            description=_dictp('description', jsonpost,'')
+            mem, p = g.db.changeDescriptionOfPostable(g.currentuser, g.currentuser, fqpn, description)
+            return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
         else:
             doabort("BAD_REQ", "No Op Specified")
     else:

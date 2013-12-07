@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -94,6 +94,17 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
+  change_description = function(description, fqpn, cback, eback) {
+    var data, url;
+    url = prefix + "/postable/" + fqpn + "/changes";
+    data = {
+      memberable: "crap",
+      op: 'description',
+      description: description
+    };
+    return send_params(url, data, cback, eback);
+  };
+
   accept_invitation = function(adsid, fqpn, cback, eback) {
     var data, url;
     url = prefix + "/postable/" + fqpn + "/changes";
@@ -119,7 +130,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     var data, url;
     url = prefix + ("/" + postabletype);
     data = {
-      name: postable
+      name: postable.name,
+      description: postable.description
     };
     return send_params(url, data, cback, eback);
   };
@@ -332,7 +344,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     submit_notes: submit_notes,
     submit_posts: submit_posts,
     save_items: save_items,
-    create_postable: create_postable
+    create_postable: create_postable,
+    change_description: change_description
   };
 
 }).call(this);

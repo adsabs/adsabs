@@ -25,26 +25,32 @@ parse_userinfo = (data) ->
             postablesin.push(p)
     postablesinvitedto=data.user.postablesinvitedto
     console.log "POSARASTAIN", postablesin
+    groupsin = (e for e in postablesin when e.ptype is 'group' and e.fqpn not in [publ, priv])
+    groupsowned = (e for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publ, priv])
+    groupsinvitedto = (e for e in postablesinvitedto when e.ptype is 'group')
     userdict=
-        groupsin: (e.fqpn for e in postablesin when e.ptype is 'group' and e.fqpn not in [publ, priv])
-        groupsowned: (e.fqpn for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publ, priv])
-        groupsinvitedto: (e.fqpn for e in postablesinvitedto when e.ptype is 'group')
+        groupsin: groupsin
+        groupsowned: groupsowned
+        groupsinvitedto: groupsinvitedto
         userinfo:
             nick: data.user.nick
             email: data.user.adsid
             whenjoined: data.user.basic.whencreated
             name: data.user.basic.name
 
-    userdict.librariesin = _.union((e.fqpn for e in postablesin when e.ptype is 'library'), userdict.groupsin)
-    userdict.librariesowned =  _.union((e.fqpn for e in postablesowned when e.ptype is 'library'), userdict.groupsowned)
-    userdict.librariesinvitedto = _.union((e.fqpn for e in postablesinvitedto when e.ptype is 'library'), userdict.groupsinvitedto)
-
+    librariesin = _.union((e for e in postablesin when e.ptype is 'library'), groupsin)
+    librariesowned =  _.union((e for e in postablesowned when e.ptype is 'library'), groupsowned)
+    librariesinvitedto = _.union((e for e in postablesinvitedto when e.ptype is 'library'), groupsinvitedto)
+    userdict.librariesin = librariesin
+    userdict.librariesowned =  librariesowned
+    userdict.librariesinvitedto = librariesinvitedto
         
     console.log "LIBGRPSSIN", userdict.librariesin
 
     return userdict
 
 make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
+    console.log "FQPN", fqpn
     if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
             h.text parse_fqin(fqpn)
@@ -85,9 +91,10 @@ class PostableView extends Backbone.View
     render: =>
 
         if @model.get('invite')
-            @$el.html(w.table_from_dict_partial(make_postable_link(@model.get('fqpn'), libmode=false), w.single_button('Yes')))
+            @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), w.single_button('Yes')]))
         else
-            content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
+            #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
+            content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('description')])
             console.log "CONTENT", content
             @$el.html(content)
         return this
@@ -136,9 +143,10 @@ class PostableListView extends Backbone.View
         console.log "RENDER1", rendered
         console.log "RENDER2"
         if @collection.invite
-            $widget=w.$table_from_dict("Invitations", "Accept?", rendered)
+            $widget=w.$table_from_dict_many("Invitations", ["Description","Accept?"], rendered)
         else
-            $widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
+            #$widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
+            $widget=w.$table_from_dict_many(@tmap[@collection.listtype], ["Description"], rendered)
         @$el.append($widget)
         return this
 
