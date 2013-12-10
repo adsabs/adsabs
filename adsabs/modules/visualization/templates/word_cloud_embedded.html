@@ -1,5 +1,5 @@
 <!-- Alex -->
-<div class="wordcloud_body">
+<div class="vis_body">
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span2" id="wordcloud_controlpanel" style="margin-top:5%">
@@ -26,7 +26,7 @@
               <li> Click on a term to add it to this list.</li>
               <li> Click again on the term to remove it.</li>
             </ul>
-            <button type="button" class="btn btn-info btn-block vis_btn" id="authorfacet" style=style="margin:20px 0px 20px 0px">Apply Filter to Search</button>
+            <button type="button" class="btn btn-info vis_center" id="authorfacet">Apply Filter to Search</button>
         </div> 
       </div>
 
@@ -37,7 +37,6 @@
 
 //initialize final word list
           var wordDict={{ wordcloud_data|tojson|safe }};
-
           var baseurlandquery= window.location.href;
 
 
@@ -108,7 +107,7 @@
                 .data(words)
                 .enter()
                 .append("text")
-                .classed("wordcloud_text vis_hover_pointer", true)
+                .classed("wordcloud_text vis_svgtext vis_hover_pointer", true)
                 .style("font-size", function(d) {return d.size + "px"; })
                 .style("fill", function(d, i) {return fill(d.origSize);})
                 .attr("text-anchor", "middle")

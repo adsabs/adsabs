@@ -78,10 +78,14 @@ def word_cloud():
         'highlights': [],
         'defType':'aqp', 
         'rows': str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
-        'tv.all': 'true', 
-        'tv.fl':'abstract', 
+        'tv.tf_idf': 'true', 
+        'tv.tf': 'true', 
+        'tv.positions':'false',
+        'tf.offsets':'false',
+        'tv.fl':'abstract,title',
+        'fl':'abstract,title' 
     })
-        
+            
     resp = solr.query(query_url=tvrh_query_url, **query_components)
 
     if resp.is_error():
