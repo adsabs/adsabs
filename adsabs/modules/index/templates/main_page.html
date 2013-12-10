@@ -1,31 +1,33 @@
 {% from "macros/search_macros.html" import render_search_form with context %}
+{% from "macros/search_macros.html" import render_classic_search_form with context %}
 
 {% extends "layout.html" %}
 
 {% block titlehead %}index{% endblock %}
 
-{% block head%}{% endblock %}
+{% block head%}
+
+{% endblock %}
 
 {% block body %}
 
 <h3>The SAO/NASA Astrophysics Data System</h3>
 
 <div class="tabbable container">
-	<ul class="nav nav-tabs">
-		<li class="active"><a href="#tab1" data-toggle="tab"> Search the ADS </a></li>
-		<!-- li><a href="#tab2" data-toggle="tab"> Dashboard </a></li-->
-		<li><a class="disabled"> Dashboard </a></li>
-	</ul>
-	{# <div class="tab-content">
-		<div class="tab-pane active" id="tab1">
-    		The search form here creates problems
+	<ul class="nav nav-tabs" >
+		<li class="active"><a href="#tab1"> Search the ADS </a></li>
+		<li><a href="/search/classic-search" > Classic Search </a></li>
+		<!-- li><a href="#tab3" data-toggle="tab"> Dashboard </a></li-->
+<!-- 		<li><a class="disabled"> Dashboard </a></li>
+ -->	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active fade in" id="tab1">
+    		{{ render_search_form(form) }}
 		</div>
-    	<div class="tab-pane" id="tab2">
-      		<p>All the personalized info</p>
-    	</div>
-  	</div> -#}
+
+  	</div> 
 </div>
-{{ render_search_form(form) }}
+
 
 <div id="text_welcome">
 	{% if static_content %}
@@ -42,4 +44,3 @@ This is the content of variable coming from the configuration.
 {{ config.APP_VERSION }}
 -->
 {% endblock %}
-

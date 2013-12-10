@@ -1,7 +1,8 @@
 {# ###### Macro for the basic search form ###### #}
 {% macro render_search_form(form) %}
-<div class="container" id="search_form">
-    <form class="form-search form-search-cust" method="{{ form.method }}" action="{{ url_for(form.flask_route) }}">
+
+<div class="container one_box_search_container" id="search_form">
+    <form class="form-search form-search-cust" id="one_box_search" method="{{ form.method }}" action="{{ url_for(form.flask_route) }}">
         <fieldset>
         	{#{ form.rows }#}
             <!-- legend>ADS metadata and fulltext integrated search</legend-->
@@ -36,7 +37,7 @@
             						data-rel="bootstrap_tooltip" title="Click here to see some examples">Examples</a></small></div>
 	        </div>
 	        <div id="advanced_options" class="row">
-	        	<div class="span12 custom-well-small">
+	        	<div class="span11 custom-well-small">
 	        	{# { form.sort_dir() } #}
 
 	        		<div class="span4 adv_opt_box">
@@ -118,4 +119,240 @@
         {% endif %}
     </form>
 </div>
+{% endmacro %}
+
+
+{# ###### Macro for the classic search form ###### #}
+
+{% macro render_classic_search_form() %}
+<div class="container classic_container">
+    <div class="form-search form-search-cust"  id="classic_form">
+        <div>    	
+            <!-- legend>ADS metadata and fulltext integrated search</legend-->
+<!--             <div class="row">
+            	<div class="span8">
+            	<h4 > New Classic Search </h4>
+            	</div>
+            </div> -->
+		<div class="row">	
+			<div class="tab-content span8">
+				<input class="span8" id="classic_q" name="q" placeholder="Watch your query being generated as you type in the form below" type="text" value="">
+			</div>
+<!-- 			<div class="alert alert-warning alert-dismissable" id="classic_edit_warning">
+  			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+				<strong> Warning!</strong> If you wish to edit content in the search bar, make sure you do it right before submitting your query. Otherwise, if you edit the search bar and then continue to augment your query in the classic form, your search bar edits will be lost.
+			</div>
+ -->
+			<div class="span4">
+				<button class="btn btn-primary" id="search_submit"><i class="icon-search icon-white"></i> Search</button>
+				<span id ="classic_help_button" class = "classic_box_shadow"><i class="icon-question-sign" ></i> Help Mode</span>
+			</div>
+		</div>
+        </div>
+
+        <div id = "classic_interact" >
+        	<div class="row">
+	    	<div class="span8 classic_form_styling">			
+	        	<div class="row">
+	        		<div class="span8 classic_top_row" id = "Database" title="You can search within our database of astronomy publications, the physics database, or both at once.">
+			        		Databases to query: 
+			        		<label class="checkbox">
+			        			<input type="checkbox" checked id="astronomy"> Astronomy
+			        		</label>
+			        		<label class="checkbox">
+			        			<input type="checkbox" id="physics"> Physics 
+			        		</label>
+			    	</div>
+			    </div>
+	        	<div class="row classic_author_object_row">
+					<div class="span8 classic_field">
+						<div id="author" title="Enter author names in the form 'Hubble, Edwin P'. Make sure to press the return key in between names." class="classic_author_object">
+							<label class="radio">
+							  <input type="radio"  class="or" name = "author_logic"> or
+							</label>
+							<label class="radio ">
+							  <input type="radio" checked class="and" name = "author_logic"> and
+							</label>
+							<label class="radio">
+							  <input type="radio" class="simple" name = "author_logic"> simple
+							</label><br/>
+						<textarea class= "span3" autofocus rows= "4"  placeholder= "Authors (Last, First M, one per line)"></textarea>
+						</div>
+	        			<div id = "object" class="classic_author_object classic_disabled">
+	        				<label class="radio">
+								 <input type="radio" disabled="disabled" class="or" name="object_logic"> or
+							</label>
+							<label class="radio" >
+								 <input type="radio" disabled="disabled" class="and" name="object_logic"> and
+							</label><br/>
+	        			<textarea disabled class="span3 uneditable-textarea" rows= "4" placeholder= "Object name/position search (not yet available)"></textarea>
+						</div>
+		   			</div>
+				 </div>
+        	<div class="row">
+				<div class="span8 classic_field classic_date" id="date" title="You can choose a bounding year or a year and month combination. If you leave one side blank, the query will be unbounded in that direction">Publication date between
+						<input class="span1"  maxlength="2" placeholder="MM" type="text" value="">/<input class="span1"  maxlength="4" placeholder="YYYY" type="text" value=""> and 
+						<input class="span1" maxlength="2"  placeholder="MM" type="text" value="">/<input class="span1"  maxlength="4"  placeholder="YYYY" type="text" value="">
+				</div>
+			</div>
+        	<div class="row">
+        		<div class="span8 classic_field" title="Choose title words here. Put phrases in double quotes. You can combine your queries with AND (all words/phrases must be present), OR (at least one must be present), simple logic (place a + in front of each word or phrase that is required, and a - in front of any phrases or words you explicitly want to exclude), or more complicated boolean logic.">
+        			<div class="row" id="title">
+
+						<div class="span4 offset4 classic_logic_abs_title" >
+							<label class="radio inline">
+							  <input type="radio"  class= "or" name="title_logic"> or
+							</label>
+							<label class="radio inline">
+							  <input type="radio"  class= "and" name="title_logic" checked> and
+							</label>
+							<label class="radio inline">
+							  <input type="radio"  class= "simple" name="title_logic"> simple
+							</label>
+							<label class="radio inline">
+							  <input type="radio" class="boolean" name="title_logic"> boolean
+							</label>
+						</div>
+        			<textarea class= "span6 " rows="1" placeholder="Title words"></textarea>
+        			</div>
+        		</div>
+        	</div>
+        	<div class="row">
+        		<div class="span8 classic_field" title = "Choose abstract words here. Put phrases in double quotes. You can combine your queries with AND (all words/phrases must be present), OR (at least one must be present), simple logic (place a + in front of each word or phrase that is required, and a - in front of any phrases or words you explicitly want to exclude), or more complicated boolean logic.">
+        			<div class="row" id="abstract">
+
+						<div class="span4 offset4 classic_logic_abs_title ">
+							<label class="radio inline">
+							  	<input type="radio" class= "or" name = "abstract_logic"> or
+							</label>
+							<label class="radio inline">
+							  	<input type="radio" class= "and" name = "abstract_logic" checked> and
+							</label>
+							<label class="radio inline">
+							  	<input type="radio" class= "simple" name = "abstract_logic"> simple
+							</label>
+							<label class="radio inline">
+							  	<input type="radio" class= "boolean" name = "abstract_logic"> boolean
+							</label>
+						</div>
+        			<textarea class= "span6" rows="3" placeholder="Abstract words/keywords"></textarea>
+        			</div>
+        		</div>
+        	</div>
+
+     	<div class="row">
+        		<div class="span8 classic_field">
+        			<div class="row" id="bibstem">
+						<div class="span4 offset4 classic_logic_abs_title " id="ref_filter" title = "Here you can narrow down your results. If you only wish to see refereed publications, leave that box checked. If you wish to see only articles in your results, check that box as well.">
+							<label class="checkbox">
+								<input type= "checkbox" checked id= "ref_only"> Refereed only &nbsp; &nbsp;
+							</label>
+							<label class="checkbox">
+								<input type= "checkbox" id="articles_only"> Select only articles
+							</label>
+						</div>
+						<div title = "Enter comma-separated bibstems here. Autocomplete will help you find a bibstem if you simply type in the first few letters from the name of the journal or conference you are seeking.">
+        					<textarea id="pubtext"  rows="2" class= "span6" placeholder="Publications (comma-separated bibstems--autocomplete recognizes publication titles)" autocomplete="off"></textarea>
+        				</div>
+        			</div>
+        		</div>
+        	</div>
+		   		
+        	<div class="row">
+			    <div class="span8 classic_field" id ="num_results">
+		        	Search will return <input type="text" class="span1" placeholder=" 200" name="items"> items
+				</div>
+			</div>
+		</div> 
+		<!-- end form span8 -->
+
+
+
+		<div class="span2">
+			<div id="classic_help_explanation">
+				<p>
+					While help mode is activated, you can mouse over any element on the form to get a more detailed explanation.
+				</p>
+				<p>
+					This interface serves as a bridge between ADS Classic and ADS 2.0 integrated search.
+					You can enter your query parameters in the different fields of the form, just as you would have done in Classic ADS.
+					However, here you will see your new-style integrated query being constructed in real time in the search bar.
+				</p>
+				<p>
+					In line with ADS 2.0 practice, your arguments in different fields will be implicitly joined with 'AND'. This is in departure from the ADS Classic abstract search, which defaults to 'OR' to join your entries in different fields. 
+				</p>
+
+				<p>
+					This search form does not allow you to edit the query directly in the query input bar. For that functionality, you can use the ADS 2.0 one-box search.
+				</p>
+				
+			</div>
+			<div id="classic_entire_filter_div">
+				<p id="classic_filter_title"><i class="icon-filter" ></i>  Current Filter Settings </p>
+				<div class = "classic_well" id= "classic_filter_div">
+				<span class="classicAppliedFilter">Database: Astronomy</span>
+				<span class="classicAppliedFilter">Number of results: 200</span>
+				<span class="classicAppliedFilter">Refereed only</span>
+			</div>
+			</div>
+		</div>
+
+
+    </div>
+
+    	<script>
+	    // code that executes upon page load
+
+			 $(function() {
+
+			 	//initiate searchObject contents in case of back button navigation
+			 	// so basically checking to see if any input is different from default searchObject
+			 	// if it is, change the searchObject 
+			 			$("#classic_interact input[type=checkbox], #classic_interact input[type=text],  #classic_interact textarea").each(function() 
+				 				{ 
+					 				classicSearch.pageInitiate($(this))
+					 			}
+			 				)
+			 	//special handling of radio buttons--only count if they have a value!
+			 	$("#classic_interact input[type=radio]").each(function() 
+				 				{ 
+					 				if ($(this).prop("checked"))
+					 					{
+					 						classicSearch.pageInitiate($(this))
+					 					}
+					 			}
+			 				)
+
+			 			//making sure filters div represents filters upon backbutton (otherwise DOM will reset and all changes
+			 			//will exist in form but not DOM)
+			 			classicSearch.convertSearchObjectToDisplayFilters(classicSearch.searchObject)
+
+					$("#classic_q").on("focus", function(e) {classicSearch.preventEdit(e)});
+
+					// hide tooltips
+					$("#classic_form div[title]").each(function()
+							{
+								var $this = $(this);
+							    $this.data('hidden_title',$this.attr('title'));
+							    $this.removeAttr('title');
+							    $this.removeAttr('data-original-title')
+							}
+					);
+
+					//help mode
+				 	$("#classic_help_button").on("click", classicSearch.tooltipToggle);
+
+				 	classicSearch.initiatePubAutocomplete();
+
+					//this takes care of listening for changes on the form
+					var handlerFunction = classicSearch.classicFormFunction();
+				 	handlerFunction();
+
+			})
+
+ 		</script>
+	</div>
+
+</div>
+
 {% endmacro %}
