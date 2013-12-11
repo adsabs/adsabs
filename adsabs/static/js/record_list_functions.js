@@ -56,7 +56,7 @@ ResultListManager.export_to_ads_classic = function(numRecs)
  * Function to export a list of papers or a query in different formats
  */
 ResultListManager.export_records_in_other_format = function(format, numRecs)
-{	
+{
 	$.fancybox.showLoading();
 	//re-enable query parameters
 	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
@@ -89,14 +89,14 @@ ResultListManager.export_records_in_other_format = function(format, numRecs)
 /*
  * load a visualization into fancybox
  */
-ResultListManager.visualize = function(url) {
-	
+ResultListManager.visualize = function(url, numRecs) {
 	$.fancybox.showLoading();
 	//re-enable query parameters
 	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
 	//remove a hidden fields if exists
 	$('#search_results_form > input.ajaxHiddenField').remove();
-	
+	//record the number of bibcodes to use in visualization
+	$('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField" value="'+numRecs+'"/>');
 	//submit the form via ajax
 	$.ajax({
 		type : "POST",
@@ -248,12 +248,15 @@ ResultListManager.single_metrics = function()
 /*
  * Function to deal with cases where no records where selected
  */
-ResultListManager.set_records = function(service)
+ResultListManager.set_records = function(service, label)
 {
         var numRecords = $('#search_results_form').find('input[name="bibcode"]:checked').length;
         var max_records = GlobalVariables.MAX_EXPORTS[service];
         var default_records = GlobalVariables.DEFAULT_EXPORTS[service];
-
+        if (label !== undefined) {
+            max_records = GlobalVariables.MAX_EXPORTS[label];
+            default_records = GlobalVariables.DEFAULT_EXPORTS[label];
+        }
         if (numRecords == 0) {
                 $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
                 $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
@@ -269,8 +272,7 @@ ResultListManager.set_records = function(service)
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.citation_helper(numRecords);
-                                }
-                                else if (service == 'metrics') {
+                                } else if (service == 'metrics') {
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.metrics(numRecords);                                   
@@ -282,7 +284,7 @@ ResultListManager.set_records = function(service)
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
-                                } else if (service = 'AASTeX') {
+                                } else if (service == 'AASTeX') {
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('AASTeX', numRecords);
@@ -290,6 +292,10 @@ ResultListManager.set_records = function(service)
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
+                                } else {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.visualize(service, numRecords);
                                 };
                             },
                             "Cancel": function() {
@@ -310,6 +316,8 @@ ResultListManager.set_records = function(service)
                     ResultListManager.export_records_in_other_format('AASTeX', numRecords);
                 } else if (service == 'EndNote') {
                     ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
+                } else {
+                    ResultListManager.visualize(service, numRecords)
                 };
             }
 };

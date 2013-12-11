@@ -140,11 +140,11 @@
 	<ul class="dropdown-menu">
 		{# <li class="nav-header">records:</li> #}
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.author_network') }}')">Author network</a></li>
+		  onclick="ResultListManager.set_records('{{ url_for('visualization.author_network') }}', 'authnetwork')">Author network</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.alladin_lite') }}')">Objects skymap</a></li>
+		  onclick="ResultListManager.set_records('{{ url_for('visualization.alladin_lite') }}', 'skymap')">Objects skymap</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.word_cloud') }}')">Word cloud</a></li>
+		  onclick="ResultListManager.set_records('{{ url_for('visualization.word_cloud') }}', 'wordcloud')">Word cloud</a></li>
 
 	</ul>
 </div>
