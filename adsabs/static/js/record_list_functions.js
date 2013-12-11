@@ -261,7 +261,7 @@ ResultListManager.set_records = function(service, label)
                 $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
                 $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
                 $( "#amount" ).show();
-                var dialog = $('#dlg')
+                var dialog = $('#record_selection_dialog')
                     .dialog({
                         modal: true,
                         title: 'Select number of records',
