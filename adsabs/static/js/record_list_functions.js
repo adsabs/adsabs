@@ -252,9 +252,10 @@ ResultListManager.set_records = function(service)
 {
         var numRecords = $('#search_results_form').find('input[name="bibcode"]:checked').length;
         var max_records = GlobalVariables.MAX_EXPORTS[service];
+        var default_records = GlobalVariables.DEFAULT_EXPORTS[service];
 
         if (numRecords == 0) {
-                $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: 1, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
+                $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
                 $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
                 $( "#amount" ).show();
                 var dialog = $('#dlg')

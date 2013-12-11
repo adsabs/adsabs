@@ -12,6 +12,8 @@ GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL = '{{ config.ADS_CLASSIC_BASEURL }}/
 GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN = {{ config.EXPORT_DEFAULT_ROWS }};
 //variable containing the maximum number of records to use with metrics
 GlobalVariables.METRICS_MAX_EXPORT = {{ config.METRICS_MAX_EXPORT }};
+//dictionary containing the default number of records to use
+GlobalVariables.DEFAULT_EXPORTS = {{ config.DEFAULT_EXPORTS }};
 //dictionary containing the maximum number of records to use
 GlobalVariables.MAX_EXPORTS = {{ config.MAX_EXPORTS }};
 //variable with the url of the view to get only bibcodes from a query

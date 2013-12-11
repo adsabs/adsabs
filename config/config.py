@@ -300,7 +300,16 @@ class AppConfig(object):
                    'EndNote':3000,
                    'AASTeX':3000,
                    }
-    
+    DEFAULT_EXPORTS = {'metrics':300, 
+                   'citation_helper':300, 
+                   'wordcloud':100, 
+                   'ADSClassic':100,
+                   'wordcloud':100,
+                   'skymap':100,
+                   'BibTeX':300,
+                   'EndNote':300,
+                   'AASTeX':300,
+                   }
 try:
     from local_config import LocalConfig
 except ImportError:
