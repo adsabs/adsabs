@@ -24,6 +24,7 @@ def export_to_other_formats():
     #extract the format
     export_format = request.values.getlist('export_format')
     list_type = request.values.get('list_type')
+    numRecs   = request.values.get('numRecs')
 
     #list of bibcodes to extract
     bibcodes_to_export = []
@@ -41,7 +42,7 @@ def export_to_other_formats():
             return render_template('errors/generic_error.html', error_message='Error while exporting records (code #1). Please try later.')
         
         #update the query parameters to return only what is necessary
-        query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
+        query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(numRecs)})
         #execute the query
         if list_type == 'similar':
             resp = get_document_similar(**query_components)
@@ -53,7 +54,7 @@ def export_to_other_formats():
         for doc in resp.get_docset_objects():
             bibcodes_to_export.append(doc.bibcode)
         #check if all the results of the query have been extracted ( num results <= max to extract )
-        if resp.get_hits() > config.EXPORT_DEFAULT_ROWS:
+        if resp.get_hits() > numRecs:
             all_extracted = False
             num_hits = resp.get_hits()
 
@@ -69,7 +70,7 @@ def export_to_other_formats():
     
     #if not everything has been extracted, show message on top  
     if not all_extracted:
-        export_str = 'Exported first %s results of %s total. \n\n\n%s' % (config.EXPORT_DEFAULT_ROWS, num_hits, export_str)
+        export_str = 'Exported first %s results of %s total. \n\n\n%s' % (numRecs, num_hits, export_str)
     else:
         export_str = 'Exported %s records \n\n\n%s' % (len(bibcodes_to_export), export_str)
     

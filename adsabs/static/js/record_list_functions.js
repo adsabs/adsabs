@@ -8,7 +8,7 @@ ResultListManager = new Object();
 /*
  * Function to export a list of selected papers or a query to ads classic
  */
-ResultListManager.export_to_ads_classic = function()
+ResultListManager.export_to_ads_classic = function(numRecs)
 {
 	//remove a hidden fields if exists
 	$('#search_results_form > input.ajaxHiddenField').remove();
@@ -42,7 +42,7 @@ ResultListManager.export_to_ads_classic = function()
 				$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
 				//append an hidden parameter for the bibcodes retrieved
 				$('#search_results_form').append('<input type="hidden" name="bibcode" class="ajaxHiddenField" value="'+data+'"/>');
-				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenField" value="'+GlobalVariables.ADS_CLASSIC_EXPORT_NR_TO_RETURN+'"/>');
+				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenField" value="'+numRecs+'"/>');
 				//submit the form
 				$('#search_results_form').removeAttr('target').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
 			}
@@ -55,7 +55,7 @@ ResultListManager.export_to_ads_classic = function()
 /*
  * Function to export a list of papers or a query in different formats
  */
-ResultListManager.export_records_in_other_format = function(format)
+ResultListManager.export_records_in_other_format = function(format, numRecs)
 {	
 	$.fancybox.showLoading();
 	//re-enable query parameters
@@ -64,7 +64,7 @@ ResultListManager.export_records_in_other_format = function(format)
 	$('#search_results_form > input.ajaxHiddenField').remove();
 	//append the format to the form
 	$('#search_results_form').append('<input type="hidden" name="export_format" class="ajaxHiddenField"  value="'+format+'"/>');
-	
+	$('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
 	//if there are checked bibcodes
 	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
 	{
@@ -274,6 +274,22 @@ ResultListManager.set_records = function(service)
                                     $(this).dialog('close');
                                     numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.metrics(numRecords);                                   
+                                } else if (service == 'ADSClassic') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.export_to_ads_classic(numRecords);
+                                } else if (service == 'BibTeX') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
+                                } else if (service = 'AASTeX') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.export_records_in_other_format('AASTeX', numRecords);
+                                } else if (service == 'EndNote') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
                                 };
                             },
                             "Cancel": function() {
@@ -286,6 +302,14 @@ ResultListManager.set_records = function(service)
                     ResultListManager.citation_helper(numRecords);
                 } else if (service == 'metrics') {
                     ResultListManager.metrics(numRecords);
+                } else if (service == 'ADSClassic') {
+                    ResultListManager.export_to_ads_classic(numRecords);
+                } else if (service == 'BibTeX') {
+                    ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
+                } else if (service == 'AASTeX') {
+                    ResultListManager.export_records_in_other_format('AASTeX', numRecords);
+                } else if (service == 'EndNote') {
+                    ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
                 };
             }
 };
