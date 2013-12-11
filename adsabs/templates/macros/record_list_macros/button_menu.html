@@ -156,9 +156,15 @@
         <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-wrench"></i> Analyze <i class="caret"></i></a>
         <ul class="dropdown-menu">
                 <li class="nav-header">selected records:</li>
-                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.citation_helper()">Citation Helper</a></li>
-                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.metrics()">Metrics</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.set_records('citation_helper')">Citation Helper</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.set_records('metrics')">Metrics</a></li>
         </ul>
+</div>
+<div id="dlg">
+    <p>
+  <input type="text" id="amount" style="border:0; color:black; display:none" readonly>
+</p>
+    <div id="slider"></div>
 </div>
 {% endmacro %}
 

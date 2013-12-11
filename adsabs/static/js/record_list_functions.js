@@ -118,7 +118,7 @@ ResultListManager.visualize = function(url) {
 /*
  * Function to get Citation Helper results
  */
-ResultListManager.citation_helper = function()
+ResultListManager.citation_helper = function(numRecs)
 {
         $.fancybox.showLoading();
         //re-enable query parameters
@@ -147,6 +147,7 @@ ResultListManager.citation_helper = function()
         }
         $('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
         $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField"  value="'+collapsed_bibcodes+'"/>');
+        $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
         $('#search_results_form').append('<input type="hidden" name="return_nr" class="ajaxHiddenField"  value="10"/>');
         //submit the form via ajax
         $.ajax({
@@ -163,7 +164,7 @@ ResultListManager.citation_helper = function()
 /*
  * Function to get Metrics results
  */
-ResultListManager.metrics = function()
+ResultListManager.metrics = function(numRecs)
 {
         $.fancybox.showLoading();
         //re-enable query parameters
@@ -182,10 +183,12 @@ ResultListManager.metrics = function()
                 var collapsed_bibcodes = checked_bibcodes.join('\n');
                 var original_query = "NA";
                 $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
+                $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
         }
         else
         {
                 $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
+                $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
         }        
         //submit the form via ajax
         $.ajax({
@@ -241,4 +244,47 @@ ResultListManager.single_metrics = function()
                     $.fancybox(data);
                 }
         });
+};
+/*
+ * Function to deal with cases where no records where selected
+ */
+ResultListManager.set_records = function(service)
+{
+        var numRecords = $('#search_results_form').find('input[name="bibcode"]:checked').length;
+        var max_records = GlobalVariables.MAX_EXPORTS[service];
+
+        if (numRecords == 0) {
+                $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: 1, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
+                $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
+                $( "#amount" ).show();
+                var dialog = $('#dlg')
+                    .dialog({
+                        modal: true,
+                        title: 'Select number of records',
+                        position: {my:'top', at:'top', of:$('#search_results_form')},
+                        buttons: {
+                            "OK": function() {
+                                if (service == 'citation_helper') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.citation_helper(numRecords);
+                                }
+                                else if (service == 'metrics') {
+                                    $(this).dialog('close');
+                                    numRecords = $( "#slider" ).slider( "value" );
+                                    ResultListManager.metrics(numRecords);                                   
+                                };
+                            },
+                            "Cancel": function() {
+                                $(this).dialog('close');
+                            }
+                        }
+                    });
+            } else {
+                if (service == 'citation_helper') {
+                    ResultListManager.citation_helper(numRecords);
+                } else if (service == 'metrics') {
+                    ResultListManager.metrics(numRecords);
+                };
+            }
 };
