@@ -4,58 +4,25 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ADS 2.0 - {% block titlehead %}{% endblock %}</title>
-	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- bootstrap stuff -->
-	<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	<!-- link href="{{ url_for('static', filename='bootstrap/css/bootstrap-responsive.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet"-->
 
-	<!-- IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-	<script type="text/javascript" src="{{ url_for('static', filename='bootstrap/js/bootstrap.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/bootstrap-select.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- jQuery UI stuff -->
-	<link href="{{ url_for('static', filename='jquery-ui/css/smoothness/jquery-ui-1.10.2.custom.min.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	<script type="text/javascript" src="{{ url_for('static', filename='jquery-ui/js/jquery-ui-1.10.2.custom.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- Other libraries -->
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/Uri.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/underscore-min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- d3 stuff -->
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.v3.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/d3.layout.cloud.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/vega.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- Fancybox stuff -->
-	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/jquery.mousewheel-3.0.6.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/jquery.fancybox.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/jquery.fancybox.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-media.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-	<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	
-	<!-- BEER Specific stuff -->
-	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	<script type="text/javascript" src="{{ url_for('static', filename='js/misc_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/libs/spin.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/record_list_functions.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip_manager.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='js/feedback_components.js') }}?app_version={{ config.APP_VERSION }}"></script>
-	<script type="text/javascript" src="http://aladin.u-strasbg.fr/AladinLite/api/v2/latest/aladin.min.js" charset="utf-8"></script>
+	<!-- css should go before javascript -->
+	{% assets "main_css" %}
+   		 <link rel="stylesheet" href="{{ ASSET_URL }}" type="text/css" media="screen" ></link>
+	{% endassets %}
+
+	{% assets "main_js" %}
+   		 <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+	{% endassets %}
+
+	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
+
+	<!-- vega.js causes many syntax errors in yui compressor -->
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/libs/vega.js') }}"></script>
 	
 	<script type="text/javascript">
   	{% from 'macros/misc.html' import render_messages %}
     {{ render_messages(['javascript']) }}
-    
-  </script>
+  	</script>
     
 	{% block head%}{% endblock %}
 </head>
