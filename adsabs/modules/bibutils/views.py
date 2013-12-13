@@ -155,7 +155,8 @@ def metrics(**args):
             try:
                 query_par = str(form.current_search_parameters.data.strip())
                 query = json.loads(query_par)['q']
-                bibcodes = get_publications_from_query(query)[:config.METRICS_MAX_EXPORT]
+                sort  = json.loads(query_par)['sort']
+                bibcodes = get_publications_from_query(query, sort)[:config.METRICS_MAX_EXPORT]
             except:
                 bibcodes = []
 #        if len(query_bibcodes) == 0:
