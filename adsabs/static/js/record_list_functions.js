@@ -258,43 +258,36 @@ ResultListManager.set_records = function(service, label)
             default_records = GlobalVariables.DEFAULT_EXPORTS[label];
         }
         if (numRecords == 0) {
-                $( "#slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
-                $( "#amount" ).val( $( "#slider" ).slider( "value" ) );
+                $( "#record_slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
+                $( "#amount" ).val( $( "#record_slider" ).slider( "value" ) );
                 $( "#amount" ).show();
                 var dialog = $('#record_selection_dialog')
                     .dialog({
-                        modal: true,
                         title: 'Select number of records',
-                        position: {my:'top', at:'top', of:$('#search_results_form')},
+                        draggable: true,
                         buttons: {
                             "OK": function() {
+                                numRecords = $( "#record_slider" ).slider( "value" );
                                 if (service == 'citation_helper') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.citation_helper(numRecords);
                                 } else if (service == 'metrics') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.metrics(numRecords);                                   
                                 } else if (service == 'ADSClassic') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_to_ads_classic(numRecords);
                                 } else if (service == 'BibTeX') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
                                 } else if (service == 'AASTeX') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('AASTeX', numRecords);
                                 } else if (service == 'EndNote') {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
                                 } else {
                                     $(this).dialog('close');
-                                    numRecords = $( "#slider" ).slider( "value" );
                                     ResultListManager.visualize(service, numRecords);
                                 };
                             },
