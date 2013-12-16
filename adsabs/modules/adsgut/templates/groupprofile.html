@@ -17,44 +17,23 @@
 {% block coffeescript %}
 $=jQuery
 $ ->
-  cback = () ->
-    console.log "cback"
-  eback = () ->
-    console.log "eback" 
+  
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
-  model={}
-  console?.log "Hello World"
-  fqpn='{{ thegroup.basic.fqin}}'
-  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}", (data) ->
-    console?.log data
-    content=views.group_info data, templates.group_info
-    $infodiv = $('div#info')
-    $infodiv.append(content)
-    $.fn.editable.defaults.mode = 'inline'
-    $infodiv.find('.edtext').editable(
-      type:'textarea'
-      rows: 2
-      url: (params) ->
-        syncs.change_description(params.value,fqpn, cback, eback)
-    )
-    $infodiv.find('.edclick').click (e) ->
-      e.stopPropagation()
-      e.preventDefault()
-      $infodiv.find('.edtext').editable('toggle')
-    $infodiv.show()
-  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}/members", (data) ->
-    plinv=new groupprofile.PostableListView(users:data.users, fqpn:'{{ thegroup.basic.fqin}}', owner:'{{owner}}', $e_el:$('div#members'))
-    #content=views.postable_members "{{ thegroup.basic.fqin}}", "{{owner}}", data, templates.postable_members, true
-    #$('div#members').append(content)
-    plinv.render()
-    $('div#members').show()
-  {% if owner %}
-  view=new views.InviteUser({postable: "{{ thegroup.basic.fqin}}", withcb:false})
-  $('div#invitedform').append(view.render().$el)
-  $('div#invitedform').show()
-  $.get "#{prefix}/group/{{ thegroup.basic.fqin}}/inviteds", (data) ->
-    content=views.postable_inviteds "{{ thegroup.basic.fqin}}", data, templates.postable_inviteds, true
-    $('div#inviteds').append(content)
-    $('div#inviteds').show()
-  {% endif %}
+  config = 
+    fqpn : '{{ thegroup.basic.fqin}}'
+    infoURL : "#{prefix}/group/{{ thegroup.basic.fqin}}"
+    membersURL : "#{prefix}/group/{{ thegroup.basic.fqin}}/members"
+    invitedsURL : "#{prefix}/group/{{ thegroup.basic.fqin}}/inviteds"
+    owner : if '{{owner}}' == 'True' then true else false
+
+  sections = 
+    $infodiv : $('div#info')
+    $membersdiv : $('div#members')
+    $invitedform : $('div#invitedform')
+    $invitedsdiv : $('div#inviteds')
+
+  
+  groupprofile.get_info(sections, config)
+
+
 {% endblock %}

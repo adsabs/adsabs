@@ -18,6 +18,15 @@ from flask.ext.login import current_user
 
 from mongogut import itemsandtags
 
+from mongogut.errors import doabort, MongoGutError
+
+#had to move this to global errors.py
+# @app.errorhandler(MongoGutError)
+# def handle_error(error):
+#     response = jsonify(error.to_dict())
+#     response.status_code = error.status_code
+#     return response
+
 
 from flask import request, session, g, redirect, url_for, \
      abort, render_template, flash, escape, make_response,  Blueprint
@@ -298,18 +307,18 @@ def before_request():
 #     return redirect(url_for('index'))
 
 
-#x
-@adsgut.route('/')
-def index():
-    return render_template('index.html', useras=g.currentuser)
-#x
-@adsgut.route('/all')
-def all():
-    groups=g.db.allGroups(g.currentuser)
-    apps=g.db.allApps(g.currentuser)
-    libraries=g.db.allLibraries(g.currentuser)
-    users=g.db.allUsers(g.currentuser)
-    return flask.render_template('index.html', groups=groups, apps=apps, users=users, libraries=libraries)
+# #x
+# @adsgut.route('/')
+# def index():
+#     return render_template('index.html', useras=g.currentuser)
+# #x
+# @adsgut.route('/all')
+# def all():
+#     groups=g.db.allGroups(g.currentuser)
+#     apps=g.db.allApps(g.currentuser)
+#     libraries=g.db.allLibraries(g.currentuser)
+#     users=g.db.allUsers(g.currentuser)
+#     return flask.render_template('index.html', groups=groups, apps=apps, users=users, libraries=libraries)
 
 #######################################################################################################################
 #######################################################################################################################
@@ -318,10 +327,26 @@ def all():
 #TODO: should we support a modicum of user information for others
 #like group and app owners?
 #x
+import simplejson as json
 @adsgut.route('/user/<nick>')
 def userInfo(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
-    return jsonify(user=user)
+    postablesother, names = user.postablesother_blame()
+    #crikey stupid hack to have to do this bcoz of jsonify introspecting
+    #mongoengine objects only
+    jsons = [e.to_json() for e in postablesother]
+    ds=[]
+    for i, j in enumerate(jsons):
+        d = json.loads(j)
+        print "D", d
+        if names[d['fqpn']]=='':
+            d['reason'] = ''
+        else:
+            d['reason'] = ",".join([e[1] for e in names[d['fqpn']]])
+        ds.append(d)
+    
+    ujson = jsonify(user=user, postablelibs=ds)
+    return ujson
 
 #x
 @adsgut.route('/user/<nick>/profile/html')
@@ -344,6 +369,7 @@ def userProfileGroupsFromAdsidHtml(adsid):
     user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
     return render_template('userprofilegroups.html', theuser=user, useras=g.currentuser)
 
+#Direct
 @adsgut.route('/user/<nick>/postablesuserisin')
 def postablesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
@@ -396,13 +422,8 @@ def appsUserIsIn(nick):
     apps=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
-#BUG: not right
-@adsgut.route('/user/<nick>/appsusercanwriteto')
-def appsUserCanWriteTo(nick):
-    useras=g.db.getUserInfo(g.currentuser, nick)
-    apps=[e['fqpn'] for e in g.db.postablesUserCanWriteTo(g.currentuser, useras, "app")]
-    return jsonify(apps=apps)
-
+#removed apps-user can write to. apps are not modeleld as libraries, but rather as groups.
+#we should figure some other way to do this
 #x
 @adsgut.route('/user/<nick>/appsuserowns')
 def appsUserOwns(nick):
@@ -419,11 +440,11 @@ def appsUserIsInvitedTo(nick):
     return jsonify(apps=apps)
 
 
-
+#does not handle non-direct  inness
 @adsgut.route('/user/<nick>/librariesuserisin')
 def librariesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.postablesUserCanAccess(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #BUG: not right
@@ -701,11 +722,11 @@ def groupProfileHtml(groupowner, groupname):
     group, owner=postable(groupowner, groupname, "group")
     return render_template('groupprofile.html', thegroup=group, owner=owner,  useras=g.currentuser)
 
-@adsgut.route('/group/<groupowner>/group:<groupname>/filter/html')
-def groupFilterHtml(groupowner, groupname):
-    querystring=request.query_string
-    group, owner=postable(groupowner, groupname, "group")
-    return render_template('groupfilter.html', thegroup=group, querystring=querystring, owner=owner, useras=g.currentuser)
+# @adsgut.route('/group/<groupowner>/group:<groupname>/filter/html')
+# def groupFilterHtml(groupowner, groupname):
+#     querystring=request.query_string
+#     group, owner=postable(groupowner, groupname, "group")
+#     return render_template('groupfilter.html', thegroup=group, querystring=querystring, owner=owner, useras=g.currentuser)
 
 # @adsgut.route('/group/<groupowner>/group:<groupname>/items')
 # def groupItems(groupowner, groupname):
@@ -759,11 +780,11 @@ def libraryProfileHtml(libraryowner, libraryname):
     library, owner=postable(libraryowner, libraryname, "library")
     return render_template('libraryprofile.html', thelibrary=library, owner=owner, useras=g.currentuser)
 
-@adsgut.route('/library/<libraryowner>/library:<libraryname>/filter/html')
-def libraryFilterHtml(libraryowner, libraryname):
-    querystring=request.query_string
-    library, owner=postable(libraryowner, libraryname, "library")
-    return render_template('libraryfilter.html', thelibrary=library, querystring=querystring, owner=owner, useras=g.currentuser)
+# @adsgut.route('/library/<libraryowner>/library:<libraryname>/filter/html')
+# def libraryFilterHtml(libraryowner, libraryname):
+#     querystring=request.query_string
+#     library, owner=postable(libraryowner, libraryname, "library")
+#     return render_template('libraryfilter.html', thelibrary=library, querystring=querystring, owner=owner, useras=g.currentuser)
 
 @adsgut.route('/postable/<nick>/group:default/filter/html')
 def udgHtml(nick):
@@ -1298,41 +1319,9 @@ def itemsinfo():
     theitems=[{'basic':{'name':i.split('/')[-1], 'fqin':i}} for i in items]
     return jsonify({'items': theitems, 'count':len(theitems)})
 
-# @visualization_blueprint.route('/alladin_lite', methods=['GET', 'POST'])
-# def alladin_lite():
-#     """
-#     View that creates the data for alladin lite
-#     """
-#     #if there are not bibcodes, there should be a query to extract the authors
-#     if request.values.has_key('bibcode'):
-#         bibcodes = request.values.getlist('bibcode')
-#     else:
-#         try:
-#             query_components = json.loads(request.values.get('current_search_parameters'))
-#         except (TypeError, JSONDecodeError):
-#             #@todo: logging of the error
-#             return render_template('errors/generic_error.html', error_message='Error. Please try later.')
-
-#         #update the query parameters to return only what is necessary
-#         query_components.update({
-#             'facets': [],
-#             'fields': ['bibcode'],
-#             'highlights': [],
-#             'rows': str(config.SEARCH_DEFAULT_ROWS)
-#             })
-
-#         resp = solr.query(**query_components)
-
-#         if resp.is_error():
-#             return render_template('errors/generic_error.html', error_message='Error while creating the objects skymap. Please try later.')
-
-#         bibcodes = [x.bibcode for x in resp.get_docset_objects()]
-
-#     return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})
-#'{{ url_for('adsgut.PostForm', itemtypens='ads', itemtypename='pub') }}'
 from config import config
 
-@adsgut.route('/postform/<itemtypens>/<itemtypename>/html', methods=['POST', 'GET'])
+@adsgut.route('/postform/<itemtypens>/<itemtypename>/html', methods=['POST'])
 def postForm(itemtypens, itemtypename):
     qstring=""
     print "NS,NAME", itemtypens, itemtypename
@@ -1415,6 +1404,8 @@ def postForm(itemtypens, itemtypename):
             curpage=current_page,
             useras=g.currentuser)
     else:
+        return render_template('errors/generic_error.html', error_message='Only POST supported for this for now.')
+        #return error instead
         print "Rendering in postform2"
         return render_template('postform2.html', items=theitems, 
             querystring=qstring, 

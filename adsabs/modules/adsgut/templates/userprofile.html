@@ -1,69 +1,40 @@
 {% extends "layout_local.html" %}
 {% block localbody %}
-  <h3>Saved Items and Libraries for user {{theuser.adsid}}</h3>
+  <h3>Libraries for user {{theuser.adsid}}</h3>
   <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
-  <div id="userinfo" style="display:none"></div>
+  <!--div id="userinfo" style="display:none"></div-->
   <br/>
-  <p> <a class="btn btn-info" href="{{ url_for('adsgut.get_classic_libraries', cookieid=theuser.cookieid)}}">Import Libraries</a> from ADS Classic into ADS 2.0.</p>
+  <p>You can import your existing libraries (with notes on publications) from from ADS Classic into ADS 2.0. This import performs a copy of your existing ADS Classic libraries. Any further changes to the ADS Classic libraries will not be reflected here, unless you click the re-import button.  Anything added in ADS 2.0 is NOT updated in the ADS Classic libraries.
+  </p>
+  <p> <a class="btn btn-info" href="{{ url_for('adsgut.get_classic_libraries', cookieid=theuser.cookieid)}}">Import Libraries</a> </p>
   <br/>
  
-  <h3>Libraries</h3>
     <div id="createlibraries"></div>
     <div id="libraries">
-      <div class="row ow"></div>
-      <div class="row in"></div>
-      <div class="row iv"></div>
+      <div class="ow"></div>
+      <div class="in"></div>
+      <div class="iv"></div>
     </div>
 
   <br/>
 
 
-  <!--h3>Groups</h3>
-    <h5>Groups In</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisin"></iframe width="100%">
-    <h5>Groups Owned</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserowns"></iframe width="100%">
-    <h5>Groups Invited</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisinvitedto"></iframe width="100%">
-  <hr/>
-  <h3>Libraries</h3>
-    <h5>Libraries In</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisin"></iframe width="100%">
-    <h5>Libraries Owned</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserowns"></iframe width="100%">
-    <h5>Libraries Invited</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisinvitedto"></iframe width="100%">
-
-  <h5>User's items (user default group)</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/items"></iframe width="100%"-->
+  
 
 {% endblock %}
 {% block coffeescript %}
 $=jQuery
 
-render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
-  plin=new userprofile.PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
-  plin.add((new userprofile.Postable(fqpn:p.fqpn, description: p.description, invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
-  console.log "THIS", this, libmode
-  plinv=new userprofile.PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
-  plinv.render()
 
 $ -> 
-  viewl=new views.CreatePostable({postabletype: "library"})
-  $('div#createlibraries').append(viewl.render().$el)
-  $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->
-    userdict=userprofile.parse_userinfo(data)
-    console.log userdict
-    content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
-    content=content+"<a href=\"{{ url_for('adsgut.udgHtml', nick=useras.nick) }}\">My Saved Items</a>"
-    #content=content+"&nbsp;&nbsp;&nbsp;<a href=\"{{ url_for('adsgut.publicHtml') }}\">Public Feed</a>"
-    $('#userinfo').append(content)
-    $('#userinfo').show()
-
-
-    console.log "LIBRARIES"
-    #$('#libraries div.ow').append(widgets.one_col_table('Owned', userdict.librariesowned))
-    pllibow=render_postable(userdict.userinfo, userdict.librariesowned, $('#libraries div.ow'), 'ow', false, "lib", true)
-    pllibin=render_postable(userdict.userinfo, userdict.librariesin, $('#libraries div.in'), 'in', false, "lib", false)
-    pllibiv=render_postable(userdict.userinfo, userdict.librariesinvitedto, $('#libraries div.iv'), 'iv', true, "lib", false)
+  config = 
+    userInfoURL: "{{ url_for('adsgut.userInfo', nick=useras.nick) }}"
+    udgHtmlURL: "{{ url_for('adsgut.udgHtml', nick=useras.nick) }}"
+  sections =
+    $create: $('div#createlibraries')
+    $info: $('#userinfo')
+    $owned: $('#libraries div.ow')
+    $in: $('#libraries div.in')
+    $invited: $('#libraries div.iv')
+  userprofile.layout_userprofile(sections, config, "lib")
 {% endblock %}

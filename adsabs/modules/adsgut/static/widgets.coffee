@@ -35,8 +35,8 @@ table_from_dict = h.renderable (kcol, vcol, dict) ->
     h.table '.table.table-bordered.table-condensed.table-striped',  ->
         h.thead ->
             h.tr ->
-                h.th kcol
-                h.th vcol
+                h.th ".#{kcol.replace(/\s+/g, '')}", kcol
+                h.th ".#{vcol.replace(/\s+/g, '')}", vcol
         h.tbody ->
             for k,v of dict
                 h.tr ->
@@ -47,8 +47,8 @@ $table_from_dict = (kcol, vcol, vlist) ->
         h.table '.table.table-bordered.table-condensed.table-striped',  ->
             h.thead ->
                 h.tr ->
-                    h.th kcol
-                    h.th vcol
+                    h.th ".#{kcol.replace(/\s+/g, '')}", kcol
+                    h.th ".#{vcol.replace(/\s+/g, '')}", vcol
             h.tbody
     $f=$(f(kcol,vcol))
     for k in vlist
@@ -66,9 +66,9 @@ table_from_dict_many = h.renderable (kcol, vcollist, dict) ->
     h.table '.table.table-bordered.table-condensed.table-striped',  ->
         h.thead ->
             h.tr ->
-                h.th kcol
+                h.th ".#{kcol.replace(/\s+/g, '')}", kcol
                 for ele in vcollist
-                    h.th ele
+                    h.th ".#{ele.replace(/\s+/g, '')}", ele
         h.tbody ->
             for k,vlist of dict
                 h.tr ->
@@ -79,9 +79,9 @@ $table_from_dict_many = (kcol, vcollist, vlist) ->
         h.table '.table.table-bordered.table-condensed.table-striped',  ->
             h.thead ->
                 h.tr ->
-                    h.th kcol
+                    h.th ".#{kcol.replace(/\s+/g, '')}", kcol
                     for ele in vcollist
-                        h.th ele
+                        h.th ".#{ele.replace(/\s+/g, '')}", ele
             h.tbody
     $f=$(f(kcol,vcollist))
     for k in vlist
@@ -96,7 +96,7 @@ one_col_table = h.renderable (kcol, tlist) ->
     h.table '.table.table-bordered.table-condensed.table-striped',  ->
         h.thead ->
             h.tr ->
-                h.th kcol
+                h.th ".#{kcol.replace(/\s+/g, '')}", kcol
         h.tbody ->
             for k in tlist
                 h.tr ->
@@ -107,7 +107,7 @@ $one_col_table = (kcol, vlist) ->
         h.table '.table.table-bordered.table-condensed.table-striped',  ->
             h.thead ->
                 h.tr ->
-                    h.th kcol
+                    h.th ".#{kcol.replace(/\s+/g, '')}", kcol
             h.tbody
     $f=$(f(kcol))
     for k in vlist
@@ -132,11 +132,11 @@ two_submit = h.renderable (ltext1, ltext2, btext) ->
         h.div ".control-group", ->
             h.label ".control-label",  ltext1
             h.div ".controls", ->
-                h.input ".span3.txt1", type: 'text'
+                h.input ".span4.txt1", type: 'text'
         h.div ".control-group", ->
             h.label ".control-label", ltext2
             h.div ".controls", ->
-                h.textarea ".span3.txt2", rows:2
+                h.textarea ".span4.txt2", rows:2
                 h.raw "&nbsp;&nbsp;&nbsp;"
                 h.button ".btn.btn-primary.sub", type: 'button', btext
 
@@ -177,7 +177,8 @@ info_layout = h.renderable (dict, keysdict) ->
   h.dl '.dl-horizontal', ->
     for k of keysdict
         h.dt keysdict[k]
-        h.dd dict[k]
+        h.dd ->
+            h.raw dict[k]
 
 #<button class="btn btn-small" type="button">Small button</button> 
 single_button = h.renderable (btext) ->
@@ -247,27 +248,35 @@ $.fn.andFind = (expr) ->
 class HoverHelpDecoratorView extends Backbone.View
 
     initialize: (options) ->
-        {@titletext, @helptext, @position, @htype} = options
+        {@titletext, @helptext, @position, @htype, @trigtype} = options
 
     render: () =>
         optpo=
             placement: @position
-            trigger: 'hover'
-            title: @titletext
-            content: @helptext
+            trigger: @trigtype
+            container: 'body'
         if @htype is "tooltip"
+            optpo.title = @helptext
             @$el.andFind('.hoverhelp').tooltip(optpo)
         else if @htype is "popover"
+            optpo.title = @titletext
+            optpo.content = @helptext
             @$el.andFind('.hoverhelp').popover(optpo)
         return this
 
-decohelp  = (el, helptext, htype, position) ->
+decohelp  = (el, helptext, htype, position, trigtype="hover") ->
+    console.log "EL: ", el, $(el)
+    if trigtype == 'click'
+        $(el).append('&nbsp;[<a href="#" class="hoverhelp" onclick="return false;">?</a>]')
+    else if trigtype == 'hover'
+        $(el).append('&nbsp;<i class="hoverhelp icon-question-sign"></i>')
     opt = 
         titletext: ""
         helptext: helptext
         position: position
         htype: htype
         el: el
+        trigtype : trigtype
     return new HoverHelpDecoratorView(opt).render()
 
 postalnote_form = h.renderable (btext, nrows=2) ->
@@ -348,6 +357,8 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     h.span "#alltags.tagls"
     h.br()
     h.button ".btn.btn-inverse.done.pull-right", type:'button', "Save"
+    h.button ".btn.btn-inverse.cancel.pull-right", type:'button', style:"margin-right: 10px;", "Cancel"
+
 
 link = h.renderable (url, txt) ->
     h.raw "<a href=\"#{url}\">#{txt}</a>"

@@ -17,14 +17,11 @@ parse_userinfo = (data) ->
     postablesowned=data.user.postablesowned
     powfqin=(p.fqpn for p in postablesowned)
     pinfqin=(p.fqpn for p in data.user.postablesin)
-    console.log "JJJ",powfqin, pinfqin
     pinfqin=_.difference(pinfqin, powfqin)
-    console.log "POSARASTAIN", pinfqin
     for p in data.user.postablesin
         if p.fqpn in pinfqin
             postablesin.push(p)
     postablesinvitedto=data.user.postablesinvitedto
-    console.log "POSARASTAIN", postablesin
     groupsin = (e for e in postablesin when e.ptype is 'group' and e.fqpn not in [publ, priv])
     groupsowned = (e for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publ, priv])
     groupsinvitedto = (e for e in postablesinvitedto when e.ptype is 'group')
@@ -41,38 +38,65 @@ parse_userinfo = (data) ->
     librariesin = _.union((e for e in postablesin when e.ptype is 'library'), groupsin)
     librariesowned =  _.union((e for e in postablesowned when e.ptype is 'library'), groupsowned)
     librariesinvitedto = _.union((e for e in postablesinvitedto when e.ptype is 'library'), groupsinvitedto)
-    userdict.librariesin = librariesin
+    for ele in librariesin
+        ele.reason = ''
+    for ele in groupsin
+        ele.reason = ''
+    for ele in librariesowned
+        ele.reason = ''
+    for ele in librariesinvitedto
+        ele.reason = ''
+    #userdict.librariesin = librariesin
     userdict.librariesowned =  librariesowned
     userdict.librariesinvitedto = librariesinvitedto
-        
-    console.log "LIBGRPSSIN", userdict.librariesin
-
+    userdict.librariesin = []
+    for ele in data.postablelibs
+        if ele.reason != ''
+            ele.reason = " (through #{ele.reason})"
+        if ele.fqpn not in powfqin
+            userdict.librariesin.push(ele)
+    userdict.librariesin = _.union(userdict.librariesin, groupsin)
     return userdict
 
+
 make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
-    console.log "FQPN", fqpn
     if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
             h.text parse_fqin(fqpn)
-        h.raw "&nbsp;("
+    else if  libmode is "group"
+        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
+            #h.i ".icon-cog"
+            #h.raw "&nbsp;"
+            h.text parse_fqin(fqpn)
+    else
+        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
+            h.text parse_fqin(fqpn)
+
+
+make_postable_link_secondary = h.renderable (fqpn, libmode=false, ownermode=false) ->
+    if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
+            h.i ".icon-cog"
+            h.raw "&nbsp;"
             if ownermode
                 h.text "admin"
             else
                 h.text "info"
-        h.raw ")"
     else if  libmode is "group"
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
-            h.text parse_fqin(fqpn)
-        h.raw "&nbsp;("
-        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
-            h.text "library"
-        h.raw ")"
+            h.i ".icon-cog"
+            h.raw "&nbsp;"
+            if ownermode
+                h.text "admin"
+            else
+                h.text "info"
     else
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
             h.text parse_fqin(fqpn)
 
-
+lmap = 
+    lib: 'Libraries'
+    group: 'Groups'
 
 class Postable extends Backbone.Model
 
@@ -91,11 +115,18 @@ class PostableView extends Backbone.View
     render: =>
 
         if @model.get('invite')
-            @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), w.single_button('Yes')]))
+            if @libmode=="lib"
+                @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
+            else
+                 @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), w.single_button('Yes')]))
+
         else
             #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
-            content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('description')])
-            console.log "CONTENT", content
+            if @libmode=="lib"
+                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('description'), @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+            else
+                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+
             @$el.html(content)
         return this
 
@@ -128,9 +159,9 @@ class PostableList extends Backbone.Collection
 #also invite isnt enough to have the event based interplay between 2 lists
 class PostableListView extends Backbone.View
     tmap:
-        in: "In"
-        ow: "Owned"
-        iv: "Invited"
+        in: "I am in"
+        ow: "I own"
+        iv: "I am invited to"
 
     initialize: (options) ->
         @$el=options.$e_el
@@ -143,16 +174,100 @@ class PostableListView extends Backbone.View
         console.log "RENDER1", rendered
         console.log "RENDER2"
         if @collection.invite
-            $widget=w.$table_from_dict_many("Invitations", ["Description","Accept?"], rendered)
+            if views.length == 0
+                rendered = ["<td colspan=4>No Invitations</td>"]
+            if @libmode=='group'
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description","Accept?"], rendered)
+            else if @libmode=='lib'
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description","Access","Accept?"], rendered)
+
         else
             #$widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
-            $widget=w.$table_from_dict_many(@tmap[@collection.listtype], ["Description"], rendered)
+            if views.length == 0
+                rendered = ["<td colspan=4>None</td>"]
+            if @libmode=='group'
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description", "Manage"], rendered)
+            else if @libmode=='lib'
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description", "Access", "Manage"], rendered)
         @$el.append($widget)
+        #widgets.decohelp('#useradder', 'help me', 'popover', 'left')
         return this
 
+rwmap = (boolrw) ->
+    if boolrw==true
+        return "read-write"
+    else
+        return "read-only"
+
+render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
+  plin=new PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
+  if libmode=="lib"
+    plin.add((new Postable(fqpn:p.fqpn, description: p.description, reason: p.reason, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+  else
+    plin.add((new Postable(fqpn:p.fqpn, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+  plinv=new PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
+  plinv.render()
+
+layout_userprofile = (sections, config, ptype) -> 
+  {$create, $info, $owned, $in, $invited} = sections
+  {userInfoURL, udgHtmlURL} = config
+  wordmap = 
+    lib: "libraries"
+    group: "groups"
+  wordmap_singular = 
+    lib: "library"
+    group: "group"
+  viewl=new views.CreatePostable({postabletype: wordmap_singular[ptype]})
+  $create.append(viewl.render().$el)
+  
+  $.get userInfoURL, (data) ->
+    userdict=parse_userinfo(data)
+
+    #content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
+    # if ptype=='lib'
+    #     additional = 
+    #         saved : "<a href=\"#{udgHtmlURL}\">Items</a>"
+    #     content=widgets.info_layout(_.extend(userdict.userinfo, additional), name:'Name', email: 'Email', saved: "Saved")
+    # else
+    #     additional={}
+    #     content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email')
+
+    # #if ptype=='lib'
+    # #    content=content+"<a href=\"#{udgHtmlURL}\">My Saved Items</a>"
+    # $info.append(content)
+    # $info.show()
+
+
+    render_postable(userdict.userinfo, userdict["#{wordmap[ptype]}owned"], $owned, 'ow', false, ptype, true)
+    if ptype=='lib'
+        #inlist = _.union(userdict["#{wordmap[ptype]}in"], userdict.librariesother)
+        inlist = userdict.librariesin
+    else
+        inlist = userdict["#{wordmap[ptype]}in"]
+    render_postable(userdict.userinfo, inlist, $in, 'in', false, ptype, false)
+    render_postable(userdict.userinfo, userdict["#{wordmap[ptype]}invitedto"], $invited, 'iv', true, ptype, false)
+    if ptype=='lib'
+        w.decohelp('.LibrariesIamin', "Others' libraries I have access to due to being in them or due to being in groups that are in them", 'popover', 'left')
+        w.decohelp('.LibrariesIown', 'Libraries I have created', 'popover', 'left')
+        w.decohelp('.LibrariesIaminvitedto', "Outstanding invitations to join other ADS users' libraries", 'popover', 'left')
+        w.decohelp('.Access', 'true if i can write to the library, false if I can only see it', 'popover', 'top')
+    else if ptype=='group'
+        w.decohelp('.GroupsIamin', 'Groups owned by others that I am a member of', 'popover', 'left')
+        w.decohelp('.GroupsIown', 'Groups I have created', 'popover', 'left')
+        w.decohelp('.GroupsIaminvitedto', "Outstanding invitations to join other ADS users' groups", 'popover', 'left')
+# viewg=new views.CreatePostable({postabletype: "group"})
+#   $('div#creategroups').append(viewg.render().$el)
+#   $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->
+#     userdict=userprofile.parse_userinfo(data)
+#     content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
+#     $('#userinfo').append(content)
+#     $('#userinfo').show()
+
+
+#     plgrpow=userprofile.render_postable(userdict.userinfo, userdict.groupsowned, $('#groups div.ow'), 'ow', false, "group", true)
+
+#     plgrpin=userprofile.render_postable(userdict.userinfo, userdict.groupsin, $('#groups div.in'), 'in', false, "group", false)
+#     plgrpiv=userprofile.render_postable(userdict.userinfo, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true, "group", false)
 
 root.userprofile=
-    parse_userinfo: parse_userinfo
-    Postable: Postable
-    PostableList: PostableList
-    PostableListView: PostableListView
+    layout_userprofile: layout_userprofile

@@ -160,14 +160,31 @@ get_groups = (nick, cback) ->
 #   else
 #     userlist= (k for k,v of users)
 #     w.inline_list userlist
+rwmap = (boolrw) ->
+    if boolrw==true
+        return "read-write"
+    else
+        return "read-only"
 
 postable_inviteds_template = renderable (fqpn, users, scmode=false) ->
   console.log "USERS", users
+  userlist= (v[0] for k,v of users)
   if scmode
-    userlist= (k for k,v of users)
+    userlist= (v[0] for k,v of users)
+    if userlist.length == 0
+      userlist = ['No Invitations Yet']
+    console.log "USERLIST", userlist
     w.one_col_table "Invited Users", userlist
   else
-    w.table_from_dict("Invited User", "Can User Write", users)
+    if userlist.length == 0
+      users={'No Invitations Yet': ['No Invitations Yet','']}
+    console.log users
+    namedict={}
+    for k of users
+      console.log "k is", k
+      namedict[users[k][0]]=rwmap(users[k][1])
+    console.log "BANEDICT", namedict, users
+    w.table_from_dict("Invited User", "Access", namedict)
 
 # #Bug: these need to become collection Views
 # postable_members = (fqpn, owner, data, template, scmode=false) ->
@@ -332,7 +349,7 @@ class CreatePostable extends Backbone.View
 
   initialize: (options) ->
     {@postabletype} = options
-    @content=widgets.two_submit("Start a new #{@postabletype}", "Description", "Create")
+    @content=widgets.two_submit("Create a new #{@postabletype}", "Description", "Create")
 
   render: () =>
     @$el.html(@content)

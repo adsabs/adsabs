@@ -2,74 +2,47 @@
 {% block localbody %}
   <h3>Groups for user {{theuser.adsid}}</h3>
   <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
-  <div id="userinfo" style="display:none"></div>
+  <!--div id="userinfo" style="display:none"></div-->
   <br/>
 
-  <h3 id="groupsh3"><span class="hoverhelp">Groups</span></h3>
     <div id="creategroups"></div>
     <div id="groups">
-      <div class="row ow"></div>
-      <div class="row in"></div>
-      <div class="row iv"></div>
+      <div class="ow"></div>
+      <div class="in"></div>
+      <div class="iv"></div>
     </div>
 
-  <!--h3>Groups</h3>
-    <h5>Groups In</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisin"></iframe width="100%">
-    <h5>Groups Owned</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserowns"></iframe width="100%">
-    <h5>Groups Invited</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisinvitedto"></iframe width="100%">
-  <hr/>
-  <h3>Libraries</h3>
-    <h5>Libraries In</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisin"></iframe width="100%">
-    <h5>Libraries Owned</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserowns"></iframe width="100%">
-    <h5>Libraries Invited</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisinvitedto"></iframe width="100%">
-
-  <h5>User's items (user default group)</h5>
-  <iframe width="100%" src="/user/{{ theuser.nick}}/items"></iframe width="100%"-->
+  
 
 {% endblock %}
 {% block coffeescript %}
 $=jQuery
 
-render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
-  plin=new userprofile.PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
-  plin.add((new userprofile.Postable(fqpn:p.fqpn, description:p.description, invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
-  console.log "THIS", this, libmode
-  plinv=new userprofile.PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
-  plinv.render()
 
 $ -> 
-  viewg=new views.CreatePostable({postabletype: "group"})
-  $('div#creategroups').append(viewg.render().$el)
-  $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->
-    userdict=userprofile.parse_userinfo(data)
-    console.log userdict
-    content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
-    $('#userinfo').append(content)
-    $('#userinfo').show()
+  config = 
+    userInfoURL: "{{ url_for('adsgut.userInfo', nick=useras.nick) }}"
+    udgHtmlURL: "{{ url_for('adsgut.udgHtml', nick=useras.nick) }}"
+  sections =
+    $create: $('div#creategroups')
+    $info: $('#userinfo')
+    $owned: $('#groups div.ow')
+    $in: $('#groups div.in')
+    $invited: $('#groups div.iv')
 
-    console.log 'GROUPS'
+  userprofile.layout_userprofile(sections, config, "group")
 
-    #$('#groups div.ow').append(widgets.one_col_table('Owned', userdict.groupsowned))
-    plgrpow=render_postable(userdict.userinfo, userdict.groupsowned, $('#groups div.ow'), 'ow', false, "group", true)
+  
 
-    plgrpin=render_postable(userdict.userinfo, userdict.groupsin, $('#groups div.in'), 'in', false, "group", false)
-    plgrpiv=render_postable(userdict.userinfo, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true, "group", false)
+  awopt = 
+    el: document.getElementById('groupsh3')
+    position: 'right'
+    titletext: "Lorem Ipsum ate a potato"
+    helptext: 'Lorem Ipsum ate a potato'
+    htype: 'tooltip'
 
-    awopt = 
-      el: document.getElementById('groupsh3')
-      position: 'right'
-      titletext: "Lorem Ipsum ate a potato"
-      helptext: 'Lorem Ipsum ate a potato'
-      htype: 'tooltip'
-
-    #aw= new widgets.HoverHelpDecoratorView(awopt)
-    #aw.render('A title', 'Lorem Ipsum ate a potato')
-    #aw.render()
+  #aw= new widgets.HoverHelpDecoratorView(awopt)
+  #aw.render('A title', 'Lorem Ipsum ate a potato')
+  #aw.render()
 
 {% endblock %}

@@ -107,6 +107,7 @@ add_group = (selectedgrp, postable, changerw, cback, eback) ->
         changerw:changerw
     send_params(url, data, cback, eback)
 
+#This one is not particularly useful and dosent seem to be used
 get_postables = (user, cback, eback) ->
     #bug:possibly buggy split
     #ary=user.split(':')

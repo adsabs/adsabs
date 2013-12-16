@@ -123,7 +123,7 @@ class ItemView extends Backbone.View
     console.log("TAGSOBJECT", @tagsobject)
     if @noteform
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, 0), theclass: ".postalnote"})
-        @$el.append(@hv.render("Notes: ").$el)
+        @$el.append(@hv.render("<strong>Notes</strong>: ").$el)
         if @hv.state is 0
             @hv.hide()
     #w.postalnote_form("make note")
@@ -213,6 +213,7 @@ class ItemsView extends Backbone.View
     "click .post" : "submitPosts"
     "click .tag" : "submitTags"
     "click .done" : "iDone"
+    "click .cancel" : "iCancel"
 
   initialize: (options) ->
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform} = options
@@ -303,12 +304,15 @@ class ItemsView extends Backbone.View
     syncs.get_postables_writable(@memberable, cback, eback)
     return this
 
+  iCancel: => 
+    $.fancybox.close()
+
   iDone: =>
     #loc=window.location
     cback = (data) =>
         console.log "DATAHOO", data
-        window.location=@loc
-        #window.close()
+        #window.location=@loc
+        $.fancybox.close()
         
     eback = (xhr, etext) =>
         console.log "ERROR", etext

@@ -189,7 +189,7 @@
           widget: w.postalnote_form("make note", 2, 0),
           theclass: ".postalnote"
         });
-        this.$el.append(this.hv.render("Notes: ").$el);
+        this.$el.append(this.hv.render("<strong>Notes</strong>: ").$el);
         if (this.hv.state === 0) {
           this.hv.hide();
         }
@@ -327,6 +327,9 @@
       this.iDone = function() {
         return ItemsView.prototype.iDone.apply(_this, arguments);
       };
+      this.iCancel = function() {
+        return ItemsView.prototype.iCancel.apply(_this, arguments);
+      };
       this.render = function() {
         return ItemsView.prototype.render.apply(_this, arguments);
       };
@@ -345,7 +348,8 @@
     ItemsView.prototype.events = {
       "click .post": "submitPosts",
       "click .tag": "submitTags",
-      "click .done": "iDone"
+      "click .done": "iDone",
+      "click .cancel": "iCancel"
     };
 
     ItemsView.prototype.initialize = function(options) {
@@ -490,12 +494,16 @@
       return this;
     };
 
+    ItemsView.prototype.iCancel = function() {
+      return $.fancybox.close();
+    };
+
     ItemsView.prototype.iDone = function() {
       var cback, cback_notes, cback_posts, cback_tags, eback, ns, postables, ts,
         _this = this;
       cback = function(data) {
         console.log("DATAHOO", data);
-        return window.location = _this.loc;
+        return $.fancybox.close();
       };
       eback = function(xhr, etext) {
         console.log("ERROR", etext);

@@ -165,8 +165,19 @@ def _configure_extensions(app):
 
     #RAHUL
     mongoengine.init_app(app)
+    mongogut_error_handler(app)
+
     #print "ME", dir(mongoengine), dir(mongoengine.connection)
-    
+
+def mongogut_error_handler(app):
+    from mongogut.errors import MongoGutError
+    from flask import jsonify
+    @app.errorhandler(MongoGutError)
+    def handle_error(error):
+        response = jsonify(error.to_dict())
+        response.status_code = error.status_code
+        return response    
+
 def _configure_error_handlers(app):
     """
     function that configures some basic handlers for errors

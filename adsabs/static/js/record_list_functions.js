@@ -254,7 +254,7 @@ ResultListManager.export_to_libraries = function()
     //remove a hidden fields if exists
     $('#search_results_form > input.ajaxHiddenField').remove();
     var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
-    //console.log("KKKKKKK", $('#search_results_form').serializeArray());
+    console.log("KKKKKKK", $('#search_results_form').serializeArray());
     //alert(url);
     //submit the form via ajax
     $.ajax({

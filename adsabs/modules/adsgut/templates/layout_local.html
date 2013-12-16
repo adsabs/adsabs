@@ -7,7 +7,7 @@
                 <ul class="nav nav-list" id="header">
                   <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a></span></li>
                   <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">My Saved Items</a></span></li>
-                  <!--li><span><a href="{{ url_for('adsgut.publicHtml') }}">Public Feed</a></span></li-->
+                  <li><span><a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=current_user.get_username()) }}">My Groups</a></span></li>
                   <li><span><a href="{{ url_for('user.index') }}">Settings</a></span></li>
                 </ul>
                 {% block sidebar %}

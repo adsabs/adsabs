@@ -71,8 +71,8 @@
     return h.table('.table.table-bordered.table-condensed.table-striped', function() {
       h.thead(function() {
         return h.tr(function() {
-          h.th(kcol);
-          return h.th(vcol);
+          h.th("." + (kcol.replace(/\s+/g, '')), kcol);
+          return h.th("." + (vcol.replace(/\s+/g, '')), vcol);
         });
       });
       return h.tbody(function() {
@@ -95,8 +95,8 @@
       return h.table('.table.table-bordered.table-condensed.table-striped', function() {
         h.thead(function() {
           return h.tr(function() {
-            h.th(kcol);
-            return h.th(vcol);
+            h.th("." + (kcol.replace(/\s+/g, '')), kcol);
+            return h.th("." + (vcol.replace(/\s+/g, '')), vcol);
           });
         });
         return h.tbody;
@@ -130,11 +130,11 @@
       h.thead(function() {
         return h.tr(function() {
           var ele, _i, _len, _results;
-          h.th(kcol);
+          h.th("." + (kcol.replace(/\s+/g, '')), kcol);
           _results = [];
           for (_i = 0, _len = vcollist.length; _i < _len; _i++) {
             ele = vcollist[_i];
-            _results.push(h.th(ele));
+            _results.push(h.th("." + (ele.replace(/\s+/g, '')), ele));
           }
           return _results;
         });
@@ -160,11 +160,11 @@
         h.thead(function() {
           return h.tr(function() {
             var ele, _i, _len, _results;
-            h.th(kcol);
+            h.th("." + (kcol.replace(/\s+/g, '')), kcol);
             _results = [];
             for (_i = 0, _len = vcollist.length; _i < _len; _i++) {
               ele = vcollist[_i];
-              _results.push(h.th(ele));
+              _results.push(h.th("." + (ele.replace(/\s+/g, '')), ele));
             }
             return _results;
           });
@@ -190,7 +190,7 @@
     return h.table('.table.table-bordered.table-condensed.table-striped', function() {
       h.thead(function() {
         return h.tr(function() {
-          return h.th(kcol);
+          return h.th("." + (kcol.replace(/\s+/g, '')), kcol);
         });
       });
       return h.tbody(function() {
@@ -213,7 +213,7 @@
       return h.table('.table.table-bordered.table-condensed.table-striped', function() {
         h.thead(function() {
           return h.tr(function() {
-            return h.th(kcol);
+            return h.th("." + (kcol.replace(/\s+/g, '')), kcol);
           });
         });
         return h.tbody;
@@ -245,7 +245,7 @@
       h.div(".control-group", function() {
         h.label(".control-label", ltext1);
         return h.div(".controls", function() {
-          return h.input(".span3.txt1", {
+          return h.input(".span4.txt1", {
             type: 'text'
           });
         });
@@ -253,7 +253,7 @@
       return h.div(".control-group", function() {
         h.label(".control-label", ltext2);
         return h.div(".controls", function() {
-          h.textarea(".span3.txt2", {
+          h.textarea(".span4.txt2", {
             rows: 2
           });
           h.raw("&nbsp;&nbsp;&nbsp;");
@@ -340,7 +340,9 @@
       _results = [];
       for (k in keysdict) {
         h.dt(keysdict[k]);
-        _results.push(h.dd(dict[k]));
+        _results.push(h.dd(function() {
+          return h.raw(dict[k]);
+        }));
       }
       return _results;
     });
@@ -453,20 +455,22 @@
     }
 
     HoverHelpDecoratorView.prototype.initialize = function(options) {
-      return this.titletext = options.titletext, this.helptext = options.helptext, this.position = options.position, this.htype = options.htype, options;
+      return this.titletext = options.titletext, this.helptext = options.helptext, this.position = options.position, this.htype = options.htype, this.trigtype = options.trigtype, options;
     };
 
     HoverHelpDecoratorView.prototype.render = function() {
       var optpo;
       optpo = {
         placement: this.position,
-        trigger: 'hover',
-        title: this.titletext,
-        content: this.helptext
+        trigger: this.trigtype,
+        container: 'body'
       };
       if (this.htype === "tooltip") {
+        optpo.title = this.helptext;
         this.$el.andFind('.hoverhelp').tooltip(optpo);
       } else if (this.htype === "popover") {
+        optpo.title = this.titletext;
+        optpo.content = this.helptext;
         this.$el.andFind('.hoverhelp').popover(optpo);
       }
       return this;
@@ -476,14 +480,24 @@
 
   })(Backbone.View);
 
-  decohelp = function(el, helptext, htype, position) {
+  decohelp = function(el, helptext, htype, position, trigtype) {
     var opt;
+    if (trigtype == null) {
+      trigtype = "hover";
+    }
+    console.log("EL: ", el, $(el));
+    if (trigtype === 'click') {
+      $(el).append('&nbsp;[<a href="#" class="hoverhelp" onclick="return false;">?</a>]');
+    } else if (trigtype === 'hover') {
+      $(el).append('&nbsp;<i class="hoverhelp icon-question-sign"></i>');
+    }
     opt = {
       titletext: "",
       helptext: helptext,
       position: position,
       htype: htype,
-      el: el
+      el: el,
+      trigtype: trigtype
     };
     return new HoverHelpDecoratorView(opt).render();
   };
@@ -559,9 +573,13 @@
     h.p("Note: Tags will be automatically visible in the groups these items are posted to! Tags may not contain commas.");
     h.span("#alltags.tagls");
     h.br();
-    return h.button(".btn.btn-inverse.done.pull-right", {
+    h.button(".btn.btn-inverse.done.pull-right", {
       type: 'button'
     }, "Save");
+    return h.button(".btn.btn-inverse.cancel.pull-right", {
+      type: 'button',
+      style: "margin-right: 10px;"
+    }, "Cancel");
   });
 
   link = h.renderable(function(url, txt) {
