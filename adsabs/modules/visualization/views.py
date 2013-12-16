@@ -28,6 +28,12 @@ def author_network():
         #@todo: logging of the error
         return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #1). Please try later.')
 
+    # get the maximum number of records to use
+    try:
+        number_of_records = request.values.get('numRecs')
+    except:
+        number_of_records = config.MAX_EXPORTS['authnetwork']
+
     # checked bibcodes will be input as
     if request.values.has_key('bibcode'):
         bibcodes = request.values.getlist('bibcode')
@@ -38,7 +44,7 @@ def author_network():
         'facets': [], 
         'fields': ['author_norm'], 
         'highlights': [], 
-        'rows': str(config.AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS)
+        'rows': str(number_of_records)
         })
 
     resp = solr.query(**query_components)
@@ -67,6 +73,12 @@ def word_cloud():
         #@todo: logging of the error
         return render_template('errors/generic_error.html', error_message='Error while creating the word cloud (code #1). Please try later.')
 
+    # get the maximum number of records to use
+    try:
+        number_of_records = request.values.get('numRecs')
+    except:
+        number_of_records = config.MAX_EXPORTS['wordcloud']
+
     # checked bibcodes will be input as
     if request.values.has_key('bibcode'):
         bibcodes = request.values.getlist('bibcode')
@@ -77,7 +89,7 @@ def word_cloud():
         'fields': ['id'],
         'highlights': [],
         'defType':'aqp', 
-        'rows': str(config.WORD_CLOUD_DEFAULT_FIRST_RESULTS),
+        'rows': str(number_of_records),
         'tv.tf_idf': 'true', 
         'tv.tf': 'true', 
         'tv.positions':'false',
@@ -108,12 +120,18 @@ def alladin_lite():
             #@todo: logging of the error
             return render_template('errors/generic_error.html', error_message='Error. Please try later.')
 
+        # get the maximum number of records to use
+        try:
+            number_of_records = request.values.get('numRecs')
+        except:
+            number_of_records = config.MAX_EXPORTS['skymap']
+
         #update the query parameters to return only what is necessary
         query_components.update({
             'facets': [],
             'fields': ['bibcode'],
             'highlights': [],
-            'rows': str(config.SEARCH_DEFAULT_ROWS)
+            'rows': str(number_of_records)
             })
 
         resp = solr.query(**query_components)

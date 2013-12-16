@@ -292,9 +292,9 @@ class AppConfig(object):
     EXPORT_DEFAULT_ROWS = 300
     MAX_EXPORTS = {'metrics':3000, 
                    'citation_helper':3000, 
-                   'wordcloud':300, 
+                   'wordcloud':1000, 
                    'ADSClassic':300,
-                   'authnetwork':300,
+                   'authnetwork':1000,
                    'skymap':300,
                    'BibTeX':3000,
                    'EndNote':3000,

@@ -3,7 +3,6 @@ from flask.ext.assets import Environment, Bundle
 main_js = Bundle('js/libs/jquery.js',
                 'jquery-ui/js/jquery-ui-1.10.2.custom.js',
                 'jquery-ui/js/jquery-ui-1.10.2.dialog.js',
-                'jquery-ui/js/jquery-ui-1.10.2.draggable.js',
                 'bootstrap/js/bootstrap.min.js',
                 'js/libs/bootstrap-select.js',
                 'js/libs/Uri.min.js',

@@ -264,7 +264,6 @@ ResultListManager.set_records = function(service, label)
                 var dialog = $('#record_selection_dialog')
                     .dialog({
                         title: 'Select number of records',
-                        draggable: true,
                         buttons: {
                             "OK": function() {
                                 numRecords = $( "#record_slider" ).slider( "value" );
