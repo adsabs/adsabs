@@ -16,9 +16,11 @@
 
 	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
 
-	<!-- vega.js causes many syntax errors in yui compressor -->
-	<script type="text/javascript" src="{{ url_for('static', filename = 'js/libs/vega.js') }}"></script>
-	
+	<!-- apparently vega.js and jquery.flot.js can't handle the yuicompressor -->
+    <script type="text/javascript" src="{{ url_for('static', filename = 'js/libs/vega.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.flot.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.flot.stack.js') }}"></script>
+
 	<script type="text/javascript">
   	{% from 'macros/misc.html' import render_messages %}
     {{ render_messages(['javascript']) }}
