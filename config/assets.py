@@ -21,6 +21,8 @@ main_js = Bundle('js/libs/jquery.js',
                 'js/libs/aladin.min.js', 
                 'js/facets_components.js',
                 'js/query_form.js',
+                'js/libs/jquery.flot.min.js',
+                'js/libs/jquery.flot.stack.js',
                 filters=('yui_js'), output='compressed/all.js')
 
 main_css = Bundle('bootstrap/css/bootstrap.min.css',

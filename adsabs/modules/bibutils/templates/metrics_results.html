@@ -2,27 +2,10 @@
 {% if include_layout == 'YES'%}
 {% extends "layout.html" %}
 {% block titlehead %}Metrics Results{% endblock %}
-{% endif %}
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/metrics.css') }}">
-<link media="screen"  rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/jquery.msg.css') }}">
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery-1.7.1.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.center.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.msg.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/flot/jquery.flot.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/flot/jquery.flot.stack.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/jquery.qtip-1.0.0.min.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/metrics.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/helptips.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<!-- Fancybox stuff -->
-<script type="text/javascript" src="{{ url_for('static', filename='fancybox/jquery.mousewheel-3.0.6.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/jquery.fancybox.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/jquery.fancybox.pack.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-buttons.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-media.js') }}?app_version={{ config.APP_VERSION }}"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.css') }}?app_version={{ config.APP_VERSION }}" type="text/css" media="screen" />
-<script type="text/javascript" src="{{ url_for('static', filename='fancybox/source/helpers/jquery.fancybox-thumbs.js') }}?app_version={{ config.APP_VERSION }}"></script>
+{% endblock %}
+{% endif %}
+{% block body %}
 <script type="text/javascript">
     {% autoescape false %}
     {% if results['mode'] == 'normal' %}
@@ -33,8 +16,8 @@
     var citshist_data  = {{results['citation histogram']}};
     {% endautoescape %}
 </script>
-{% endblock %}
-{% block body %}
+<link rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/metrics.css') }}">
+<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/metrics.js') }}"></script>
 <div id="content">
 	<div id="metrics_tables" class="wrapper group_wrapper">
 		<table class="metricsval">
