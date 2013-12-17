@@ -195,10 +195,9 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 
 
-postable_info_layout = renderable ({basic, owner, nick}, mode="filter") ->
+postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="filter") ->
   description=basic.description
   dtext = w.editable_text(description)
-  console.log "DTEXT", dtext
   if description is ""
     description = "not provided"
   if mode is "filter"
@@ -206,48 +205,48 @@ postable_info_layout = renderable ({basic, owner, nick}, mode="filter") ->
   else if mode is "profile"
     modetext = "Info"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
-  a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
+  a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.name}</a>"
   dl '.dl-horizontal', ->
     dt "Description"
     dd ->
       raw dtext
-    dt "UUID"
-    dd nick
+    #dt "UUID"
+    #dd nick
     dt "Owner"
-    dd owner
+    dd oname
     dt "Creator"
-    dd basic.creator
+    dd cname
     dt "Created on"
     dd basic.whencreated
     dt "#{modetext}:"
     dd ->
       raw a
 
-postable_info_layout2 = renderable ({basic, owner, nick}, mode="profile") ->
+postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="profile") ->
   if mode is "filter"
     modetext = "Items"
   else if mode is "profile"
     modetext = "Info"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
-  a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.fqin}</a>"
+  a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.name}</a>"
   dl '.dl-horizontal', ->
     dt "Owner"
-    dd owner
+    dd oname
     dt "#{modetext}:"
     dd ->
       raw a
 
 library_info_template = renderable (data) ->
-  postable_info_layout data.library
+  postable_info_layout data.library, data.oname, data.cname
 
 group_info_template = renderable (data) ->
-  postable_info_layout data.group
+  postable_info_layout data.group, data.oname, data.cname
   
 library_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.library
+  postable_info_layout2 data.library, data.oname, data.cname
 
 group_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.group
+  postable_info_layout2 data.group, data.oname, data.cname
 
 #controller style stuff should be added here.
 postable_info = (data, template) ->

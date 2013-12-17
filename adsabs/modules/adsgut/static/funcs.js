@@ -321,7 +321,7 @@
     return template(fqpn, data.users, scmode);
   };
 
-  postable_info_layout = renderable(function(_arg, mode) {
+  postable_info_layout = renderable(function(_arg, oname, cname, mode) {
     var a, basic, description, dtext, modetext, nick, owner, url;
     basic = _arg.basic, owner = _arg.owner, nick = _arg.nick;
     if (mode == null) {
@@ -329,7 +329,6 @@
     }
     description = basic.description;
     dtext = w.editable_text(description);
-    console.log("DTEXT", dtext);
     if (description === "") {
       description = "not provided";
     }
@@ -339,18 +338,16 @@
       modetext = "Info";
     }
     url = "" + prefix + "/postable/" + basic.fqin + "/" + mode + "/html";
-    a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.fqin + "</a>";
+    a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.name + "</a>";
     return dl('.dl-horizontal', function() {
       dt("Description");
       dd(function() {
         return raw(dtext);
       });
-      dt("UUID");
-      dd(nick);
       dt("Owner");
-      dd(owner);
+      dd(oname);
       dt("Creator");
-      dd(basic.creator);
+      dd(cname);
       dt("Created on");
       dd(basic.whencreated);
       dt("" + modetext + ":");
@@ -360,7 +357,7 @@
     });
   });
 
-  postable_info_layout2 = renderable(function(_arg, mode) {
+  postable_info_layout2 = renderable(function(_arg, oname, cname, mode) {
     var a, basic, modetext, nick, owner, url;
     basic = _arg.basic, owner = _arg.owner, nick = _arg.nick;
     if (mode == null) {
@@ -372,10 +369,10 @@
       modetext = "Info";
     }
     url = "" + prefix + "/postable/" + basic.fqin + "/" + mode + "/html";
-    a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.fqin + "</a>";
+    a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.name + "</a>";
     return dl('.dl-horizontal', function() {
       dt("Owner");
-      dd(owner);
+      dd(oname);
       dt("" + modetext + ":");
       return dd(function() {
         return raw(a);
@@ -384,19 +381,19 @@
   });
 
   library_info_template = renderable(function(data) {
-    return postable_info_layout(data.library);
+    return postable_info_layout(data.library, data.oname, data.cname);
   });
 
   group_info_template = renderable(function(data) {
-    return postable_info_layout(data.group);
+    return postable_info_layout(data.group, data.oname, data.cname);
   });
 
   library_itemsinfo_template = renderable(function(data) {
-    return postable_info_layout2(data.library);
+    return postable_info_layout2(data.library, data.oname, data.cname);
   });
 
   group_itemsinfo_template = renderable(function(data) {
-    return postable_info_layout2(data.group);
+    return postable_info_layout2(data.group, data.oname, data.cname);
   });
 
   postable_info = function(data, template) {

@@ -698,11 +698,11 @@ def addMemberToPostable_or_postableMembers(po, pt, pn):
 #######################################################################################################################
 def postable(ownernick, name, ptstr):
     fqpn=ownernick+"/"+ptstr+":"+name
-    postable=g.db.getPostableInfo(g.currentuser, g.currentuser, fqpn)
+    postable, owner, creator=g.db.getPostableInfo(g.currentuser, g.currentuser, fqpn)
     isowner=False
     if g.db.isOwnerOfPostable(g.currentuser, g.currentuser, postable):
         isowner=True
-    return postable, isowner
+    return postable, isowner, owner.presentable_name(), creator.presentable_name()
 
 
 #POST/GET in a lightbox?
@@ -714,29 +714,15 @@ def creategrouphtml():
 #x
 @adsgut.route('/group/<groupowner>/group:<groupname>')
 def groupInfo(groupowner, groupname):
-    return jsonify(group=postable(groupowner, groupname, "group")[0])
+    g, io, on, cn = postable(groupowner, groupname, "group")
+    return jsonify(group=g, oname = on, cname = cn)
 
 #x
 @adsgut.route('/postable/<groupowner>/group:<groupname>/profile/html')
 def groupProfileHtml(groupowner, groupname):
-    group, owner=postable(groupowner, groupname, "group")
+    group, owner, on, cn=postable(groupowner, groupname, "group")
     return render_template('groupprofile.html', thegroup=group, owner=owner,  useras=g.currentuser)
 
-# @adsgut.route('/group/<groupowner>/group:<groupname>/filter/html')
-# def groupFilterHtml(groupowner, groupname):
-#     querystring=request.query_string
-#     group, owner=postable(groupowner, groupname, "group")
-#     return render_template('groupfilter.html', thegroup=group, querystring=querystring, owner=owner, useras=g.currentuser)
-
-# @adsgut.route('/group/<groupowner>/group:<groupname>/items')
-# def groupItems(groupowner, groupname):
-#     group=postable(groupowner, groupname, "group")
-#     num, vals=g.dbp.getItemsForQuery(g.currentuser, g.currentuser,
-#        {'postables':[group.basic.fqin]} )
-#     groupdict={'count':num, 'items':[json.loads(v.to_json()) for v in vals]}
-#     return jsonify(groupdict)
-#######################################################################################################################
-#######################################################################################################################
 
 #POST/GET in a lightbox?
 @adsgut.route('/app/html')
@@ -746,23 +732,16 @@ def createapphtml():
 #x
 @adsgut.route('/app/<appowner>/app:<appname>')
 def appInfo(appowner, appname):
-    return jsonify(app=postable(appowner, appname, "app")[0])
+    a, io, on, cn = postable(appowner, appname, "app")
+    return jsonify(app=a, oname = on, cname = cn)
 
 #x
 @adsgut.route('/postable/<appowner>/app:<appname>/profile/html')
 def appProfileHtml(appowner, appname):
-    app, owner=postable(appowner, appname, "app")
+    app, owner, on, cn=postable(appowner, appname, "app")
     return render_template('appprofile.html', theapp=app, owner=owner, useras=g.currentuser)
 
-# @adsgut.route('/app/<appowner>/app:<appname>/items')
-# def appItems(appowner, appname):
-#     app=postable(appowner, appname, "app")
-#     num, vals=g.dbp.getItemsForQuery(g.currentuser, g.currentuser,
-#        {'postables':[app.basic.fqin]} )
-#     appdict={'count':num, 'items':[json.loads(v.to_json()) for v in vals]}
-#     return jsonify(appdict)
-#######################################################################################################################
-#######################################################################################################################
+
 #POST/GET in a lightbox?
 @adsgut.route('/library/html')
 def createlibraryhtml():
@@ -772,19 +751,15 @@ def createlibraryhtml():
 #x
 @adsgut.route('/library/<libraryowner>/library:<libraryname>')
 def libraryInfo(libraryowner, libraryname):
-    return jsonify(library=postable(libraryowner, libraryname, "library")[0])
+    l, io, on, cn = postable(libraryowner, libraryname, "library")
+    return jsonify(library=l, oname=on, cname=cn)
 
 #x
 @adsgut.route('/postable/<libraryowner>/library:<libraryname>/profile/html')
 def libraryProfileHtml(libraryowner, libraryname):
-    library, owner=postable(libraryowner, libraryname, "library")
+    library, owner, on, cn=postable(libraryowner, libraryname, "library")
     return render_template('libraryprofile.html', thelibrary=library, owner=owner, useras=g.currentuser)
 
-# @adsgut.route('/library/<libraryowner>/library:<libraryname>/filter/html')
-# def libraryFilterHtml(libraryowner, libraryname):
-#     querystring=request.query_string
-#     library, owner=postable(libraryowner, libraryname, "library")
-#     return render_template('libraryfilter.html', thelibrary=library, querystring=querystring, owner=owner, useras=g.currentuser)
 
 @adsgut.route('/postable/<nick>/group:default/filter/html')
 def udgHtml(nick):
@@ -802,7 +777,7 @@ def publicHtml():
 @adsgut.route('/postable/<po>/<pt>:<pn>/filter/html')
 def postableFilterHtml(po, pt, pn):
     querystring=request.query_string
-    p, owner=postable(po, pn, pt)
+    p, owner, on, cn=postable(po, pn, pt)
     pflavor='pos'
     if pn=='public' and po=='adsgut' and pt=='group':
         pflavor='pub'
@@ -814,13 +789,6 @@ def postableFilterHtml(po, pt, pn):
     tqtype='tagname'
     #BUG using currentuser right now. need to support a notion of useras
     return render_template('postablefilter.html', p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner)
-# @adsgut.route('/library/<libraryowner>/library:<libraryname>/items')
-# def libraryItems(libraryowner, libraryname):
-#     library=postable(libraryowner, libraryname, "library")
-#     num, vals=g.dbp.getItemsForQuery(g.currentuser, g.currentuser,
-#        {'postables':[library.basic.fqin]} )
-#     libdict={'count':num, 'items':[json.loads(v.to_json()) for v in vals]}
-#     return jsonify(libdict)
 
 
 #######################################################################################################################
