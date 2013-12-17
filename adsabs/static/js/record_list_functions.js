@@ -252,11 +252,16 @@ ResultListManager.set_records = function(service, label)
 {
         var numRecords = $('#search_results_form').find('input[name="bibcode"]:checked').length;
         var max_records = GlobalVariables.MAX_EXPORTS[service];
+        var num_results = $( "#amount" ).val();
         var default_records = GlobalVariables.DEFAULT_EXPORTS[service];
         if (label !== undefined) {
             max_records = GlobalVariables.MAX_EXPORTS[label];
             default_records = GlobalVariables.DEFAULT_EXPORTS[label];
         }
+        max_records = Math.min(num_results,max_records)
+        if (max_records < default_records) {
+            default_records = max_records / 2
+        };
         if (numRecords == 0) {
                 $( "#record_slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
                 $( "#amount" ).val( $( "#record_slider" ).slider( "value" ) );
