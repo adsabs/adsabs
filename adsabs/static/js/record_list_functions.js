@@ -259,8 +259,8 @@ ResultListManager.set_records = function(service, label)
             default_records = GlobalVariables.DEFAULT_EXPORTS[label];
         }
         max_records = Math.min(num_results,max_records)
-        if (max_records < default_records) {
-            default_records = max_records / 2
+        if (num_results <= max_records) {
+            default_records = max_records
         };
         if (numRecords == 0) {
                 $( "#record_slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
