@@ -101,6 +101,15 @@ def retrieve_bigquery(query_id):
         return None
     return query.data
 
+def save_bigquery(data):
+    # save data inside mongo and get unique id
+    qid = str(uuid.uuid4())
+    new_rec = BigQuery(
+                query_id=qid,
+                created=datetime.utcnow().replace(tzinfo=pytz.utc),
+                data=data)
+    new_rec.save()
+    return qid
 
 @search_blueprint.route('/bigquery/', methods=('GET', 'POST'))
 def bigquery():
@@ -132,13 +141,7 @@ def bigquery():
     if v[0:7] != 'bibcode':
         v = 'bibcode\n' + v
     
-    # save data inside mongo and get unique id
-    qid = str(uuid.uuid4())
-    new_rec = BigQuery(
-                query_id=qid,
-                created=datetime.utcnow().replace(tzinfo=pytz.utc),
-                data=v)
-    new_rec.save()
+    qid = save_bigquery(v)
     
     flash("Please note, that we do not guarantee that your query is permanent (it will be deleted at some point)", "info")
     urlargs = dict(request.args)
