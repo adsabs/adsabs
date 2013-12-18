@@ -41,3 +41,5 @@ adsabs.log
 logging.conf
 
 local_config.py
+
+adsabs/static/.webassets-cache

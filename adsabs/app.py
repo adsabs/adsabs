@@ -3,7 +3,9 @@ import sys
 import pytz
 
 import logging
+from webassets.loaders import PythonLoader
 from flask import Flask, send_from_directory
+from flask.ext.assets import Environment, Bundle
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import configure_template_filters
@@ -17,6 +19,7 @@ __all__ = ['create_app']
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo")
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="invenio")
+
 
 def create_app(config=config, app_name=None):
     """Create a Flask app."""
@@ -39,6 +42,7 @@ def create_app(config=config, app_name=None):
     configure_template_filters(app)
     _configure_error_handlers(app)
     _configure_misc_handlers(app)
+    _configure_assets(app)
     configure_before_request_funcs(app)
     configure_after_request_funcs(app)
     
@@ -47,6 +51,17 @@ def create_app(config=config, app_name=None):
         toolbar = DebugToolbarExtension(app)
 
     return app
+
+
+def _configure_assets(app):
+    
+    assets = Environment(app)
+    pyload = PythonLoader('config.assets')
+    bundles = pyload.load_bundles()
+ 
+    assets.register('main_js', bundles['main_js'])
+    assets.register('main_css', bundles['main_css'])
+
 
 def _configure_logging(app):
     
