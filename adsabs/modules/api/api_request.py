@@ -89,6 +89,7 @@ class ApiSearchRequest(object):
                 
     def execute(self):
         req = self._create_search_request()
+        solr.set_defaults(req)
         
         try:
             resp = solr.get_response(req)

@@ -144,7 +144,8 @@ class TestSolrHAProxyCookie(AdsabsBaseTestCase):
         
             self.app.preprocess_request()
             req = solr.create_request("foo")
-            resp = solr.get_response(req, query_url='http://httpbin.org/cookies')
+            solr.set_defaults(req, query_url='http://httpbin.org/cookies')
+            resp = solr.get_response(req)
             expected = { config.SOLR_HAPROXY_SESSION_COOKIE_NAME: g.user_cookie_id }
             self.assertDictContainsSubset(expected, resp.raw['cookies'])
 
