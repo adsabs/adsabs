@@ -10,18 +10,36 @@
 {% block localbody %}
 {% if pflavor=='udg' %}
 <h4>Items saved by {{useras.adsid}}</h4>
+<span>
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+</form>
+</span>
+<hr/>
 {% elif pflavor=='pub' %}
 <h4>Public Feed</h4>
+<span>
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+</form>
+</span>
+<hr/>
 {% else %}
 {% if p.classname=="library" %}
 <h4>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
 {% elif p.classname=="group" %}
-<h4>Items saved in library for group<a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
+<h4>Items saved in library for group <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
  {% endif %}
 <!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
 <div id="info" style="display:none"></div>
 <span>
-  Only from <a href="" id="useradder" class="hoverhelp" data="off">{{ useras.adsid }}</a> | Query: 
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+  <label>&nbsp; | Only from <a href="" id="useradder" class="hoverhelp" data="off">yourself</a> | Query: </label>
+</form>
 </span>
 <hr/>
 {% endif %}
@@ -49,7 +67,9 @@ $ ->
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
     tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
-    itPURL: "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
+    bq2url : "http://localhost:15000/search/bigquery/"
     memberable: "{{useras.nick}}"
     loc : document.location
     tqtype : "{{ tqtype }}"
@@ -59,6 +79,8 @@ $ ->
     $items : $('#items')
     $ua : $('#useradder')
     $tagssec : $('#stags')
+    $bigquery : $('#bigquery')
+    $bigqueryform : $('#bigqueryform')
 
 
   {% if pflavor!= 'udg' and pflavor!='pub' %}

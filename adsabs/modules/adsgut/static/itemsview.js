@@ -155,7 +155,7 @@
       this.$el.empty();
       adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
       url = adslocation + ("" + this.item.basic.name);
-      htmlstring = "<span class='itemtitle'><a href=\"" + url + "\">" + this.item.basic.name + "</a></span><br/>";
+      htmlstring = "<div class='searchresultl'><a href=\"" + url + "\">" + this.item.basic.name + "</a></div>";
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
@@ -701,6 +701,7 @@
     ItemsFilterView.prototype.render = function() {
       var fqin, i, ins, v, _i, _len, _ref;
       console.log("EL", this.$el);
+      this.itemviews = {};
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -717,6 +718,7 @@
         console.log("INS", ins);
         v = new ItemView(ins);
         this.$el.append(v.render().el);
+        this.itemviews[fqin] = v;
         this.$el.append('<hr/>');
       }
       return this;

@@ -46,6 +46,30 @@ send_params = (url, data, cback, eback) ->
         error:eback
     xhr=doajax(params)
 
+# import requests
+
+# rstr="bibcode\n2013MPEC....H...46."
+
+# headers = {'Content-Type': 'big-query/csv'}
+# url='http://localhost:9002/solr/collection1/select'
+# qdict = {
+#     'q':'text:*:*',
+#     'fq':'{!bitset compression=none}',
+#     'wt':'json',
+#     'fl':'title,year,author'
+# }
+# r = requests.post(url, params=qdict, data=rstr, headers=headers)
+# print r.url
+# print r.text
+
+send_bibcodes = (url, items, cback, eback) ->
+    bibcodes = (encodeURIComponent(i.basic.name) for i in items)
+    data = 
+        bibcode : bibcodes
+    console.log "SBDATA", data
+    send_params(url, data, cback, eback)
+
+
 do_get = (url, cback, eback) ->
     params=
         type:'GET'
@@ -232,6 +256,7 @@ root.syncs=
     save_items:save_items
     create_postable: create_postable
     change_description: change_description
+    send_bibcodes: send_bibcodes
 
 
 

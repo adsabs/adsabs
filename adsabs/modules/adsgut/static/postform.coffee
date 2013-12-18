@@ -37,6 +37,25 @@ do_postform = (sections, config) ->
                 ido.noteform=true
             plinv=new itemsdo.ItemsView(ido)
             plinv.render()
+            #possible A&A issue
+            eb = (err) ->
+                console.log("ERR", err)
+                for d in theitems
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
+            cb = (data) ->
+                console.log "CBDATA", JSON.stringify(data), data.response.docs
+                thedocs = {}
+                for d in data.response.docs
+                    thedocs[d.bibcode]=d
+                docnames = (d.bibcode for d in data.response.docs)
+                for d in theitems
+                    if d.basic.name in docnames
+                        e=thedocs[d.basic.name]
+                    else
+                        e={}
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
+            console.log "ITTYS", theitems
+            syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
 
 root.postform = 
     do_postform: do_postform

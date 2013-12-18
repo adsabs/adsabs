@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -60,6 +60,24 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       error: eback
     };
     return xhr = doajax(params);
+  };
+
+  send_bibcodes = function(url, items, cback, eback) {
+    var bibcodes, data, i;
+    bibcodes = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = items.length; _i < _len; _i++) {
+        i = items[_i];
+        _results.push(encodeURIComponent(i.basic.name));
+      }
+      return _results;
+    })();
+    data = {
+      bibcode: bibcodes
+    };
+    console.log("SBDATA", data);
+    return send_params(url, data, cback, eback);
   };
 
   do_get = function(url, cback, eback) {
@@ -345,7 +363,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     submit_posts: submit_posts,
     save_items: save_items,
     create_postable: create_postable,
-    change_description: change_description
+    change_description: change_description,
+    send_bibcodes: send_bibcodes
   };
 
 }).call(this);

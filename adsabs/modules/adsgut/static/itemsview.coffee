@@ -93,7 +93,7 @@ class ItemView extends Backbone.View
     @$el.empty()
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
-    htmlstring = "<span class='itemtitle'><a href=\"#{url}\">#{@item.basic.name}</a></span><br/>"
+    htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a></div>"
     fqin=@item.basic.fqin
     content = ''
     content = content + htmlstring
@@ -430,6 +430,7 @@ class ItemsFilterView extends Backbone.View
   render: =>
     console.log "EL", @$el
     #@$el.append('<hr/>')
+    @itemviews = {}
     for i in @items
         fqin=i.basic.fqin
         ins = 
@@ -443,6 +444,7 @@ class ItemsFilterView extends Backbone.View
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)
+        @itemviews[fqin] = v
         @$el.append('<hr/>')
     return this
 

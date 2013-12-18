@@ -8,6 +8,14 @@ parse_fqin = (fqin) ->
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
+format_item = ($sel, iteminfo) ->
+  year = iteminfo.year ? "unknown"
+  $sel.append("<span class='pubdate pull-right'><em>published in #{year}</em></span><br/>")
+  title = iteminfo.title ? "No title found"
+  $sel.append("<span class='title'><strong>#{title}</strong></span><br/>")
+  author = iteminfo.author ? ['No authors found']
+  $sel.append("<span class='author'>#{author.join(', ')}</span>")
+
 format_tags = (tagtype, $sel, tags, tagqkey)->
   typestring = tagtype.split(':')[1]
   htmlstring="<li class=\"nav-header\">Filter by: #{typestring}</li>"
@@ -371,6 +379,7 @@ class CreatePostable extends Backbone.View
 root.get_tags = get_tags
 root.get_taggings = get_taggings
 root.format_items = format_items
+root.format_item = format_item
 root.format_tags = format_tags
 root.get_groups= get_groups
 root.format_stuff = format_stuff

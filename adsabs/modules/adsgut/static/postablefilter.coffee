@@ -21,6 +21,11 @@ do_postable_filter = (sections, config) ->
         theitems=data.items
         thecount=data.count
         itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+        biblist=(encodeURIComponent(i.basic.name) for i in theitems)
+        bibstring = biblist.join("\n")
+        sections.$bigquery.val(bibstring)
+        sections.$bigqueryform.attr("action", config.bq2url)
+        sections.$bigqueryform.attr("hello", "world")
         itemsq=itemlist.join("&")
         $.get "#{config.itPURL}?#{itemsq}", (data)->
             [stags, notes]=get_taggings(data)
@@ -43,6 +48,25 @@ do_postable_filter = (sections, config) ->
 
             plinv=new itemsdo.ItemsFilterView(ido)
             plinv.render()
+            #possible A&A issue
+            eb = (err) ->
+                console.log("ERR", err)
+                for d in theitems
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
+            cb = (data) ->
+                console.log "CBDATA", JSON.stringify(data), data.response.docs
+                thedocs = {}
+                for d in data.response.docs
+                    thedocs[d.bibcode]=d
+                docnames = (d.bibcode for d in data.response.docs)
+                for d in theitems
+                    if d.basic.name in docnames
+                        e=thedocs[d.basic.name]
+                    else
+                        e={}
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
+            console.log "ITTYS", theitems
+            syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
     loc = config.loc
     nonqloc=loc.href.split('?')[0]
     if sections.$ua.attr('data') is 'off'

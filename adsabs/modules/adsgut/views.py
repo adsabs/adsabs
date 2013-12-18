@@ -221,6 +221,13 @@ def _itemspostget(qdict):
     #Possible security hole bug
     return itemlist
 
+def _bibcodespostget(qdict):
+    itemlist=_dictp('bibcode', qdict)
+    if not itemlist:
+        return []
+    #Possible security hole bug
+    return itemlist
+
 def _postablesget(qdict):
     plist=_dictp('postables', qdict)
     if not plist:
@@ -1412,6 +1419,39 @@ def perform_classic_library_query(parameters, headers, service_url):
         user_json = {}
     return user_json
 
+#This should probably be done in flask.ext.solrquery but its easier to do it simpler
+def perform_solr_bigquery(bibcodes):
+    """
+    function that performs a POST request and returns a json object
+    """
+    headers = {'Content-Type': 'big-query/csv'}
+    url='http://localhost:9002/solr/collection1/select'
+    qdict = {
+        'q':'text:*:*',
+        'fq':'{!bitset compression=none}',
+        'wt':'json',
+        'fl':'bibcode,title,year,author'
+    }
+    #Perform the request
+    rstr = "bibcode\n"+"\n".join(bibcodes)
+    print "RSTR", rstr, bibcodes
+    r = requests.post(url, params=qdict, data=rstr, headers=headers)
+    #Check for problems
+    try:
+        r.raise_for_status()
+    except Exception, e:
+        exc_info = sys.exc_info()
+        app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+    
+    try:
+        d = r.json()
+    except Exception, e:
+        exc_info = sys.exc_info()
+        app.logger.error("Author JSON decode error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+        r = None
+        d = {}
+    return d
+
 @adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
 def get_classic_libraries(cookieid, password=None):
     #headers BUG add http auth headers here, user ads, password?
@@ -1426,6 +1466,16 @@ def get_classic_libraries(cookieid, password=None):
     else:
         return redirect('/')
 
+@adsgut.route('/bigquery/bibcodes', methods=['POST'])
+def get_bigquery_solr():
+    if request.method=='POST':
+        print request.json
+        jsonpost=dict(request.json)
+        #henceforth this will be names
+        bibcodes = _bibcodespostget(jsonpost)
+        print "bcodes", bibcodes
+        d=perform_solr_bigquery(bibcodes)
+        return jsonify(d)
 
 if __name__ == "__main__":
     adsgut.run(host="0.0.0.0", port=4000)
