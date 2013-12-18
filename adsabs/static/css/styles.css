@@ -556,4 +556,8 @@ div.absview div.row-fluid label {
  	overflow:auto;
  	height:250px;
  }
+
+textarea#bigquery {
+  width:80%;
+}
  

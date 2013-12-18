@@ -1,7 +1,7 @@
 {# ###### Macro for the basic search form ###### #}
 {% macro render_search_form(form) %}
 <div class="container" id="search_form">
-    <form class="form-search form-search-cust" method="GET" action="{{ url_for('search.search') }}">
+    <form class="form-search form-search-cust" method="{{ form.method }}" action="{{ url_for(form.flask_route) }}">
         <fieldset>
         	{#{ form.rows }#}
             <!-- legend>ADS metadata and fulltext integrated search</legend-->
@@ -127,6 +127,16 @@
 	            </div>
 	        </div>
         </fieldset>
+        
+        {{ form.bigquery() }}
+        
+        {% if form.has_rendered_elements() %}
+          {% for rendered_element in form.get_rendered_elements() %}
+            <div class="form.includes">
+              {{ rendered_element }}
+            <div>
+          {% endfor %}  
+        {% endif %}
     </form>
     
 </div>

@@ -21,7 +21,9 @@ if not getattr(config, 'SECRET_KEY', None):
     # set a fake one to keep the create_app from barfing
     config.SECRET_KEY = "foo"
 
-app = create_app(config)
+
+
+app = create_app(config)    
 manager = Manager(app)#, with_default_commands=False)
 
 tools_manager = Manager("Tools commands")#, with_default_commands=False)

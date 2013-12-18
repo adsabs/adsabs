@@ -1,5 +1,6 @@
 import sys
-from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for
+from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
+    Markup, redirect
 from flask.ext.solrquery import solr #@UnresolvedImport
 
 #from flask.ext.login import current_user #@UnresolvedImport
@@ -61,7 +62,27 @@ def search():
         if form.validate():
             query_components = QueryBuilderSearch.build(form, request.values)
             try:
-                resp = solr.query(**query_components)
+                
+                req = solr.create_request(**query_components)
+                bigquery = None
+                if 'bigquery' in request.values:
+                    bigquery = request.values['bigquery']
+                    
+                    bq_data = retrieve_bigquery(bigquery)
+                    if bq_data is not None:
+                        req.headers = {'content-type': 'big-query/csv'}
+                        req.data=bq_data
+                        req.add_filter_query('{!bitset}')
+                    else:
+                        bigquery = None
+                
+                req = solr.set_defaults(req)
+                resp = solr.get_response(req)
+                
+                if bigquery:
+                    facets = resp.get_facet_parameters()
+                    facets.append(('bigquery', bigquery))
+                
             except Exception, e:
                 raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
             if resp.is_error():
@@ -73,61 +94,62 @@ def search():
     return render_template('search.html', form=form)
 
 
+def retrieve_bigquery(query_id):
+    cursor = BigQuery.query.filter(BigQuery.query_id==query_id) #@UndefinedVariable
+    query = cursor.first()
+    if query is None:
+        return None
+    return query.data
+
+
 @search_blueprint.route('/bigquery/', methods=('GET', 'POST'))
 def bigquery():
     """
     Allows one to post a large number of ID's and get
     results in the search form
-    
-    I need to get this to the form; the stupid thing is not sending
-    post data; or flask is not reading them; i don't know...
-    
-    $('div#bigquery');
-    $('div#footer').append($('<div id="bigquery"><form><div>Copy&Paste bibcodes here, one per line.</div><textarea type="hidden" name="bigquery" class="ajaxHiddenField" rows="30" cols="40">sfsdfdsf</textarea></form></div>'));
-    var big = $('div#bigquery');
-    big.append($('<input type="submit" value="Submit">').click(function() {
-        $.ajax({
-                type : "POST",
-                cache : false,
-                url : '/search/bigquery/',
-                data : big.serialize(),
-                contentType: 'plain/text',
-                processData: false,
-                success: function(data) {
-                    $.fancybox.hideLoading();
-                    //add query id to the form
-                    $('#q').val($('#q').val() + data);
-                    //append an hidden parameter for the bibcodes retrieved
-                    //submit the form
-                    //$('form.form-search').submit();
-                }
-            });
-    }));
-    
-    $.fancybox.showLoading()
-    $.fancybox($('div#bigquery'))
-    
     """
+    form = QueryForm(csrf_enabled=False)
+    # prefill the database select menu option
+    form.db_f.default = config.SEARCH_DEFAULT_DATABASE
+    form.method = 'POST'
+    form.flask_route = 'search.bigquery'
+        
     # just for debugging, return what we know about the query
     if ('uuid' in request.values):
-        cursor = BigQuery.query.filter(BigQuery.query_id==request.values['uuid']) #@UndefinedVariable
-        query = cursor.first()
-        return query.data
+        data = retrieve_bigquery(request.values['uuid'])
+        form.add_rendered_element(Markup(render_template('bigquery.html', data=data)))
+        return render_template('search.html', form=form)
+    
     
     # receive the data from the form
     v = request.values.get('bigquery')
     if (v is None or len(v) == 0):
-        return ""
+        form.add_rendered_element(Markup(render_template('bigquery.html', data="")))
+        return render_template('search.html', form=form)
+    
+    # make sure the data has proper header
+    v = v.strip()
+    if v[0:7] != 'bibcode':
+        v = 'bibcode\n' + v
     
     # save data inside mongo and get unique id
     qid = str(uuid.uuid4())
-    new_rec = BigQuery(query_id=qid,
+    new_rec = BigQuery(
+                query_id=qid,
                 created=datetime.utcnow().replace(tzinfo=pytz.utc),
                 data=v)
     new_rec.save()
     
+    flash("Please note, that we do not guarantee that your query is permanent (it will be deleted at some point)", "info")
+    urlargs = dict(request.args)
+    urlargs['bigquery'] = qid
+    if 'q' not in urlargs:
+        urlargs['q'] = '*:*'
+    full_url = url_for('search.search', **urlargs)
+    return redirect(full_url)
+
     # return the unique queryid
-    return qid
+    #return qid
     
     
 
