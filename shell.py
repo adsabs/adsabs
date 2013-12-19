@@ -173,6 +173,19 @@ def restore(indir=None):
                      "-u", config.MONGOALCHEMY_USER, 
                      "-p", config.MONGOALCHEMY_PASSWORD, 
                      os.path.join(indir, config.MONGOALCHEMY_DATABASE)])
+    
+@mongo_manager.command
+def migrate(commit):
+
+    def import_migration():
+        package_path = 'migrations.migrate_%s' % commit
+        m = __import__(package_path)
+        for n in package_path.split(".")[1:]:
+            m = getattr(m, n)
+        return m
+    
+    m = import_migration()
+    m.migrate()
 
 manager.add_command('mongo', mongo_manager)
 

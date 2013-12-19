@@ -279,12 +279,12 @@ class APITests(AdsabsBaseTestCase):
         is_valid('hl=title:3')
         for f in config.API_SOLR_HIGHLIGHT_FIELDS:
             is_valid('hl=%s' % f)
-        is_valid('hl=abstract&hl=full')
+        is_valid('hl=abstract&hl=body')
         not_valid('hl=title-3', {'hl': 'Invalid highlight input'})
         not_valid('hl=foobar', {'hl': 'not a selectable field'})
         not_valid('hl=title:3:4', {'hl': 'Too many options'})
-        not_valid('hl=abstract&hl=full:3:4', {'hl': 'Too many options'})
-        not_valid('hl=abstract-3&hl=full:3:4', {'hl': 'Invalid highlight input'})
+        not_valid('hl=abstract&hl=body:3:4', {'hl': 'Too many options'})
+        not_valid('hl=abstract-3&hl=body:3:4', {'hl': 'Invalid highlight input'})
          
         is_valid('sort=DATE asc')
         is_valid('sort=DATE desc')
@@ -358,10 +358,10 @@ class ApiUserTest(AdsabsBaseTestCase):
         self.assertRaisesRegexp(AssertionError, 'start=300 exceeds max allowed value: 200', u._max_start_ok, 300)
          
         u = DP({})
-        self.assertRaisesRegexp(AssertionError, 'disallowed field: full', u._fields_ok, 'full')
+        self.assertRaisesRegexp(AssertionError, 'disallowed field: body', u._fields_ok, 'body')
         self.assertIsNone(u._fields_ok('bibcode'))
         self.assertIsNone(u._fields_ok('bibcode,title'))
-        self.assertRaisesRegexp(AssertionError, 'disallowed field: full', u._fields_ok, 'bibcode,title,full')
+        self.assertRaisesRegexp(AssertionError, 'disallowed field: body', u._fields_ok, 'bibcode,title,body')
          
         allowed_fields = []
         for f in config.API_SOLR_DEFAULT_FIELDS:
@@ -562,16 +562,16 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.assertTrue(maxh == 2, "Twere were too few/many hightlights returned, requested=2, returned=%s" % maxh )
         
         # multiple fields
-        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2013MNRAS.435.3559T&qf=full+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=full:3')
+        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2013MNRAS.435.3559T&qf=body+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=body:3')
         resp = json.loads(rv.data)
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)
             self.assertIn('abstract', doc['highlights'])
             self.assertIn('<em>black', doc['highlights']['abstract'][0])
-            self.assertIn('full', doc['highlights'])
-            self.assertIn('<em>black', doc['highlights']['full'][0])
+            self.assertIn('body', doc['highlights'])
+            self.assertIn('<em>black', doc['highlights']['body'][0])
             self.assertTrue(len(doc['highlights']['abstract']) == 1, "Too many highlights")
-            self.assertTrue(len(doc['highlights']['full']) == 3, "Too few highlights")    
+            self.assertTrue(len(doc['highlights']['body']) == 3, "Too few highlights")    
         
              
          

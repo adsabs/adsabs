@@ -121,7 +121,7 @@ class AppConfig(object):
         ('database',-1, 1),
         ]
     
-    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('full', 4),('abstract', 4),('ack', 4)]
+    SOLR_SEARCH_DEFAULT_HIGHLIGHTS = [('body', 4),('abstract', 4),('ack', 4)]
     SOLR_DOCUMENT_DEFAULT_HIGHLIGHTS = [('abstract', 1, 50000)]
     SOLR_SEARCH_REQUIRED_FIELDS = ['id','bibcode']
     
@@ -202,8 +202,8 @@ class AppConfig(object):
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
                                'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]']
-    API_SOLR_EXTRA_FIELDS = ['full','references','ack','score']
-    API_SOLR_HIGHLIGHT_FIELDS = ['title','abstract','full','ack']
+    API_SOLR_EXTRA_FIELDS = ['body','references','ack','score']
+    API_SOLR_HIGHLIGHT_FIELDS = ['title','abstract','body','ack']
     
     API_SOLR_FACET_FIELDS = {
         'bibstem': 'bibstem_facet',
