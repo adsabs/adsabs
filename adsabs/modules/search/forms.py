@@ -5,7 +5,7 @@ Created on Sep 19, 2012
 '''
 import re
 from flask.ext.wtf import Form #@UnresolvedImport
-from wtforms import (TextField, SelectField, IntegerField, BooleanField, #HiddenField, #SubmitField, RadioField, #@UnresolvedImport
+from wtforms import (TextField, SelectField, IntegerField, BooleanField, HiddenField, #SubmitField, RadioField, #@UnresolvedImport
                           validators) #@UnresolvedImport
 from wtforms.validators import (required, optional, length)
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
@@ -31,6 +31,12 @@ class MultiFacetSelectField(SelectField):
                 raise ValueError("Not a valid choice")
         
 class QueryForm(Form):
+    
+    def __init__(self, *args, **kwargs):
+        Form.__init__(self, *args, **kwargs)
+        self.method = 'GET'
+        self.flask_route = 'search.search'
+        self.__includes = []
     
     default_if_missing = MultiDict([('db_f', ''), ])
 
@@ -66,7 +72,16 @@ class QueryForm(Form):
                                                         ('200', '200 results')] )
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
+    bigquery = HiddenField(u'Custom Query')
     
+    def add_rendered_element(self, string):
+        self.__includes.append(string)
+    
+    def has_rendered_elements(self):
+        return len(self.__includes) > 0
+    
+    def get_rendered_elements(self):
+        return self.__includes
    
 class AdvancedQueryForm(QueryForm):
     pass

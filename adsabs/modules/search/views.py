@@ -1,14 +1,19 @@
 import sys
-from flask import Blueprint, request, g, render_template, flash, current_app, abort
+from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
+    Markup, redirect
 from flask.ext.solrquery import solr #@UnresolvedImport
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm
+from .models import BigQuery
 from adsabs.core.solr import QueryBuilderSearch, AdsabsSolrqueryException
 from adsabs.core.data_formatter import field_to_json
 from config import config
 from adsabs.core.logevent import log_event
 import traceback
+import uuid
+import pytz
+from datetime import datetime
 
 #Definition of the blueprint
 search_blueprint = Blueprint('search', __name__, template_folder="templates", 
@@ -57,7 +62,27 @@ def search():
         if form.validate():
             query_components = QueryBuilderSearch.build(form, request.values)
             try:
-                resp = solr.query(**query_components)
+                
+                req = solr.create_request(**query_components)
+                bigquery = None
+                if 'bigquery' in request.values:
+                    bigquery = request.values['bigquery']
+                    
+                    bq_data = retrieve_bigquery(bigquery)
+                    if bq_data is not None:
+                        req.headers = {'content-type': 'big-query/csv'}
+                        req.data=bq_data
+                        req.add_filter_query('{!bitset}')
+                    else:
+                        bigquery = None
+                
+                req = solr.set_defaults(req)
+                resp = solr.get_response(req)
+                
+                if bigquery:
+                    facets = resp.get_facet_parameters()
+                    facets.append(('bigquery', bigquery))
+                
             except Exception, e:
                 raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
             if resp.is_error():
@@ -67,6 +92,69 @@ def search():
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)
+
+
+def retrieve_bigquery(query_id):
+    cursor = BigQuery.query.filter(BigQuery.query_id==query_id) #@UndefinedVariable
+    query = cursor.first()
+    if query is None:
+        return None
+    return query.data
+
+def save_bigquery(data):
+    # save data inside mongo and get unique id
+    qid = str(uuid.uuid4())
+    new_rec = BigQuery(
+                query_id=qid,
+                created=datetime.utcnow().replace(tzinfo=pytz.utc),
+                data=data)
+    new_rec.save()
+    return qid
+
+@search_blueprint.route('/bigquery/', methods=('GET', 'POST'))
+def bigquery():
+    """
+    Allows one to post a large number of ID's and get
+    results in the search form
+    """
+    form = QueryForm(csrf_enabled=False)
+    # prefill the database select menu option
+    form.db_f.default = config.SEARCH_DEFAULT_DATABASE
+    form.method = 'POST'
+    form.flask_route = 'search.bigquery'
+        
+    # just for debugging, return what we know about the query
+    if ('uuid' in request.values):
+        data = retrieve_bigquery(request.values['uuid'])
+        form.add_rendered_element(Markup(render_template('bigquery.html', data=data)))
+        return render_template('search.html', form=form)
+    
+    
+    # receive the data from the form
+    v = request.values.get('bigquery')
+    if (v is None or len(v) == 0):
+        form.add_rendered_element(Markup(render_template('bigquery.html', data="")))
+        return render_template('search.html', form=form)
+    
+    # make sure the data has proper header
+    v = v.strip()
+    if v[0:7] != 'bibcode':
+        v = 'bibcode\n' + v
+    
+    qid = save_bigquery(v)
+    
+    flash("Please note, that we do not guarantee that your query is permanent (it will be deleted at some point)", "info")
+    urlargs = dict(request.args)
+    urlargs['bigquery'] = qid
+    if 'q' not in urlargs:
+        urlargs['q'] = '*:*'
+    full_url = url_for('search.search', **urlargs)
+    return redirect(full_url)
+
+    # return the unique queryid
+    #return qid
+    
+    
 
 @search_blueprint.route('/facets', methods=('GET', 'POST'))
 def facets():
