@@ -39,7 +39,7 @@ HelpTipManager.show_help = function(item)
 {
     // Get the help text
 	var text_type = this.help_text[item.id];
-	//I create the QTIP element
+	// Create the Help tip using popover from bootstrap
 	$(item).popover({
 	    html: true,
 	    trigger: "hover focus",
@@ -47,3 +47,16 @@ HelpTipManager.show_help = function(item)
 	    content: text_type['help'],
 	});
 };
+
+$(document).ready(function(){
+    $('a.helptip_mark').mouseover(function (){
+        var id = $(this).attr('id');
+        var text_type = HelpTipManager.help_text[id];
+    	$(this).popover({
+	        html: true,
+	        trigger: "hover focus",
+	        title: text_type['title'],
+	        content: text_type['help'],
+    	});
+    });
+});
