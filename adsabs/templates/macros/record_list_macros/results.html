@@ -49,8 +49,8 @@
 		    	{% else %}
 		    		{% set len_snippets_abs = 0 %}
 		    	{% endif %}
-		    	{% if doc.has_highlights('full') and len_snippets_abs <= 4 %}
-		    		{% for highlight in doc.get_highlights('full') %}
+		    	{% if doc.has_highlights('body') and len_snippets_abs <= 4 %}
+		    		{% for highlight in doc.get_highlights('body') %}
 		    			{% if loop.index0 < 4 - len_snippets_abs %}
 		    				<span class="highlight">&hellip; {{ highlight|safe_html_unescape|safe }} &hellip;</span>
 		    			{% else %}
