@@ -30,9 +30,11 @@ HelpTipManager.help_text['G_INDEX'] = {'title':'g-index', 'help': 'Given a set o
 HelpTipManager.help_text['E_INDEX'] = {'title':'e-index', 'help': 'The e-index is calculated (using a citation-sorted list of publications) as e<sup>2</sup> = &Sigma;<sub>j=1</sub><sup>H</sup>c<sub>j</sub> - H<sup>2</sup> \
 where c<sub>j</sub> is the number of citations received by paper j, and it represents the ignored excess citations. It is not a replacement for H, but to be used in conjection with H. In other words, for a citation-ordered list of publications, the square of e equals the sum of citations up to the publication with rank H.'};
 HelpTipManager.help_text['I10_INDEX'] = {'title':'i10-index', 'help': 'The i10-index is the number of publications with at least 10 citations.'};
+HelpTipManager.help_text['I100_INDEX'] = {'title':'i100-index', 'help': 'The i100-index is the number of publications with at least 100 citations.'};
 HelpTipManager.help_text['TORI_INDEX'] = {'title':'tori-index', 'help': 'The tori-index is calculated using the reference lists of the citing papers, where self-citations are removed. The contribution of each citing paper is then normalized by the number of remaining references in the citing papers and the number of authors in the cited paper.'};
 HelpTipManager.help_text['ROQ_INDEX'] = {'title':'riq-index', 'help': 'The riq-index equals the square root of the tori-index, divided by the time between the first and last publication.'};
 HelpTipManager.help_text['M_INDEX'] = {'title':'m-index', 'help': 'The m-index is the h-index divided by the time (years) between the first and most recent publication.'};
+HelpTipManager.help_text['READ10_INDEX'] = {'title':'Read10-index', 'help': 'Read10 is the current readership rate for all an individual\'s papers published in the most recent ten years, normalized for number of authors.'};
 
 // function that shows an help text for the different options of a search page
 HelpTipManager.show_help = function(item)
