@@ -43,4 +43,5 @@ path.py>=4.3
 mock>=1.0.1
 gspread==0.1.0
 yuicompressor>=2.4.2
+nltk==2.0.4
 -e git+https://github.com/adsabs/adsdata.git#egg=adsdata

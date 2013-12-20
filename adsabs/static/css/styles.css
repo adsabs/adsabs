@@ -492,6 +492,12 @@ div.absview div.row-fluid label {
 
 /* Visualization CSS*/
 
+.vis_center {
+    display: block;
+    margin: 0px auto;
+    }
+
+
 .vis_body {
   font-family: Helvetica, Arial, Sans-serif;
   background-color: #f9f9f9;
@@ -523,11 +529,6 @@ div.absview div.row-fluid label {
   margin-top:20px;
   }
 
-.vis_btn{
-  padding:2px;
-  font-size: 12px;
-  font-weight:200;
- }
 
 .vis_link {
 	stroke: gray;
@@ -561,3 +562,7 @@ textarea#bigquery {
   width:80%;
 }
  
+
+.chart {
+overflow:auto
+}
