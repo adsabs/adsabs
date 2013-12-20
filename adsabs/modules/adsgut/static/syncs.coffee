@@ -63,7 +63,8 @@ send_params = (url, data, cback, eback) ->
 # print r.text
 
 send_bibcodes = (url, items, cback, eback) ->
-    bibcodes = (encodeURIComponent(i.basic.name) for i in items)
+    #bibcodes = (encodeURIComponent(i.basic.name) for i in items)
+    bibcodes = (i.basic.name for i in items)
     data = 
         bibcode : bibcodes
     console.log "SBDATA", data

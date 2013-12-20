@@ -68,8 +68,9 @@ $ ->
     tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
-    bq2url : "http://localhost:15000/search/bigquery/"
+    bq2url : GlobalVariables.ADS_PREFIX+"/search/bigquery/"
     memberable: "{{useras.nick}}"
     loc : document.location
     tqtype : "{{ tqtype }}"

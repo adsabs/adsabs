@@ -116,9 +116,9 @@ class PostableView extends Backbone.View
 
         if @model.get('invite')
             if @libmode=="lib"
-                @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
+                @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
             else
-                 @$el.html(w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=false), [@model.get('description'), w.single_button('Yes')]))
+                 @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('description'), w.single_button('Yes')]))
 
         else
             #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))

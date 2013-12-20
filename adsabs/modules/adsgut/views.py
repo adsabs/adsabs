@@ -830,7 +830,7 @@ def tagsUserOwns(nick):
     tagtype= _dictg('tagtype', query)
     #will not get notes
     stags=g.dbp.getTagsAsOwnerOnly(g.currentuser, useras, tagtype)
-    stagdict={'simpletags':stags}
+    stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
 #these are the simple tags user owns as well as can write to by dint of giving it to a group.
@@ -839,8 +839,10 @@ def tagsUserCanWriteTo(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
+    print "TAGGER", tagtype
     stags=g.dbp.getAllTagsForUser(g.currentuser, useras, tagtype)
-    stagdict={'simpletags':stags}
+    print "STAGS", stags
+    stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
 @adsgut.route('/user/<nick>/tagsasmember')
@@ -849,7 +851,7 @@ def tagsUserAsMember(nick):
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
     stags=g.dbp.getTagsAsMemberOnly(g.currentuser, useras, tagtype)
-    stagdict={'simpletags':stags}
+    stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
 ########################
@@ -1425,7 +1427,7 @@ def perform_solr_bigquery(bibcodes):
     function that performs a POST request and returns a json object
     """
     headers = {'Content-Type': 'big-query/csv'}
-    url='http://localhost:9002/solr/collection1/select'
+    url=config.SOLRQUERY_URL
     qdict = {
         'q':'text:*:*',
         'fq':'{!bitset compression=none}',
@@ -1434,22 +1436,27 @@ def perform_solr_bigquery(bibcodes):
     }
     #Perform the request
     rstr = "bibcode\n"+"\n".join(bibcodes)
-    print "RSTR", rstr, bibcodes
+    print "RSTR", rstr
     r = requests.post(url, params=qdict, data=rstr, headers=headers)
     #Check for problems
+    print '||||||||||||||||||||||||||||||||||||||||||||||||||||'
     try:
         r.raise_for_status()
     except Exception, e:
+        print "1"
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
     
     try:
         d = r.json()
+        print "2"
     except Exception, e:
+        print "3"
         exc_info = sys.exc_info()
         app.logger.error("Author JSON decode error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
         r = None
         d = {}
+    print "D is", d
     return d
 
 @adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
@@ -1469,7 +1476,7 @@ def get_classic_libraries(cookieid, password=None):
 @adsgut.route('/bigquery/bibcodes', methods=['POST'])
 def get_bigquery_solr():
     if request.method=='POST':
-        print request.json
+        #print request.json
         jsonpost=dict(request.json)
         #henceforth this will be names
         bibcodes = _bibcodespostget(jsonpost)

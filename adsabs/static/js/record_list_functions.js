@@ -266,10 +266,12 @@ ResultListManager.export_to_libraries = function()
             //console.log("OUTDATA", outdata)
             $.fancybox.hideLoading();
             $.fancybox({
-                'width'         : '75%',
-                'height'        : '75%',
+                'width'         : '90%',
+                'height'        : '90%',
                 'autoScale'     : false,
+                'autoSize'     : false,
                 'type'          : 'iframe',
+                'closeBtn'      : false,
                 'content'       : outdata
             });
         }

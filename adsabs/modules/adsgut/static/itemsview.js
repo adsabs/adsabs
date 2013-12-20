@@ -114,7 +114,7 @@
     };
 
     ItemView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit;
+      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions;
       console.log("PVIN", this.memberable, this.postings);
       this.hv = void 0;
       this.newtags = [];
@@ -173,6 +173,7 @@
         addWithoutAjax: _.bind(addwoa, this),
         ajax_submit: this.tagajaxsubmit,
         onRemove: _.bind(remIndiv, this),
+        suggestions: this.suggestions,
         templates: {
           pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
           add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">add tag</span>&nbsp;',
@@ -353,7 +354,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions;
       this.newposts = [];
       return this.tagajaxsubmit = false;
     };
@@ -453,7 +454,8 @@
           item: i,
           memberable: this.memberable,
           noteform: this.noteform,
-          tagajaxsubmit: this.tagajaxsubmit
+          tagajaxsubmit: this.tagajaxsubmit,
+          suggestions: this.suggestions
         };
         v = new ItemView(ins);
         $lister.append(v.render().el);
@@ -474,6 +476,7 @@
           addWithoutAjax: _.bind(addwoata, _this),
           ajax_submit: false,
           onRemove: _.bind(remMulti, _this),
+          suggestions: _this.suggestions,
           templates: {
             pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
             add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">add tag</span>&nbsp;',
@@ -694,8 +697,8 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform;
-      return console.log("ITEMS", this.items);
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions;
+      return console.log("ITEMS", this.items, this.suggestions);
     };
 
     ItemsFilterView.prototype.render = function() {
@@ -713,7 +716,8 @@
           item: i,
           memberable: this.memberable,
           noteform: this.noteform,
-          tagajaxsubmit: true
+          tagajaxsubmit: true,
+          suggestions: this.suggestions
         };
         console.log("INS", ins);
         v = new ItemView(ins);

@@ -38,112 +38,118 @@
       }
       return _results;
     });
-    $.get(config.itemsPURL, function(data) {
-      var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
-      theitems = data.items;
-      thecount = data.count;
-      itemlist = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-          i = theitems[_i];
-          _results.push("items=" + (encodeURIComponent(i.basic.fqin)));
-        }
-        return _results;
-      })();
-      biblist = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-          i = theitems[_i];
-          _results.push(encodeURIComponent(i.basic.name));
-        }
-        return _results;
-      })();
-      bibstring = biblist.join("\n");
-      sections.$bigquery.val(bibstring);
-      sections.$bigqueryform.attr("action", config.bq2url);
-      sections.$bigqueryform.attr("hello", "world");
-      itemsq = itemlist.join("&");
-      return $.get("" + config.itPURL + "?" + itemsq, function(data) {
-        var cb, e, eb, ido, k, notes, plinv, postings, stags, v, _ref, _ref1;
-        _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
-        postings = {};
-        _ref1 = data.postings;
-        for (k in _ref1) {
-          if (!__hasProp.call(_ref1, k)) continue;
-          v = _ref1[k];
-          if (v[0] > 0) {
-            postings[k] = (function() {
-              var _i, _len, _ref2, _results;
-              _ref2 = v[1];
+    $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
+      var suggestions;
+      suggestions = data.simpletags;
+      console.log("SUGG", suggestions);
+      return $.get(config.itemsPURL, function(data) {
+        var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
+        theitems = data.items;
+        thecount = data.count;
+        itemlist = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = theitems.length; _i < _len; _i++) {
+            i = theitems[_i];
+            _results.push("items=" + (encodeURIComponent(i.basic.fqin)));
+          }
+          return _results;
+        })();
+        biblist = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = theitems.length; _i < _len; _i++) {
+            i = theitems[_i];
+            _results.push(encodeURIComponent(i.basic.name));
+          }
+          return _results;
+        })();
+        bibstring = biblist.join("\n");
+        sections.$bigquery.val(bibstring);
+        sections.$bigqueryform.attr("action", config.bq2url);
+        sections.$bigqueryform.attr("hello", "world");
+        itemsq = itemlist.join("&");
+        return $.get("" + config.itPURL + "?" + itemsq, function(data) {
+          var cb, e, eb, ido, k, notes, plinv, postings, stags, v, _ref, _ref1;
+          _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
+          postings = {};
+          _ref1 = data.postings;
+          for (k in _ref1) {
+            if (!__hasProp.call(_ref1, k)) continue;
+            v = _ref1[k];
+            if (v[0] > 0) {
+              postings[k] = (function() {
+                var _i, _len, _ref2, _results;
+                _ref2 = v[1];
+                _results = [];
+                for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+                  e = _ref2[_i];
+                  _results.push(e.thething.postfqin);
+                }
+                return _results;
+              })();
+            } else {
+              postings[k] = [];
+            }
+          }
+          ido = {
+            stags: stags,
+            postings: postings,
+            notes: notes,
+            $el: sections.$items,
+            items: theitems,
+            noteform: true,
+            nameable: false,
+            itemtype: 'ads/pub',
+            memberable: config.memberable,
+            suggestions: suggestions
+          };
+          plinv = new itemsdo.ItemsFilterView(ido);
+          plinv.render();
+          eb = function(err) {
+            var d, _i, _len, _results;
+            console.log("ERR", err);
+            _results = [];
+            for (_i = 0, _len = theitems.length; _i < _len; _i++) {
+              d = theitems[_i];
+              _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
+            }
+            return _results;
+          };
+          cb = function(data) {
+            var d, docnames, thedocs, _i, _j, _len, _len1, _ref2, _ref3, _results;
+            console.log("CBDATA", JSON.stringify(data), data.response.docs);
+            thedocs = {};
+            _ref2 = data.response.docs;
+            for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+              d = _ref2[_i];
+              thedocs[d.bibcode] = d;
+            }
+            docnames = (function() {
+              var _j, _len1, _ref3, _results;
+              _ref3 = data.response.docs;
               _results = [];
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                e = _ref2[_i];
-                _results.push(e.thething.postfqin);
+              for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+                d = _ref3[_j];
+                _results.push(d.bibcode);
               }
               return _results;
             })();
-          } else {
-            postings[k] = [];
-          }
-        }
-        ido = {
-          stags: stags,
-          postings: postings,
-          notes: notes,
-          $el: sections.$items,
-          items: theitems,
-          noteform: true,
-          nameable: false,
-          itemtype: 'ads/pub',
-          memberable: config.memberable
-        };
-        plinv = new itemsdo.ItemsFilterView(ido);
-        plinv.render();
-        eb = function(err) {
-          var d, _i, _len, _results;
-          console.log("ERR", err);
-          _results = [];
-          for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-            d = theitems[_i];
-            _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
-          }
-          return _results;
-        };
-        cb = function(data) {
-          var d, docnames, thedocs, _i, _j, _len, _len1, _ref2, _ref3, _results;
-          console.log("CBDATA", JSON.stringify(data), data.response.docs);
-          thedocs = {};
-          _ref2 = data.response.docs;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            d = _ref2[_i];
-            thedocs[d.bibcode] = d;
-          }
-          docnames = (function() {
-            var _j, _len1, _ref3, _results;
-            _ref3 = data.response.docs;
             _results = [];
-            for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-              d = _ref3[_j];
-              _results.push(d.bibcode);
+            for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
+              d = theitems[_j];
+              if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
+                e = thedocs[d.basic.name];
+              } else {
+                e = {};
+              }
+              _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));
             }
             return _results;
-          })();
-          _results = [];
-          for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
-            d = theitems[_j];
-            if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
-              e = thedocs[d.basic.name];
-            } else {
-              e = {};
-            }
-            _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));
-          }
-          return _results;
-        };
-        console.log("ITTYS", theitems);
-        return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
+          };
+          console.log("ITTYS", theitems);
+          return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
+        });
       });
     });
     loc = config.loc;

@@ -69,7 +69,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       _results = [];
       for (_i = 0, _len = items.length; _i < _len; _i++) {
         i = items[_i];
-        _results.push(encodeURIComponent(i.basic.name));
+        _results.push(i.basic.name);
       }
       return _results;
     })();

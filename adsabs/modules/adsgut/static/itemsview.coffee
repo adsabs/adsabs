@@ -60,7 +60,7 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit} = options
+    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions} = options
     console.log "PVIN",  @memberable, @postings
     @hv=undefined
     @newtags = []
@@ -113,6 +113,7 @@ class ItemView extends Backbone.View
         addWithoutAjax: _.bind(addwoa, this)
         ajax_submit: @tagajaxsubmit
         onRemove: _.bind(remIndiv, this)
+        suggestions: @suggestions
         templates:
             pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
             add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">add tag</span>&nbsp;',
@@ -216,7 +217,7 @@ class ItemsView extends Backbone.View
     "click .cancel" : "iCancel"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions} = options
     @newposts=[]
     @tagajaxsubmit = false
 
@@ -269,6 +270,7 @@ class ItemsView extends Backbone.View
             memberable: @memberable
             noteform: @noteform
             tagajaxsubmit: @tagajaxsubmit
+            suggestions: @suggestions
         v=new ItemView(ins)
         $lister.append(v.render().el)
         @itemviews[fqin]=v
@@ -288,6 +290,7 @@ class ItemsView extends Backbone.View
             addWithoutAjax: _.bind(addwoata, this)
             ajax_submit: false
             onRemove: _.bind(remMulti, this)
+            suggestions: @suggestions
             templates:
                 pill: '<span class="badge badge-default tag-badge" style="margin-right:3px;">{0}</span>&nbsp;&nbsp;&nbsp;&nbsp;',
                 add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">add tag</span>&nbsp;',
@@ -424,8 +427,8 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform} = options
-    console.log "ITEMS", @items
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions} = options
+    console.log "ITEMS", @items, @suggestions
 
   render: =>
     console.log "EL", @$el
@@ -441,6 +444,7 @@ class ItemsFilterView extends Backbone.View
             memberable: @memberable
             noteform: @noteform
             tagajaxsubmit: true
+            suggestions: @suggestions
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)

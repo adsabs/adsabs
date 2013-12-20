@@ -283,9 +283,9 @@
       var content, libmode, ownermode;
       if (this.model.get('invite')) {
         if (this.libmode === "lib") {
-          this.$el.html(w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = false), [this.model.get('description'), this.model.get('readwrite'), w.single_button('Yes')]));
+          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('description'), this.model.get('readwrite'), w.single_button('Yes')]));
         } else {
-          this.$el.html(w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = false), [this.model.get('description'), w.single_button('Yes')]));
+          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('description'), w.single_button('Yes')]));
         }
       } else {
         if (this.libmode === "lib") {
