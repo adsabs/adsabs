@@ -105,7 +105,12 @@ ResultListManager.visualize = function(url) {
 		data : $('#search_results_form').serializeArray(),
 		success: function(data) {
 			$.fancybox.hideLoading();
-			$.fancybox(data);
+			$.fancybox({
+				'content': data,
+				'autoSize': false,
+				'width': '100%',
+				'height': '100%'
+			});
 		}
 	});
 };
