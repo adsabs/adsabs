@@ -6,9 +6,10 @@ Created on Sep 19, 2012
 import re
 from flask.ext.wtf import Form #@UnresolvedImport
 from wtforms import (TextField, SelectField, IntegerField, BooleanField, HiddenField, #SubmitField, RadioField, #@UnresolvedImport
-                          validators) #@UnresolvedImport
+                          validators, widgets) #@UnresolvedImport
 from wtforms.validators import (required, optional, length)
 from werkzeug.datastructures import ImmutableMultiDict, MultiDict
+from config import config
 
 
 __all__ = ["QueryForm", "AdvancedQueryForm"]
@@ -60,8 +61,9 @@ class QueryForm(Form):
     """Form for the basic search"""
     q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
 
-    db_f =  MultiFacetSelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('general', 'general'), ('', 'all') ], description=u'Database')
-    
+    # make this hidden since we'll use database selection from the facets
+    db_f =  MultiFacetSelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('', 'all') ], description=u'Database', widget=widgets.HiddenInput(), default=config.SEARCH_DEFAULT_DATABASE)
+
     month_from = IntegerField(u'Month From', [optional(), validators.NumberRange(min=1, max=12, message='Starting month not valid: allowed values from 01 to 12')])
     month_to = IntegerField(u'Month To', [optional(), validators.NumberRange(min=1, max=12, message='Ending month not valid: allowed values from 01 to 12')])
     year_from = IntegerField(u'Year From', [optional(), validators.NumberRange(min=1, max=2500, message='Starting year not valid')])
