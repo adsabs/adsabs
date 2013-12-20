@@ -77,12 +77,19 @@ class AppConfig(object):
 
     SOLR_DOCUMENT_ID_FIELD = 'bibcode'
     SOLR_FILTER_QUERY_PARSER = 'aqp'
+    SOLR_HIGHLIGHTER_QUERY_PARSER = 'aqp'
     SOLR_HAPROXY_SESSION_COOKIE_NAME = 'JSESSIONID'
+
+    # this operator wraps the user query if sort by relevance is selected
+    # and no additional operators are used
+    SOLR_RELEVANCE_FUNCTION = 'classic_relevance(%s,0.4)'
     
     SEARCH_DEFAULT_ROWS = 20
-    SEARCH_DEFAULT_SORT = 'RELEVANCE'
+#    SEARCH_DEFAULT_SORT = 'RELEVANCE'
+    SEARCH_DEFAULT_SORT = 'DATE'
 #    SEARCH_DEFAULT_SORT_DIRECTION = 'desc'
-    SEARCH_DEFAULT_DATABASE = 'astronomy'
+    SEARCH_DEFAULT_DATABASE = '(astronomy OR physics)'
+#    SEARCH_DEFAULT_DATABASE = 'astronomy'
     
     SEARCH_SORT_OPTIONS_MAP = {
         'DATE': ('pubdate_sort', 'desc'),

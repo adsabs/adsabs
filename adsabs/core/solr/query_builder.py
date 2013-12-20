@@ -11,6 +11,7 @@ from adsabs.core.exceptions import ConfigurationError
 from flask import current_app as app
 
 import sys
+import re
 THIS_MODULE = sys.modules[__name__]
 
 def _append_to_list(list_, item):
@@ -59,7 +60,6 @@ def create_sort_param(sort_type=None, sort_dir=None, list_type=None):
                 secondary = (secondary[0], sort_dir)
         return [primary, secondary]
 
-    
     
 class QueryBuilderSearch(object):
 
@@ -111,10 +111,52 @@ class QueryBuilderSearch(object):
             #this function doesn't return anything: if modifies the search_components variable
             return None
         
-        #one box query
-        search_components['q'] = u'(%s)' % form.q.data
+        def generate_highlight_query(q):
+            """
+            Removes operators from original query so that the highlighter does not get all confused
+            and does its job.  Currently all we do is transform the query so that this input:
+                operator(arguments...)
+            is transformed into this string:
+                (arguments...)
+            And we properly deal with additional nested operators
+            Note: since we are not doing proper parsing of the input the way SOLR aqp does, we may
+            get this wrong in some cases, but this is just a quick and dirty fix to get highlighting.
+            We also don't need to worry about syntax errors since those would be caught by the aqp
+            parser on the main query and a failure to properly interpret this query will simply cause
+            the highlighting not to show up in the results.
+            """
+            stripped = re.sub(r'\b\w+\(', '(', q)
+            if config.SOLR_HIGHLIGHTER_QUERY_PARSER:
+                stripped = '{!%s}%s' % (config.SOLR_HIGHLIGHTER_QUERY_PARSER, stripped)
+            return stripped
+
+
+        # grab sort parameters here since we use them throughout
+        sort_type = request_values.get('re_sort_type')
+        sort_dir = request_values.get('re_sort_dir')
+
+        # one box query
         search_components['ui_q'] = form.q.data
-          
+        search_components['hl.q'] = generate_highlight_query(form.q.data)
+        search_components['q'] = u'(%s)' % form.q.data
+
+        # if no resorting has been specified, then we default to RELEVANCE for
+        # 2nd order queries, or the system-wide defaults otherwise
+        if sort_type is None:
+            if re.match(r'^\w+\(', form.q.data):
+                sort_type = 'RELEVANCE'
+                sort_dir = 'desc'
+            else:
+                sort_type = config.SEARCH_DEFAULT_SORT
+
+        # see if we need to wrap the input query with an operator
+        # we do this only if the search is by relevance, no other 
+        # operator has been selected by the user, and a default relevance
+        # wrapper has been configured
+        if sort_type == 'RELEVANCE' and re.match(r'^\w+\(', form.q.data) is None and config.SOLR_RELEVANCE_FUNCTION:
+            # escape commas since the wrapper is a multi-argument function
+            search_components['q'] = config.SOLR_RELEVANCE_FUNCTION % re.sub(r',', r'\,', form.q.data)
+
         #date range
         if form.year_from.data or form.year_to.data:
             mindate = '0001-00-00' #'*' the * has a bug
@@ -204,8 +246,6 @@ class QueryBuilderSearch(object):
                             pass
     
         # update any sort options
-        sort_type = request_values.get('re_sort_type')
-        sort_dir = request_values.get('re_sort_dir')
         sort_options = create_sort_param(sort_type, sort_dir)
         if sort_options is not None:
             search_components['sort'] = sort_options
@@ -213,10 +253,7 @@ class QueryBuilderSearch(object):
         #wrapping the query with topn function if there is a valid number (the validation must be done in the form) 
         if form.topn.data and form.topn.data != 'None':
 
-            if sort_type is None:
-                sort_type = config.SEARCH_DEFAULT_SORT
-
-            if sort_type is 'RELEVANCE':
+            if sort_type == 'RELEVANCE':
                 # sorting by solr score doesn't allow a direction
                 # so just take the field here
                 topn_sort = config.SEARCH_SORT_OPTIONS_MAP[sort_type][0]
