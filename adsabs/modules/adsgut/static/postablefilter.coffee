@@ -2,6 +2,17 @@ root = exports ? this
 $=jQuery
 console.log "In Funcs"
 h = teacup
+#redo this to use url parsing library, handle other types of queries besides tags
+parse_querystring= (qstr) ->
+    console.log "QQQ", qstr
+    qlist=qstr.split('&')
+    qlist = _.difference(qlist,['query=tagtype:ads/tagtype:tag'])
+    qlist = (q.replace('query=tagname:','') for q in qlist)
+    if qlist.length==1 and qlist[0]==""
+        qlist=[]
+    console.log "QLIST", qlist
+    return qlist
+
 
 do_postable_info = (sections, config, ptype) ->
     $.get config.infoURL, (data) ->
@@ -14,17 +25,24 @@ do_postable_info = (sections, config, ptype) ->
         sections.$info.show()
 
 do_postable_filter = (sections, config) ->
+    console.log "CONFIG", config
     $.get config.tagsPURL, (data) ->
         for own k,v of data.tags
             format_tags(k, sections.$tagssec, get_tags(v, config.tqtype), config.tqtype)
     $.get "#{config.tagsucwtURL}?tagtype=ads/tagtype:tag", (data) ->
         suggestions=data.simpletags
         console.log "SUGG", suggestions
+        qtxtlist = parse_querystring(config.querystring)
+        if qtxtlist.length > 0
+            sections.$breadcrumb.text('Tags: ')
+            for e in qtxtlist
+                sections.$breadcrumb.append("<span class='badge'>#{e}</span>&nbsp;")
+            sections.$breadcrumb.show()
         $.get config.itemsPURL, (data) ->
             theitems=data.items
             thecount=data.count
             itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
-            biblist=(encodeURIComponent(i.basic.name) for i in theitems)
+            biblist=(i.basic.name for i in theitems)
             bibstring = biblist.join("\n")
             sections.$bigquery.val(bibstring)
             sections.$bigqueryform.attr("action", config.bq2url)
@@ -49,6 +67,7 @@ do_postable_filter = (sections, config) ->
                     itemtype:'ads/pub'
                     memberable:config.memberable
                     suggestions : suggestions
+                    pview: config.pview
                 plinv=new itemsdo.ItemsFilterView(ido)
                 plinv.render()
                 #possible A&A issue
@@ -68,7 +87,7 @@ do_postable_filter = (sections, config) ->
                         else
                             e={}
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
-                console.log "ITTYS", theitems
+                console.log "ITTYS", theitems, (e.basic.fqin for e in theitems)
                 syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
     loc = config.loc
     nonqloc=loc.href.split('?')[0]

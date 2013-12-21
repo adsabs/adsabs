@@ -69,7 +69,8 @@
             itemtype: itemtype,
             memberable: memberable,
             loc: loc,
-            suggestions: suggestions
+            suggestions: suggestions,
+            pview: 'none'
           };
           if (thecount === 1) {
             ido.noteform = true;

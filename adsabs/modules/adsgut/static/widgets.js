@@ -502,9 +502,15 @@
     return new HoverHelpDecoratorView(opt).render();
   };
 
-  postalnote_form = h.renderable(function(btext, nrows) {
+  postalnote_form = h.renderable(function(btext, nrows, pview) {
+    var notetext;
     if (nrows == null) {
       nrows = 2;
+    }
+    if (pview === 'udg' || pview === 'none') {
+      notetext = 'Post note to all libraries this item is in (notes are private by default)';
+    } else {
+      notetext = 'Post note to this library only (notes are private by default)';
     }
     return h.div(".postalnote", function() {
       h.textarea(".controls.input-xlarge.txt", {
@@ -516,7 +522,7 @@
         h.input(".control.cb", {
           type: 'checkbox'
         });
-        h.text("note private?");
+        h.text(notetext);
         return h.raw("&nbsp;&nbsp;");
       });
       return h.button('.btn.btn-primary.btn-mini.notebtn', {

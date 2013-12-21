@@ -36,6 +36,7 @@ do_postform = (sections, config) ->
                     memberable:memberable
                     loc: loc
                     suggestions: suggestions
+                    pview: 'none'
                 if thecount == 1
                     ido.noteform=true
                 plinv=new itemsdo.ItemsView(ido)

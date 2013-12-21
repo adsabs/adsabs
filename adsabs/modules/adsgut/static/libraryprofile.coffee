@@ -7,9 +7,9 @@ w = widgets
 
 rwmap = (boolrw) ->
     if boolrw==true
-        return "read-write"
+        return "read and post"
     else
-        return "read-only"
+        return "read only"
 
 class PostableView extends Backbone.View
 
@@ -111,7 +111,7 @@ get_info = (sections, config) ->
                     sections.$invitedform.show()
                     $.get config.invitedsURL, (data) ->
                         content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
-                        sections.$invitedsdiv.append(viewu.render().el)
+                        sections.$invitedsdiv.prepend(viewu.render().el)
                         sections.$invitedsdiv.append(content)
                         sections.$invitedsdiv.show()
 

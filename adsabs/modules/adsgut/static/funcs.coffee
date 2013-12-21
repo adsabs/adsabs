@@ -4,17 +4,48 @@ console.log "In Funcs"
 {renderable, ul, li, dl, dt, dd, raw, br, strong} = teacup
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
+
+monthNamesShort = 
+  '01':  "Jan"
+  '02':  "Feb"
+  '03':  "Mar"
+  '04':  "Apr"
+  '05':  "May"
+  '06':  "Jun"
+  '07':  "Jul"
+  '08':  "Aug"
+  '09':  "Sep"
+  '10':  "Oct"
+  '11':  "Nov"
+  '12':  "Dec"
+  
+# {% for auth in doc.author %}
+#   {% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
+# {% endfor %}
+# {% if loop.length > 4 %}
+#   <em>and {{ loop.length - 4 }} coauthors</em>
+# {% endif %}
+
+short_authors = (authors) ->
+  if authors.length <= 4
+    return authors[0..3].join('; ')
+  else
+    n=authors.length - 4
+    return authors[0..3].join('; ')+" <em>and #{n} coauthors</em>"
+
+
 parse_fqin = (fqin) -> 
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
 format_item = ($sel, iteminfo) ->
-  year = iteminfo.year ? "unknown"
-  $sel.append("<span class='pubdate pull-right'><em>published in #{year}</em></span><br/>")
+  [year, month, leave] = iteminfo.pubdate?.split('-')
+  pubdate = monthNamesShort[month]+" "+year ? "unknown"
+  $sel.append("<span class='pubdate pull-right'><em>published in #{pubdate}</em></span><br/>")
   title = iteminfo.title ? "No title found"
   $sel.append("<span class='title'><strong>#{title}</strong></span><br/>")
   author = iteminfo.author ? ['No authors found']
-  $sel.append("<span class='author'>#{author.join(', ')}</span>")
+  $sel.append("<span class='author'>#{short_authors(author)}</span>")
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
   typestring = tagtype.split(':')[1]
@@ -170,9 +201,9 @@ get_groups = (nick, cback) ->
 #     w.inline_list userlist
 rwmap = (boolrw) ->
     if boolrw==true
-        return "read-write"
+        return "read and post"
     else
-        return "read-only"
+        return "read only"
 
 postable_inviteds_template = renderable (fqpn, users, scmode=false) ->
   console.log "USERS", users
@@ -234,7 +265,7 @@ postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="pr
   if mode is "filter"
     modetext = "Items"
   else if mode is "profile"
-    modetext = "Info"
+    modetext = "Info/Admin"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.name}</a>"
   dl '.dl-horizontal', ->

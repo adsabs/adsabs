@@ -114,7 +114,7 @@
     };
 
     ItemView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions;
+      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
       console.log("PVIN", this.memberable, this.postings);
       this.hv = void 0;
       this.newtags = [];
@@ -187,7 +187,7 @@
       if (this.noteform) {
         this.hv = new w.HideableView({
           state: 0,
-          widget: w.postalnote_form("make note", 2, 0),
+          widget: w.postalnote_form("make note", 2, this.pview),
           theclass: ".postalnote"
         });
         this.$el.append(this.hv.render("<strong>Notes</strong>: ").$el);
@@ -354,7 +354,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview;
       this.newposts = [];
       return this.tagajaxsubmit = false;
     };
@@ -455,7 +455,8 @@
           memberable: this.memberable,
           noteform: this.noteform,
           tagajaxsubmit: this.tagajaxsubmit,
-          suggestions: this.suggestions
+          suggestions: this.suggestions,
+          pview: this.pview
         };
         v = new ItemView(ins);
         $lister.append(v.render().el);
@@ -697,7 +698,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview;
       return console.log("ITEMS", this.items, this.suggestions);
     };
 
@@ -717,7 +718,8 @@
           memberable: this.memberable,
           noteform: this.noteform,
           tagajaxsubmit: true,
-          suggestions: this.suggestions
+          suggestions: this.suggestions,
+          pview: this.pview
         };
         console.log("INS", ins);
         v = new ItemView(ins);

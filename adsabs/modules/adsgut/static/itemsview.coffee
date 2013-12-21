@@ -60,7 +60,7 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions} = options
+    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
     console.log "PVIN",  @memberable, @postings
     @hv=undefined
     @newtags = []
@@ -69,6 +69,7 @@ class ItemView extends Backbone.View
     @therebenotes=false
     if @notes.length > 0
         @therebenotes=true
+    #console.log "PVIEW IS", @pview
 
   update: (postings, notes, tags) =>
     @stags=tags
@@ -122,12 +123,12 @@ class ItemView extends Backbone.View
     @.$('.tagls').tags(jslist,tagdict)
     @tagsobject = jslist[0]
     console.log("TAGSOBJECT", @tagsobject)
+    #console.log "PVIEW2 IS", @pview
     if @noteform
-        @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, 0), theclass: ".postalnote"})
+        @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, @pview), theclass: ".postalnote"})
         @$el.append(@hv.render("<strong>Notes</strong>: ").$el)
         if @hv.state is 0
             @hv.hide()
-    #w.postalnote_form("make note")
         if @therebenotes
             @$el.append("<p class='notes'></p>")
             @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable))
@@ -217,7 +218,7 @@ class ItemsView extends Backbone.View
     "click .cancel" : "iCancel"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview} = options
     @newposts=[]
     @tagajaxsubmit = false
 
@@ -271,6 +272,7 @@ class ItemsView extends Backbone.View
             noteform: @noteform
             tagajaxsubmit: @tagajaxsubmit
             suggestions: @suggestions
+            pview: @pview
         v=new ItemView(ins)
         $lister.append(v.render().el)
         @itemviews[fqin]=v
@@ -427,7 +429,7 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview} = options
     console.log "ITEMS", @items, @suggestions
 
   render: =>
@@ -445,6 +447,7 @@ class ItemsFilterView extends Backbone.View
             noteform: @noteform
             tagajaxsubmit: true
             suggestions: @suggestions
+            pview: @pview
         console.log "INS", ins
         v=new ItemView(ins)
         @$el.append(v.render().el)

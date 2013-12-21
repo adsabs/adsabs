@@ -116,16 +116,16 @@ class PostableView extends Backbone.View
 
         if @model.get('invite')
             if @libmode=="lib"
-                @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
+                @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('owner'), @model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
             else
-                 @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('description'), w.single_button('Yes')]))
+                 @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('owner'), @model.get('description'), w.single_button('Yes')]))
 
         else
             #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
             if @libmode=="lib"
-                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('description'), @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
             else
-                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('owner'), @model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
 
             @$el.html(content)
         return this
@@ -175,36 +175,36 @@ class PostableListView extends Backbone.View
         console.log "RENDER2"
         if @collection.invite
             if views.length == 0
-                rendered = ["<td colspan=4>No Invitations</td>"]
+                rendered = ["<td colspan=5>No Invitations</td>"]
             if @libmode=='group'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description","Accept?"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Accept?"], rendered)
             else if @libmode=='lib'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description","Access","Accept?"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Access","Accept?"], rendered)
 
         else
             #$widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
             if views.length == 0
-                rendered = ["<td colspan=4>None</td>"]
+                rendered = ["<td colspan=5>None</td>"]
             if @libmode=='group'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description", "Manage"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Manage"], rendered)
             else if @libmode=='lib'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Description", "Access", "Manage"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Access", "Manage"], rendered)
         @$el.append($widget)
         #widgets.decohelp('#useradder', 'help me', 'popover', 'left')
         return this
 
 rwmap = (boolrw) ->
     if boolrw==true
-        return "read-write"
+        return "read and post"
     else
-        return "read-only"
+        return "read only"
 
 render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
   plin=new PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
   if libmode=="lib"
-    plin.add((new Postable(fqpn:p.fqpn, description: p.description, reason: p.reason, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, reason: p.reason, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
   else
-    plin.add((new Postable(fqpn:p.fqpn, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
   plinv=new PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
   plinv.render()
 
@@ -236,6 +236,7 @@ layout_userprofile = (sections, config, ptype) ->
     # #    content=content+"<a href=\"#{udgHtmlURL}\">My Saved Items</a>"
     # $info.append(content)
     # $info.show()
+    console.log "USERDICTA==============", userdict
 
 
     render_postable(userdict.userinfo, userdict["#{wordmap[ptype]}owned"], $owned, 'ow', false, ptype, true)
@@ -250,7 +251,7 @@ layout_userprofile = (sections, config, ptype) ->
         w.decohelp('.LibrariesIamin', "Others' libraries I have access to due to being in them or due to being in groups that are in them", 'popover', 'left')
         w.decohelp('.LibrariesIown', 'Libraries I have created', 'popover', 'left')
         w.decohelp('.LibrariesIaminvitedto', "Outstanding invitations to join other ADS users' libraries", 'popover', 'left')
-        w.decohelp('.Access', 'true if i can write to the library, false if I can only see it', 'popover', 'top')
+        w.decohelp('.Access', '"read and post" if i can post items to the library, "read only" if I can only view items in the library', 'popover', 'top')
     else if ptype=='group'
         w.decohelp('.GroupsIamin', 'Groups owned by others that I am a member of', 'popover', 'left')
         w.decohelp('.GroupsIown', 'Groups I have created', 'popover', 'left')

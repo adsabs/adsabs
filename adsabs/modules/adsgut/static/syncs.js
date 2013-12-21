@@ -49,12 +49,13 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
   prefix = GlobalVariables.ADS_PREFIX + "/adsgut";
 
   send_params = function(url, data, cback, eback) {
-    var params, xhr;
+    var params, stringydata, xhr;
+    stringydata = JSON.stringify(data);
     params = {
       type: 'POST',
       dataType: 'json',
       url: url,
-      data: JSON.stringify(data),
+      data: stringydata,
       contentType: "application/json",
       success: cback,
       error: eback

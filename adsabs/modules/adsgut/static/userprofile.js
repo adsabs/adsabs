@@ -283,15 +283,15 @@
       var content, libmode, ownermode;
       if (this.model.get('invite')) {
         if (this.libmode === "lib") {
-          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('description'), this.model.get('readwrite'), w.single_button('Yes')]));
+          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('owner'), this.model.get('description'), this.model.get('readwrite'), w.single_button('Yes')]));
         } else {
-          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('description'), w.single_button('Yes')]));
+          this.$el.html(w.table_from_dict_partial_many(parse_fqin(this.model.get('fqpn')), [this.model.get('owner'), this.model.get('description'), w.single_button('Yes')]));
         }
       } else {
         if (this.libmode === "lib") {
-          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode) + this.model.get('reason'), [this.model.get('description'), this.model.get('readwrite'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode) + this.model.get('reason'), [this.model.get('owner'), this.model.get('description'), this.model.get('readwrite'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
         } else {
-          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('description'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('owner'), this.model.get('description'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
         }
         this.$el.html(content);
       }
@@ -392,21 +392,21 @@
       console.log("RENDER2");
       if (this.collection.invite) {
         if (views.length === 0) {
-          rendered = ["<td colspan=4>No Invitations</td>"];
+          rendered = ["<td colspan=5>No Invitations</td>"];
         }
         if (this.libmode === 'group') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Description", "Accept?"], rendered);
+          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Accept?"], rendered);
         } else if (this.libmode === 'lib') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Description", "Access", "Accept?"], rendered);
+          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Access", "Accept?"], rendered);
         }
       } else {
         if (views.length === 0) {
-          rendered = ["<td colspan=4>None</td>"];
+          rendered = ["<td colspan=5>None</td>"];
         }
         if (this.libmode === 'group') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Description", "Manage"], rendered);
+          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Manage"], rendered);
         } else if (this.libmode === 'lib') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Description", "Access", "Manage"], rendered);
+          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Access", "Manage"], rendered);
         }
       }
       this.$el.append($widget);
@@ -419,9 +419,9 @@
 
   rwmap = function(boolrw) {
     if (boolrw === true) {
-      return "read-write";
+      return "read and post";
     } else {
-      return "read-only";
+      return "read only";
     }
   };
 
@@ -441,6 +441,7 @@
           p = plist[_i];
           _results.push(new Postable({
             fqpn: p.fqpn,
+            owner: p.owner,
             description: p.description,
             reason: p.reason,
             readwrite: rwmap(p.readwrite),
@@ -459,6 +460,7 @@
           p = plist[_i];
           _results.push(new Postable({
             fqpn: p.fqpn,
+            owner: p.owner,
             description: p.description,
             readwrite: rwmap(p.readwrite),
             invite: plin.invite,
@@ -497,6 +499,7 @@
     return $.get(userInfoURL, function(data) {
       var inlist, userdict;
       userdict = parse_userinfo(data);
+      console.log("USERDICTA==============", userdict);
       render_postable(userdict.userinfo, userdict["" + wordmap[ptype] + "owned"], $owned, 'ow', false, ptype, true);
       if (ptype === 'lib') {
         inlist = userdict.librariesin;
@@ -509,7 +512,7 @@
         w.decohelp('.LibrariesIamin', "Others' libraries I have access to due to being in them or due to being in groups that are in them", 'popover', 'left');
         w.decohelp('.LibrariesIown', 'Libraries I have created', 'popover', 'left');
         w.decohelp('.LibrariesIaminvitedto', "Outstanding invitations to join other ADS users' libraries", 'popover', 'left');
-        return w.decohelp('.Access', 'true if i can write to the library, false if I can only see it', 'popover', 'top');
+        return w.decohelp('.Access', '"read and post" if i can post items to the library, "read only" if I can only view items in the library', 'popover', 'top');
       } else if (ptype === 'group') {
         w.decohelp('.GroupsIamin', 'Groups owned by others that I am a member of', 'popover', 'left');
         w.decohelp('.GroupsIown', 'Groups I have created', 'popover', 'left');

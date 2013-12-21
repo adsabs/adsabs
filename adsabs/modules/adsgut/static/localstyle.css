@@ -76,3 +76,7 @@ tagls .tag-input {
     color: #ffffff;
     outline: none;
 }
+
+#importbutton:hover {
+background-position: 0px;
+}

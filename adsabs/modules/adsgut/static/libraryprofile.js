@@ -17,9 +17,9 @@
 
   rwmap = function(boolrw) {
     if (boolrw === true) {
-      return "read-write";
+      return "read and post";
     } else {
-      return "read-only";
+      return "read only";
     }
   };
 
@@ -200,7 +200,7 @@
             sections.$invitedform.show();
             return $.get(config.invitedsURL, function(data) {
               content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, false);
-              sections.$invitedsdiv.append(viewu.render().el);
+              sections.$invitedsdiv.prepend(viewu.render().el);
               sections.$invitedsdiv.append(content);
               return sections.$invitedsdiv.show();
             });

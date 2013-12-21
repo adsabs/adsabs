@@ -279,17 +279,22 @@ decohelp  = (el, helptext, htype, position, trigtype="hover") ->
         trigtype : trigtype
     return new HoverHelpDecoratorView(opt).render()
 
-postalnote_form = h.renderable (btext, nrows=2) ->
+postalnote_form = h.renderable (btext, nrows=2, pview) ->
     #h.div ".control-group.postalnote", ->
     #h.raw htmlstring
     #h.br()
     #h.raw additional
     #<a class="btn" href="#"><i class="icon-align-justify"></i></a>
+    #console.log "PVIEW3 IS", pview
+    if pview is 'udg' or pview is 'none'
+        notetext = 'Post note to all libraries this item is in (notes are private by default)'
+    else
+        notetext = 'Post note to this library only (notes are private by default)'
     h.div ".postalnote", ->    
         h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
         h.label ".control-label", ->
             h.input ".control.cb", type:'checkbox'
-            h.text "note private?"
+            h.text notetext
             h.raw "&nbsp;&nbsp;"
         h.button '.btn.btn-primary.btn-mini.notebtn', type:'button', btext
 

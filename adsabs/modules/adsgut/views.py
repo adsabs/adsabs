@@ -792,6 +792,7 @@ def postableFilterHtml(po, pt, pn):
         tqtype='stags'
         pflavor='udg'
     else:
+        pflavor='postable'
         tqtype='tagname'
     tqtype='tagname'
     #BUG using currentuser right now. need to support a notion of useras
@@ -1432,9 +1433,10 @@ def perform_solr_bigquery(bibcodes):
         'q':'text:*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
-        'fl':'bibcode,title,year,author'
+        'fl':'bibcode,title,pubdate,author'
     }
     #Perform the request
+    qdict['rows']=len(bibcodes)
     rstr = "bibcode\n"+"\n".join(bibcodes)
     print "RSTR", rstr
     r = requests.post(url, params=qdict, data=rstr, headers=headers)
@@ -1467,6 +1469,8 @@ def get_classic_libraries(cookieid, password=None):
     parameters = {'cookie':cookieid}
     libjson=perform_classic_library_query(parameters, headers, ADS_CLASSIC_LIBRARIES_URL)
     useras=g.db.getUserForCookieid(g.currentuser, cookieid)
+    useras.classicimported=True
+    useras.save()
     ret=g.dbp.populateLibraries(g.currentuser, useras, libjson)
     if ret:
         return redirect(url_for('adsgut.userProfileHtml', nick=useras.nick))

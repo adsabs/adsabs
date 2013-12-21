@@ -36,11 +36,12 @@ h = teacup
 doajax=$.ajax
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 send_params = (url, data, cback, eback) ->
+    stringydata = JSON.stringify(data)
     params=
         type:'POST'
         dataType:'json'
         url:url
-        data:JSON.stringify(data)
+        data: stringydata
         contentType: "application/json"
         success:cback
         error:eback

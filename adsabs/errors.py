@@ -7,6 +7,7 @@ import logging
 from flask import render_template, request
 from adsabs.core.logevent import LogEvent
 from mongogut.errors import MongoGutError
+from flask import jsonify
 
 def create_error_handler(app, status_code, template):
     @app.errorhandler(status_code)
