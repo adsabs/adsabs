@@ -36,29 +36,15 @@ HelpTipManager.help_text['ROQ_INDEX'] = {'title':'riq-index', 'help': 'The riq-i
 HelpTipManager.help_text['M_INDEX'] = {'title':'m-index', 'help': 'The m-index is the h-index divided by the time (years) between the first and most recent publication.'};
 HelpTipManager.help_text['READ10_INDEX'] = {'title':'Read10-index', 'help': 'Read10 is the current readership rate for all an individual\'s papers published in the most recent ten years, normalized for number of authors.'};
 
-// function that shows an help text for the different options of a search page
-HelpTipManager.show_help = function(item)
-{
-    // Get the help text
-	var text_type = this.help_text[item.id];
-	// Create the Help tip using popover from bootstrap
-	$(item).popover({
-	    html: true,
-	    trigger: "hover focus",
-	    title: text_type['title'],
-	    content: text_type['help'],
-	});
-};
+HelpTipManager.get_content = function(id) {
+	return this.help_text[id];
+}
 
 $(document).ready(function(){
-    $('a.helptip_mark').mouseover(function (){
-        var id = $(this).attr('id');
-        var text_type = HelpTipManager.help_text[id];
-    	$(this).popover({
-	        html: true,
-	        trigger: "hover focus",
-	        title: text_type['title'],
-	        content: text_type['help'],
-    	});
-    });
+	$('.helptip_mark').popover({
+		html: true,
+		trigger: "hover focus",
+		title: function() { return HelpTipManager.get_content($(this).attr('id'))['title']; },
+		content: function() { return HelpTipManager.get_content($(this).attr('id'))['help']; }
+	});
 });
