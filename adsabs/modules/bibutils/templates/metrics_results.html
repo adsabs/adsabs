@@ -18,6 +18,7 @@
 </script>
 <link rel="stylesheet" href="{{ url_for('bibutils.static', filename='css/metrics.css') }}">
 <script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/metrics.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('bibutils.static', filename='js/helptips.js') }}"></script>
 <div id="content">
 	<div id="metrics_tables" class="wrapper group_wrapper">
 		<table class="metricsval">
@@ -46,7 +47,7 @@
 					<tr>
 						<td>Number of papers</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_NUMBER_OF_PAPERS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                            <i class="icon-question-sign helptip_mark" id="NUMBER_OF_PAPERS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Number of papers']}}
@@ -60,7 +61,7 @@
 					<tr>
 						<td>Normalized paper count</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_NORMALIZED_PAPER_COUNT" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                            <i class="icon-question-sign helptip_mark" id="NORMALIZED_PAPER_COUNT"></i>
 						</td>
 						<td>
 							{{results['all stats']['Normalized paper count']}}
@@ -73,7 +74,7 @@
 				<tr>
 					<td>Total reads</td>
 					<td class="helptip">
-						[<a class="helptip_mark" id="option_TOTAL_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="TOTAL_NUMBER_OF_READS"></i>
 					</td>
 					<td>
 						{{results['all reads']['Total number of reads']}}
@@ -89,7 +90,7 @@
 					<tr>
 						<td>Average reads</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_AVERAGE_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="AVERAGE_NUMBER_OF_READS"></i>
 						</td>
 						<td>
 							{{results['all reads']['Average number of reads']}}
@@ -101,7 +102,7 @@
 					<tr>
 						<td>Median reads</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_MEDIAN_NUMBER_OF_READS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="MEDIAN_NUMBER_OF_READS"></i>
 						</td>
 						<td>
 							{{results['all reads']['Median number of reads']}}
@@ -114,7 +115,7 @@
 				<tr>
 					<td>Total downloads</td>
 					<td class="helptip">
-						[<a class="helptip_mark" id="option_TOTAL_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="TOTAL_NUMBER_OF_DOWNLOADS"></i>
 					</td>
 					<td>
 						{{results['all reads']['Total number of downloads']}}
@@ -129,7 +130,7 @@
 					<tr>
 						<td>Average downloads</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_AVERAGE_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="AVERAGE_NUMBER_OF_DOWNLOADS"></i>
 						</td>
 						<td>
 							{{results['all reads']['Average number of downloads']}}
@@ -141,7 +142,7 @@
 					<tr>
 						<td>Median downloads</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_MEDIAN_NUMBER_OF_DOWNLOADS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="MEDIAN_NUMBER_OF_DOWNLOADS"></i>
 						</td>
 						<td>
 							{{results['all reads']['Median number of downloads']}}
@@ -179,7 +180,7 @@
 					<tr>
 						<td>Number of citing papers</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_NUMBER_OF_CITING_PAPERS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="NUMBER_OF_CITING_PAPERS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Number of citing papers']}}
@@ -192,7 +193,7 @@
 				<tr>
 					<td>Total citations</td>
 					<td class="helptip">
-						[<a class="helptip_mark" id="option_TOTAL_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="TOTAL_CITATIONS"></i>
 					</td>
 					<td>
 						{{results['all stats']['Total citations']}}
@@ -207,7 +208,7 @@
 					<tr>
 						<td>Average citations</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_AVERAGE_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="AVERAGE_CITATIONS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Average citations']}}
@@ -219,7 +220,7 @@
 					<tr>
 						<td>Median citations</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_MEDIAN_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="MEDIAN_CITATIONS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Median citations']}}
@@ -232,7 +233,7 @@
 				<tr>
 					<td>Normalized citations</td>
 					<td class="helptip">
-						[<a class="helptip_mark" id="option_NORMALIZED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="NORMALIZED_CITATIONS"></i>
 					</td>
 					<td>
 						{{results['all stats']['Normalized citations']}}
@@ -246,7 +247,7 @@
 				<tr>
 					<td>Refereed citations</td>
 					<td class="helptip">
-						[<a class="helptip_mark" id="option_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="REFEREED_CITATIONS"></i>
 					</td>
 					<td>
 						{{results['all stats']['Refereed citations']}}
@@ -261,7 +262,7 @@
 					<tr>
 						<td>Average refereed citations</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_AVERAGE_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="AVERAGE_REFEREED_CITATIONS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Average refereed citations']}}
@@ -273,7 +274,7 @@
 					<tr>
 						<td>Median refereed citations</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_MEDIAN_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="MEDIAN_REFEREED_CITATIONS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Median refereed citations']}}
@@ -285,7 +286,7 @@
 					<tr>
 						<td>Normalized refereed citations</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_NORMALIZED_REFEREED_CITATIONS" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="NORMALIZED_REFEREED_CITATIONS"></i>
 						</td>
 						<td>
 							{{results['all stats']['Normalized refereed citations']}}
@@ -306,7 +307,7 @@
 					<tr>
 						<td>h-index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_H_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="H_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['H-index']}}
@@ -318,7 +319,7 @@
 					<tr>
 						<td>g-index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_G_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="G_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['g-index']}}
@@ -330,7 +331,7 @@
 					<tr>
 						<td>i10-index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_I10_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="I10_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['i10-index']}}
@@ -342,7 +343,7 @@
 					<tr>
 						<td>i100-index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_I100_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="I100_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['i100-index']}}
@@ -354,7 +355,7 @@
 					<tr>
 						<td>tori index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_TORI_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="TORI_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['tori index']}}
@@ -366,7 +367,7 @@
 					<tr>
 						<td>riq index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_ROQ_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="ROQ_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['roq index']}}
@@ -378,7 +379,7 @@
 					<tr>
 						<td>read10-index</td>
 						<td class="helptip">
-							[<a class="helptip_mark" id="option_M_INDEX" onmouseover="QtipManager.show_help(this);" onmouseout="QtipManager.hide_help();">?</a>]
+                        <i class="icon-question-sign helptip_mark" id="READ10_INDEX"></i>
 						</td>
 						<td>
 							{{results['all stats']['read10 index']}}
