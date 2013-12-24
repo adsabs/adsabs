@@ -25,12 +25,10 @@
 		    {% endif %}
 		    {% if doc.author %}
 		        <div class="span12 author">
-		        {# { '; '.join(doc.author) } #}
-		        {% for auth in doc.author %}
-		        	{% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
-		        {% endfor %}
-		        {% if loop.length > 4 %}
-		        	<em>and {{ loop.length - 4 }} coauthors</em>
+			{{ '; '.join(doc.author[:4]) }}
+			{% set autlen = doc.author|length %}
+		        {% if autlen > 4 %}
+		        	<em>and {{ autlen - 4 }} coauthors</em>
 		        {% endif %}
 		        </div>
 		    {% endif %}

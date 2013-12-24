@@ -1,4 +1,5 @@
 import sys
+import re
 from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
     Markup, redirect
 from flask.ext.solrquery import solr #@UnresolvedImport
@@ -136,14 +137,16 @@ def bigquery():
         form.add_rendered_element(Markup(render_template('bigquery.html', data="")))
         return render_template('search.html', form=form)
     
-    # make sure the data has proper header
-    v = v.strip()
+    # reformat query value to handle the following separators between identifiers:
+    #     '\s+', ', ', '; '
+    # and make sure the data has proper header
+    v = re.sub(r'\s+', r'\n', v.strip().replace(',',' ').replace(';',' '))
     if v[0:7] != 'bibcode':
         v = 'bibcode\n' + v
     
     qid = save_bigquery(v)
     
-    flash("Please note, that we do not guarantee that your query is permanent (it will be deleted at some point)", "info")
+    flash("Please note that we do not guarantee the persistance of your query in our system (it will be deleted at some point)", "info")
     urlargs = dict(request.args)
     urlargs['bigquery'] = qid
     if 'q' not in urlargs:

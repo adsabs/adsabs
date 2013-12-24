@@ -81,14 +81,6 @@
 	        		</div>
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">
 	        			<div class="row">
-	        				<div class="span2">{{ form.db_f.description }}</div>
-	        			</div>
-	        			<div class="row">
-	        				<div class="span2">{{ form.db_f(class="span2") }}</div>
-	        			</div>
-	        		</div>
-	        		<div class="span2 adv_opt_box adv_opt_box_foll">
-	        			<div class="row">
 	        				{% if not form.no_ft.raw_data or form.no_ft.raw_data[0] == '1' %}
 	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.no_ft(value='1') }} {{ form.no_ft.description }}</label></div>
 	        				{% else %}
@@ -129,6 +121,7 @@
         </fieldset>
         
         {{ form.bigquery() }}
+        {{ form.db_f(value='(astronomy OR physics)') }}
         
         {% if form.has_rendered_elements() %}
           {% for rendered_element in form.get_rendered_elements() %}
