@@ -304,6 +304,9 @@ class AppConfig(object):
                    'skymap':750,
                    'export_other':300,
                    }
+    #ADSGUT
+    MONGODB_SETTINGS= {'DB': 'adsgut'}
+    
 try:
     from local_config import LocalConfig
 except ImportError:
