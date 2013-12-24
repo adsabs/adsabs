@@ -19,6 +19,8 @@ import pymongo
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
 from flask.ext.adsdata import adsdata #@UnresolvedImport
+from adsabs.core.solr import get_document_similar
+
 # local imports
 from config import config
 from .errors import SolrCitationQueryError
@@ -283,10 +285,15 @@ def get_references(**args):
                 papers += doc['reference']
     return papers
 
-def get_publications_from_query(q,sort_order):
+def get_publications_from_query(q,sort_order, list_type=None):
     try:
         # Get the information from Solr
-        resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+        if list_type and list_type == 'similar':
+            query_func = get_document_similar
+        else:
+            query_func = solr.query
+        resp = query_func(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+
     except SolrReferenceQueryError, e:
         app.logger.error("Solr publications query for %s blew up (%s)" % (q,e))
         raise

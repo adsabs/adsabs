@@ -62,11 +62,6 @@ def citation_helper(**args):
         if len(bibcodes) == 0:
             flash('Citation Helper returned no results. Reason: No bibcodes were supplied')
             return render_template('citation_helper.html', form=form)
-        # get the maximum number of records to use
-        try:
-            number_of_records = int(form.numRecs.data)
-        except:
-            number_of_records = config.MAX_EXPORTS['citation_helper']
         # get the maximum number of suggestions
         try:
             number_of_suggestions = int(form.return_nr.data)
@@ -161,12 +156,19 @@ def metrics(**args):
             bibcodes = filter(lambda b: len(b) == 19, map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n')))
         except:
             bibcodes = []
+        list_type = request.values.get('list_type', None)
         if len(bibcodes) == 0:
             try:
                 query_par = str(form.current_search_parameters.data.strip())
                 query = json.loads(query_par)['q']
-                sort  = json.loads(query_par)['sort']
-                bibcodes = get_publications_from_query(query, sort)[:number_of_records]
+                sort  = json.loads(query_par).get('sort', None)
+                if sort is None:
+                    # this might be an abstract citation/reference list view so get the sort from config
+                    if list_type is not None and list_type in config.ABS_SORT_OPTIONS_MAP:
+                        sort = [config.ABS_SORT_OPTIONS_MAP[list_type]]
+                    else:
+                        sort = []
+                bibcodes = get_publications_from_query(query, sort, list_type)[:number_of_records]
             except:
                 bibcodes = []
 #        if len(query_bibcodes) == 0:

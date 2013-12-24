@@ -291,24 +291,18 @@ class AppConfig(object):
     # configuration parameters for maximum number of records used for various services (metrics, citation helper, exports, ...)
     EXPORT_DEFAULT_ROWS = 300
     MAX_EXPORTS = {'metrics':3000, 
-                   'citation_helper':3000, 
                    'wordcloud':1000, 
                    'ADSClassic':3000,
                    'authnetwork':1000,
                    'skymap':1000,
-                   'BibTeX':3000,
-                   'EndNote':3000,
-                   'AASTeX':3000,
+                   'export_other':3000,
                    }
     DEFAULT_EXPORTS = {'metrics':300, 
-                   'citation_helper':300, 
                    'wordcloud':750, 
                    'ADSClassic':300,
                    'authnetwork':750,
                    'skymap':750,
-                   'BibTeX':300,
-                   'EndNote':300,
-                   'AASTeX':300,
+                   'export_other':300,
                    }
 try:
     from local_config import LocalConfig

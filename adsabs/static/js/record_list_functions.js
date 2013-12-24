@@ -3,318 +3,243 @@
  * module to manage the list of results
  */
 
-ResultListManager = new Object();
+var ResultListManager = function() {
 
-/*
- * Function to export a list of selected papers or a query to ads classic
- */
-ResultListManager.export_to_ads_classic = function(numRecs)
-{
-	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenField').remove();
-	//disable sorting for ADS Classic
-	$('#search_results_form').append('<input type="hidden" name="sort" class="ajaxHiddenField" value="NONE"/>');
-	
-	//if there are checked bibcodes there is nothing to do but submitting the form
-	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-	{
-		//remove the query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-		//submit the form
-		$('#search_results_form').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).attr('target', '_blank').submit();
-	}
-	//otherwise need to retrieve the list and then submit the form
-	else
-	{
-		$.fancybox.showLoading();
+	return {
+
+		remove_hidden: function() {
+                //remove a hidden fields if exists
+                $('input.ajaxHiddenField', $('#search_results_form')).remove();
+		},
+
+		disable_sorting: function() {
+			//disable sorting for ADS Classic
+			$('#search_results_form').append('<input type="hidden" name="sort" class="ajaxHiddenField" value="NONE"/>');
+		},
+
+		add_hidden_field: function(name, value) {
+			$('#search_results_form').append('<input type="hidden" name="'+name+'" class="ajaxHiddenField"  value="'+value+'"/>');
+		},
+
+		bibcodes_checked: function() {
+			return $('#search_results_form').find('input[name="bibcode"]:checked');
+		},
 		
-		//re-enable query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-		//get the bibcodes
-		$.ajax({
-			type : "POST",
-			cache : false,
-			url : GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY,
-			data : $('#search_results_form').serializeArray(),
-			success: function(data) {
-				$.fancybox.hideLoading();
-				//remove the query parameters
-				$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-				//append an hidden parameter for the bibcodes retrieved
-				$('#search_results_form').append('<input type="hidden" name="bibcode" class="ajaxHiddenField" value="'+data+'"/>');
-				$('#search_results_form').append('<input type="hidden" name="nr_to_return" class="ajaxHiddenField" value="'+numRecs+'"/>');
-				//submit the form
-				$('#search_results_form').removeAttr('target').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
+		bibcodes_displayed: function() {
+			return $('#search_results_form').find('input[name="bibcode"]');
+		},
+		
+		is_abstract_page: function() {
+			return $('#abstractContent').length ? true : false;
+		},
+		
+		disable_query_params: function() {
+			$('input[name="current_search_parameters"]', $('#search_results_form')).attr('disabled','disabled');
+		},
+		
+		enable_query_params: function() {
+			$('input[name="current_search_parameters"]', $('#search_results_form')).removeAttr('disabled');
+		},
+		
+		submit_form: function(action) {
+			$('#search_results_form').attr('action', action).attr('target', '_blank').submit();
+		},
+		
+		/*
+		 * function for getting a integer count of number of records to submit to one of the various
+		 * visualizations or analysis generators. takes a callback that will be passed the number
+		 * of records supplied by the user when the "OK" button is pressed.
+		 */
+		record_input_dialog: function(service, ok_callback) {
+	        var max_records = GlobalVariables.MAX_EXPORTS[service];
+	        var default_records = GlobalVariables.DEFAULT_EXPORTS[service];
+	        var hits = parseInt($('#hits').val());
+	        $("#amount").val(hits);
+	        max_records = Math.min(hits, max_records);
+	        if (hits <= max_records) {
+	            default_records = max_records
+	        };			
+	        $( "#record_slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
+	        $( "#amount" ).val( $( "#record_slider" ).slider( "value" ) );
+	        $( "#amount" ).show();
+	        var dialog = $('#record_selection_dialog').dialog({
+	        	title: 'Select number of records',
+	        	modal: true,
+	        	buttons: {
+	        		"OK": function() {
+	        			var numRecords = $( "#record_slider" ).slider( "value" );
+	        			$(this).dialog('close');
+	        			ok_callback(numRecords);
+	        		},
+                    "Cancel": function() {
+                    	$(this).dialog('close');
+                    }
+	        	}
+	        });
+        },
+
+        /*
+         * submit the search_results_form to a provided url
+         * url - ajax request will be sent to this url
+         * wrap_pre (boolean) - optionally wrap the returned data in '<pre> tags
+         * success_callback (function) - provide a custom success callback
+         */
+		ajax_submit: function(url, wrap_pre, success_callback) {
+			$.fancybox.showLoading();
+			
+			var wrap_pre = wrap_pre || false;
+			
+			if (!success_callback) {
+				success_callback = function(data) {
+    				$.fancybox.hideLoading();
+    				data = wrap_pre ? '<pre>'+data+'</pre>' : data;
+    				$.fancybox({
+    					'content': data,
+    					'autoSize': false,
+    					'width': '100%',
+    					'height': '100%'   					
+    				});
+    			}
 			}
-		});
-	}
+    		$.ajax({
+    			type : "POST",
+    			cache : false,
+    			url : url,
+    			data : $('#search_results_form').serializeArray(),
+    			success: success_callback
+    		});
+		},
 		
-	
-};
+        /*
+         * Function to export a list of selected papers or a query to ads classic
+        */
+		export_to_ads_classic: function() {
+			this.remove_hidden();
+			this.disable_sorting();
 
-/*
- * Function to export a list of papers or a query in different formats
- */
-ResultListManager.export_records_in_other_format = function(format, numRecs)
-{
-	$.fancybox.showLoading();
-	//re-enable query parameters
-	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenField').remove();
-	//append the format to the form
-	$('#search_results_form').append('<input type="hidden" name="export_format" class="ajaxHiddenField"  value="'+format+'"/>');
-	$('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
-	//if there are checked bibcodes
-	if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-	{
-		//remove the query parameters
-		$('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
+			// if bibcodes are selected simply submit the form to the export url
+			if (this.bibcodes_checked().length > 0) {
+				this.enable_query_params();
+				this.submit_form(GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL);
+			// abstract view has only one bibcode
+			} else if (this.is_abstract_page()) {
+	        	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
+	        	this.add_hidden_field('bibcodes', bibcode)
+				this.submit_form(GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL);
+	        // pass a callback to the record count input selector along with a custom
+	        // success callback that will insert the returned bibcodes (data) into the form
+	        // before submitting to the export url
+			} else {
+				var RLM = this;
+				this.enable_query_params();
+				this.record_input_dialog('ADSClassic', function(numRecs) {
+					RLM.ajax_submit(GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY, false, function(data) {
+						$.fancybox.hideLoading();
+						RLM.disable_query_params();
+						RLM.add_hidden_field('bibcode', data);
+						RLM.add_hidden_field('nr_to_return', numRecs);
+						//submit the form
+						RLM.submit_form(GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL);
+//						$('#search_results_form').removeAttr('target').attr('action', GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL).submit();
+					});
+				});
+			}
+		},
+
+        /*
+         * Function to export a list of papers or a query in different formats
+         */
+        export_records_in_other_format: function(format) {
+
+        	this.remove_hidden();
+        	this.add_hidden_field('export_format', format);
+        	if (this.bibcodes_checked().length > 0) {
+        		this.disable_query_params();
+        		this.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
+			} else if (this.is_abstract_page()) {
+	        	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
+	        	this.add_hidden_field('bibcodes', bibcode);
+        		this.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
+			} else {
+				var RLM = this;
+				this.record_input_dialog('export_other', function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
+					RLM.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
+				});
+        	}
+        },
+        
+        /*
+         * load a visualization into fancybox
+         */
+        visualize: function(url, viz_type) {
+        	this.remove_hidden();
+        	this.enable_query_params();
+        	if (this.bibcodes_checked().length > 0) {
+        		this.ajax_submit(url);
+        	} else {
+				var RLM = this;
+				this.record_input_dialog(viz_type, function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
+					RLM.ajax_submit(url);
+				});
+        	}
+        },
+        
+        /*
+         * Function to get Citation Helper results
+         */
+        citation_helper: function() {
+        	this.remove_hidden();
+        	this.disable_query_params();
+        	this.add_hidden_field('return_nr', 10)
+
+        	var $inputs = (this.bibcodes_checked().length > 0)
+        		? this.bibcodes_checked()
+        		: this.bibcodes_displayed();
+
+        	var checked = new Array();
+        	$inputs.each(function() {
+        		checked.push($(this).attr('value'));
+        	});
+
+        	var collapsed_bibcodes = checked.join('\n');
+        	this.add_hidden_field('bibcodes', collapsed_bibcodes);
+        	this.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
+        },
+
+        /*
+        * Function to get Metrics results
+        */        
+        metrics: function() {
+        	this.remove_hidden();
+        	
+        	if (this.bibcodes_checked().length > 0) {
+
+        		this.disable_query_params();
+        		var checked = new Array();
+        		this.bibcodes_checked().each(function() {
+        			checked.push($(this).attr('value'));
+        		});
+        		var collapsed_bibcodes = checked.join('\n');
+        		this.add_hidden_field('bibcodes', collapsed_bibcodes);
+        		this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+
+        	} else {
+				var RLM = this;
+        		this.enable_query_params();
+				this.record_input_dialog('metrics', function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
+					RLM.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+				});
+        	}        	
+        },
+        
+        single_metrics: function() {
+        	// this is some serious wtf how this works right now
+        	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
+        	this.add_hidden_field('bibcodes', bibcode)
+        	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        }
 	}
-	
-	//submit the form via ajax
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL,
-		data : $('#search_results_form').serializeArray(),
-		success: function(data) {
-			$.fancybox.hideLoading();
-			$.fancybox('<pre>'+data+'</pre>');
-		}
-	});
-	
-};
-
-/*
- * load a visualization into fancybox
- */
-ResultListManager.visualize = function(url, numRecs) {
-	$.fancybox.showLoading();
-	//re-enable query parameters
-	$('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-	//remove a hidden fields if exists
-	$('#search_results_form > input.ajaxHiddenField').remove();
-	//record the number of bibcodes to use in visualization
-	$('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField" value="'+numRecs+'"/>');
-	//submit the form via ajax
-	$.ajax({
-		type : "POST",
-		cache : false,
-		url : url,
-		data : $('#search_results_form').serializeArray(),
-		success: function(data) {
-			$.fancybox.hideLoading();
-			$.fancybox({
-				'content': data,
-				'autoSize': false,
-				'width': '100%',
-				'height': '100%'
-			});
-		}
-	});
-};
-
-/*
- * Function to get Citation Helper results
- */
-ResultListManager.citation_helper = function(numRecs)
-{
-        $.fancybox.showLoading();
-        //re-enable query parameters
-        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-        //remove a hidden fields if exists
-        $('#search_results_form > input.ajaxHiddenField').remove();
-        //if there are checked bibcodes
-        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-        {
-                //remove the query parameters
-                checked_bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
-                $inputs.each(function() {
-                    checked_bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = checked_bibcodes.join('\n');
-        }
-        else
-        {
-                bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]');
-                $inputs.each(function() {
-                    bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = bibcodes.join('\n');
-        }
-        $('#search_results_form > input[name="current_search_parameters"]').attr('disabled','disabled');
-        $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField"  value="'+collapsed_bibcodes+'"/>');
-        $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
-        $('#search_results_form').append('<input type="hidden" name="return_nr" class="ajaxHiddenField"  value="10"/>');
-        //submit the form via ajax
-        $.ajax({
-                type : "POST",
-                cache : false,
-                url : GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL,
-                data : $('#search_results_form').serializeArray(),
-                success: function(data) {
-                    $.fancybox.hideLoading();
-                    $.fancybox(data);
-                } 
-        });
-};
-/*
- * Function to get Metrics results
- */
-ResultListManager.metrics = function(numRecs)
-{
-        $.fancybox.showLoading();
-        //re-enable query parameters
-        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-        //remove a hidden fields if exists
-        $('#search_results_form > input.ajaxHiddenField').remove();
-        //if there are checked bibcodes
-        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-        {
-                //remove the query parameters
-                checked_bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
-                $inputs.each(function() {
-                    checked_bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = checked_bibcodes.join('\n');
-                var original_query = "NA";
-                $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
-                $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
-        }
-        else
-        {
-                $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-                $('#search_results_form').append('<input type="hidden" name="numRecs" class="ajaxHiddenField"  value="'+numRecs+'"/>');
-        }        
-        //submit the form via ajax
-        $.ajax({
-                type : "POST",
-                cache : false,
-                url : GlobalVariables.ADSABS2_METRICS_BASE_URL,
-                data : $('#search_results_form').serializeArray(),
-                success: function(data) {
-                    $.fancybox.hideLoading();
-                    $.fancybox(data);
-                }
-        });
-};
-
-ResultListManager.single_metrics = function()
-{
-        $.fancybox.showLoading();
-        //re-enable query parameters
-        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-        //remove a hidden fields if exists
-        $('#search_results_form > input.ajaxHiddenField').remove();
-        //if there are checked bibcodes
-        if ($('#search_results_form').find('input[name="bibcode"]:checked').length > 0)
-        {
-                //remove the query parameters
-                checked_bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]:checked');
-                $inputs.each(function() {
-                    checked_bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = checked_bibcodes.join('\n');
-                var original_query = "NA";
-        }
-        else
-        {
-                bibcodes = new Array();
-                var $inputs = $('#search_results_form').find('input[name="bibcode"]');
-                $inputs.each(function() {
-                    bibcodes.push($(this).attr('value'));
-                });
-                var collapsed_bibcodes = bibcodes.join('\n');
-        }
-        $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-        $('#search_results_form').append('<input type="hidden" name="bibcodes" class="ajaxHiddenField" value="'+collapsed_bibcodes+'"/>');
-        //submit the form via ajax
-        $.ajax({
-                type : "POST",
-                cache : false,
-                url : GlobalVariables.ADSABS2_METRICS_BASE_URL,
-                data : $('#search_results_form').serializeArray(),
-                success: function(data) {
-                    $.fancybox.hideLoading();
-                    $.fancybox(data);
-                }
-        });
-};
-/*
- * Function to deal with cases where no records where selected
- */
-ResultListManager.set_records = function(service, label)
-{
-        var numRecords = $('#search_results_form').find('input[name="bibcode"]:checked').length;
-        var max_records = GlobalVariables.MAX_EXPORTS[service];
-        var num_results = $( "#amount" ).val();
-        var default_records = GlobalVariables.DEFAULT_EXPORTS[service];
-        if (label !== undefined) {
-            max_records = GlobalVariables.MAX_EXPORTS[label];
-            default_records = GlobalVariables.DEFAULT_EXPORTS[label];
-        }
-        max_records = Math.min(num_results,max_records)
-        if (num_results <= max_records) {
-            default_records = max_records
-        };
-        if (numRecords == 0) {
-                $( "#record_slider" ).slider({range: "max", min: 1, max: max_records, value: default_records, slide: function( event, ui ) {$( "#amount" ).val( ui.value );}});
-                $( "#amount" ).val( $( "#record_slider" ).slider( "value" ) );
-                $( "#amount" ).show();
-                var dialog = $('#record_selection_dialog')
-                    .dialog({
-                        title: 'Select number of records',
-                        buttons: {
-                            "OK": function() {
-                                numRecords = $( "#record_slider" ).slider( "value" );
-                                if (service == 'citation_helper') {
-                                    $(this).dialog('close');
-                                    ResultListManager.citation_helper(numRecords);
-                                } else if (service == 'metrics') {
-                                    $(this).dialog('close');
-                                    ResultListManager.metrics(numRecords);                                   
-                                } else if (service == 'ADSClassic') {
-                                    $(this).dialog('close');
-                                    ResultListManager.export_to_ads_classic(numRecords);
-                                } else if (service == 'BibTeX') {
-                                    $(this).dialog('close');
-                                    ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
-                                } else if (service == 'AASTeX') {
-                                    $(this).dialog('close');
-                                    ResultListManager.export_records_in_other_format('AASTeX', numRecords);
-                                } else if (service == 'EndNote') {
-                                    $(this).dialog('close');
-                                    ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
-                                } else {
-                                    $(this).dialog('close');
-                                    ResultListManager.visualize(service, numRecords);
-                                };
-                            },
-                            "Cancel": function() {
-                                $(this).dialog('close');
-                            }
-                        }
-                    });
-            } else {
-                if (service == 'citation_helper') {
-                    ResultListManager.citation_helper(numRecords);
-                } else if (service == 'metrics') {
-                    ResultListManager.metrics(numRecords);
-                } else if (service == 'ADSClassic') {
-                    ResultListManager.export_to_ads_classic(numRecords);
-                } else if (service == 'BibTeX') {
-                    ResultListManager.export_records_in_other_format('BIBTEX', numRecords);
-                } else if (service == 'AASTeX') {
-                    ResultListManager.export_records_in_other_format('AASTeX', numRecords);
-                } else if (service == 'EndNote') {
-                    ResultListManager.export_records_in_other_format('ENDNOTE', numRecords);
-                } else {
-                    ResultListManager.visualize(service, numRecords)
-                };
-            }
-};
+}();

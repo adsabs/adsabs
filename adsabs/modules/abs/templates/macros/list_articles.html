@@ -1,11 +1,20 @@
 {# Global imports #}
-{% from "macros/record_list_macros/results.html" import render_search_result with context %}
-{% from "macros/record_list_macros/pagination.html" import render_pagination, render_result_numbers with context %}
-{% from "macros/record_list_macros/button_menu.html" import render_re_sort, render_toggle_all_paper_list, render_export_menu, render_view_menu with context %}
+{% from "macros/record_list_macros/results.html" 
+    import render_search_result with context %}
+{% from "macros/record_list_macros/pagination.html" 
+    import render_pagination, 
+           render_result_numbers with context %}
+{% from "macros/record_list_macros/button_menu.html" 
+    import render_re_sort, 
+           render_toggle_all_paper_list, 
+           render_export_menu, 
+           render_view_menu,
+           render_analyze_menu,
+           render_record_count_dialog,
+           render_view_menu with context %}
 
 {% macro render_list_articles(list_articles, list_type, bibcode) %}
 
-{# set query_components={'q':list_articles.request.get_param('q'), 'sort':(list_articles.request.get_param('sort').split(' ')[0], list_articles.request.get_param('sort').split(' ')[1])} #}
 {% set query_components={'q':list_articles.request.get_param('q')} %}
 
 <form id="search_results_form" action="">
@@ -24,7 +33,10 @@
 				{% set disabled = list_type == 'similar' %}
 				{{ render_re_sort(list_articles, url_for('abs.tab_list', bibcode=bibcode, list_type=list_type), disabled) }}
 				{{ render_export_menu() }}
+                {{ render_view_menu()}}
+                {{ render_analyze_menu()}}
 			</div>
+			{{ render_record_count_dialog(list_articles.get_hits()) }}
 		</div>
 	{# The actual results #}
 	{% for doc in list_articles.get_docset_objects() %}
