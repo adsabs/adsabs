@@ -1,7 +1,7 @@
 #we'll start with user profile funcs
 root = exports ? this
 $=jQuery
-console.log "In libraryprofile"
+#console.log "In libraryprofile"
 h = teacup
 w = widgets
 
@@ -20,11 +20,11 @@ class PostableView extends Backbone.View
 
   initialize: (options) ->
     {@rwmode, @memberable, @fqpn, @owner, @username, @ownerfqin} = options
-    console.log "PVIN", @rwmode, @memberable, @fqpn
+    #console.log "PVIN", @rwmode, @memberable, @fqpn
 
   render: =>
     #content = w.one_col_table_partial(@memberable)
-    console.log "RWMODE", @rwmode
+    #console.log "RWMODE", @rwmode
     if not @owner
         content = w.table_from_dict_partial(@username, "Only owner can see this.")
     else
@@ -33,20 +33,20 @@ class PostableView extends Backbone.View
         else
             content = w.table_from_dict_partial(@username, w.single_button_label(rwmap(@rwmode), "Toggle"))
     #dahtml= "<td>a</td><td>b</td>"
-    console.log "CONTENT", content, @rwmode, @memberable, @fqpn, @username
+    #console.log "CONTENT", content, @rwmode, @memberable, @fqpn, @username
     @$el.html(content)
     return this
 
   clickedToggle: =>
     loc=window.location
     cback = (data) ->
-        console.log "return data", data, loc
+        #console.log "return data", data, loc
         window.location=location
     eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
-    console.log("GGG",@model, @$el)
+    #console.log("GGG",@model, @$el)
     syncs.toggle_rw(@memberable, @fqpn, cback, eback)
 
 class PostableListView extends Backbone.View
@@ -59,12 +59,12 @@ class PostableListView extends Backbone.View
     @ownerfqin=options.ownerfqin
 
   render: =>
-    console.log "RENDERING", @owner, @users
+    #console.log "RENDERING", @owner, @users
     #if @owner is true
     views=(new PostableView({rwmode:@users[u][1], fqpn:@fqpn, memberable:u, username:@users[u][0], owner: @owner, ownerfqin:@ownerfqin}) for u of @users)
     rendered = (v.render().el for v in views)
-    console.log "RENDER1", rendered
-    console.log "RENDER2"
+    #console.log "RENDER1", rendered
+    #console.log "RENDER2"
     #$widget=w.$one_col_table("User", rendered)
     $widget=w.$table_from_dict("User", "Access", rendered)
     @$el.append($widget)
@@ -75,9 +75,9 @@ class PostableListView extends Backbone.View
 
 get_info = (sections, config) ->
     cback = () ->
-        console.log "cback"
+        #console.log "cback"
     eback = () ->
-        console.log "eback" 
+        #console.log "eback" 
     $.get config.infoURL, (data) ->
         content=views.library_info data, templates.library_info
         ownerfqin=data.library.owner
@@ -96,12 +96,12 @@ get_info = (sections, config) ->
         sections.$infodiv.show()
 
         $.get config.membersURL, (data) ->
-            console.log "DATA", data
+            #console.log "DATA", data
             plinv=new PostableListView(users:data.users, fqpn:config.fqpn, owner:config.owner, ownerfqin: ownerfqin, $e_el: sections.$membersdiv)
             plinv.render()
             sections.$membersdiv.show()
             if config.owner
-                console.log "gaga", config.owner
+                #console.log "gaga", config.owner
                 viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
                 
                 $.get config.guiURL, (data) ->

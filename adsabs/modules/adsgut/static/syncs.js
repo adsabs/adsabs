@@ -40,8 +40,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
   $ = jQuery;
 
-  console.log("In Funcs");
-
   h = teacup;
 
   doajax = $.ajax;
@@ -77,7 +75,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     data = {
       bibcode: bibcodes
     };
-    console.log("SBDATA", data);
     return send_params(url, data, cback, eback);
   };
 
@@ -227,7 +224,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     tagtype = "ads/tagtype:tag";
     itemtype = "ads/itemtype:pub";
     url = prefix + "/items/taggings";
-    console.log("TAGS ARE", tags);
     ts = {};
     inames = [];
     for (_i = 0, _len = items.length; _i < _len; _i++) {
@@ -307,7 +303,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
   submit_posts = function(items, postables, cback, eback) {
     var data, i, itemnames, itemtype, url;
     itemtype = "ads/itemtype:pub";
-    console.log(items, '|||', postables);
     itemnames = (function() {
       var _i, _len, _results;
       _results = [];
@@ -333,7 +328,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
   save_items = function(items, cback, eback) {
     var data, i, itemnames, itemtype, url;
     itemtype = "ads/itemtype:pub";
-    console.log(items, '|||');
     itemnames = (function() {
       var _i, _len, _results;
       _results = [];

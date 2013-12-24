@@ -8,8 +8,6 @@
 
   $ = jQuery;
 
-  console.log("In Funcs");
-
   h = teacup;
 
   do_postform = function(sections, config) {
@@ -18,7 +16,6 @@
     $itemssec = sections.$itemssec;
     return $.get("" + tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
       var suggestions;
-      console.log("TUCWT===", data);
       suggestions = data.simpletags;
       return $.get(itemsInfoURL, function(data) {
         var i, itemlist, itemsq, thecount, theitems;
@@ -34,7 +31,6 @@
           return _results;
         })();
         itemsq = itemlist.join("&");
-        console.log("ITEMSQAA", theitems, itemlist);
         return $.get("" + config.itemsTPURL + "?" + itemsq, function(data) {
           var cb, e, eb, ido, k, notes, plinv, postings, stags, v, _ref, _ref1;
           _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
@@ -79,7 +75,6 @@
           plinv.render();
           eb = function(err) {
             var d, _i, _len, _results;
-            console.log("ERR", err);
             _results = [];
             for (_i = 0, _len = theitems.length; _i < _len; _i++) {
               d = theitems[_i];
@@ -89,7 +84,6 @@
           };
           cb = function(data) {
             var d, docnames, thedocs, _i, _j, _len, _len1, _ref2, _ref3, _results;
-            console.log("CBDATA", JSON.stringify(data), data.response.docs);
             thedocs = {};
             _ref2 = data.response.docs;
             for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
@@ -118,7 +112,6 @@
             }
             return _results;
           };
-          console.log("ITTYS", theitems);
           return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
         });
       });

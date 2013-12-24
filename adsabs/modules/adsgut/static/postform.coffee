@@ -1,20 +1,20 @@
 root = exports ? this
 $=jQuery
-console.log "In Funcs"
+#console.log "In Funcs"
 h = teacup
 
 do_postform = (sections, config) ->
     {itemsInfoURL, itemsTPURL, tagsucwtURL, memberable, itemtype, nam, loc} = config
     {$itemssec} = sections
     $.get "#{tagsucwtURL}?tagtype=ads/tagtype:tag", (data) ->
-        console.log("TUCWT===", data)
+        #console.log("TUCWT===", data)
         suggestions = data.simpletags
         $.get itemsInfoURL, (data) ->
             theitems=data.items
             thecount=data.count
             itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
             itemsq=itemlist.join("&")
-            console.log "ITEMSQAA", theitems, itemlist
+            #console.log "ITEMSQAA", theitems, itemlist
 
             $.get "#{config.itemsTPURL}?#{itemsq}", (data)->
                 [stags, notes]=get_taggings(data)
@@ -43,11 +43,11 @@ do_postform = (sections, config) ->
                 plinv.render()
                 #possible A&A issue
                 eb = (err) ->
-                    console.log("ERR", err)
+                    #console.log("ERR", err)
                     for d in theitems
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
                 cb = (data) ->
-                    console.log "CBDATA", JSON.stringify(data), data.response.docs
+                    #console.log "CBDATA", JSON.stringify(data), data.response.docs
                     thedocs = {}
                     for d in data.response.docs
                         thedocs[d.bibcode]=d
@@ -58,7 +58,7 @@ do_postform = (sections, config) ->
                         else
                             e={}
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
-                console.log "ITTYS", theitems
+                #console.log "ITTYS", theitems
                 syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
 
 root.postform = 

@@ -1,7 +1,7 @@
 #we'll start with user profile funcs
 root = exports ? this
 $=jQuery
-console.log "In userprofile"
+#console.log "In userprofile"
 h = teacup
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
@@ -133,13 +133,13 @@ class PostableView extends Backbone.View
     clickedYes: =>
         loc=window.location
         cback = (data) ->
-            console.log "return data", data, loc
+            #console.log "return data", data, loc
             window.location=location
         eback = (xhr, etext) ->
-            console.log "ERROR", etext, loc
+            #console.log "ERROR", etext, loc
             #replace by a div alert from bootstrap
             alert 'Did not succeed'
-        console.log("GGG",@model, @$el)
+        #console.log("GGG",@model, @$el)
         useremail=@model.get('email')
         syncs.accept_invitation(useremail, @model.get('fqpn'), cback, eback)
 
@@ -171,8 +171,8 @@ class PostableListView extends Backbone.View
     render: =>
         views = (new PostableView(model:m, libmode:@libmode, ownermode:@ownermode) for m in @collection.models)
         rendered = (v.render().el for v in views)
-        console.log "RENDER1", rendered
-        console.log "RENDER2"
+        #console.log "RENDER1", rendered
+        #console.log "RENDER2"
         if @collection.invite
             if views.length == 0
                 rendered = ["<td colspan=5>No Invitations</td>"]
@@ -236,7 +236,7 @@ layout_userprofile = (sections, config, ptype) ->
     # #    content=content+"<a href=\"#{udgHtmlURL}\">My Saved Items</a>"
     # $info.append(content)
     # $info.show()
-    console.log "USERDICTA==============", userdict
+    #console.log "USERDICTA==============", userdict
 
 
     render_postable(userdict.userinfo, userdict["#{wordmap[ptype]}owned"], $owned, 'ow', false, ptype, true)

@@ -9,8 +9,6 @@
 
   $ = jQuery;
 
-  console.log("In libraryprofile");
-
   h = teacup;
 
   w = widgets;
@@ -45,13 +43,11 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin;
-      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn);
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin, options;
     };
 
     PostableView.prototype.render = function() {
       var content;
-      console.log("RWMODE", this.rwmode);
       if (!this.owner) {
         content = w.table_from_dict_partial(this.username, "Only owner can see this.");
       } else {
@@ -61,7 +57,6 @@
           content = w.table_from_dict_partial(this.username, w.single_button_label(rwmap(this.rwmode), "Toggle"));
         }
       }
-      console.log("CONTENT", content, this.rwmode, this.memberable, this.fqpn, this.username);
       this.$el.html(content);
       return this;
     };
@@ -70,14 +65,11 @@
       var cback, eback, loc;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert('Did not succeed');
       };
-      console.log("GGG", this.model, this.$el);
       return syncs.toggle_rw(this.memberable, this.fqpn, cback, eback);
     };
 
@@ -107,7 +99,6 @@
 
     PostableListView.prototype.render = function() {
       var $widget, rendered, u, v, views;
-      console.log("RENDERING", this.owner, this.users);
       views = (function() {
         var _results;
         _results = [];
@@ -132,8 +123,6 @@
         }
         return _results;
       })();
-      console.log("RENDER1", rendered);
-      console.log("RENDER2");
       $widget = w.$table_from_dict("User", "Access", rendered);
       this.$el.append($widget);
       return this;
@@ -145,12 +134,8 @@
 
   get_info = function(sections, config) {
     var cback, eback;
-    cback = function() {
-      return console.log("cback");
-    };
-    eback = function() {
-      return console.log("eback");
-    };
+    cback = function() {};
+    eback = function() {};
     return $.get(config.infoURL, function(data) {
       var content, ownerfqin;
       content = views.library_info(data, templates.library_info);
@@ -172,7 +157,6 @@
       sections.$infodiv.show();
       return $.get(config.membersURL, function(data) {
         var plinv, viewu;
-        console.log("DATA", data);
         plinv = new PostableListView({
           users: data.users,
           fqpn: config.fqpn,
@@ -183,7 +167,6 @@
         plinv.render();
         sections.$membersdiv.show();
         if (config.owner) {
-          console.log("gaga", config.owner);
           viewu = new views.InviteUser({
             postable: config.fqpn,
             withcb: true

@@ -9,8 +9,6 @@
 
   $ = jQuery;
 
-  console.log("In groupprofile");
-
   h = teacup;
 
   w = widgets;
@@ -37,14 +35,12 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username;
-      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn);
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username, options;
     };
 
     PostableView.prototype.render = function() {
       var content;
       content = w.one_col_table_partial(this.username);
-      console.log("CONTENT", content, this.rwmode, this.memberable, this.fqpn);
       this.$el.html(content);
       return this;
     };
@@ -53,14 +49,11 @@
       var cback, eback, loc;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert('Did not succeed');
       };
-      console.log("GGG", this.model, this.$el);
       return syncs.toggle_rw(this.memberable, this.fqpn, cback, eback);
     };
 
@@ -123,12 +116,8 @@
 
   get_info = function(sections, config) {
     var cback, eback;
-    cback = function() {
-      return console.log("cback");
-    };
-    eback = function() {
-      return console.log("eback");
-    };
+    cback = function() {};
+    eback = function() {};
     return $.get(config.infoURL, function(data) {
       var content, ownerfqin;
       content = views.group_info(data, templates.group_info);

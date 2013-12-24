@@ -1,7 +1,7 @@
 #we'll start with user profile funcs
 root = exports ? this
 $=jQuery
-console.log "In groupprofile"
+#console.log "In groupprofile"
 h = teacup
 w = widgets
 
@@ -15,26 +15,26 @@ class PostableView extends Backbone.View
 
   initialize: (options) ->
     {@rwmode, @memberable, @fqpn, @username} = options
-    console.log "PVIN", @rwmode, @memberable, @fqpn
+    #console.log "PVIN", @rwmode, @memberable, @fqpn
 
   render: =>
     content = w.one_col_table_partial(@username)
     #content = w.table_from_dict_partial(@memberable, w.single_button_label(@rwmode, "Toggle"))
     #dahtml= "<td>a</td><td>b</td>"
-    console.log "CONTENT", content, @rwmode, @memberable, @fqpn
+    #console.log "CONTENT", content, @rwmode, @memberable, @fqpn
     @$el.html(content)
     return this
 
   clickedToggle: =>
     loc=window.location
     cback = (data) ->
-        console.log "return data", data, loc
+        #console.log "return data", data, loc
         window.location=location
     eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
-    console.log("GGG",@model, @$el)
+    #console.log("GGG",@model, @$el)
     syncs.toggle_rw(@memberable, @fqpn, cback, eback)
 
 class PostableListView extends Backbone.View
@@ -60,9 +60,9 @@ class PostableListView extends Backbone.View
 
 get_info = (sections, config) ->
     cback = () ->
-        console.log "cback"
+        #console.log "cback"
     eback = () ->
-        console.log "eback" 
+        #console.log "eback" 
     $.get config.infoURL, (data) ->
         content=views.group_info data, templates.group_info
         ownerfqin=data.group.owner

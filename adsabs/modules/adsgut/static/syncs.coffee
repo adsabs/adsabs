@@ -31,7 +31,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 ###
 root = exports ? this
 $=jQuery
-console.log "In Funcs"
+#console.log "In Funcs"
 h = teacup
 doajax=$.ajax
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
@@ -68,7 +68,7 @@ send_bibcodes = (url, items, cback, eback) ->
     bibcodes = (i.basic.name for i in items)
     data = 
         bibcode : bibcodes
-    console.log "SBDATA", data
+    #console.log "SBDATA", data
     send_params(url, data, cback, eback)
 
 
@@ -178,7 +178,7 @@ submit_tags = (items, tags, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/items/taggings"
-    console.log "TAGS ARE", tags
+    #console.log "TAGS ARE", tags
     ts={}
     inames=[]
     for i in items
@@ -219,7 +219,7 @@ submit_notes = (items, notetuples, cback, eback) ->
 
 submit_posts = (items, postables, cback, eback) ->
     itemtype= "ads/itemtype:pub"
-    console.log items, '|||', postables
+    #console.log items, '|||', postables
     itemnames= (i.basic.name for i in items)
     url= prefix+"/items/postings"
     if postables.length >0
@@ -234,7 +234,7 @@ submit_posts = (items, postables, cback, eback) ->
 #there will always be items so no guarding required
 save_items = (items, cback, eback) ->
     itemtype= "ads/itemtype:pub"
-    console.log items, '|||'
+    #console.log items, '|||'
     itemnames= (i.basic.name for i in items)
     url= prefix+"/items"
     data=

@@ -10,8 +10,6 @@
 
   $ = jQuery;
 
-  console.log("In userprofile");
-
   h = teacup;
 
   w = widgets;
@@ -302,14 +300,11 @@
       var cback, eback, loc, useremail;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert('Did not succeed');
       };
-      console.log("GGG", this.model, this.$el);
       useremail = this.model.get('email');
       return syncs.accept_invitation(useremail, this.model.get('fqpn'), cback, eback);
     };
@@ -388,8 +383,6 @@
         }
         return _results;
       })();
-      console.log("RENDER1", rendered);
-      console.log("RENDER2");
       if (this.collection.invite) {
         if (views.length === 0) {
           rendered = ["<td colspan=5>No Invitations</td>"];
@@ -499,7 +492,6 @@
     return $.get(userInfoURL, function(data) {
       var inlist, userdict;
       userdict = parse_userinfo(data);
-      console.log("USERDICTA==============", userdict);
       render_postable(userdict.userinfo, userdict["" + wordmap[ptype] + "owned"], $owned, 'ow', false, ptype, true);
       if (ptype === 'lib') {
         inlist = userdict.librariesin;

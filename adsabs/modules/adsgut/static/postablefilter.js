@@ -8,13 +8,10 @@
 
   $ = jQuery;
 
-  console.log("In Funcs");
-
   h = teacup;
 
   parse_querystring = function(qstr) {
     var q, qlist;
-    console.log("QQQ", qstr);
     qlist = qstr.split('&');
     qlist = _.difference(qlist, ['query=tagtype:ads/tagtype:tag']);
     qlist = (function() {
@@ -29,7 +26,6 @@
     if (qlist.length === 1 && qlist[0] === "") {
       qlist = [];
     }
-    console.log("QLIST", qlist);
     return qlist;
   };
 
@@ -48,7 +44,6 @@
 
   do_postable_filter = function(sections, config) {
     var loc, nonqloc, urla;
-    console.log("CONFIG", config);
     $.get(config.tagsPURL, function(data) {
       var k, v, _ref, _results;
       _ref = data.tags;
@@ -63,7 +58,6 @@
     $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
       var e, qtxtlist, suggestions, _i, _len;
       suggestions = data.simpletags;
-      console.log("SUGG", suggestions);
       qtxtlist = parse_querystring(config.querystring);
       if (qtxtlist.length > 0) {
         sections.$breadcrumb.text('Tags: ');
@@ -76,7 +70,6 @@
       return $.get(config.itemsPURL, function(data) {
         var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
         theitems = data.items;
-        console.log("THEITEMS", theitems);
         sections.$count.text("" + theitems.length + " papers. ");
         sections.$count.show();
         thecount = data.count;
@@ -104,8 +97,7 @@
         sections.$bigqueryform.attr("hello", "world");
         itemsq = itemlist.join("&");
         return $.get("" + config.itPURL + "?" + itemsq, function(data) {
-          var cb, eb, ido, k, notes, plinv, postings, ptimes, sorteditems, stags, times, v, _j, _k, _len1, _len2, _ref, _ref1;
-          console.log("POSTINGS", data.postings, config.fqpn);
+          var cb, eb, ido, k, notes, plinv, postings, ptimes, sorteditems, stags, times, v, _j, _len1, _ref, _ref1;
           _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
           postings = {};
           times = {};
@@ -136,7 +128,6 @@
                 }
                 return _results;
               })();
-              console.log("PTIMES", ptimes);
               if (ptimes.length > 0) {
                 times[k] = ptimes[0];
               } else {
@@ -147,18 +138,12 @@
               times[k] = 0;
             }
           }
-          console.log("TIMES ARE ROCKING", times);
           sorteditems = _.sortBy(theitems, function(i) {
             return -Date.parse(times[i.basic.fqin]);
           });
           for (_j = 0, _len1 = sorteditems.length; _j < _len1; _j++) {
             i = sorteditems[_j];
             i.whenposted = times[i.basic.fqin];
-          }
-          console.log("SORTEDITEMS");
-          for (_k = 0, _len2 = sorteditems.length; _k < _len2; _k++) {
-            i = sorteditems[_k];
-            console.log(i.basic.fqin, i.whenposted, i.whenpostedsecs);
           }
           ido = {
             stags: stags,
@@ -176,36 +161,35 @@
           plinv = new itemsdo.ItemsFilterView(ido);
           plinv.render();
           eb = function(err) {
-            var d, _l, _len3, _results;
-            console.log("ERR", err);
+            var d, _k, _len2, _results;
             _results = [];
-            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
-              d = theitems[_l];
+            for (_k = 0, _len2 = theitems.length; _k < _len2; _k++) {
+              d = theitems[_k];
               _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
             }
             return _results;
           };
           cb = function(data) {
-            var d, docnames, thedocs, _l, _len3, _len4, _m, _ref2, _ref3, _results;
+            var d, docnames, thedocs, _k, _l, _len2, _len3, _ref2, _ref3, _results;
             thedocs = {};
             _ref2 = data.response.docs;
-            for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
-              d = _ref2[_l];
+            for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+              d = _ref2[_k];
               thedocs[d.bibcode] = d;
             }
             docnames = (function() {
-              var _len4, _m, _ref3, _results;
+              var _l, _len3, _ref3, _results;
               _ref3 = data.response.docs;
               _results = [];
-              for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
-                d = _ref3[_m];
+              for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+                d = _ref3[_l];
                 _results.push(d.bibcode);
               }
               return _results;
             })();
             _results = [];
-            for (_m = 0, _len4 = theitems.length; _m < _len4; _m++) {
-              d = theitems[_m];
+            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
+              d = theitems[_l];
               if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
                 e = thedocs[d.basic.name];
               } else {
@@ -215,15 +199,6 @@
             }
             return _results;
           };
-          console.log("ITTYS", theitems, (function() {
-            var _l, _len3, _results;
-            _results = [];
-            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
-              e = theitems[_l];
-              _results.push(e.basic.fqin);
-            }
-            return _results;
-          })());
           return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
         });
       });

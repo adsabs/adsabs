@@ -25,9 +25,9 @@
 <script type="text/javascript">
   $(document).ready( function(){
     source = $('#source').text()
-    console.log("SOURCE", source);
+    //console.log("SOURCE", source);
     window.compiledJS = CoffeeScript.compile(source, {'bare': 'on'});
-    console.log(window.compiledJS);
+    //console.log(window.compiledJS);
     //alert(window.compiledJS);
     eval(window.compiledJS);
   });
