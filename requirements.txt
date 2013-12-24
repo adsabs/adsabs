@@ -16,7 +16,6 @@ Flask>=0.9
 MongoAlchemy>=0.14
 MySQL-python
 PyVirtualDisplay>=0.1.2
-SQLAlchemy>=0.8.1
 WTForms>=1.0.4
 beautifulsoup4>=4.2.0
 beaver>=29
