@@ -9,8 +9,6 @@
 
   $ = jQuery;
 
-  console.log("In Funcs");
-
   h = teacup;
 
   editable_text = function(text) {
@@ -396,7 +394,6 @@
     };
 
     HideableView.prototype.toggle = function() {
-      console.log("in toggle", this.state);
       if (this.state === 0) {
         this.show();
       } else {
@@ -406,7 +403,6 @@
     };
 
     HideableView.prototype.hide = function() {
-      console.log("HIDE");
       this.$('.hider .i').html('+');
       this.state = 0;
       return this.$(this.theclass).hide();
@@ -485,7 +481,6 @@
     if (trigtype == null) {
       trigtype = "hover";
     }
-    console.log("EL: ", el, $(el));
     if (trigtype === 'click') {
       $(el).append('&nbsp;[<a href="#" class="hoverhelp" onclick="return false;">?</a>]');
     } else if (trigtype === 'hover') {
@@ -508,9 +503,11 @@
       nrows = 2;
     }
     if (pview === 'udg' || pview === 'none') {
-      notetext = 'Post note to all libraries this item is in (notes are private by default)';
+      notetext = 'Make note visible to members of all libraries this item is in (notes are private by default)';
+    } else if (pview === 'pub') {
+      notetext = 'Make note visible to members of the public (notes are private by default)';
     } else {
-      notetext = 'Post note to this library only (notes are private by default)';
+      notetext = 'Make note visible to members of this library (notes are private by default)';
     }
     return h.div(".postalnote", function() {
       h.textarea(".controls.input-xlarge.txt", {
@@ -532,7 +529,6 @@
   });
 
   multiselect = h.renderable(function(daclass, choices, choicedict) {
-    console.log("IN MULTISELECT");
     return h.select(".multi" + daclass, {
       multiple: "multiple"
     }, function() {
@@ -555,7 +551,6 @@
       c = librarychoices[_i];
       librarychoicedict[c] = parse_fqin(c);
     }
-    console.log("WEE", librarychoicedict);
     h.legend("Save all of these items");
     if (nameable) {
       h.div(".control-group", function() {

@@ -150,16 +150,16 @@ get_postables_writable = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesusercanwriteto"
     do_get(url, cback, eback)
 
-submit_note = (item, itemname, note, cback, eback) ->
+submit_note = (item, itemname, notetuple, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
     ts={}
-    ts[itemname] = [{content:note, tagtype:tagtype}]
+    ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
     data=
         tagspecs: ts
         itemtype:itemtype
-    if note != ""
+    if notetuple[0] != ""
         send_params(url, data, cback, eback)
 
 submit_tag = (item, itemname, tag, cback, eback) ->
@@ -196,7 +196,7 @@ submit_tags = (items, tags, cback, eback) ->
     else
         cback()
 
-submit_notes = (items, notes, cback, eback) ->
+submit_notes = (items, notetuples, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/items/taggings"
@@ -205,9 +205,9 @@ submit_notes = (items, notes, cback, eback) ->
     for i in items
         fqin=i.basic.fqin
         name=i.basic.name
-        if notes[fqin].length > 0
+        if notetuples[fqin].length > 0
             inames.push(name)
-            ts[name] = ({content:note, tagtype:tagtype} for note in notes[fqin])
+            ts[name] = ({content:nt[0], tagtype:tagtype, tagmode:nt[1]} for nt in notetuples[fqin])
     if inames.length >0
         data=
             tagspecs: ts

@@ -1,6 +1,6 @@
 root = exports ? this
 $=jQuery
-console.log "In Funcs"
+#console.log "In Funcs"
 {renderable, ul, li, dl, dt, dd, raw, br, strong} = teacup
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
@@ -75,9 +75,12 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
 
 
 format_notes_for_item = (fqin, notes, nick) ->
-  t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
+  start = '<table class="table-condensed table-striped">'
+  end = "</table>"
+  #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
+  t3list=("<tr><td>#{t[2]}</td><td>#{t[0]}</td></tr>" for t in notes[fqin])
   if t3list.length >0
-    return t3list.join("")
+    return start+t3list.join("")+end
   else
     return ""
 
@@ -90,7 +93,7 @@ format_notes_for_item = (fqin, notes, nick) ->
 
 format_tags_for_item = (fqin, stags, nick) ->
   t2list=({url:"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}"} for t in stags[fqin])
-  console.log("T@LIST", t2list)
+  #console.log("T@LIST", t2list)
   if t2list.length >0
     return t2list
   else
@@ -127,13 +130,13 @@ format_stuff = (fqin, nick, stags, postings, notes) ->
   return htmlstring
 
 format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asform=false) ->
-  console.log "HTML", $sel.html()
+  #console.log "HTML", $sel.html()
   adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
   htmlstring = ""
-  console.log items.length, "ITTABITTA", (i.basic.fqin for i in items), "}}"
+  #console.log items.length, "ITTABITTA", (i.basic.fqin for i in items), "}}"
   for i in items
     fqin=i.basic.fqin
-    #console.log "whatsup", fqin, items.length, $sel, htmlstring
+    ##console.log "whatsup", fqin, items.length, $sel, htmlstring
     url=adslocation + "#{i.basic.name}"
     htmlstring = htmlstring + "<#{formatter}><a href=\"#{url}\">#{i.basic.name}</a><br/>"
     htmlstring=htmlstring+format_tags_for_item(fqin, stags, nick)
@@ -146,7 +149,7 @@ format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asf
   $('#breadcrumb').append("#{count} items")
 
 get_tags = (tags, tqtype) ->
-  console.log "TAGS", tags
+  #console.log "TAGS", tags
   tdict={}
   if tqtype is 'stags'
     return ([t[3], [t[0]]] for t in tags)
@@ -162,16 +165,16 @@ get_tags = (tags, tqtype) ->
 get_taggings = (data) ->
   stags={}
   notes={}
-  console.log "DATA", data
+  #console.log "DATA", data
   for own k,v of data.taggings
-    #console.log "1>>>", k,v[0], v[1]
+    ##console.log "1>>>", k,v[0], v[1]
     if v[0] > 0
-      stags[k]=([e.thething.tagname, e.thething.tagtype] for e in v[1] when e.thething.tagtype is "ads/tagtype:tag")
-      notes[k]=(e.thething.tagdescription for e in v[1] when e.thething.tagtype is "ads/tagtype:note")
+      stags[k]=([e.posting.tagname, e.posting.tagtype] for e in v[1] when e.posting.tagtype is "ads/tagtype:tag")
+      notes[k]=([e.posting.tagdescription, e.posting.whenposted, e.posting.postedby] for e in v[1] when e.posting.tagtype is "ads/tagtype:note")
     else
       stags[k]=[]
       notes[k]=[]
-    #console.log "HHHHH", stags[k], notes[k]
+    ##console.log "HHHHH", stags[k], notes[k]
   return [stags, notes]
 
 get_groups = (nick, cback) ->
@@ -193,8 +196,8 @@ get_groups = (nick, cback) ->
 #       # return v.render()
 #       views=(new RWToggleView({rwmode:users[u], fqpn:fqpn, memberable:u}) for u of users)
 #       rendered = (v.render().el for v in views)
-#       console.log "RENDER1", rendered
-#       console.log "RENDER2"
+#       #console.log "RENDER1", rendered
+#       #console.log "RENDER2"
 #       $widget=w.$one_col_table("User", rendered)
 #   else
 #     userlist= (k for k,v of users)
@@ -206,23 +209,23 @@ rwmap = (boolrw) ->
         return "read only"
 
 postable_inviteds_template = renderable (fqpn, users, scmode=false) ->
-  console.log "USERS", users
+  #console.log "USERS", users
   userlist= (v[0] for k,v of users)
   if scmode
     userlist= (v[0] for k,v of users)
     if userlist.length == 0
       userlist = ['No Invitations Yet']
-    console.log "USERLIST", userlist
+    #console.log "USERLIST", userlist
     w.one_col_table "Invited Users", userlist
   else
     if userlist.length == 0
       users={'No Invitations Yet': ['No Invitations Yet','']}
-    console.log users
+    #console.log users
     namedict={}
     for k of users
-      console.log "k is", k
+      #console.log "k is", k
       namedict[users[k][0]]=rwmap(users[k][1])
-    console.log "BANEDICT", namedict, users
+    #console.log "BANEDICT", namedict, users
     w.table_from_dict("Invited User", "Access", namedict)
 
 # #Bug: these need to become collection Views
@@ -316,13 +319,13 @@ class InviteUser extends Backbone.View
   inviteUserEH: =>
     loc=window.location
     cback = (data) ->
-            console.log "return data", data, loc
+            #console.log "return data", data, loc
             window.location=location
     eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert "Did not succeed: #{etext}"
-    console.log("GGG",@$el)
+    #console.log("GGG",@$el)
     #default for groups
     changerw=false
     if @withcb
@@ -358,13 +361,13 @@ class AddGroup extends Backbone.View
   addGroupEH: =>
     loc=window.location
     cback = (data) ->
-            console.log "return data", data, loc
+            #console.log "return data", data, loc
             window.location=location
     eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert "Did not succeed: #{etext}"
-    console.log("GGG",@$el)
+    #console.log("GGG",@$el)
     #default for groups
     changerw=false
     if @withcb
@@ -374,7 +377,7 @@ class AddGroup extends Backbone.View
       else
         changerw=false
     groupchosen=@$('.sel').val()
-    console.log("GC", groupchosen)
+    #console.log("GC", groupchosen)
     syncs.add_group(groupchosen, @postable, changerw, cback, eback)
 
 
@@ -396,10 +399,10 @@ class CreatePostable extends Backbone.View
   createPostableEH: =>
     loc=window.location
     cback = (data) ->
-            console.log "return data", data, loc
+            #console.log "return data", data, loc
             window.location=location
     eback = (xhr, etext) ->
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert "Did not succeed: #{etext}"
     postable={}

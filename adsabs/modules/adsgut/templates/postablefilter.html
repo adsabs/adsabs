@@ -19,7 +19,7 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquery" name="bigquery" type="hidden" value="">
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
 </span></label>
 </form>
 </span>
@@ -30,6 +30,8 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquery" name="bigquery" type="hidden" value="">
   <button class="btn" type="submit">View in search page</button>
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+</span></label>
 </form>
 </span>
 <hr/>
@@ -45,7 +47,7 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquery" name="bigquery" type="hidden" value="">
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
 </span></label>
 </form>
 </span>
@@ -71,6 +73,7 @@ $ ->
   vars="{{ querystring | safe }}"
 
   config = 
+    fqpn : "{{p.basic.fqin}}"
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
     tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
@@ -92,6 +95,7 @@ $ ->
     $bigquery : $('#bigquery')
     $bigqueryform : $('#bigqueryform')
     $breadcrumb: $('#breadcrumb')
+    $count: $('#count')
 
 
   {% if pflavor!= 'udg' and pflavor!='pub' %}

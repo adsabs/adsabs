@@ -40,6 +40,9 @@ do_postable_filter = (sections, config) ->
             sections.$breadcrumb.show()
         $.get config.itemsPURL, (data) ->
             theitems=data.items
+            console.log("THEITEMS", theitems)
+            sections.$count.text("#{theitems.length} papers. ")
+            sections.$count.show()
             thecount=data.count
             itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
             biblist=(i.basic.name for i in theitems)
@@ -49,19 +52,35 @@ do_postable_filter = (sections, config) ->
             sections.$bigqueryform.attr("hello", "world")
             itemsq=itemlist.join("&")
             $.get "#{config.itPURL}?#{itemsq}", (data)->
+                console.log "POSTINGS", data.postings, config.fqpn
                 [stags, notes]=get_taggings(data)
                 postings={}
+                times={}
                 for own k,v of data.postings
                     if v[0] > 0
-                        postings[k]=(e.thething.postfqin for e in v[1])
+                        postings[k]=(e.posting.postfqin for e in v[1])
+                        ptimes = (e.posting.whenposted for e in v[1] when e.posting.postfqin==config.fqpn)
+                        console.log "PTIMES", ptimes
+                        if ptimes.length > 0
+                            times[k]=ptimes[0]#currently ignore others if there are more than one post
+                        else
+                            times[k]=0#earliest :-)
                     else
                         postings[k]=[]
+                        times[k] = 0
+                console.log "TIMES ARE ROCKING", times
+                sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
+                for i in sorteditems
+                    i.whenposted = times[i.basic.fqin]
+                console.log "SORTEDITEMS"
+                for i in sorteditems
+                    console.log i.basic.fqin, i.whenposted, i.whenpostedsecs 
                 ido=
                     stags:stags
                     postings:postings
                     notes:notes
                     $el:sections.$items
-                    items: theitems
+                    items: sorteditems
                     noteform: true
                     nameable: false
                     itemtype:'ads/pub'
@@ -76,7 +95,7 @@ do_postable_filter = (sections, config) ->
                     for d in theitems
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
                 cb = (data) ->
-                    console.log "CBDATA", JSON.stringify(data), data.response.docs
+                    #console.log "CBDATA", JSON.stringify(data), data.response.docs
                     thedocs = {}
                     for d in data.response.docs
                         thedocs[d.bibcode]=d

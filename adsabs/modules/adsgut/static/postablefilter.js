@@ -76,6 +76,9 @@
       return $.get(config.itemsPURL, function(data) {
         var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
         theitems = data.items;
+        console.log("THEITEMS", theitems);
+        sections.$count.text("" + theitems.length + " papers. ");
+        sections.$count.show();
         thecount = data.count;
         itemlist = (function() {
           var _j, _len1, _results;
@@ -101,9 +104,11 @@
         sections.$bigqueryform.attr("hello", "world");
         itemsq = itemlist.join("&");
         return $.get("" + config.itPURL + "?" + itemsq, function(data) {
-          var cb, eb, ido, k, notes, plinv, postings, stags, v, _ref, _ref1;
+          var cb, eb, ido, k, notes, plinv, postings, ptimes, sorteditems, stags, times, v, _j, _k, _len1, _len2, _ref, _ref1;
+          console.log("POSTINGS", data.postings, config.fqpn);
           _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
           postings = {};
+          times = {};
           _ref1 = data.postings;
           for (k in _ref1) {
             if (!__hasProp.call(_ref1, k)) continue;
@@ -115,20 +120,52 @@
                 _results = [];
                 for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
                   e = _ref2[_j];
-                  _results.push(e.thething.postfqin);
+                  _results.push(e.posting.postfqin);
                 }
                 return _results;
               })();
+              ptimes = (function() {
+                var _j, _len1, _ref2, _results;
+                _ref2 = v[1];
+                _results = [];
+                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                  e = _ref2[_j];
+                  if (e.posting.postfqin === config.fqpn) {
+                    _results.push(e.posting.whenposted);
+                  }
+                }
+                return _results;
+              })();
+              console.log("PTIMES", ptimes);
+              if (ptimes.length > 0) {
+                times[k] = ptimes[0];
+              } else {
+                times[k] = 0;
+              }
             } else {
               postings[k] = [];
+              times[k] = 0;
             }
+          }
+          console.log("TIMES ARE ROCKING", times);
+          sorteditems = _.sortBy(theitems, function(i) {
+            return -Date.parse(times[i.basic.fqin]);
+          });
+          for (_j = 0, _len1 = sorteditems.length; _j < _len1; _j++) {
+            i = sorteditems[_j];
+            i.whenposted = times[i.basic.fqin];
+          }
+          console.log("SORTEDITEMS");
+          for (_k = 0, _len2 = sorteditems.length; _k < _len2; _k++) {
+            i = sorteditems[_k];
+            console.log(i.basic.fqin, i.whenposted, i.whenpostedsecs);
           }
           ido = {
             stags: stags,
             postings: postings,
             notes: notes,
             $el: sections.$items,
-            items: theitems,
+            items: sorteditems,
             noteform: true,
             nameable: false,
             itemtype: 'ads/pub',
@@ -139,37 +176,36 @@
           plinv = new itemsdo.ItemsFilterView(ido);
           plinv.render();
           eb = function(err) {
-            var d, _j, _len1, _results;
+            var d, _l, _len3, _results;
             console.log("ERR", err);
             _results = [];
-            for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
-              d = theitems[_j];
+            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
+              d = theitems[_l];
               _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
             }
             return _results;
           };
           cb = function(data) {
-            var d, docnames, thedocs, _j, _k, _len1, _len2, _ref2, _ref3, _results;
-            console.log("CBDATA", JSON.stringify(data), data.response.docs);
+            var d, docnames, thedocs, _l, _len3, _len4, _m, _ref2, _ref3, _results;
             thedocs = {};
             _ref2 = data.response.docs;
-            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-              d = _ref2[_j];
+            for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
+              d = _ref2[_l];
               thedocs[d.bibcode] = d;
             }
             docnames = (function() {
-              var _k, _len2, _ref3, _results;
+              var _len4, _m, _ref3, _results;
               _ref3 = data.response.docs;
               _results = [];
-              for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-                d = _ref3[_k];
+              for (_m = 0, _len4 = _ref3.length; _m < _len4; _m++) {
+                d = _ref3[_m];
                 _results.push(d.bibcode);
               }
               return _results;
             })();
             _results = [];
-            for (_k = 0, _len2 = theitems.length; _k < _len2; _k++) {
-              d = theitems[_k];
+            for (_m = 0, _len4 = theitems.length; _m < _len4; _m++) {
+              d = theitems[_m];
               if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
                 e = thedocs[d.basic.name];
               } else {
@@ -180,10 +216,10 @@
             return _results;
           };
           console.log("ITTYS", theitems, (function() {
-            var _j, _len1, _results;
+            var _l, _len3, _results;
             _results = [];
-            for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
-              e = theitems[_j];
+            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
+              e = theitems[_l];
               _results.push(e.basic.fqin);
             }
             return _results;

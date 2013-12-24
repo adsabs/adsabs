@@ -9,8 +9,6 @@
 
   $ = jQuery;
 
-  console.log("In Funcs");
-
   renderable = teacup.renderable, ul = teacup.ul, li = teacup.li, dl = teacup.dl, dt = teacup.dt, dd = teacup.dd, raw = teacup.raw, br = teacup.br, strong = teacup.strong;
 
   w = widgets;
@@ -92,19 +90,21 @@
   };
 
   format_notes_for_item = function(fqin, notes, nick) {
-    var t, t3list;
+    var end, start, t, t3list;
+    start = '<table class="table-condensed table-striped">';
+    end = "</table>";
     t3list = (function() {
       var _i, _len, _ref, _results;
       _ref = notes[fqin];
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
-        _results.push("<span>" + t + "</span><br/>");
+        _results.push("<tr><td>" + t[2] + "</td><td>" + t[0] + "</td></tr>");
       }
       return _results;
     })();
     if (t3list.length > 0) {
-      return t3list.join("");
+      return start + t3list.join("") + end;
     } else {
       return "";
     }
@@ -126,7 +126,6 @@
       }
       return _results;
     })();
-    console.log("T@LIST", t2list);
     if (t2list.length > 0) {
       return t2list;
     } else {
@@ -178,18 +177,8 @@
     if (asform == null) {
       asform = false;
     }
-    console.log("HTML", $sel.html());
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
     htmlstring = "";
-    console.log(items.length, "ITTABITTA", (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = items.length; _i < _len; _i++) {
-        i = items[_i];
-        _results.push(i.basic.fqin);
-      }
-      return _results;
-    })(), "}}");
     for (_i = 0, _len = items.length; _i < _len; _i++) {
       i = items[_i];
       fqin = i.basic.fqin;
@@ -209,7 +198,6 @@
 
   get_tags = function(tags, tqtype) {
     var fqtn, k, name, t, tdict, type, user, v, _i, _len;
-    console.log("TAGS", tags);
     tdict = {};
     if (tqtype === 'stags') {
       return (function() {
@@ -249,7 +237,6 @@
     var e, k, notes, stags, v, _ref;
     stags = {};
     notes = {};
-    console.log("DATA", data);
     _ref = data.taggings;
     for (k in _ref) {
       if (!__hasProp.call(_ref, k)) continue;
@@ -261,8 +248,8 @@
           _results = [];
           for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
             e = _ref1[_i];
-            if (e.thething.tagtype === "ads/tagtype:tag") {
-              _results.push([e.thething.tagname, e.thething.tagtype]);
+            if (e.posting.tagtype === "ads/tagtype:tag") {
+              _results.push([e.posting.tagname, e.posting.tagtype]);
             }
           }
           return _results;
@@ -273,8 +260,8 @@
           _results = [];
           for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
             e = _ref1[_i];
-            if (e.thething.tagtype === "ads/tagtype:note") {
-              _results.push(e.thething.tagdescription);
+            if (e.posting.tagtype === "ads/tagtype:note") {
+              _results.push([e.posting.tagdescription, e.posting.whenposted, e.posting.postedby]);
             }
           }
           return _results;
@@ -308,7 +295,6 @@
     if (scmode == null) {
       scmode = false;
     }
-    console.log("USERS", users);
     userlist = (function() {
       var _results;
       _results = [];
@@ -331,7 +317,6 @@
       if (userlist.length === 0) {
         userlist = ['No Invitations Yet'];
       }
-      console.log("USERLIST", userlist);
       return w.one_col_table("Invited Users", userlist);
     } else {
       if (userlist.length === 0) {
@@ -339,13 +324,10 @@
           'No Invitations Yet': ['No Invitations Yet', '']
         };
       }
-      console.log(users);
       namedict = {};
       for (k in users) {
-        console.log("k is", k);
         namedict[users[k][0]] = rwmap(users[k][1]);
       }
-      console.log("BANEDICT", namedict, users);
       return w.table_from_dict("Invited User", "Access", namedict);
     }
   });
@@ -475,14 +457,11 @@
       var adsid, cback, changerw, eback, loc, rwmode;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert("Did not succeed: " + etext);
       };
-      console.log("GGG", this.$el);
       changerw = false;
       if (this.withcb) {
         rwmode = this.$('.cb').is(':checked');
@@ -546,14 +525,11 @@
       var cback, changerw, eback, groupchosen, loc, rwmode;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert("Did not succeed: " + etext);
       };
-      console.log("GGG", this.$el);
       changerw = false;
       if (this.withcb) {
         rwmode = this.$('.cb').is(':checked');
@@ -564,7 +540,6 @@
         }
       }
       groupchosen = this.$('.sel').val();
-      console.log("GC", groupchosen);
       return syncs.add_group(groupchosen, this.postable, changerw, cback, eback);
     };
 
@@ -607,11 +582,9 @@
       var cback, eback, loc, postable;
       loc = window.location;
       cback = function(data) {
-        console.log("return data", data, loc);
         return window.location = location;
       };
       eback = function(xhr, etext) {
-        console.log("ERROR", etext, loc);
         return alert("Did not succeed: " + etext);
       };
       postable = {};

@@ -37,7 +37,7 @@ from mongoengine import Document
 from bson.objectid import ObjectId
 BLUEPRINT_MODE=os.environ.get('BLUEPRINT_MODE', True)
 BLUEPRINT_MODE=bool(BLUEPRINT_MODE)
-print "BLUEPRINT MODE", BLUEPRINT_MODE
+#print "BLUEPRINT MODE", BLUEPRINT_MODE
 
 if not BLUEPRINT_MODE:
     adsgut_app=flask.Flask(__name__)
@@ -56,8 +56,8 @@ else:
     from adsabs.extensions import solr
     #adsgut_app.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
 
-#print dir(adsgut), type(adsgut)
-print "HELLO"
+##print dir(adsgut), type(adsgut)
+#print "HELLO"
 #adsgut.config.from_object(__name__)
 if not BLUEPRINT_MODE:
     adsgut.config['TESTING'] = True
@@ -160,7 +160,7 @@ def _sortget(qdict):
     #a serialixed dict of ascending and field
     sortstring=_dictg('sort', qdict)
     if not sortstring:
-        return {'field':'thething__whenposted', 'ascending':False}
+        return {'field':'posting__whenposted', 'ascending':False}
     sort={}
     sort['field'], sort['ascending'] = sortstring.split(':')
     sort['ascending']=(sort['ascending']=='True')
@@ -208,7 +208,7 @@ def _pagtupleget(qdict):
 #currently force a new items each time.
 def _itemsget(qdict):
     itemlist=_dictg('items', qdict, True)
-    print "itemlist", itemlist
+    #print "itemlist", itemlist
     if not itemlist[0]:
         return []
     #Possible security hole bug
@@ -262,8 +262,8 @@ def before_request():
         adsid=current_user.get_username()
     except:
         adsid=None
-    print "USER", adsid, current_user.get_id()
-    #print "POSTER", url_for('adsgut.postForm', itemtypens='ads', itemtypename='pub')
+    #print "USER", adsid, current_user.get_id()
+    ##print "POSTER", url_for('adsgut.postForm', itemtypens='ads', itemtypename='pub')
     p=itemsandtags.Postdb(mongoengine)
     w=p.whosdb
     g.db=w
@@ -275,9 +275,9 @@ def before_request():
     else:
         try:
             user=w.getUserForAdsid(None, adsid)
-            print "---------->IN HERE", adsid
+            #print "---------->IN HERE", adsid
         except:
-            print "<----------OR HERE", adsid, sys.exc_info()
+            #print "<----------OR HERE", adsid, sys.exc_info()
             adsgutuser=w.getUserForNick(None, 'adsgut')
             adsuser=w.getUserForNick(adsgutuser, 'ads')
             #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
@@ -345,7 +345,7 @@ def userInfo(nick):
     ds=[]
     for i, j in enumerate(jsons):
         d = json.loads(j)
-        print "D", d
+        #print "D", d
         if names[d['fqpn']]=='':
             d['reason'] = ''
         else:
@@ -534,7 +534,7 @@ def doPostableChanges(po, pt, pn):
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
         #specify your own nick for accept or decline
-        print "LALALALALLA", request.json
+        #print "LALALALALLA", request.json
         jsonpost=dict(request.json)
         memberable=_dictp('memberable', jsonpost)
         changerw=_dictp('changerw', jsonpost)
@@ -545,7 +545,7 @@ def doPostableChanges(po, pt, pn):
         if not memberable:
             doabort("BAD_REQ", "No User Specified")
         op=_dictp('op', jsonpost)
-        print "NICKOP", memberable, op
+        #print "NICKOP", memberable, op
         if not op:
             doabort("BAD_REQ", "No Op Specified")
         if op=="invite":
@@ -792,7 +792,7 @@ def postableFilterHtml(po, pt, pn):
         tqtype='stags'
         pflavor='udg'
     else:
-        pflavor='postable'
+        pflavor=p.basic.fqin
         tqtype='tagname'
     tqtype='tagname'
     #BUG using currentuser right now. need to support a notion of useras
@@ -840,9 +840,9 @@ def tagsUserCanWriteTo(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
-    print "TAGGER", tagtype
+    #print "TAGGER", tagtype
     stags=g.dbp.getAllTagsForUser(g.currentuser, useras, tagtype)
-    print "STAGS", stags
+    #print "STAGS", stags
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
@@ -892,14 +892,14 @@ def itemsForPostable(po, pt, pn):
         #BUG find a way of having the usernick in this context be from elsewhere
         #the elsewhere would come from postings and taggings, and confine to this group
         #perhaps all the query funcs would need some re-org
-        print "QQQ",query, request.args
+        #print "QQQ",query, request.args
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         pagtuple = _pagtupleget(query)
         criteria= _criteriaget(query)
         postable= po+"/"+pt+":"+pn
         q=_queryget(query)
-        print "Q is", q
+        #print "Q is", q
         if not q.has_key('postables'):
             q['postables']=[]
         q['postables'].append(postable)
@@ -1073,6 +1073,8 @@ def _setupTagspec(ti, useras):
     tagspec['creator']=useras.basic.fqin
     if ti.has_key('name'):
         tagspec['name'] = ti['name']
+    if ti.has_key('tagmode'):
+        tagspec['tagmode'] = ti['tagmode']
     if ti.has_key('content'):
         tagspec['content'] = ti['content']
     tagspec['tagtype'] = ti['tagtype']
@@ -1097,7 +1099,7 @@ def tagsForItem(ns, itemname):
             doabort('BAD_REQ', "No itemname specified to tag")
         for ti in tagspecs[itemname]:
             tagspec=_setupTagspec(ti, useras)
-            print "TAGSPEC IS", tagspec
+            #print "TAGSPEC IS", tagspec
             i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
             newtaggings.append(td)
 
@@ -1112,7 +1114,7 @@ def tagsForItem(ns, itemname):
         #return jsonify({'tags':tags, 'count':count})
         return jsonify(taggings=taggingsdict)
     else:
-        print "REQUEST.args", request.args, dict(request.args)
+        #print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
         useras, usernick=_userget(g, query)
 
@@ -1122,7 +1124,7 @@ def tagsForItem(ns, itemname):
         #By this time query is popped down
         #I am not convinced this is how to do this query
         # criteria= _criteriaget(query)
-        # criteria.append(['field':'thething__thingtopostfqin', 'op':'eq', 'value':ifqin])
+        # criteria.append(['field':'posting__thingtopostfqin', 'op':'eq', 'value':ifqin])
         # count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
         #     query, usernick, criteria, sort)
         #count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
@@ -1178,7 +1180,7 @@ def itemsPostings():
     #q={useras?, sort?, items}
     if request.method=='POST':
         jsonpost=dict(request.json)
-        print "JSONPOST", request.json
+        #print "JSONPOST", request.json
         useras = _userpostget(g, jsonpost)
         items = _itemspostget(jsonpost)
         fqpo = _postablesget(jsonpost)
@@ -1198,7 +1200,7 @@ def itemsPostings():
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-        print 'QUERY', query
+        #print 'QUERY', query
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
@@ -1216,7 +1218,7 @@ def itemsTaggingsAndPostings():
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-        #print 'AAAQUERY', query, request.args
+        ##print 'AAAQUERY', query, request.args
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
@@ -1225,7 +1227,7 @@ def itemsTaggingsAndPostings():
             items, None, sort)
         taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
-        #print "MEEP",taggingsdict, postingsdict
+        ##print "MEEP",taggingsdict, postingsdict
         return jsonify(postings=postingsdict, taggings=taggingsdict)
 
 @adsgut.route('/itemtypes', methods=['POST', 'GET'])
@@ -1302,15 +1304,15 @@ from config import config
 @adsgut.route('/postform/<itemtypens>/<itemtypename>/html', methods=['POST'])
 def postForm(itemtypens, itemtypename):
     qstring=""
-    print "NS,NAME", itemtypens, itemtypename
+    #print "NS,NAME", itemtypens, itemtypename
     itemtype=itemtypens+"/"+itemtypename
     if request.method=='POST':
         if itemtype=="ads/pub": 
-            print "RVALS", request.values
+            #print "RVALS", request.values
             current_page=request.referrer
             if request.values.has_key('bibcode'):
                 bibcodes = request.values.getlist('bibcode')
-                print "got bibcodes here", bibcodes
+                #print "got bibcodes here", bibcodes
             else:
                 try:
                     query_components = json.loads(request.values.get('current_search_parameters'))
@@ -1333,13 +1335,13 @@ def postForm(itemtypens, itemtypename):
                     return render_template('errors/generic_error.html', error_message='Error while loading bibcodes for posting. Please try later.')
 
                 bibcodes = [x.bibcode for x in resp.get_docset_objects()]
-                print "g2bc here", bibcodes
+                #print "g2bc here", bibcodes
             items=["ads/"+i for i in bibcodes]
-            print "ITTEMS", items
+            #print "ITTEMS", items
         elif itemtype=="ads/search":
             itemstring=query.get('items',[''])[0]
     else:
-        print "ITEMTYPE", itemtype
+        #print "ITEMTYPE", itemtype
         query=dict(request.args)
         querystring=request.query_string
         itemstring=query.get('items',[''])[0]
@@ -1355,7 +1357,7 @@ def postForm(itemtypens, itemtypename):
         theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
     elif itemtype=="ads/search":
         theitems=[{ 'basic':{'name':itemstring,'fqin':'ads/'+itemstring}}]
-    print "THEITEMS", theitems
+    #print "THEITEMS", theitems
     #How do we BUG get itemtype. we should redofqin to ads/pub:name as the itemtype
     #always determines the namespace of the item. This would mean name had to be
     #globally unique rather than locally for user usage, unless we have a dual name
@@ -1372,7 +1374,7 @@ def postForm(itemtypens, itemtypename):
         qstring=itemstring
     if nameable and singlemode:
         nameable=True
-    print "QSTRING", qstring, current_page
+    #print "QSTRING", qstring, current_page
     if request.method=="POST":
         return render_template('postform_fancy.html', items=theitems, 
             querystring=qstring, 
@@ -1384,7 +1386,7 @@ def postForm(itemtypens, itemtypename):
     else:
         return render_template('errors/generic_error.html', error_message='Only POST supported for this for now.')
         #return error instead
-        print "Rendering in postform2"
+        #print "Rendering in postform2"
         return render_template('postform2.html', items=theitems, 
             querystring=qstring, 
             singlemode=singlemode,
@@ -1438,27 +1440,27 @@ def perform_solr_bigquery(bibcodes):
     #Perform the request
     qdict['rows']=len(bibcodes)
     rstr = "bibcode\n"+"\n".join(bibcodes)
-    print "RSTR", rstr
+    #print "RSTR", rstr
     r = requests.post(url, params=qdict, data=rstr, headers=headers)
     #Check for problems
-    print '||||||||||||||||||||||||||||||||||||||||||||||||||||'
+    #print '||||||||||||||||||||||||||||||||||||||||||||||||||||'
     try:
         r.raise_for_status()
     except Exception, e:
-        print "1"
+        #print "1"
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
     
     try:
         d = r.json()
-        print "2"
+        #print "2"
     except Exception, e:
-        print "3"
+        #print "3"
         exc_info = sys.exc_info()
         app.logger.error("Author JSON decode error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
         r = None
         d = {}
-    print "D is", d
+    #print "D is", d
     return d
 
 @adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
@@ -1480,11 +1482,11 @@ def get_classic_libraries(cookieid, password=None):
 @adsgut.route('/bigquery/bibcodes', methods=['POST'])
 def get_bigquery_solr():
     if request.method=='POST':
-        #print request.json
+        ##print request.json
         jsonpost=dict(request.json)
         #henceforth this will be names
         bibcodes = _bibcodespostget(jsonpost)
-        print "bcodes", bibcodes
+        #print "bcodes", bibcodes
         d=perform_solr_bigquery(bibcodes)
         return jsonify(d)
 

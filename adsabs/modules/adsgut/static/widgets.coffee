@@ -1,6 +1,6 @@
 root = exports ? this
 $=jQuery
-console.log "In Funcs"
+#console.log "In Funcs"
 h = teacup
 
 editable_text =  (text) ->
@@ -209,7 +209,7 @@ class HideableView extends Backbone.View
         {@widget, @state, @theclass} = options
 
     toggle: () =>
-        console.log "in toggle", @state
+        #console.log "in toggle", @state
         if @state is 0
             @show()
         else
@@ -217,7 +217,7 @@ class HideableView extends Backbone.View
         return false
 
     hide: () =>
-        console.log "HIDE"
+        #console.log "HIDE"
         @$('.hider .i').html('+')
         @state = 0
         @$(@theclass).hide()
@@ -265,7 +265,7 @@ class HoverHelpDecoratorView extends Backbone.View
         return this
 
 decohelp  = (el, helptext, htype, position, trigtype="hover") ->
-    console.log "EL: ", el, $(el)
+    #console.log "EL: ", el, $(el)
     if trigtype == 'click'
         $(el).append('&nbsp;[<a href="#" class="hoverhelp" onclick="return false;">?</a>]')
     else if trigtype == 'hover'
@@ -287,9 +287,11 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
     #<a class="btn" href="#"><i class="icon-align-justify"></i></a>
     #console.log "PVIEW3 IS", pview
     if pview is 'udg' or pview is 'none'
-        notetext = 'Post note to all libraries this item is in (notes are private by default)'
+        notetext = 'Make note visible to members of all libraries this item is in (notes are private by default)'
+    else if pview is 'pub'
+        notetext = 'Make note visible to members of the public (notes are private by default)'
     else
-        notetext = 'Post note to this library only (notes are private by default)'
+        notetext = 'Make note visible to members of this library (notes are private by default)'
     h.div ".postalnote", ->    
         h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
         h.label ".control-label", ->
@@ -325,7 +327,7 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
 #     <button type="submit" class="btn">Submit</button>
 
 multiselect = h.renderable (daclass, choices, choicedict) -> 
-    console.log "IN MULTISELECT"
+    #console.log "IN MULTISELECT"
     h.select ".multi#{daclass}", multiple:"multiple", ->
         for c in choices
             h.option  value: c, choicedict[c]
@@ -335,7 +337,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     librarychoicedict={}
     for c in librarychoices
         librarychoicedict[c]=parse_fqin(c)
-    console.log "WEE", librarychoicedict
+    #console.log "WEE", librarychoicedict
 
     h.legend "Save all of these items"
     if nameable

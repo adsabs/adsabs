@@ -21,36 +21,38 @@ enval = (tag) ->
         tag.id = tag.text
         tag.text = '<a class="tag-link" ' + title +  '" href="' + tag.url + '">' + tag.text + '</a>';
 
-        console.log("taggb",tag);
+        #console.log("taggb",tag);
     return tag
 
 #IMPORTANT:in the individual item case we do the submit, but we dont roundtrip to regen the tags
 addwa = (tag, cback) ->
     #tags = [tag.id]
     #items = [@item]
-    console.log items, tag
+    #console.log items, tag
     eback = (xhr, etext) =>
-        console.log "ERROR", etext
+        #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     syncs.submit_tag(@item.basic.fqin, @item.basic.name, tag.id, cback, eback)
 
 addwoa = (tag, cback) ->
-    console.log "NEWTAG IN ADDWOA", tag
+    #console.log "NEWTAG IN ADDWOA", tag
     @update_tags(tag.id)
     cback()
-    console.log "NEWTAGS", @newtags
+    #console.log "NEWTAGS", @newtags
 
 remIndiv = (pill) ->
     tag = $(pill).attr('data-tag-id')
-    console.log "TAGALOG", tag, pill
+    #console.log "TAGALOG", tag, pill
     if not @tagajaxsubmit
-        console.log "OLDNEWTAGS1", @tagajaxsubmit, @newtags
+        #console.log "OLDNEWTAGS1", @tagajaxsubmit, @newtags
         @remove_from_tags(tag)
-        console.log "NEWNEWTAGS", @newtags
+        #console.log "NEWNEWTAGS", @newtags
     else
-        console.log "INDIVREM2", @tagajaxsubmit
+        #console.log "INDIVREM2", @tagajaxsubmit
 
+time_format = (timestring) ->
+    return timestring.split('.')[0].split('T').join(" at ")
 class ItemView extends Backbone.View
      
   tagName: 'div'
@@ -61,7 +63,7 @@ class ItemView extends Backbone.View
 
   initialize: (options) ->
     {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
-    console.log "PVIN",  @memberable, @postings
+    #console.log "PVIN",  @memberable, @postings
     @hv=undefined
     @newtags = []
     @newnotes = []
@@ -69,7 +71,7 @@ class ItemView extends Backbone.View
     @therebenotes=false
     if @notes.length > 0
         @therebenotes=true
-    #console.log "PVIEW IS", @pview
+    ##console.log "PVIEW IS", @pview
 
   update: (postings, notes, tags) =>
     @stags=tags
@@ -77,24 +79,28 @@ class ItemView extends Backbone.View
     @postings=postings
 
   update_tags: (newtag) =>
-    console.log("#{@item.basic.name} >>>",newtag)
+    #console.log("#{@item.basic.name} >>>",newtag)
     @newtags.push(newtag)
 
   remove_from_tags: (newtag) =>
-    console.log "newtag is", newtag
+    #console.log "newtag is", newtag
     @newtags = _.without(@newtags, newtag)
 
   update_posts: (newposts) =>
     @newposts=_.union(@newposts, newposts)
 
-  update_notes: (newnote) =>
-    @newnotes.push(newnote)
+  update_notes: (newnotetuple) =>
+    @newnotes.push(newnotetuple)
 
   render: =>
     @$el.empty()
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
-    htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a></div>"
+    if @item.whenposted
+        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format(@item.whenposted)})</div>"
+    else
+        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a></div>"
+      
     fqin=@item.basic.fqin
     content = ''
     content = content + htmlstring
@@ -122,8 +128,8 @@ class ItemView extends Backbone.View
     jslist=[]
     @.$('.tagls').tags(jslist,tagdict)
     @tagsobject = jslist[0]
-    console.log("TAGSOBJECT", @tagsobject)
-    #console.log "PVIEW2 IS", @pview
+    #console.log("TAGSOBJECT", @tagsobject)
+    ##console.log "PVIEW2 IS", @pview
     if @noteform
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, @pview), theclass: ".postalnote"})
         @$el.append(@hv.render("<strong>Notes</strong>: ").$el)
@@ -140,14 +146,15 @@ class ItemView extends Backbone.View
     poststoshow=(p for p in @newposts when p not in @postings)
     thepostings = format_postings_for_item(fqin, cdict(fqin, poststoshow), @memberable)
     already = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable).join(', ')
-    console.log "THEPOSTINGS", thepostings, already
+    #console.log "THEPOSTINGS", thepostings, already
     inbet = ''
     if already != ''
         inbet= ', '
 
-    console.log('EEKS', thepostings.join(', '))
+    #console.log('EEKS', thepostings.join(', '))
     @.$('.postls').html(already+inbet+thepostings.join(', '))
 
+  #notes should return their tagmode eventually
   update_note_ajax: (data) =>
     fqin=@item.basic.fqin
     [stags, notes]=get_taggings(data)
@@ -157,28 +164,39 @@ class ItemView extends Backbone.View
     @render()
 
   submitNote: =>
-    console.log "IN SUBMIT NOTE"
+    #console.log "IN SUBMIT NOTE"
     item=@item.basic.fqin
     itemname=@item.basic.name
     notetext= @.$('.txt').val()
-    console.log notetext
+    notemode = '1'
+    if @.$('.cb').is(':checked')
+        if @pview is 'pub'
+            #additionally, item must be made public. should public also mean all groups item is in
+            #as now. YES.
+            notemode = '0'
+        else if @pview is 'udg' or @pview is 'none'
+            notemode = '0'
+        else
+            notemode = @pview
+
+    #console.log "NOTESPEC",notetext, notemode
     loc=window.location
     cback = (data) =>
-        console.log "return data", data, loc
+        #console.log "return data", data, loc
         #window.location=loc
         @update_note_ajax(data)
     eback = (xhr, etext) =>
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
-        console.log "in ajax submit"
-        syncs.submit_note(item, itemname, notetext, cback, eback)
+        #console.log "in ajax submit"
+        syncs.submit_note(item, itemname, [notetext, notemode], cback, eback)
     else
-        console.log "NO AJAX IN NOTES"
-        @update_notes(notetext)
+        #console.log "NO AJAX IN NOTES"
+        @update_notes([notetext, notemode])
         if not @therebenotes
-            console.log "there werent notes before"
+            #console.log "there werent notes before"
             @$el.append("<p class='notes'></p>")
             @therebenotes=true
         @.$('.notes').prepend("<span>#{notetext}</span><br/>")
@@ -189,23 +207,23 @@ class ItemView extends Backbone.View
 
 
 addwoata = (tag, cback) ->
-    console.log "IN ADVOATA", tag
+    #console.log "IN ADVOATA", tag
     @update_tags(tag)
     cback()
 
 remMulti = (pill) ->
     tag = $(pill).attr('data-tag-id')
-    console.log "TAGALOGMULTI", tag, pill
+    #console.log "TAGALOGMULTI", tag, pill
     if not @tagajaxsubmit
-        console.log "MULTIREM1", @tagajaxsubmit, pill
+        #console.log "MULTIREM1", @tagajaxsubmit, pill
         for i in @items
             fqin=i.basic.fqin
             #@itemviews[fqin].remove_from_tags(tag.id)
-            console.log "YS", @itemviews[fqin].tagsobject
+            #console.log "YS", @itemviews[fqin].tagsobject
             @itemviews[fqin].tagsobject.removeTag(@itemviews[fqin].$("[data-tag-id='#{tag}']"))
-            console.log "HERE"
+            #console.log "HERE"
     else
-        console.log "MULTIREM2", @tagajaxsubmit
+        #console.log "MULTIREM2", @tagajaxsubmit
 
 #This needs to be redone to show changes but not actually do them.
 #FOR POSTFORM
@@ -224,15 +242,15 @@ class ItemsView extends Backbone.View
 
   update_postings_taggings: () =>
     @postings={}
-    console.log("itys", @items)
+    #console.log("itys", @items)
     itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in @items)
     itemsq=itemlist.join("&")
     $.get prefix+"/items/taggingsandpostings?#{itemsq}", (data)=>
         [@stags, @notes]=get_taggings(data)
         for own k,v of data.postings
-            #console.log "2>>>", k,v[0],v[1]
+            ##console.log "2>>>", k,v[0],v[1]
             if v[0] > 0
-                @postings[k]=(e.thething.postfqin for e in v[1])
+                @postings[k]=(e.posting.postfqin for e in v[1])
             else
                 @postings[k]=[]
         for i in @items
@@ -254,7 +272,7 @@ class ItemsView extends Backbone.View
         fqin=i.basic.fqin
         @itemviews[fqin].update_posts(@newposts)
         @itemviews[fqin].addToPostsView()
-    console.log "NEWPOSTS", @newposts
+    #console.log "NEWPOSTS", @newposts
 
   render: =>
     $lister=@$('.items')
@@ -279,11 +297,11 @@ class ItemsView extends Backbone.View
     # for v in views
     #     $lister.append(v.render().el)
     eback = (xhr, etext) =>
-        console.log "ERROR", etext
+        #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     cback = (data) =>
-        console.log data
+        #console.log data
         libs=_.union(data.libraries, data.groups)
         $ctrls.append(w.postalall_form(@nameable, @itemtype, libs))
         tagdict = 
@@ -299,7 +317,7 @@ class ItemsView extends Backbone.View
                 input_pill: '<span></span>&nbsp;'
         jslist=[]
         @.$('#alltags').tags(jslist,tagdict)
-        console.log("MULTILIBRARY", @.$('.multilibrary'))
+        #console.log("MULTILIBRARY", @.$('.multilibrary'))
         @.$('.multilibrary').multiselect({
                         includeSelectAllOption: true,
                         enableFiltering: true,
@@ -315,32 +333,32 @@ class ItemsView extends Backbone.View
   iDone: =>
     #loc=window.location
     cback = (data) =>
-        console.log "DATAHOO", data
+        #console.log "DATAHOO", data
         #window.location=@loc
         $.fancybox.close()
         
     eback = (xhr, etext) =>
-        console.log "ERROR", etext
+        #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     #if you dont do things, atleast save items
     postables = @collectPosts()
-    console.log "P", postables
+    #console.log "P", postables
     ts = @collectTags()
-    console.log "T", ts
+    #console.log "T", ts
     ns = @collectNotes()
-    console.log "N", ns
+    #console.log "N", ns
     cback_notes = ()  =>
-        console.log "SAVING NOTES", ns
+        #console.log "SAVING NOTES", ns
         syncs.submit_notes(@items, ns, cback, eback)
     cback_tags = () =>
-        console.log "SAVING TAGS", ts
+        #console.log "SAVING TAGS", ts
         syncs.submit_tags(@items, ts, cback_notes, eback)
     cback_posts = () =>
-        console.log "SAVING POSTS", postables
+        #console.log "SAVING POSTS", postables
         syncs.submit_posts(@items, postables, cback_tags, eback)
     
-    console.log "SAVING ITEMS"
+    #console.log "SAVING ITEMS"
     syncs.save_items(@items, cback_posts, eback)
     
     
@@ -357,21 +375,20 @@ class ItemsView extends Backbone.View
     #if makepublic
     #    postables=postables.concat ['adsgut/group:public']
     $('option', @$('.multilibrary')).each (ele) ->
-        #console.log "$this is", $(this), ele
+        ##console.log "$this is", $(this), ele
         $(this).removeAttr('selected').prop('selected', false)
     @$('.multilibrary').multiselect('refresh')
     loc=window.location
     cback = (data) =>
-        #window.location=loc
         @update_postings_taggings()
     eback = (xhr, etext) =>
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed saving to libraries'
     if @tagajaxsubmit
         syncs.submit_posts(@items, postables, cback, eback)
     else
-        console.log "submit posts non ajax", postables
+        #console.log "submit posts non ajax", postables
         @update_posts(postables)
     return false
 
@@ -381,7 +398,7 @@ class ItemsView extends Backbone.View
         fqin=i.basic.fqin
         iview=@itemviews[fqin]
         ntags=iview.newtags
-        console.log "<<<???", fqin, ntags, i
+        #console.log "<<<???", fqin, ntags, i
         tags[fqin]=(e.trim() for e in ntags when e != "")
     return tags
 
@@ -394,7 +411,7 @@ class ItemsView extends Backbone.View
             ntags = iview.newnotes
         else
             ntags=[]
-        notes[fqin]=(e.trim() for e in ntags when e != "")
+        notes[fqin]=([e[0].trim(),e[1]] for e in ntags when e[0] != "")
     return notes
 
   collectPosts: =>
@@ -404,10 +421,10 @@ class ItemsView extends Backbone.View
     ts={}
     tagstring=@$('.tagsinput').val()
     if tagstring is ""
-        console.log "a"
+        #console.log "a"
         tags=[]
     else
-        console.log "b", (e for e in tagstring.split(','))
+        #console.log "b", (e for e in tagstring.split(','))
         tags=(e.trim() for e in tagstring.split(','))
         tags=(e for e in tags when e != "")
     loc=window.location
@@ -419,7 +436,7 @@ class ItemsView extends Backbone.View
         #@$('.tagsinput').val("")
         @update_postings_taggings()
     eback = (xhr, etext) =>
-        console.log "ERROR", etext, loc
+        #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert 'Did not succeed tagging'
     syncs.submit_tags(@items, ts, cback, eback)
@@ -430,11 +447,10 @@ class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview} = options
-    console.log "ITEMS", @items, @suggestions
+    #console.log "ITEMS", @items, @suggestions
 
   render: =>
-    console.log "EL", @$el
-    #@$el.append('<hr/>')
+    #console.log "EL", @$el
     @itemviews = {}
     for i in @items
         fqin=i.basic.fqin
@@ -448,7 +464,7 @@ class ItemsFilterView extends Backbone.View
             tagajaxsubmit: true
             suggestions: @suggestions
             pview: @pview
-        console.log "INS", ins
+        #console.log "INS", ins, @pview
         v=new ItemView(ins)
         @$el.append(v.render().el)
         @itemviews[fqin] = v

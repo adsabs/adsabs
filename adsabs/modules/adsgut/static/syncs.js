@@ -179,7 +179,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return do_get(url, cback, eback);
   };
 
-  submit_note = function(item, itemname, note, cback, eback) {
+  submit_note = function(item, itemname, notetuple, cback, eback) {
     var data, itemtype, tagtype, ts, url;
     tagtype = "ads/tagtype:note";
     itemtype = "ads/itemtype:pub";
@@ -187,15 +187,16 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     ts = {};
     ts[itemname] = [
       {
-        content: note,
-        tagtype: tagtype
+        content: notetuple[0],
+        tagtype: tagtype,
+        tagmode: notetuple[1]
       }
     ];
     data = {
       tagspecs: ts,
       itemtype: itemtype
     };
-    if (note !== "") {
+    if (notetuple[0] !== "") {
       return send_params(url, data, cback, eback);
     }
   };
@@ -262,8 +263,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     }
   };
 
-  submit_notes = function(items, notes, cback, eback) {
-    var data, fqin, i, inames, itemtype, name, note, tagtype, ts, url, _i, _len;
+  submit_notes = function(items, notetuples, cback, eback) {
+    var data, fqin, i, inames, itemtype, name, nt, tagtype, ts, url, _i, _len;
     tagtype = "ads/tagtype:note";
     itemtype = "ads/itemtype:pub";
     url = prefix + "/items/taggings";
@@ -273,17 +274,18 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       i = items[_i];
       fqin = i.basic.fqin;
       name = i.basic.name;
-      if (notes[fqin].length > 0) {
+      if (notetuples[fqin].length > 0) {
         inames.push(name);
         ts[name] = (function() {
           var _j, _len1, _ref, _results;
-          _ref = notes[fqin];
+          _ref = notetuples[fqin];
           _results = [];
           for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            note = _ref[_j];
+            nt = _ref[_j];
             _results.push({
-              content: note,
-              tagtype: tagtype
+              content: nt[0],
+              tagtype: tagtype,
+              tagmode: nt[1]
             });
           }
           return _results;
