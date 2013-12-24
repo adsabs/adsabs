@@ -64,6 +64,7 @@
   		}
 	};
 	var json = {{ bibcodes|tojson|safe }};
+    console.log("JSON IS", json);
 	var baseurlandquery = window.location.href;
     var newbibcodes=[];
 
@@ -96,6 +97,48 @@
 		finalURI.replaceQueryParam('q', qstring);
 		window.location.href = decodeURIComponent(finalURI.toString());
 	}
+
+    //from http://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
+    function post_to_url(path, params, method) {
+        method = method || "post"; // Set method to post by default if not specified.
+
+        // The rest of this code assumes you are not using a library.
+        // It can be made less wordy if you use one.
+        var form = document.createElement("form");
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+
+                form.appendChild(hiddenField);
+             }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+    
+    function generateSearchPOST(){
+        var selected=newbibcodes;
+        querypieces=[];
+        if (selected.length==1){
+            var querystring = selected[0];
+        } else {
+            var querystring=selected.join("\n");
+        }//end else for multiple selected authors
+
+        var originalURI= new Uri(baseurlandquery);
+        var oldqlist = originalURI.getQueryParamValues('q');
+        var qstring=oldqlist.join(' AND ');
+        var finalURI = new Uri('/search/bigquery/');
+        finalURI.replaceQueryParam('q', qstring);
+        post_to_url(finalURI.toString(),{'bigquery': querystring});
+    }
 
 
     function newCatLayer(aladinLite, objArray, layerName) {
@@ -147,13 +190,13 @@
     });
 
     $('#dofacet').click(function() {
-         generateSearch();
+         generateSearchPOST();
     });
 
     $(document).ready( function(){
     	a.removeLayers();
         var list = json.bibcodes;
-        console.log("LIST", list);
+        //console.log("LIST", list);
         // query SIMBAD with list of bibcodes
         $.ajax({
             url: "http://simbad.harvard.edu/simbad/sim-nameresolver",
@@ -196,7 +239,7 @@
                 }
             },
             error: function() {
-                console.log('Something wrong occured');
+                alert('Something wrong occured');
             }
         });
     }); // end jquery document.ready()

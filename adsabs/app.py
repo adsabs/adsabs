@@ -165,17 +165,34 @@ def _configure_extensions(app):
 
     #RAHUL
     mongoengine.init_app(app)
-    mongogut_error_handler(app)
 
     #print "ME", dir(mongoengine), dir(mongoengine.connection)
 
 def mongogut_error_handler(app):
     from mongogut.errors import MongoGutError
-    from flask import jsonify
+    from flask import jsonify, request, render_template
+    
+    def f(error, template, status_code):    
+        app.logger.error("[error] %s, %s" % (str(error), request.path))
+        return render_template(template), status_code
+
     @app.errorhandler(MongoGutError)
     def handle_error(error):
-        response = jsonify(error.to_dict())
+        edict = error.to_dict()
+        response = jsonify(edict)
         response.status_code = error.status_code
+        tdict = {
+            400: 'errors/400.html',
+            401: 'errors/401.html',
+            403: 'errors/403.html',
+            404: 'errors/404.html',
+            405: 'errors/405.html',
+            500: 'errors/500.html',
+            503: 'errors/503.html'
+        }
+        if request.path[-4:]=='html':
+            tpl = tdict[error.status_code]
+            return f(edict['reason'], tpl, error.status_code)
         return response    
 
 def _configure_error_handlers(app):
@@ -183,12 +200,13 @@ def _configure_error_handlers(app):
     function that configures some basic handlers for errors
     """
     from errors import create_error_handler
-    
     create_error_handler(app, 400, 'errors/400.html')
     create_error_handler(app, 403, 'errors/403.html')
     create_error_handler(app, 404, 'errors/404.html')
     create_error_handler(app, 405, 'errors/405.html')
     create_error_handler(app, 500, 'errors/500.html')
+    mongogut_error_handler(app)#RAHUL
+
 
     
 def _configure_misc_handlers(app):

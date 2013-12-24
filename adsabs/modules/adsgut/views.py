@@ -259,7 +259,9 @@ def before_request():
     #BUG: currently get first part of email
     try:
         #username=current_user.get_username().split('@')[0]
+        #print "getting user info"
         adsid=current_user.get_username()
+        cookieid=current_user.get_id()
     except:
         adsid=None
     #print "USER", adsid, current_user.get_id()
@@ -274,7 +276,11 @@ def before_request():
         user=g.db.getUserForAdsid(None, adsid)
     else:
         try:
-            user=w.getUserForAdsid(None, adsid)
+            user=w.getUserForCookieid(None, cookieid)
+            if user.adsid != adsid:#user changed their email
+                #print "email changed"
+                user.adsid = adsid
+                user.save(safe=True)
             #print "---------->IN HERE", adsid
         except:
             #print "<----------OR HERE", adsid, sys.exc_info()
@@ -282,11 +288,12 @@ def before_request():
             adsuser=w.getUserForNick(adsgutuser, 'ads')
             #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
             #this removes the possibility of the user adding a custom nick, for now
-            cookieid=current_user.get_id()
+            #cookieid=current_user.get_id()
             #user=w.addUser(adsgutuser,{'adsid':adsid})
             user=w.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
             #add the user to the flagship ads app, at the very least
             user, adspubapp = w.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
+
 
     #superuser if no login BUG: use only for testing
 

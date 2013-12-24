@@ -17,8 +17,8 @@ def create_error_handler(app, status_code, template):
 
     
 
-    @app.errorhandler(MongoGutError)
-    def handle_error(error):
-        response = jsonify(error.to_dict())
-        response.status_code = error.status_code
-        return response
+    # @app.errorhandler(MongoGutError)
+    # def handle_error(error):
+    #     response = jsonify(error.to_dict())
+    #     response.status_code = error.status_code
+    #     return response
