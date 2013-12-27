@@ -84,21 +84,24 @@ var ResultListManager = function() {
          * wrap_pre (boolean) - optionally wrap the returned data in '<pre> tags
          * success_callback (function) - provide a custom success callback
          */
-		ajax_submit: function(url, wrap_pre, success_callback) {
+		ajax_submit: function(url, wrap_pre, success_callback, fancybox_opts) {
 			$.fancybox.showLoading();
 			
 			var wrap_pre = wrap_pre || false;
+			var fancybox_opts = fancybox_opts || {};
 			
 			if (!success_callback) {
 				success_callback = function(data) {
     				$.fancybox.hideLoading();
     				data = wrap_pre ? '<pre>'+data+'</pre>' : data;
-    				$.fancybox({
+    				opts = {
     					'content': data,
     					'autoSize': false,
     					'width': '100%',
     					'height': '100%'   					
-    				});
+    				};
+    				_.extend(fancybox_opts);
+    				$.fancybox(opts);
     			}
 			}
     		$.ajax({
@@ -240,8 +243,15 @@ var ResultListManager = function() {
         	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
         	this.add_hidden_field('bibcodes', bibcode)
         	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        },
+        
+        export_to_libraries = function() {
+        	this.enable_query_params();
+        	var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
+        	this.ajax_submit(url, false, null, {'closeBtn', false});
         }
 	}
+
 }();
 
 
