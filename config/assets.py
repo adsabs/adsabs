@@ -1,7 +1,7 @@
 from flask.ext.assets import Environment, Bundle
 
 main_js = Bundle('js/libs/jquery.js',
-                'jquery-ui/js/jquery-ui-1.10.2.custom.js',
+                'jquery-ui/js/jquery-ui-1.10.3.custom.js',
                 'bootstrap/js/bootstrap.min.js',
                 'js/libs/bootstrap-select.js',
                 'js/libs/Uri.min.js',
@@ -24,8 +24,7 @@ main_js = Bundle('js/libs/jquery.js',
                 filters=('yui_js'), output='compressed/all.js')
 
 main_css = Bundle('bootstrap/css/bootstrap.min.css',
-                 'jquery-ui/css/smoothness/jquery-ui-1.10.2.custom.min.css',
-                 'jquery-ui/css/smoothness/jquery-ui-1.10.2.dialog.css',
+                 'jquery-ui/css/smoothness/jquery-ui-1.10.3.custom.css',
                  'fancybox/source/jquery.fancybox.css',
                  'fancybox/source/helpers/jquery.fancybox-buttons.css',
                  'fancybox/source/helpers/jquery.fancybox-thumbs.css',
