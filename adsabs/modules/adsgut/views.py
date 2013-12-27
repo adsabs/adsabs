@@ -1107,6 +1107,7 @@ def tagsForItem(ns, itemname):
         useras = _userpostget(g, jsonpost)
         itemtype=_dictp('itemtype', jsonpost)
         itemspec={'name':itemname, 'itemtype':itemtype}
+        fqpn = _dictp('fqpn',jsonpost)
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
         i=g.dbp.saveItem(g.currentuser, useras, itemspec)
@@ -1125,11 +1126,11 @@ def tagsForItem(ns, itemname):
         # taggingsdict={}
         # taggingsdict[i.basic.fqin]=(newtaggings.length, newtaggings)
         # return jsonify(taggings=taggingsdict)
-        taggingsdict= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None)
+        taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict)
+        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable)
     else:
         #print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
@@ -1137,7 +1138,7 @@ def tagsForItem(ns, itemname):
 
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
-
+        fqpn = _dictg('fqpn',query)
         #By this time query is popped down
         #I am not convinced this is how to do this query
         # criteria= _criteriaget(query)
@@ -1145,11 +1146,11 @@ def tagsForItem(ns, itemname):
         # count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
         #     query, usernick, criteria, sort)
         #count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
-        taggingsdict= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
+        taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict)
+        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable)
 ####These are the fromSpec family of functions for GET
 
 #multi item multi tag tagging on POST and get taggings
@@ -1175,7 +1176,7 @@ def itemsTaggings():
                 newtaggings.append(td)
         # itemtaggings={'status':'OK', 'taggings':newtaggings}
         # return jsonify(taggings=newtaggings)
-        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict,_=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None)
         return jsonify(taggings=taggingsdict)
     else:
@@ -1186,7 +1187,7 @@ def itemsTaggings():
         sort = _sortget(query)
         items = _itemsget(query)
         #By this time query is popped down
-        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict,_=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         return jsonify(taggings=taggingsdict)
 
@@ -1236,16 +1237,17 @@ def itemsTaggingsAndPostings():
         useras = _userpostget(g, jsonpost)
         sort = _sortpostget(jsonpost)
         items = _itemspostget(jsonpost)
+        fqpn = _dictp('fqpn',jsonpost)
         #print "ITEMS", items
         #print "SORT", sort, "useras", useras
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None, sort)
-        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, sort)
+        taggingsdict, taggingsthispostable=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, sort, fqpn)
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
-        return jsonify(postings=postingsdict, taggings=taggingsdict)
+        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
@@ -1253,13 +1255,14 @@ def itemsTaggingsAndPostings():
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
+        fqpn = _dictg('fqpn',query)
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None, sort)
-        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, sort)
-        ##print "MEEP",taggingsdict, postingsdict
-        return jsonify(postings=postingsdict, taggings=taggingsdict)
+        taggingsdict, taggingsthispostable=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, sort, fqpn)
+        #print "MEEP",taggingsthispostable
+        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
 
 @adsgut.route('/itemtypes', methods=['POST', 'GET'])
 def itemtypes():

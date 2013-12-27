@@ -90,13 +90,25 @@ email_split = (e) ->
   hfp = host.split('.')[0]
   return name+'@'+hfp
 
-this_postable = (pview, pval) ->
+this_postable = (pval, pview) ->
   #console.log "--", pview, pval
-  if pview != 'udg' and pview != 'none' and pview == pval
-    pble = "<i class='icon-cog'></i>&nbsp;&nbsp;"
+  if pview != 'udg' and pview != 'none'
+    if pval==true
+      pble = "<i class='icon-comment'></i>&nbsp;&nbsp;"
+    else
+      pble = ''
   else
     pble = ''
     return pble
+
+format_row = (notetext, notemode, notetime, user, currentuser, truthiness, pview) ->
+  tf = time_format(notetime)
+  uf = if user==currentuser then 'me' else email_split(user)
+  lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
+  nmf = if notemode is '1' then lock else ''
+  nt = this_postable(truthiness, pview)
+  outstr = "<tr><td style='white-space: nowrap;'>#{tf}</td><td style='text-align: right;'>#{uf}&nbsp;&nbsp;</td><td>#{nmf}#{nt}#{notetext}</td></tr>"
+  return outstr
 
 format_notes_for_item = (fqin, notes, currentuser, pview) ->
   #console.log "current user is", currentuser, notes
@@ -105,9 +117,9 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
   lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
   
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
-  #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[3], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
-  t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
-  
+  #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[4], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
+  #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
+  t3list = ( format_row(t[0], t[3], t[1], t[2], currentuser, t[4], pview) for t in notes[fqin])
   if t3list.length >0
     return start+t3list.join("")+end
   else
@@ -196,10 +208,13 @@ get_taggings = (data) ->
   notes={}
   #console.log "DATA", data
   for own k,v of data.taggings
+    tp = data.taggingtp[k]
+    tg = v[1]
+    combi = _.zip(tg, tp)
     ##console.log "1>>>", k,v[0], v[1]
     if v[0] > 0
-      stags[k]=([e.posting.tagname, e.posting.tagtype] for e in v[1] when e.posting.tagtype is "ads/tagtype:tag")
-      notes[k]=([e.posting.tagdescription, e.posting.whenposted, e.posting.postedby, e.posting.tagmode, e.pinpostables] for e in v[1] when e.posting.tagtype is "ads/tagtype:note")
+      stags[k]=([e[0].posting.tagname, e[0].posting.tagtype] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
+      notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
     else
       stags[k]=[]
       notes[k]=[]
@@ -445,6 +460,7 @@ root.get_taggings = get_taggings
 root.format_item = format_item
 root.format_tags = format_tags
 root.get_groups= get_groups
+root.format_row = format_row
 #root.format_stuff = format_stuff
 root.format_postings_for_item = format_postings_for_item
 root.format_notes_for_item = format_notes_for_item

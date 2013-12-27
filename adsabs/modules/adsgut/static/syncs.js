@@ -176,7 +176,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return do_get(url, cback, eback);
   };
 
-  submit_note = function(item, itemname, notetuple, cback, eback) {
+  submit_note = function(item, itemname, notetuple, ctxt, cback, eback) {
     var data, itemtype, tagtype, ts, url;
     tagtype = "ads/tagtype:note";
     itemtype = "ads/itemtype:pub";
@@ -193,6 +193,9 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagspecs: ts,
       itemtype: itemtype
     };
+    if (ctxt !== 'udg' && ctxt !== 'public' && ctxt !== 'none') {
+      data.fqpn = ctxt;
+    }
     if (notetuple[0] !== "") {
       return send_params(url, data, cback, eback);
     }
@@ -345,7 +348,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
-  taggings_postings_post_get = function(items, cback) {
+  taggings_postings_post_get = function(items, pview, cback) {
     var data, eback, url;
     url = prefix + "/items/taggingsandpostings";
     eback = function() {
@@ -354,6 +357,9 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     data = {
       items: items
     };
+    if (pview !== 'udg' && pview !== 'none' && pview !== 'public') {
+      data.fqpn = pview;
+    }
     return send_params(url, data, cback, eback);
   };
 

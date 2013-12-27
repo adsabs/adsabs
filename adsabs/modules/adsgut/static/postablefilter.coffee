@@ -60,7 +60,7 @@ do_postable_filter = (sections, config, tagfunc) ->
             sections.$bigqueryform.attr("hello", "world")
             itemsq=itemlist.join("&")
             #$.get "#{config.itPURL}?#{itemsq}", (data)->
-            syncs.taggings_postings_post_get itemlist, (data)->
+            syncs.taggings_postings_post_get itemlist, config.pview, (data)->
                 #console.log "POSTINGS", data.postings, config.fqpn
                 #console.log "TG", data.taggings
                 [stags, notes]=get_taggings(data)

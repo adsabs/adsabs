@@ -150,7 +150,7 @@ get_postables_writable = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesusercanwriteto"
     do_get(url, cback, eback)
 
-submit_note = (item, itemname, notetuple, cback, eback) ->
+submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
@@ -159,6 +159,8 @@ submit_note = (item, itemname, notetuple, cback, eback) ->
     data=
         tagspecs: ts
         itemtype:itemtype
+    if ctxt not in ['udg','public','none']
+        data.fqpn = ctxt
     if notetuple[0] != ""
         send_params(url, data, cback, eback)
 
@@ -242,12 +244,14 @@ save_items = (items, cback, eback) ->
         itemtype:itemtype
     send_params(url, data, cback, eback)
 
-taggings_postings_post_get = (items, cback) ->
+taggings_postings_post_get = (items, pview, cback) ->
     url= prefix+"/items/taggingsandpostings"
     eback = () ->
         alert "Error Occurred"
     data=
         items:items
+    if pview not in ['udg', 'none', 'public']
+        data.fqpn = pview
     send_params(url, data, cback, eback)
 
 root.syncs=

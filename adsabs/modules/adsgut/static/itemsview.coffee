@@ -51,7 +51,7 @@ remIndiv = (pill) ->
     else
         #console.log "INDIVREM2", @tagajaxsubmit
 
-time_format = (timestring) ->
+time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
 class ItemView extends Backbone.View
      
@@ -98,7 +98,7 @@ class ItemView extends Backbone.View
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
     if @item.whenposted
-        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format(@item.whenposted)})</div>"
+        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format_iv(@item.whenposted)})</div>"
     else
         htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a></div>"
       
@@ -181,7 +181,7 @@ class ItemView extends Backbone.View
             notemode = '0'
         else
             notemode = @pview
-
+    ctxt = @pview
     #console.log "NOTESPEC",notetext, notemode
     loc=window.location
     cback = (data) =>
@@ -194,7 +194,7 @@ class ItemView extends Backbone.View
         alert 'Did not succeed'
     if @tagajaxsubmit
         #console.log "in ajax submit"
-        syncs.submit_note(item, itemname, [notetext, notemode], cback, eback)
+        syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback)
     else
         #console.log "NO AJAX IN NOTES"
         @update_notes([notetext, notemode])
@@ -202,7 +202,9 @@ class ItemView extends Backbone.View
             #console.log "there werent notes before"
             @$el.append("<p class='notes'></p>")
             @therebenotes=true
-        @.$('.notes').prepend("<span>#{notetext}</span><br/>")
+        d = new Date()
+        notetime=d.toISOString()
+        @.$('.notes tbody').prepend(format_row(notetext, notemode, notetime, @memberable, @memberable, false, @pview))
         @hv.hide()
         @.$('.txt').val("")
     return false
