@@ -117,7 +117,6 @@ var ResultListManager = function() {
 			this.remove_hidden();
 			this.disable_sorting();
 
-<<<<<<< HEAD
 			// if bibcodes are selected simply submit the form to the export url
 			if (this.bibcodes_checked().length > 0) {
 				this.enable_query_params();
