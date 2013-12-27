@@ -24,11 +24,18 @@ do_postable_info = (sections, config, ptype) ->
         sections.$info.append(content+'<hr/>')
         sections.$info.show()
 
-do_postable_filter = (sections, config) ->
-    #console.log "CONFIG", config
-    $.get config.tagsPURL, (data) ->
+do_tags = (url, $sel, tqtype) ->
+    $.get url, (data) ->
         for own k,v of data.tags
-            format_tags(k, sections.$tagssec, get_tags(v, config.tqtype), config.tqtype)
+            format_tags(k, $sel, get_tags(v, tqtype), tqtype)
+
+do_postable_filter = (sections, config, tagfunc) ->
+    #console.log "CONFIG", config
+    # $.get config.tagsPURL, (data) ->
+    #     for own k,v of data.tags
+    #         format_tags(k, sections.$tagssec, get_tags(v, config.tqtype), config.tqtype)
+    #do_tags(config.tagsPURL, sections.$tagssec, config.tqtype)
+    tagfunc()
     $.get "#{config.tagsucwtURL}?tagtype=ads/tagtype:tag", (data) ->
         suggestions=data.simpletags
         #console.log "SUGG", suggestions
@@ -44,15 +51,18 @@ do_postable_filter = (sections, config) ->
             sections.$count.text("#{theitems.length} papers. ")
             sections.$count.show()
             thecount=data.count
-            itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+            #itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+            itemlist=(i.basic.fqin for i in theitems)
             biblist=(i.basic.name for i in theitems)
             bibstring = biblist.join("\n")
             sections.$bigquery.val(bibstring)
             sections.$bigqueryform.attr("action", config.bq2url)
             sections.$bigqueryform.attr("hello", "world")
             itemsq=itemlist.join("&")
-            $.get "#{config.itPURL}?#{itemsq}", (data)->
+            #$.get "#{config.itPURL}?#{itemsq}", (data)->
+            syncs.taggings_postings_post_get itemlist, (data)->
                 #console.log "POSTINGS", data.postings, config.fqpn
+                #console.log "TG", data.taggings
                 [stags, notes]=get_taggings(data)
                 postings={}
                 times={}
@@ -87,6 +97,7 @@ do_postable_filter = (sections, config) ->
                     memberable:config.memberable
                     suggestions : suggestions
                     pview: config.pview
+                    tagfunc: tagfunc
                 plinv=new itemsdo.ItemsFilterView(ido)
                 plinv.render()
                 #possible A&A issue
@@ -121,3 +132,4 @@ do_postable_filter = (sections, config) ->
 root.postablefilter = 
     do_postable_info: do_postable_info
     do_postable_filter: do_postable_filter
+    do_tags: do_tags

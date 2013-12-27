@@ -242,6 +242,14 @@ save_items = (items, cback, eback) ->
         itemtype:itemtype
     send_params(url, data, cback, eback)
 
+taggings_postings_post_get = (items, cback) ->
+    url= prefix+"/items/taggingsandpostings"
+    eback = () ->
+        alert "Error Occurred"
+    data=
+        items:items
+    send_params(url, data, cback, eback)
+
 root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
@@ -259,6 +267,6 @@ root.syncs=
     create_postable: create_postable
     change_description: change_description
     send_bibcodes: send_bibcodes
-
+    taggings_postings_post_get: taggings_postings_post_get
 
 

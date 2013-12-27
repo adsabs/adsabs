@@ -81,7 +81,9 @@ $ ->
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
     bq2url : GlobalVariables.ADS_PREFIX+"/search/bigquery/"
-    memberable: "{{useras.nick}}"
+    memberable: 
+      nick: "{{useras.nick}}"
+      adsid: "{{useras.adsid}}"
     loc : document.location
     tqtype : "{{ tqtype }}"
     querystring: "{{ querystring | safe }}"
@@ -97,10 +99,10 @@ $ ->
     $breadcrumb: $('#breadcrumb')
     $count: $('#count')
 
+  redo_tags = _.partial(postablefilter.do_tags, config.tagsPURL, sections.$tagssec, config.tqtype)
 
   {% if pflavor!= 'udg' and pflavor!='pub' %}
   postablefilter.do_postable_info(sections, config, ptype)
   {% endif %}
-  postablefilter.do_postable_filter(sections, config)
-
+  postablefilter.do_postable_filter(sections, config, redo_tags)
 {% endblock %}

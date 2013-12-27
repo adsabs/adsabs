@@ -27,7 +27,7 @@
     var ename, title, _ref;
     ename = encodeURIComponent(tag.text);
     if (!tag.url) {
-      tag.url = "" + prefix + "/postable/" + this.memberable + "/group:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
+      tag.url = "" + prefix + "/postable/" + this.memberable.nick + "/group:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
       title = (_ref = tag.title) != null ? _ref : ' data-toggle="tooltip" title="' + tag.title + {
         '"': ''
       };
@@ -110,7 +110,9 @@
     };
 
     ItemView.prototype.initialize = function(options) {
+      var _ref;
       this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
       this.newnotes = [];
@@ -156,9 +158,9 @@
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
-      thetags = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable);
+      thetags = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable.nick);
       additional = "<span class='tagls'></span><br/>";
-      thepostings = format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable);
+      thepostings = format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable.nick);
       additionalpostings = "<strong>In Libraries</strong>: <span class='postls'>" + (thepostings.join(', ')) + "</span><br/>";
       additional = additional + additionalpostings;
       content = content + additional;
@@ -168,6 +170,7 @@
         enhanceValue: _.bind(enval, this),
         addWithAjax: _.bind(addwa, this),
         addWithoutAjax: _.bind(addwoa, this),
+        onAfterAdd: this.tagsfunc,
         ajax_submit: this.tagajaxsubmit,
         onRemove: _.bind(remIndiv, this),
         suggestions: this.suggestions,
@@ -192,7 +195,7 @@
         }
         if (this.therebenotes) {
           this.$el.append("<p class='notes'></p>");
-          this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable));
+          this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable.adsid, this.pview));
         }
       }
       return this;
@@ -213,8 +216,8 @@
         }
         return _results;
       }).call(this);
-      thepostings = format_postings_for_item(fqin, cdict(fqin, poststoshow), this.memberable);
-      already = format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable).join(', ');
+      thepostings = format_postings_for_item(fqin, cdict(fqin, poststoshow), this.memberable.nick);
+      already = format_postings_for_item(fqin, cdict(fqin, this.postings), this.memberable.nick).join(', ');
       inbet = '';
       if (already !== '') {
         inbet = ', ';
@@ -483,7 +486,7 @@
         });
         return _this.globaltagsobject = jslist[0];
       };
-      syncs.get_postables_writable(this.memberable, cback, eback);
+      syncs.get_postables_writable(this.memberable.nick, cback, eback);
       return this;
     };
 
@@ -663,7 +666,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      return this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, options;
+      return this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.tagfunc = options.tagfunc, options;
     };
 
     ItemsFilterView.prototype.render = function() {
@@ -682,7 +685,8 @@
           noteform: this.noteform,
           tagajaxsubmit: true,
           suggestions: this.suggestions,
-          pview: this.pview
+          pview: this.pview,
+          tagfunc: this.tagfunc
         };
         v = new ItemView(ins);
         this.$el.append(v.render().el);

@@ -6,6 +6,7 @@ w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
 monthNamesShort = 
+  '00': ""
   '01':  "Jan"
   '02':  "Feb"
   '03':  "Mar"
@@ -39,8 +40,12 @@ parse_fqin = (fqin) ->
     return vals[-1+vals.length]
 
 format_item = ($sel, iteminfo) ->
+  #onsole.log '{',iteminfo.pubdate,'}'
   [year, month, leave] = iteminfo.pubdate?.split('-')
-  pubdate = monthNamesShort[month]+" "+year ? "unknown"
+  if month is undefined
+    pubdate = year ? "unknown"
+  else
+    pubdate = monthNamesShort[month]+" "+year ? "unknown"
   $sel.append("<span class='pubdate pull-right'><em>published in #{pubdate}</em></span><br/>")
   title = iteminfo.title ? "No title found"
   $sel.append("<span class='title'><strong>#{title}</strong></span><br/>")
@@ -48,6 +53,7 @@ format_item = ($sel, iteminfo) ->
   $sel.append("<span class='author'>#{short_authors(author)}</span>")
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
+  $sel.empty()
   typestring = tagtype.split(':')[1]
   htmlstring="<li class=\"nav-header\">Filter by: #{typestring}</li>"
   for [k,v] in tags
@@ -73,12 +79,35 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
     ##{v.join(',')}
   $sel.html(htmlstring)
 
+time_format = (timestring) ->
+    [d, t] = timestring.split('.')[0].split('T')
+    d = d.split('-')[1..2].join('/')
+    t = t.split(':')[0..1].join(':')
+    return d+" "+t
 
-format_notes_for_item = (fqin, notes, nick) ->
+email_split = (e) ->
+  [name, host] = e.split('@')
+  hfp = host.split('.')[0]
+  return name+'@'+hfp
+
+this_postable = (pview, pval) ->
+  #console.log "--", pview, pval
+  if pview != 'udg' and pview != 'none' and pview == pval
+    pble = "<i class='icon-cog'></i>&nbsp;&nbsp;"
+  else
+    pble = ''
+    return pble
+
+format_notes_for_item = (fqin, notes, currentuser, pview) ->
+  #console.log "current user is", currentuser, notes
   start = '<table class="table-condensed table-striped">'
   end = "</table>"
+  lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
+  
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
-  t3list=("<tr><td>#{t[2]}</td><td>#{t[0]}</td></tr>" for t in notes[fqin])
+  #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[3], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
+  t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
+  
   if t3list.length >0
     return start+t3list.join("")+end
   else
@@ -122,31 +151,31 @@ format_postings_for_item = (fqin, postings, nick) ->
   else
     return []
 
-format_stuff = (fqin, nick, stags, postings, notes) ->
-  htmlstring= ""
-  htmlstring= htmlstring+format_tags_for_item(fqin, stags, nick)
-  htmlstring= htmlstring+format_postings_for_item(fqin, postings, nick)
-  htmlstring= htmlstring+format_notes_for_item(fqin, notes, nick)
-  return htmlstring
+# format_stuff = (fqin, nick, stags, postings, notes) ->
+#   htmlstring= ""
+#   htmlstring= htmlstring+format_tags_for_item(fqin, stags, nick)
+#   htmlstring= htmlstring+format_postings_for_item(fqin, postings, nick)
+#   htmlstring= htmlstring+format_notes_for_item(fqin, notes, nick)
+#   return htmlstring
 
-format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asform=false) ->
-  #console.log "HTML", $sel.html()
-  adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
-  htmlstring = ""
-  #console.log items.length, "ITTABITTA", (i.basic.fqin for i in items), "}}"
-  for i in items
-    fqin=i.basic.fqin
-    ##console.log "whatsup", fqin, items.length, $sel, htmlstring
-    url=adslocation + "#{i.basic.name}"
-    htmlstring = htmlstring + "<#{formatter}><a href=\"#{url}\">#{i.basic.name}</a><br/>"
-    htmlstring=htmlstring+format_tags_for_item(fqin, stags, nick)
-    htmlstring=htmlstring+format_postings_for_item(fqin, postings, nick)
-    htmlstring=htmlstring+format_notes_for_item(fqin, notes, nick)  
-    htmlstring=htmlstring+"</#{formatter}>"
-    if asform
-      htmlstring=htmlstring+w.postalnote_form("make note")
-  $sel.append(htmlstring)
-  $('#breadcrumb').append("#{count} items")
+# format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asform=false) ->
+#   #console.log "HTML", $sel.html()
+#   adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
+#   htmlstring = ""
+#   #console.log items.length, "ITTABITTA", (i.basic.fqin for i in items), "}}"
+#   for i in items
+#     fqin=i.basic.fqin
+#     ##console.log "whatsup", fqin, items.length, $sel, htmlstring
+#     url=adslocation + "#{i.basic.name}"
+#     htmlstring = htmlstring + "<#{formatter}><a href=\"#{url}\">#{i.basic.name}</a><br/>"
+#     htmlstring=htmlstring+format_tags_for_item(fqin, stags, nick)
+#     htmlstring=htmlstring+format_postings_for_item(fqin, postings, nick)
+#     htmlstring=htmlstring+format_notes_for_item(fqin, notes, nick)  
+#     htmlstring=htmlstring+"</#{formatter}>"
+#     if asform
+#       htmlstring=htmlstring+w.postalnote_form("make note")
+#   $sel.append(htmlstring)
+#   $('#breadcrumb').append("#{count} items")
 
 get_tags = (tags, tqtype) ->
   #console.log "TAGS", tags
@@ -170,11 +199,11 @@ get_taggings = (data) ->
     ##console.log "1>>>", k,v[0], v[1]
     if v[0] > 0
       stags[k]=([e.posting.tagname, e.posting.tagtype] for e in v[1] when e.posting.tagtype is "ads/tagtype:tag")
-      notes[k]=([e.posting.tagdescription, e.posting.whenposted, e.posting.postedby] for e in v[1] when e.posting.tagtype is "ads/tagtype:note")
+      notes[k]=([e.posting.tagdescription, e.posting.whenposted, e.posting.postedby, e.posting.tagmode, e.pinpostables] for e in v[1] when e.posting.tagtype is "ads/tagtype:note")
     else
       stags[k]=[]
       notes[k]=[]
-    ##console.log "HHHHH", stags[k], notes[k]
+    #console.log "HHHHH", k, notes[k]
   return [stags, notes]
 
 get_groups = (nick, cback) ->
@@ -412,11 +441,11 @@ class CreatePostable extends Backbone.View
 
 root.get_tags = get_tags
 root.get_taggings = get_taggings
-root.format_items = format_items
+#root.format_items = format_items
 root.format_item = format_item
 root.format_tags = format_tags
 root.get_groups= get_groups
-root.format_stuff = format_stuff
+#root.format_stuff = format_stuff
 root.format_postings_for_item = format_postings_for_item
 root.format_notes_for_item = format_notes_for_item
 root.format_tags_for_item = format_tags_for_item

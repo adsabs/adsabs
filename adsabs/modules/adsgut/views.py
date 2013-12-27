@@ -166,6 +166,16 @@ def _sortget(qdict):
     sort['ascending']=(sort['ascending']=='True')
     return sort
 
+def _sortpostget(qdict):
+    #a serialixed dict of ascending and field
+    sortstring=_dictp('sort', qdict)
+    if not sortstring:
+        return {'field':'posting__whenposted', 'ascending':False}
+    sort={}
+    sort['field'], sort['ascending'] = sortstring.split(':')
+    sort['ascending']=(sort['ascending']=='True')
+    return sort
+
 #criteria is a multiple ampersand list, with colon separators.
 #eg criteria=basic__fqin:eq:something&criteria=
 #we create from it a criteria list of dicts
@@ -910,7 +920,7 @@ def itemsForPostable(po, pt, pn):
         if not q.has_key('postables'):
             q['postables']=[]
         q['postables'].append(postable)
-        
+        #print "Q is", q, query, useras, usernick
         #By this time query is popped down
         count, items=g.dbp.getItemsForQuery(g.currentuser, useras,
             q, usernick, criteria, sort, pagtuple)
@@ -1221,7 +1231,21 @@ def itemsTaggingsAndPostings():
     ##name/itemtype/uri/
     #q={useras?, sort?, items}
     if request.method=='POST':
-        junk="NOT YET IMPLEMENTED AND I DONT THINK WE WILL"
+        #"THIS WILL NOT BE TO POST STUFF IN BUT TO GET RESULTS"
+        jsonpost=dict(request.json)
+        useras = _userpostget(g, jsonpost)
+        sort = _sortpostget(jsonpost)
+        items = _itemspostget(jsonpost)
+        #print "ITEMS", items
+        #print "SORT", sort, "useras", useras
+        #By this time query is popped down
+        postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, None, sort)
+        taggingsdict=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+            items, sort)
+        #print "MEEP",taggingsdict, postingsdict
+        #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
+        return jsonify(postings=postingsdict, taggings=taggingsdict)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)

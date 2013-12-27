@@ -55,6 +55,9 @@
         onBeforeAdd: function(pill, value) {
             return pill;
         },
+        onAfterAdd: function(pill, value) {
+            return pill;
+        },
         addWithoutAjax: function(value, cback) {
             console.log("CALLED WITHOUT AJAX");
             cback();
@@ -298,6 +301,7 @@
             $self.options.addWithAjax(value, function(){
                 pills_list.append(tag);
                 $('[data-toggle="tooltip"]').tooltip();
+                $self.options.onAfterAdd(tag, value);
                 return true;
             });
         }

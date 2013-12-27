@@ -15,7 +15,7 @@ cdict=(fqin, l)->
 enval = (tag) ->
     ename = encodeURIComponent(tag.text)
     if not tag.url
-        tag.url = "#{prefix}/postable/#{@memberable}/group:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
+        tag.url = "#{prefix}/postable/#{@memberable.nick}/group:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
         title = tag.title ? ' data-toggle="tooltip" title="' + tag.title + '"' : '';
         #tag.text = '<a class="tag-link" ' + title + ' target="' + tagger.options.tag_link_target + '" href="' + tag.url + '">' + tag.text + '</a>';
         tag.id = tag.text
@@ -63,6 +63,7 @@ class ItemView extends Backbone.View
 
   initialize: (options) ->
     {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
+    @tagsfunc = options.tagfunc ? () ->
     #console.log "PVIN",  @memberable, @postings
     @hv=undefined
     @newtags = []
@@ -105,9 +106,9 @@ class ItemView extends Backbone.View
     content = ''
     content = content + htmlstring
     #additional = format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
-    thetags = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable)
+    thetags = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable.nick)
     additional = "<span class='tagls'></span><br/>"
-    thepostings = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable)
+    thepostings = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable.nick)
     additionalpostings = "<strong>In Libraries</strong>: <span class='postls'>#{thepostings.join(', ')}</span><br/>"
     additional = additional + additionalpostings
     content = content + additional
@@ -118,6 +119,7 @@ class ItemView extends Backbone.View
         enhanceValue: _.bind(enval, this)
         addWithAjax: _.bind(addwa, this)
         addWithoutAjax: _.bind(addwoa, this)
+        onAfterAdd: @tagsfunc
         ajax_submit: @tagajaxsubmit
         onRemove: _.bind(remIndiv, this)
         suggestions: @suggestions
@@ -137,15 +139,16 @@ class ItemView extends Backbone.View
             @hv.hide()
         if @therebenotes
             @$el.append("<p class='notes'></p>")
-            @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable))
+            #console.log "NOTES", @notes
+            @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview))
     return this
 
   #this might be better implemented with underscore
   addToPostsView: () =>
     fqin=@item.basic.fqin
     poststoshow=(p for p in @newposts when p not in @postings)
-    thepostings = format_postings_for_item(fqin, cdict(fqin, poststoshow), @memberable)
-    already = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable).join(', ')
+    thepostings = format_postings_for_item(fqin, cdict(fqin, poststoshow), @memberable.nick)
+    already = format_postings_for_item(fqin, cdict(fqin, @postings), @memberable.nick).join(', ')
     #console.log "THEPOSTINGS", thepostings, already
     inbet = ''
     if already != ''
@@ -238,6 +241,7 @@ class ItemsView extends Backbone.View
   initialize: (options) ->
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview} = options
     @newposts=[]
+    #console.log "PVIEW", @pview
     @tagajaxsubmit = false
 
   update_postings_taggings: () =>
@@ -324,7 +328,7 @@ class ItemsView extends Backbone.View
                         maxHeight: 150
         })
         @globaltagsobject = jslist[0]
-    syncs.get_postables_writable(@memberable, cback, eback)
+    syncs.get_postables_writable(@memberable.nick, cback, eback)
     return this
 
   iCancel: => 
@@ -446,7 +450,8 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
+    #console.log "PVIEW", @pview
     #console.log "ITEMS", @items, @suggestions
 
   render: =>
@@ -464,6 +469,7 @@ class ItemsFilterView extends Backbone.View
             tagajaxsubmit: true
             suggestions: @suggestions
             pview: @pview
+            tagfunc: @tagfunc
         #console.log "INS", ins, @pview
         v=new ItemView(ins)
         @$el.append(v.render().el)

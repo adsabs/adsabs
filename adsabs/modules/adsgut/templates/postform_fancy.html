@@ -44,7 +44,9 @@ $ ->
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
     itemtype : '{{itemtype}}'
-    memberable : '{{useras.nick}}'
+    memberable : 
+      nick: '{{useras.nick}}'
+      adsid: '{{useras.adsid}}'
     nam: false
   {% if nameable %}
   config.nam=true
