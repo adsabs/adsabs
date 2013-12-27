@@ -215,39 +215,20 @@
                                   );
                 }//end draw()
 
-        //function used when someone wants to facet search on selected authors  
-        var generateSearch= function()
+       var generateSearch= function()
           {
-            querypieces=[];   
-            querypieces.push(' AND (');   
+            var selectedTerms=[];   
         
-            for (var i=0; i<selected.length-1; i++)
-            {
-  
-                {
-                  
-                  querypieces.push('"'+selected[i]+'"');
-                  querypieces.push('+OR+');
-                }
-            }
-                  querypieces.push('"'+selected.slice(-1)+'")');
-              var querystring=querypieces.join('');
+            $.each(selected, function(idx, term) {
+                selectedTerms.push('"' + term + '"');	
+            });
+            
+            var newTerms = '(' + selectedTerms.join(' OR ') + ')';
                
             var finalURI= new Uri(baseurlandquery);
-            var facetregex=/&.*$/;
-            if (facetregex.test(finalURI.query())) 
-                  {
-                    var facetindex=finalURI.query().search(facetregex);
-                    var facets=finalURI.query().slice(facetindex);
-                  }
-            else
-                  {
-                    var facets='';
-                  };
-            var orig_query=finalURI.getQueryParamValue('q');
-            var newquery= orig_query+querystring
+            var newQuery = finalURI.getQueryParamValue('q') + ' AND ' + newTerms;
+            finalURI.replaceQueryParam('q', newQuery);
 
-            finalURI.setQuery('q='+newquery+facets);
             window.location.href = decodeURIComponent(finalURI.toString());
           }
     

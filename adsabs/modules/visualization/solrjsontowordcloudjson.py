@@ -8,8 +8,8 @@ stemmer = PorterStemmer()
 
 sw = open(os.path.dirname(os.path.abspath(__file__)) +'/solr_stopwords.txt').read().split('\n')
 
-# so in 250 docs, token has to appear >= 3 times
-MIN_OCCURENCES_OF_WORD = 0.012
+# so in 250 docs, token has to appear >= 4 times
+MIN_OCCURENCES_OF_WORD = 0.016
 
 
 def list_to_dict(l):
