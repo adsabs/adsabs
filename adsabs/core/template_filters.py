@@ -9,7 +9,7 @@ import jinja2
 import scrubber
 import re
 from werkzeug import url_decode, url_encode
-from flask import Markup
+from flask import Markup, json
 import dicttoxml
 import math
 import sys
@@ -385,7 +385,11 @@ def configure_template_filters(app):
     @app.template_filter('get_messages')
     def g_g_m(categories):
         return get_global_messages(with_categories=True, category_filter=categories)
-    
+
+    @app.template_filter('to_json')
+    def to_json(value):
+        return json.dumps(value)    
+
     # like this we can make a filter available inside templates (macros)
     # ie. like get_flashed_messages() - however it is not a good practice
     # we should use it very carefully

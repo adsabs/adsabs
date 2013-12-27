@@ -140,11 +140,11 @@
 	<ul class="dropdown-menu">
 		{# <li class="nav-header">records:</li> #}
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.author_network') }}')">Author network</a></li>
+		  onclick="ResultListManager.visualize('{{ url_for('visualization.author_network') }}', 'authnetwork')">Author network</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.alladin_lite') }}')">Objects skymap</a></li>
+		  onclick="ResultListManager.visualize('{{ url_for('visualization.alladin_lite') }}', 'skymap')">Objects skymap</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" 
-		  onclick="ResultListManager.visualize('{{ url_for('visualization.word_cloud') }}')">Word cloud</a></li>
+		  onclick="ResultListManager.visualize('{{ url_for('visualization.word_cloud') }}', 'wordcloud')">Word cloud</a></li>
 
 	</ul>
 </div>
@@ -156,8 +156,8 @@
         <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-wrench"></i> Analyze <i class="caret"></i></a>
         <ul class="dropdown-menu">
                 <li class="nav-header">selected records:</li>
-                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.citation_helper()">Citation Helper</a></li>
-                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.metrics()">Metrics</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.citation_helper()">Citation Helper</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.metrics()">Metrics</a></li>
         </ul>
 </div>
 {% endmacro %}
@@ -179,3 +179,13 @@
 	<i class="icon icon-check"></i>
 </span>
 {% endmacro %}
+
+{# ###Macro to render the record count input dialog #}
+{% macro render_record_count_dialog(hits) %}
+            <div id="record_selection_dialog">
+                <input type="hidden" id="hits" value="{{ hits }}"/>
+                <p><input type="text" id="amount" style="border:0; color:black; display:none" readonly /></p>
+                <div id="record_slider"></div>
+            </div>
+{% endmacro %}
+

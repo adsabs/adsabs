@@ -103,7 +103,6 @@ class AppConfig(object):
     }
     SEARCH_DEFAULT_SECONDARY_SORT = ('bibcode', 'desc')
 
-    EXPORT_DEFAULT_ROWS = 300
     AUTHOR_NETWORK_DEFAULT_FIRST_RESULTS = 1000
     WORD_CLOUD_DEFAULT_FIRST_RESULTS = 250
     
@@ -270,7 +269,6 @@ class AppConfig(object):
     METRICS_MIN_BIBLIO_LENGTH = 5
     METRICS_CHUNK_SIZE = 100
     METRICS_MAX_HITS = 100000
-    METRICS_MAX_EXPORT = 300
     METRICS_TMP_DIR = '/tmp'
     METRICS_MONGO_HOST = 'localhost'
     METRICS_MONGO_PORT = 27017
@@ -290,6 +288,22 @@ class AppConfig(object):
     RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
     RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'
 
+    # configuration parameters for maximum number of records used for various services (metrics, citation helper, exports, ...)
+    EXPORT_DEFAULT_ROWS = 300
+    MAX_EXPORTS = {'metrics':3000, 
+                   'wordcloud':1000, 
+                   'ADSClassic':3000,
+                   'authnetwork':1000,
+                   'skymap':1000,
+                   'export_other':3000,
+                   }
+    DEFAULT_EXPORTS = {'metrics':300, 
+                   'wordcloud':750, 
+                   'ADSClassic':300,
+                   'authnetwork':750,
+                   'skymap':750,
+                   'export_other':300,
+                   }
 try:
     from local_config import LocalConfig
 except ImportError:

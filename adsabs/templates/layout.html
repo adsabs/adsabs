@@ -20,7 +20,9 @@
     <script type="text/javascript" src="{{ url_for('static', filename = 'js/libs/vega.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.flot.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/libs/jquery.flot.stack.js') }}"></script>
-
+    <!-- jQuery UI dialog apparently doesn't like the yuicompressor either -->
+    <script type="text/javascript" src="{{ url_for('static', filename = 'jquery-ui/js/jquery-ui-1.10.2.dialog.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'jquery-ui/js/jquery-ui-1.10.2.draggable.js') }}"></script>
 	<script type="text/javascript">
   	{% from 'macros/misc.html' import render_messages %}
     {{ render_messages(['javascript']) }}

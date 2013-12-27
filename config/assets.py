@@ -25,6 +25,7 @@ main_js = Bundle('js/libs/jquery.js',
 
 main_css = Bundle('bootstrap/css/bootstrap.min.css',
                  'jquery-ui/css/smoothness/jquery-ui-1.10.2.custom.min.css',
+                 'jquery-ui/css/smoothness/jquery-ui-1.10.2.dialog.css',
                  'fancybox/source/jquery.fancybox.css',
                  'fancybox/source/helpers/jquery.fancybox-buttons.css',
                  'fancybox/source/helpers/jquery.fancybox-thumbs.css',

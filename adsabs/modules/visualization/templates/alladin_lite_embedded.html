@@ -160,13 +160,18 @@
             data: {"bibcode": list.join(','), 'data': 'I.0,b,C.0(S;1),J,S(S,Q,B),T(M,Q,B)', 'output': 'json'},
             method: 'POST',
             success: function(datastring) {
-                data=JSON.parse(datastring);
+            	try {
+            		// simbad sends back invalid json if no results are found
+                    var data=JSON.parse(datastring);
+                } catch (e) {
+                	// do nothing?
+                }
                 //console.log("Got back",);
                 a.gotoPosition( data[0].ra, data[0].dec);
-                layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
+                var layersData = {'Stars': [], 'ISM': [], 'Galaxy': [], 'Radio sources': [], 'Other': []};
                 var otype, category;
                 for (var k=0; k<data.length; k++) {
-                    otype = data[k].otype;
+                    var otype = data[k].otype;
                     //console.log("DD",data[k]);
                     if (otype=='Star') {
                         category = 'Stars';
