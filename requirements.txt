@@ -4,7 +4,7 @@ pip>=1.4.1
 BeautifulSoup>=3.2.1
 Flask-Cache>=0.12
 Flask-DebugToolbar>=0.8.0
-Flask-Login>=0.1.3
+Flask-Login==0.2.7
 Flask-Mail>=0.8.2
 Flask-MongoAlchemy>=0.5.4
 Flask-Pushrod>=0.1.2
