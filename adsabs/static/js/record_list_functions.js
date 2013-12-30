@@ -100,7 +100,7 @@ var ResultListManager = function() {
     					'width': '100%',
     					'height': '100%'   					
     				};
-    				_.extend(fancybox_opts);
+    				opts = _.extend(opts, fancybox_opts);
     				$.fancybox(opts);
     			}
 			}
@@ -245,46 +245,22 @@ var ResultListManager = function() {
         	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
         },
         
-        export_to_libraries = function() {
+        export_to_libraries: function() {
         	this.enable_query_params();
         	var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
-        	this.ajax_submit(url, false, null, {'closeBtn', false});
+        	
+        	if (this.bibcodes_checked().length > 0) {
+        		this.ajax_submit(url, false, null, {'closeBtn': false});
+        	} else {
+        		var RLM = this;
+        		this.record_input_dialog('export_library', function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
+					RLM.ajax_submit(url, false, null, {'closeBtn': false});
+        		})
+        	}
+
         }
 	}
 
 }();
 
-
-ResultListManager.export_to_libraries = function()
-{
-    $.fancybox.showLoading();
-    //re-enable query parameters
-    $('#search_results_form > input[name="current_search_parameters"]').removeAttr('disabled');
-    //remove a hidden fields if exists
-    $('#search_results_form > input.ajaxHiddenField').remove();
-    var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
-    //console.log("KKKKKKK", $('#search_results_form').serializeArray());
-    //alert(url);
-    //submit the form via ajax
-    $.ajax({
-        type : "POST",
-        cache : false,
-        url : url,
-        data : $('#search_results_form').serializeArray(),
-        success: function(outdata) {
-            //console.log("OUTDATA", outdata)
-            $.fancybox.hideLoading();
-            $.fancybox({
-                'width'         : '90%',
-                'height'        : '90%',
-                'autoScale'     : false,
-                'autoSize'     : false,
-                'type'          : 'iframe',
-                'closeBtn'      : false,
-                'content'       : outdata
-            });
-        }
-    });
-    
-    
-};

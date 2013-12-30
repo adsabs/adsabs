@@ -296,16 +296,18 @@ class AppConfig(object):
                    'authnetwork':1000,
                    'skymap':1000,
                    'export_other':3000,
+                   'export_library': 300,
                    }
     DEFAULT_EXPORTS = {'metrics':300, 
                    'wordcloud':750, 
                    'ADSClassic':300,
                    'authnetwork':750,
                    'skymap':750,
+                   'export_library': 20,
                    'export_other':300,
                    }
     #ADSGUT
-    MONGODB_SETTINGS= {'DB': 'adsgut'}
+    MONGODB_SETTINGS= {'HOST': 'mongodb://user:pass@localhost/adsgut', 'DB': 'adsgut'}
     
 try:
     from local_config import LocalConfig

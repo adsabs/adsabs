@@ -26,5 +26,3 @@ GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';
 GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/metrics/';
 
 GlobalVariables.ADS_PREFIX = '{{ ADS_PREFIX }}';
-
-GlobalVarialbes.ADS_GUT_
