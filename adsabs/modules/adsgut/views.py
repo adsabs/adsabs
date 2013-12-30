@@ -546,6 +546,7 @@ def createLibrary():
     else:
         doabort("BAD_REQ", "GET not supported")
 
+from adsabs.modules.user.user import AdsUser
 @adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
 def doPostableChanges(po, pt, pn):
     #add permit to match user with groupowner
@@ -567,7 +568,18 @@ def doPostableChanges(po, pt, pn):
         if not op:
             doabort("BAD_REQ", "No Op Specified")
         if op=="invite":
-            memberable=g.db.getUserForAdsid(g.currentuser, memberable)
+            try:
+                memberable=g.db.getUserForAdsid(g.currentuser, memberable)
+            except:
+                adsuser = AdsUser.from_email(memberable)
+                if adsuser==None:
+                    doabort("BAD_REQ", "No such User")
+                cookieid = adsuser.get_id()
+                adsid = adsuser.get_username()
+                adsgutuser=g.db.getUserForNick(None, 'adsgut')
+                adsuser=g.db.getUserForNick(adsgutuser, 'ads')
+                memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+                memberable, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', memberable.nick)
             utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
         elif op=='accept':

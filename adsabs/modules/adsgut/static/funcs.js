@@ -112,7 +112,6 @@
 
   this_postable = function(pval, pview) {
     var pble;
-    console.log("--", pview, pval);
     if (pview !== 'udg' && pview !== 'none') {
       if (pval === true) {
         return pble = "<i class='icon-comment'></i>&nbsp;&nbsp;";
@@ -286,7 +285,6 @@
         stags[k] = [];
         notes[k] = [];
       }
-      console.log("HHHHH", k, notes[k]);
     }
     return [stags, notes];
   };
