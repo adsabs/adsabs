@@ -20,35 +20,6 @@
 			        {{ form.q(class="span8", placeholder=form.q.description, autofocus="autofocus") }}
 			        <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler"><i class="icon-plus"></i> options</span>
 			        <button class="btn btn-primary"><i class="icon-search icon-white"></i> Search</button>
-			        <div class="dropdown pull-right">
-			        	<a class="btn dropdown-toggle add-open-permanent" data-toggle="dropdown"  data-rel="bootstrap_tooltip" title="Search settings">
-			        		<i class="icon-cog"></i> <i class="caret"></i>
-			        	</a>
-			        	<ul style="min-width: 300px; padding-bottom: 0px;" class="dropdown-menu donothide clearfix">
-							<li class="nav-header">Search settings</li>
-							
-							<!-- The transformation of the buttonSelect elements is done through the specific jQuery plugin and activated by the code in query_form.js-->
-							<li class="divider"></li>
-							<li class="clearfix nav-list">
-								<div class="control-group clearfix">
-									<label class="control-label pull-left">Display on page</label>
-									<div class="controls pull-right">
-										<!-- select class="btn-small span2" style="height: inherit; line-height: inherit; display: none;" name="rg">
-											<option value="10">10 results</option>
-											<option selected="selected" value="25">25 results</option>
-											<option value="50">50 results</option>
-											<option value="100">100 results</option>
-										</select-->
-										{{ form.nr(class="btn-small span2 hidden_elem buttonSelect") }}
-									</div>
-								</div>
-							</li>
-							
-							<!--li class="modal-footer nav-list clearfix"><button class="btn btn-small pull-right" data-placement="bottom" data-rel="bootstrap_tooltip" title="use settings in current search">
-							    <i class="icon-ok"></i> Apply </button>
-							</li-->
-						</ul>
-			        </div>
 		        </div>
 	        </div>
 	        <div class="row">
@@ -79,6 +50,22 @@
 	        				</div>
 	        			</div>
 	        		</div>
+                                <div class="span3 adv_opt_box adv_opt_box_foll">
+                                        <div class="row">
+                                               <div class="span3">{{ form.db_f.description }}</div>
+                                       </div>
+                                       <div class="row">
+                                               <div class="span3">{{ form.db_f(class="span2") }}</div>
+                                       </div>
+				</div>
+	        		<div class="span2 adv_opt_box adv_opt_box_foll">
+	        			<div class="row">
+                                               <div class="span2">{{ form.nr.description }}</div>
+                                       </div>
+                                       <div class="row">
+                                               <div class="span2">{{ form.nr(maxlength="4", class="span1") }}</div>
+                                       </div>
+				</div>					  
 	        		<div class="span2 adv_opt_box adv_opt_box_foll">
 	        			<div class="row">
 	        				{% if not form.no_ft.raw_data or form.no_ft.raw_data[0] == '1' %}
@@ -121,7 +108,6 @@
         </fieldset>
         
         {{ form.bigquery() }}
-        {{ form.db_f(value='(astronomy OR physics)') }}
         
         {% if form.has_rendered_elements() %}
           {% for rendered_element in form.get_rendered_elements() %}
