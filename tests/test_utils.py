@@ -26,6 +26,7 @@ from adsabs.app import create_app
 class AdsabsBaseTestCase(fixtures.TestWithFixtures, unittest.TestCase):
     
     def setUp(self):
+        self.maxDiff = None
         self.box = mongobox.MongoBox(scripting=True, auth=True)
         self.box.start()
         self.boxclient = self.box.client()

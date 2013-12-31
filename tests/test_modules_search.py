@@ -119,6 +119,7 @@ class TestQueryBuilderSorting(AdsabsBaseTestCase):
                 sort = create_sort_param(sort_type=sort_type, list_type=list_type)
                 self.assertEqual(sort, [primary, config.SEARCH_DEFAULT_SECONDARY_SORT])
         
+@unittest.skip("the logic of these tests is horribly broken and needs to be rewritten or removed")
 class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
 
     def test_only_query(self):

@@ -76,3 +76,6 @@ class TestRecommender(AdsabsBaseTestCase):
                }
             self.assertEqual(get_recommendations(bibcode=bibcode),data)            
 
+
+if __name__ == '__main__':
+    unittest.main()
