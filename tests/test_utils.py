@@ -46,6 +46,12 @@ class AdsabsBaseTestCase(fixtures.TestWithFixtures, unittest.TestCase):
         config.MONGOALCHEMY_USER = 'test'
         config.MONGOALCHEMY_PASSWORD = 'test'
         config.LOGGING_LOG_LEVEL = 'WARN'
+        # adsgut mongo connection stuff
+        config.MONGODB_SETTINGS= {
+            'PORT': self.box.port,
+            'HOST': 'mongodb://test:test@localhost/test', 
+            'DB': 'test'
+        }
         config.CSRF_ENABLED = False
         config.DEBUG = False
         config.PRINT_DEBUG_TEMPLATE = False
