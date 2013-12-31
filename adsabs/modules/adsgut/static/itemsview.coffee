@@ -62,7 +62,7 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
+    {@counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
     @tagsfunc = options.tagfunc ? () ->
     #console.log "PVIN",  @memberable, @postings
     @hv=undefined
@@ -98,9 +98,9 @@ class ItemView extends Backbone.View
     adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
     url=adslocation + "#{@item.basic.name}"
     if @item.whenposted
-        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format_iv(@item.whenposted)})</div>"
+        htmlstring = "<div class='searchresultl'>(#{@counter}). <a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format_iv(@item.whenposted)})</div>"
     else
-        htmlstring = "<div class='searchresultl'><a href=\"#{url}\">#{@item.basic.name}</a></div>"
+        htmlstring = "<div class='searchresultl'>(#{@counter}). <a href=\"#{url}\">#{@item.basic.name}</a></div>"
       
     fqin=@item.basic.fqin
     content = ''
@@ -285,6 +285,7 @@ class ItemsView extends Backbone.View
     #$lister.append('<legend>Selected Items</legend>')
     $ctrls=@$('.ctrls')
     @itemviews={}
+    counter=1
     for i in @items
         fqin=i.basic.fqin
         ins = 
@@ -297,9 +298,12 @@ class ItemsView extends Backbone.View
             tagajaxsubmit: @tagajaxsubmit
             suggestions: @suggestions
             pview: @pview
+            counter: counter
         v=new ItemView(ins)
         $lister.append(v.render().el)
+        $lister.append('<hr style="margin-top: 10px; margin-bottom: 10px;"/>')
         @itemviews[fqin]=v
+        counter = counter + 1
     # for v in views
     #     $lister.append(v.render().el)
     eback = (xhr, etext) =>
@@ -459,6 +463,7 @@ class ItemsFilterView extends Backbone.View
   render: =>
     #console.log "EL", @$el
     @itemviews = {}
+    counter = 1
     for i in @items
         fqin=i.basic.fqin
         ins = 
@@ -472,11 +477,13 @@ class ItemsFilterView extends Backbone.View
             suggestions: @suggestions
             pview: @pview
             tagfunc: @tagfunc
+            counter: counter
         #console.log "INS", ins, @pview
         v=new ItemView(ins)
         @$el.append(v.render().el)
         @itemviews[fqin] = v
-        @$el.append('<hr/>')
+        @$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>')
+        counter = counter + 1
     return this
 
 

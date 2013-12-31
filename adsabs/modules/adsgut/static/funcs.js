@@ -532,7 +532,13 @@
     };
 
     AddGroup.prototype.render = function() {
-      this.$el.html(this.content);
+      if (this.groups.length === 0) {
+        this.$el.html(this.content);
+        this.$(":input").attr("disabled", true);
+        this.$el.append("<p class='text-error'>You are not a member of any group. Create some groups first.</p>");
+      } else {
+        this.$el.html(this.content);
+      }
       return this;
     };
 

@@ -399,7 +399,12 @@ class AddGroup extends Backbone.View
       @content=widgets.dropdown_submit(@groups, @groupnames, "Add a group you are a member of:","Add")
 
   render: () =>
-    @$el.html(@content)
+    if @groups.length ==0
+      @$el.html(@content)
+      @.$(":input").attr("disabled", true)
+      @$el.append("<p class='text-error'>You are not a member of any group. Create some groups first.</p>")
+    else
+      @$el.html(@content)
     return this
 
   addGroupEH: =>

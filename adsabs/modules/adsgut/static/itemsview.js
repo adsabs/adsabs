@@ -111,7 +111,7 @@
 
     ItemView.prototype.initialize = function(options) {
       var _ref;
-      this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
       this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
@@ -151,9 +151,9 @@
       adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
       url = adslocation + ("" + this.item.basic.name);
       if (this.item.whenposted) {
-        htmlstring = "<div class='searchresultl'><a href=\"" + url + "\">" + this.item.basic.name + "</a>&nbsp;&nbsp;(saved " + (time_format_iv(this.item.whenposted)) + ")</div>";
+        htmlstring = "<div class='searchresultl'>(" + this.counter + "). <a href=\"" + url + "\">" + this.item.basic.name + "</a>&nbsp;&nbsp;(saved " + (time_format_iv(this.item.whenposted)) + ")</div>";
       } else {
-        htmlstring = "<div class='searchresultl'><a href=\"" + url + "\">" + this.item.basic.name + "</a></div>";
+        htmlstring = "<div class='searchresultl'>(" + this.counter + "). <a href=\"" + url + "\">" + this.item.basic.name + "</a></div>";
       }
       fqin = this.item.basic.fqin;
       content = '';
@@ -436,11 +436,12 @@
     };
 
     ItemsView.prototype.render = function() {
-      var $ctrls, $lister, cback, eback, fqin, i, ins, v, _i, _len, _ref,
+      var $ctrls, $lister, cback, counter, eback, fqin, i, ins, v, _i, _len, _ref,
         _this = this;
       $lister = this.$('.items');
       $ctrls = this.$('.ctrls');
       this.itemviews = {};
+      counter = 1;
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -454,11 +455,14 @@
           noteform: this.noteform,
           tagajaxsubmit: this.tagajaxsubmit,
           suggestions: this.suggestions,
-          pview: this.pview
+          pview: this.pview,
+          counter: counter
         };
         v = new ItemView(ins);
         $lister.append(v.render().el);
+        $lister.append('<hr style="margin-top: 10px; margin-bottom: 10px;"/>');
         this.itemviews[fqin] = v;
+        counter = counter + 1;
       }
       eback = function(xhr, etext) {
         return alert('Did not succeed');
@@ -673,8 +677,9 @@
     };
 
     ItemsFilterView.prototype.render = function() {
-      var fqin, i, ins, v, _i, _len, _ref;
+      var counter, fqin, i, ins, v, _i, _len, _ref;
       this.itemviews = {};
+      counter = 1;
       _ref = this.items;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
@@ -689,12 +694,14 @@
           tagajaxsubmit: true,
           suggestions: this.suggestions,
           pview: this.pview,
-          tagfunc: this.tagfunc
+          tagfunc: this.tagfunc,
+          counter: counter
         };
         v = new ItemView(ins);
         this.$el.append(v.render().el);
         this.itemviews[fqin] = v;
-        this.$el.append('<hr/>');
+        this.$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>');
+        counter = counter + 1;
       }
       return this;
     };
