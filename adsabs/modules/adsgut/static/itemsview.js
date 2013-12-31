@@ -111,7 +111,7 @@
 
     ItemView.prototype.initialize = function(options) {
       var _ref;
-      this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
       this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
@@ -130,7 +130,8 @@
     };
 
     ItemView.prototype.update_tags = function(newtag) {
-      return this.newtags.push(newtag);
+      this.newtags.push(newtag);
+      return this.submittable.state = true;
     };
 
     ItemView.prototype.remove_from_tags = function(newtag) {
@@ -138,11 +139,13 @@
     };
 
     ItemView.prototype.update_posts = function(newposts) {
-      return this.newposts = _.union(this.newposts, newposts);
+      this.newposts = _.union(this.newposts, newposts);
+      return this.submittable.state = true;
     };
 
     ItemView.prototype.update_notes = function(newnotetuple) {
-      return this.newnotes.push(newnotetuple);
+      this.newnotes.push(newnotetuple);
+      return this.submittable.state = true;
     };
 
     ItemView.prototype.render = function() {
@@ -272,6 +275,7 @@
         this.$('.notes tbody').prepend(format_row(notetext, notemode, notetime, this.memberable, this.memberable, false, this.pview));
         this.hv.hide();
         this.$('.txt').val("");
+        this.submittable.state = true;
       }
       return false;
     };
@@ -354,7 +358,10 @@
     ItemsView.prototype.initialize = function(options) {
       this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview;
       this.newposts = [];
-      return this.tagajaxsubmit = false;
+      this.tagajaxsubmit = false;
+      return this.submittable = {
+        state: false
+      };
     };
 
     ItemsView.prototype.update_postings_taggings = function() {
@@ -407,32 +414,30 @@
     };
 
     ItemsView.prototype.update_tags = function(newtag) {
-      var fqin, i, _i, _len, _ref, _results;
+      var fqin, i, _i, _len, _ref;
       _ref = this.items;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         i = _ref[_i];
         fqin = i.basic.fqin;
-        _results.push(this.itemviews[fqin].tagsobject.addTag(this.itemviews[fqin].$('.pills-list'), newtag));
+        this.itemviews[fqin].tagsobject.addTag(this.itemviews[fqin].$('.pills-list'), newtag);
       }
-      return _results;
+      return this.submittable.state = true;
     };
 
     ItemsView.prototype.update_posts = function(postables) {
-      var fqin, i, p, _i, _j, _len, _len1, _ref, _results;
+      var fqin, i, p, _i, _j, _len, _len1, _ref;
       for (_i = 0, _len = postables.length; _i < _len; _i++) {
         p = postables[_i];
         this.newposts = _.union(this.newposts, postables);
       }
       _ref = this.items;
-      _results = [];
       for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
         i = _ref[_j];
         fqin = i.basic.fqin;
         this.itemviews[fqin].update_posts(this.newposts);
-        _results.push(this.itemviews[fqin].addToPostsView());
+        this.itemviews[fqin].addToPostsView();
       }
-      return _results;
+      return this.submittable.state = true;
     };
 
     ItemsView.prototype.render = function() {
@@ -456,7 +461,8 @@
           tagajaxsubmit: this.tagajaxsubmit,
           suggestions: this.suggestions,
           pview: this.pview,
-          counter: counter
+          counter: counter,
+          submittable: this.submittable
         };
         v = new ItemView(ins);
         $lister.append(v.render().el);
@@ -673,7 +679,10 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      return this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.tagfunc = options.tagfunc, options;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.tagfunc = options.tagfunc;
+      return this.submittable = {
+        state: true
+      };
     };
 
     ItemsFilterView.prototype.render = function() {
@@ -695,7 +704,8 @@
           suggestions: this.suggestions,
           pview: this.pview,
           tagfunc: this.tagfunc,
-          counter: counter
+          counter: counter,
+          submittable: this.submittable
         };
         v = new ItemView(ins);
         this.$el.append(v.render().el);

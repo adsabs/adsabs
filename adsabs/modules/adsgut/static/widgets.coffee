@@ -363,7 +363,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     #h.button ".btn.btn-primary.tag", type:'button', "Tag"
     h.span "#alltags.tagls"
     h.br()
-    h.button ".btn.btn-inverse.done.pull-right", type:'button', "Save"
+    h.button ".btn.btn-inverse.done.pull-right.savebutton", type:'button', "Save"
     h.button ".btn.btn-inverse.cancel.pull-right", type:'button', style:"margin-right: 10px;", "Cancel"
 
 

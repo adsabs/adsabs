@@ -62,7 +62,7 @@ class ItemView extends Backbone.View
     "click .notebtn" : "submitNote"
 
   initialize: (options) ->
-    {@counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
+    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
     @tagsfunc = options.tagfunc ? () ->
     #console.log "PVIN",  @memberable, @postings
     @hv=undefined
@@ -82,6 +82,7 @@ class ItemView extends Backbone.View
   update_tags: (newtag) =>
     #console.log("#{@item.basic.name} >>>",newtag)
     @newtags.push(newtag)
+    @submittable.state = true
 
   remove_from_tags: (newtag) =>
     #console.log "newtag is", newtag
@@ -89,9 +90,11 @@ class ItemView extends Backbone.View
 
   update_posts: (newposts) =>
     @newposts=_.union(@newposts, newposts)
+    @submittable.state = true
 
   update_notes: (newnotetuple) =>
     @newnotes.push(newnotetuple)
+    @submittable.state = true
 
   render: =>
     @$el.empty()
@@ -207,6 +210,7 @@ class ItemView extends Backbone.View
         @.$('.notes tbody').prepend(format_row(notetext, notemode, notetime, @memberable, @memberable, false, @pview))
         @hv.hide()
         @.$('.txt').val("")
+        @submittable.state = true
     return false
 
 
@@ -245,6 +249,8 @@ class ItemsView extends Backbone.View
     @newposts=[]
     #console.log "PVIEW", @pview
     @tagajaxsubmit = false
+    @submittable = 
+        state: false
 
   update_postings_taggings: () =>
     @postings={}
@@ -270,6 +276,7 @@ class ItemsView extends Backbone.View
         #below is not needed, it gets autocalled?
         #@itemviews[fqin].update_tags(newtag.id)
         @itemviews[fqin].tagsobject.addTag(@itemviews[fqin].$('.pills-list'), newtag)
+    @submittable.state = true
 
   update_posts: (postables) =>
     for p in postables
@@ -278,6 +285,7 @@ class ItemsView extends Backbone.View
         fqin=i.basic.fqin
         @itemviews[fqin].update_posts(@newposts)
         @itemviews[fqin].addToPostsView()
+    @submittable.state = true
     #console.log "NEWPOSTS", @newposts
 
   render: =>
@@ -299,6 +307,7 @@ class ItemsView extends Backbone.View
             suggestions: @suggestions
             pview: @pview
             counter: counter
+            submittable: @submittable
         v=new ItemView(ins)
         $lister.append(v.render().el)
         $lister.append('<hr style="margin-top: 10px; margin-bottom: 10px;"/>')
@@ -459,6 +468,8 @@ class ItemsFilterView extends Backbone.View
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
     #console.log "PVIEW", @pview
     #console.log "ITEMS", @items, @suggestions
+    @submittable = 
+        state: true
 
   render: =>
     #console.log "EL", @$el
@@ -478,6 +489,7 @@ class ItemsFilterView extends Backbone.View
             pview: @pview
             tagfunc: @tagfunc
             counter: counter
+            submittable: @submittable
         #console.log "INS", ins, @pview
         v=new ItemView(ins)
         @$el.append(v.render().el)
