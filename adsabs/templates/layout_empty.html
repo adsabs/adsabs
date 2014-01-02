@@ -20,7 +20,19 @@
 	<!-- BEER Specific stuff -->
 	<link href="{{ url_for('static', filename='css/bootstrap_custom.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
 	<link href="{{ url_for('static', filename='css/styles.css') }}?app_version={{ config.APP_VERSION }}" rel="stylesheet">
-	
+	<!--adsgut stuff-->
+	<!--link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link>
+	<script src="{{ url_for('adsgut.static', filename='underscore-min.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='teacup.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='widgets.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='funcs.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='syncs.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='userprofile.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='libraryprofile.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='groupprofile.js') }}"></script>
+	<script src="{{ url_for('adsgut.static', filename='itemsview.js') }}"></script-->
 	{% block head_el %}{% endblock %}
 </head>
 <body>

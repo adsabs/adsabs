@@ -1,0 +1,108 @@
+{% extends "layout_local.html" %}
+{% block scripturls %}
+<script src="{{ url_for('adsgut.static', filename='postablefilter.js') }}"></script>
+{% endblock %}
+{% block sidebar %}
+<ul class="nav nav-list" id="stags">
+</ul>
+<ul class="nav nav-list" id="users">
+  <li class="nav-header">Posted by</li>
+  <li> <a href="" id="useradder" data="off">you</a> </li>
+</ul>
+
+{% endblock %}
+
+{% block localbody %}
+{% if pflavor=='udg' %}
+<h4>Items saved by {{useras.adsid}}</h4>
+<span>
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+</span></label>
+</form>
+</span>
+<hr/>
+{% elif pflavor=='pub' %}
+<h4>Public Feed</h4>
+<span>
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+</span></label>
+</form>
+</span>
+<hr/>
+{% else %}
+{% if p.classname=="library" %}
+<h4>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
+{% elif p.classname=="group" %}
+<h4>Items saved in library for group <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
+ {% endif %}
+<!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
+<div id="info" style="display:none"></div>
+<span>
+  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
+  <input id="bigquery" name="bigquery" type="hidden" value="">
+  <button class="btn" type="submit">View in search page</button>
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+</span></label>
+</form>
+</span>
+<hr/>
+{% endif %}
+
+
+
+<!--ul id="items">
+</ul-->
+<div id="items">
+</div>
+{% endblock %}
+
+{% block coffeescript %}
+$=jQuery
+#console.log "In PostableFilter"
+
+
+$ ->
+  prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
+  ptype = "{{p.classname}}"
+  vars="{{ querystring | safe }}"
+
+  config = 
+    fqpn : "{{p.basic.fqin}}"
+    infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
+    tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
+    bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
+    bq2url : GlobalVariables.ADS_PREFIX+"/search/bigquery/"
+    memberable: 
+      nick: "{{useras.nick}}"
+      adsid: "{{useras.adsid}}"
+    loc : document.location
+    tqtype : "{{ tqtype }}"
+    querystring: "{{ querystring | safe }}"
+    pview: "{{pflavor}}"
+
+  sections = 
+    $info : $('div#info')
+    $items : $('#items')
+    $ua : $('#useradder')
+    $tagssec : $('#stags')
+    $bigquery : $('#bigquery')
+    $bigqueryform : $('#bigqueryform')
+    $breadcrumb: $('#breadcrumb')
+    $count: $('#count')
+
+  redo_tags = _.partial(postablefilter.do_tags, config.tagsPURL, sections.$tagssec, config.tqtype)
+
+  {% if pflavor!= 'udg' and pflavor!='pub' %}
+  postablefilter.do_postable_info(sections, config, ptype)
+  {% endif %}
+  postablefilter.do_postable_filter(sections, config, redo_tags)
+{% endblock %}

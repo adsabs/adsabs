@@ -6,6 +6,8 @@ Created on Jan 7, 2013
 import logging
 from flask import render_template, request
 from adsabs.core.logevent import LogEvent
+from mongogut.errors import MongoGutError
+from flask import jsonify
 
 def create_error_handler(app, status_code, template):
     @app.errorhandler(status_code)
@@ -14,3 +16,9 @@ def create_error_handler(app, status_code, template):
         return render_template(template), status_code
 
     
+
+    # @app.errorhandler(MongoGutError)
+    # def handle_error(error):
+    #     response = jsonify(error.to_dict())
+    #     response.status_code = error.status_code
+    #     return response

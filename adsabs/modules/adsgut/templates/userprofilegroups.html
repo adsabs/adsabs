@@ -1,0 +1,49 @@
+{% extends "layout_local.html" %}
+{% block localbody %}
+  <h3>Groups for user {{theuser.adsid}}</h3>
+  <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
+  <!--div id="userinfo" style="display:none"></div-->
+  <p> Groups are used for long-term collaboration. For example, you could store your research group's or a journal club's reading material, or papers relevant to your research activities, in the group's library. All members of the group can post items to the group's library.
+  </p>
+
+    <div id="creategroups"></div>
+    <div id="groups">
+      <div class="ow"></div>
+      <div class="in"></div>
+      <div class="iv"></div>
+    </div>
+
+  
+
+{% endblock %}
+{% block coffeescript %}
+$=jQuery
+
+
+$ -> 
+  config = 
+    userInfoURL: "{{ url_for('adsgut.userInfo', nick=useras.nick) }}"
+    udgHtmlURL: "{{ url_for('adsgut.udgHtml', nick=useras.nick) }}"
+  sections =
+    $create: $('div#creategroups')
+    $info: $('#userinfo')
+    $owned: $('#groups div.ow')
+    $in: $('#groups div.in')
+    $invited: $('#groups div.iv')
+
+  userprofile.layout_userprofile(sections, config, "group")
+
+  
+
+  awopt = 
+    el: document.getElementById('groupsh3')
+    position: 'right'
+    titletext: "Lorem Ipsum ate a potato"
+    helptext: 'Lorem Ipsum ate a potato'
+    htype: 'tooltip'
+
+  #aw= new widgets.HoverHelpDecoratorView(awopt)
+  #aw.render('A title', 'Lorem Ipsum ate a potato')
+  #aw.render()
+
+{% endblock %}

@@ -29,9 +29,9 @@ manager = Manager(app)#, with_default_commands=False)
 tools_manager = Manager("Tools commands")#, with_default_commands=False)
 
 @manager.command
-def run():
+def run(port=5000):
     """Run server that can be reached from anywhere."""
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=int(port))
     
 @manager.command
 def create_local_config():

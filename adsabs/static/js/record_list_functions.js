@@ -84,21 +84,24 @@ var ResultListManager = function() {
          * wrap_pre (boolean) - optionally wrap the returned data in '<pre> tags
          * success_callback (function) - provide a custom success callback
          */
-		ajax_submit: function(url, wrap_pre, success_callback) {
+		ajax_submit: function(url, wrap_pre, success_callback, fancybox_opts) {
 			$.fancybox.showLoading();
 			
 			var wrap_pre = wrap_pre || false;
+			var fancybox_opts = fancybox_opts || {};
 			
 			if (!success_callback) {
 				success_callback = function(data) {
     				$.fancybox.hideLoading();
     				data = wrap_pre ? '<pre>'+data+'</pre>' : data;
-    				$.fancybox({
+    				opts = {
     					'content': data,
     					'autoSize': false,
     					'width': '100%',
     					'height': '100%'   					
-    				});
+    				};
+    				opts = _.extend(opts, fancybox_opts);
+    				$.fancybox(opts);
     			}
 			}
     		$.ajax({
@@ -115,11 +118,10 @@ var ResultListManager = function() {
         */
 		export_to_ads_classic: function() {
 			this.remove_hidden();
-			this.disable_sorting();
 
 			// if bibcodes are selected simply submit the form to the export url
 			if (this.bibcodes_checked().length > 0) {
-				this.enable_query_params();
+				this.disable_query_params();
 				this.submit_form(GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL);
 			// abstract view has only one bibcode
 			} else if (this.is_abstract_page()) {
@@ -136,6 +138,7 @@ var ResultListManager = function() {
 					RLM.ajax_submit(GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY, false, function(data) {
 						$.fancybox.hideLoading();
 						RLM.disable_query_params();
+						RLM.disable_sorting();
 						RLM.add_hidden_field('bibcode', data);
 						RLM.add_hidden_field('nr_to_return', numRecs);
 						//submit the form
@@ -162,6 +165,7 @@ var ResultListManager = function() {
         		this.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
 			} else {
 				var RLM = this;
+				this.enable_query_params();
 				this.record_input_dialog('export_other', function(numRecs) {
 					RLM.add_hidden_field('numRecs', numRecs);
 					RLM.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
@@ -240,6 +244,24 @@ var ResultListManager = function() {
         	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
         	this.add_hidden_field('bibcodes', bibcode)
         	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        },
+        
+        export_to_libraries: function() {
+        	this.enable_query_params();
+        	var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
+        	
+        	if (this.bibcodes_checked().length > 0) {
+        		this.ajax_submit(url, false, null, {'closeBtn': false});
+        	} else {
+        		var RLM = this;
+        		this.record_input_dialog('export_library', function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
+					RLM.ajax_submit(url, false, null, {'closeBtn': false});
+        		})
+        	}
+
         }
 	}
+
 }();
+

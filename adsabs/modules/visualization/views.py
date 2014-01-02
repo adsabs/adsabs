@@ -43,7 +43,12 @@ def author_network():
         'highlights': [], 
         })
 
-    resp = solr.query(**query_components)
+    req = solr.create_request(**query_components)
+    if 'bigquery' in request.values:
+        from adsabs.core.solr import bigquery
+        bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+    req = solr.set_defaults(req)
+    resp = solr.get_response(req)
 
     if resp.is_error():
         return render_template('errors/generic_error.html', error_message='Error while creating the author network (code #2). Please try later.')
@@ -89,8 +94,13 @@ def word_cloud():
         'tv.fl':'abstract,title',
         'fl':'abstract,title' 
     })
-            
-    resp = solr.query(query_url=tvrh_query_url, **query_components)
+
+    req = solr.create_request(**query_components)
+    if 'bigquery' in request.values:
+        from adsabs.core.solr import bigquery
+        bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+    req = solr.set_defaults(req, query_url=tvrh_query_url)
+    resp = solr.get_response(req)            
 
     if resp.is_error():
         return render_template('errors/generic_error.html', error_message='Error while creating the word cloud (code #2). Please try later.')
@@ -122,7 +132,12 @@ def alladin_lite():
             'highlights': [],
             })
 
-        resp = solr.query(**query_components)
+        req = solr.create_request(**query_components)
+        if 'bigquery' in request.values:
+            from adsabs.core.solr import bigquery
+            bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+        req = solr.set_defaults(req)
+        resp = solr.get_response(req)
 
         if resp.is_error():
             return render_template('errors/generic_error.html', error_message='Error while creating the objects skymap. Please try later.')

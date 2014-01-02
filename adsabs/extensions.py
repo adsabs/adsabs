@@ -3,8 +3,8 @@
 from config import config
 
 # For import *
+#__all__ = ['login_manager', 'mongodb', 'pushrod', 'mail', 'cache', 'solr', 'adsdata', 'mongoengine']
 __all__ = ['login_manager', 'mongodb', 'pushrod', 'mail', 'cache']
-
 #from flask.ext.sqlalchemy import SQLAlchemy #@UnresolvedImport
 #db = SQLAlchemy()
 
@@ -36,3 +36,7 @@ solr = FlaskSolrQuery()
 
 from flask.ext.adsdata import FlaskAdsdata #@UnresolvedImport
 adsdata = FlaskAdsdata()
+
+#RAHUL:added
+from flask.ext.mongoengine import MongoEngine
+mongoengine=MongoEngine()

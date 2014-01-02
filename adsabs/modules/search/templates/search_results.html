@@ -57,6 +57,9 @@
 		<div class="span9" id="results">
 			<form id="search_results_form" method="post" action="" >
 				<input type="hidden" value='{{ query_components|tojson|safe }}' name="current_search_parameters" />
+				{% if bigquery_id %}
+                    <input type="hidden" value="{{ bigquery_id|safe }}" name="bigquery" />
+                {% endif %}                       
 				<div class="container-fluid">
 				{# The facet bar #}
 				{% if resp.get_facet_parameters() %}

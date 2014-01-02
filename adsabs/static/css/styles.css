@@ -471,7 +471,7 @@ div.absview div.row-fluid label {
 .action-box .listbox {
 	float: left;
 	padding: 0 1em 1em 0.8em;
-	width: 280px;
+	/*width: 280px;*/
 }
 
 .action-box .listbox h4 {

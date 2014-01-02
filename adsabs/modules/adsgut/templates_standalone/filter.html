@@ -1,0 +1,95 @@
+{% extends "layout.html" %}
+
+{% block sidebar %}
+<ul class="nav nav-list" id="stags">
+</ul>
+{% endblock %}
+
+{% block body %}
+<h2>{{ p.classname }} <a href="/postable/{{p.basic.fqin}}/filter/html">{{p.basic.fqin}}</a></h2>
+<p id="breadcrumb">
+Breadcrumb {{ querystring }}
+</p>
+<h3>Items</h3>
+<ul id="items">
+</ul>
+
+{% endblock %}
+
+{% block coffeescript %}
+$=jQuery
+console.log "In Filtera"
+
+format_tags = ($sel, tags)->
+  htmlstring="<li class=\"nav-header\">TAGS</li>"
+  for t in tags
+    nonqloc=document.location.href.split('?')[0]
+    url=nonqloc+"?query=stags:#{t}"
+    urla=document.location+"&query=stags:#{t}"
+    if nonqloc is document.location.href
+      urla=document.location+"?query=stags:#{t}"
+    
+    htmlstring = htmlstring+"<li><span><a href=\"#{url}\">#{t}</a>&nbsp;<a href=\"#{urla}\">(+)</a></span></li>"
+  $sel.html(htmlstring)
+
+
+format_items = ($sel, items, count, stags, notes, postings)->
+  adslocation="http://labs.adsabs.harvard.edu/adsabs/abs/"
+  htmlstring=""
+  for i in items
+    fqin=i.basic.fqin
+    console.log
+    url=adslocation+"#{i.basic.name}"
+    htmlstring = htmlstring+"<li><a href=\"#{url}\">#{i.basic.name}</a><br/>"
+    t2list=("<a href=\"#{t}\">#{t}</a>" for t in stags[fqin])
+    htmlstring=htmlstring+"<span>Tagged as "+t2list.join(", ")+"</span>"
+    t3list=("<span>#{t}</span><br/>" for t in notes[fqin])
+    htmlstring=htmlstring+"<p>Notes:<br/>"+t3list.join("<br/>")+"</p>"
+    p2list=("<a href=\"/postable/#{p}/filter/html\">#{p}</a>" for p in postings[fqin])
+    htmlstring=htmlstring+"<span>Posted as "+p2list.join(", ")+"</span><br/></li>"
+
+  $sel.html(htmlstring)
+  $('#breadcrumb').append("#{count} items")
+
+get_tags = (data, ix) ->
+  tags = data.tags
+  console.log "TAGS", tags
+  return (t[ix] for t in tags)
+
+get_taggings = (data) ->
+  stags={}
+  notes={}
+  for own k,v of data.taggings
+    console.log "1>>>", k,v[0], v[1]
+    if v[0] > 0
+      stags[k]=(e.thething.postfqin for e in v[1] when e.thething.tagtype is "ads/tagtype:tag")
+      notes[k]=(e.thething.tagdescription for e in v[1] when e.thething.tagtype is "ads/tagtype:note")
+    else
+      stags[k]=[]
+      notes[k]=[]
+    console.log "HHHHH", stags[k], notes[k]
+  return [stags, notes]
+
+$ ->
+  vars="{{ querystring | safe }}"
+  $.get "/postable/{{ p.basic.fqin}}/tags?#{vars}", (data) ->
+    console.log "Tag Count", data.count, vars
+    format_tags($('#stags'), get_tags(data,0))
+  $.get "/postable/{{ p.basic.fqin}}/items?#{vars}", (data) ->
+    console.log "Item Count", data.count, vars
+    theitems=data.items
+    thecount=data.count
+    itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+    itemsq=itemlist.join("&")
+    console.log "itemsq", itemlist, itemsq
+    $.get "/items/taggingsandpostings?#{itemsq}", (data)->
+      [stags, notes]=get_taggings(data)
+      postings={}
+      for own k,v of data.postings
+        console.log "2>>>", k,v[0],v[1]
+        if v[0] > 0
+          postings[k]=(e.thething.postfqin for e in v[1])
+        else
+          postings[k]=[]
+      format_items $('#items'), theitems, thecount, stags, notes, postings
+{% endblock %}

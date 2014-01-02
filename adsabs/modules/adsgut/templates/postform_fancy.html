@@ -1,0 +1,59 @@
+<link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='style.css') }}"></link>
+<link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='localstyle.css') }}"></link>
+<link rel="stylesheet" type="text/css" href="{{ url_for('adsgut.static', filename='bootstrap-multiselect.css') }}"></link>
+  <script type="text/javascript" src="{{ url_for('adsgut.static', filename='bootstrap-multiselect.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='bootstrap-tags.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='teacup.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='widgets.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='funcs.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='syncs.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='userprofile.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='libraryprofile.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='groupprofile.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='itemsview.js') }}"></script>
+  <script src="{{ url_for('adsgut.static', filename='postform.js') }}"></script>
+<div class="container-fluid">
+
+  <div id="items" class="row">
+      <div class="span6 items"><legend>Selected Items</legend></div>
+      <div class="span6 ctrls"></div>
+  </div>
+</div><!--/.fluid-container-->
+<script type="text/javascript">
+  $(document).ready( function(){
+    source = $('#source').text()
+    //console.log("SOURCE", source);
+    window.compiledJS = CoffeeScript.compile(source, {'bare': 'on'});
+    //console.log(window.compiledJS);
+    //alert(window.compiledJS);
+    eval(window.compiledJS);
+  });
+</script>
+<script type="text/coffeescript" id="source">
+$=jQuery
+#currently below only works for pubs, but ought to work otherwise too
+$ ->
+  myvar =  encodeURIComponent("{{ querystring | safe }}")
+  config = 
+    loc : "{{curpage | safe }}" 
+    itemsInfoURL :  "{{ url_for('adsgut.itemsinfo') }}?items=#{myvar}"
+    itemsTPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
+    bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
+    itemtype : '{{itemtype}}'
+    memberable : 
+      nick: '{{useras.nick}}'
+      adsid: '{{useras.adsid}}'
+    nam: false
+  {% if nameable %}
+  config.nam=true
+  {% endif %}
+
+  sections = 
+    $itemssec : $('#items')
+
+  postform.do_postform(sections, config)
+
+</script>

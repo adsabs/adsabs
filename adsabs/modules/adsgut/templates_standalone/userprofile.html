@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h3>User {{theuser.nick}}</h3>
+  <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
+  <div id="userinfo" style="display:none"></div>
+  <br/>
+  <h4>Groups</h4>
+    <div class="row" id="groups">
+      <div class="span3 ow"></div>
+      <div class="span3 in"></div>
+      <div class="span3 iv"></div>
+    </div>
+  <br/>
+  <h4>Libraries</h4>
+    <div class="row" id="libraries">
+      <div class="span3 ow"></div>
+      <div class="span3 in"></div>
+      <div class="span3 iv"></div>
+    </div>
+  <!--h3>Groups</h3>
+    <h5>Groups In</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisin"></iframe width="100%">
+    <h5>Groups Owned</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserowns"></iframe width="100%">
+    <h5>Groups Invited</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/groupsuserisinvitedto"></iframe width="100%">
+  <hr/>
+  <h3>Libraries</h3>
+    <h5>Libraries In</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisin"></iframe width="100%">
+    <h5>Libraries Owned</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserowns"></iframe width="100%">
+    <h5>Libraries Invited</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/librariesuserisinvitedto"></iframe width="100%">
+
+  <h5>User's items (user default group)</h5>
+  <iframe width="100%" src="/user/{{ theuser.nick}}/items"></iframe width="100%"-->
+
+{% endblock %}
+{% block coffeescript %}
+$=jQuery
+
+render_postable = (usernick, plist, $pel, ptype, invite) ->
+  plin=new userprofile.PostableList([],listtype:ptype, invite:invite, nick:usernick)
+  plin.add((new userprofile.Postable(fqpn:p, invite:plin.invite, nick:plin.nick) for p in plist))
+  console.log "THIS", this
+  plinv=new userprofile.PostableListView(collection:plin, $e_el:$pel)
+  plinv.render()
+
+$ -> 
+  $.get "/user/{{ theuser.nick}}", (data) ->
+    userdict=userprofile.parse_userinfo(data)
+    usernick=userdict.userinfo.nick
+    console.log userdict
+    content=widgets.info_layout(userdict.userinfo, name:'Name', nick:'Nickname', whenjoined:'Joined')
+    content=content+"<a href=\"/postable/{{theuser.nick}}/group:default/filter/html\">My Items</a>"
+    content=content+"&nbsp;&nbsp;&nbsp;<a href=\"/postable/adsgut/group:public/filter/html\">Public Items</a>"
+    $('#userinfo').append(content)
+    $('#userinfo').show()
+
+    console.log 'GROUPS'
+
+    #$('#groups div.ow').append(widgets.one_col_table('Owned', userdict.groupsowned))
+    plgrpow=render_postable(usernick, userdict.groupsowned, $('#groups div.ow'), 'ow', false)
+
+    plgrpin=render_postable(usernick, userdict.groupsin, $('#groups div.in'), 'in', false)
+    plgrpiv=render_postable(usernick, userdict.groupsinvitedto, $('#groups div.iv'), 'iv', true)
+
+    console.log "LIBRARIES"
+    #$('#libraries div.ow').append(widgets.one_col_table('Owned', userdict.librariesowned))
+    pllibow=render_postable(usernick, userdict.librariesowned, $('#libraries div.ow'), 'ow', false)
+    pllibin=render_postable(usernick, userdict.librariesin, $('#libraries div.in'), 'in', false)
+    pllibiv=render_postable(usernick, userdict.librariesinvitedto, $('#libraries div.iv'), 'iv', true)
+{% endblock %}

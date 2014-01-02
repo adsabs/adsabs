@@ -109,7 +109,7 @@ def _configure_extensions(app):
     Function to configure the extensions that need to be wrapped inside the application.
     NOTE: connection to the database MUST be created in this way otherwise they will leak
     """
-    from adsabs.extensions import login_manager, mongodb, pushrod, mail, cache, solr, adsdata
+    from adsabs.extensions import login_manager, mongodb, pushrod, mail, cache, solr, adsdata, mongoengine
     from adsabs.modules.user import AdsUser
     from adsabs.core.solr import SolrResponse, SolrRequestAdapter
     
@@ -162,18 +162,51 @@ def _configure_extensions(app):
      
     app.logger.debug("initializing adsdata extension")
     adsdata.init_app(app) 
+
+    #RAHUL
+    mongoengine.init_app(app)
+
+    #print "ME", dir(mongoengine), dir(mongoengine.connection)
+
+def mongogut_error_handler(app):
+    from mongogut.errors import MongoGutError
+    from flask import jsonify, request, render_template
     
+    def f(error, template, status_code):    
+        app.logger.error("[error] %s, %s" % (str(error), request.path))
+        return render_template(template), status_code
+
+    @app.errorhandler(MongoGutError)
+    def handle_error(error):
+        edict = error.to_dict()
+        response = jsonify(edict)
+        response.status_code = error.status_code
+        tdict = {
+            400: 'errors/400.html',
+            401: 'errors/401.html',
+            403: 'errors/403.html',
+            404: 'errors/404.html',
+            405: 'errors/405.html',
+            500: 'errors/500.html',
+            503: 'errors/503.html'
+        }
+        if request.path[-4:]=='html':
+            tpl = tdict[error.status_code]
+            return f(edict['reason'], tpl, error.status_code)
+        return response    
+
 def _configure_error_handlers(app):
     """
     function that configures some basic handlers for errors
     """
     from errors import create_error_handler
-    
     create_error_handler(app, 400, 'errors/400.html')
     create_error_handler(app, 403, 'errors/403.html')
     create_error_handler(app, 404, 'errors/404.html')
     create_error_handler(app, 405, 'errors/405.html')
     create_error_handler(app, 500, 'errors/500.html')
+    mongogut_error_handler(app)#RAHUL
+
 
     
 def _configure_misc_handlers(app):
@@ -186,6 +219,7 @@ def _configure_misc_handlers(app):
     @app.route('/robots.txt')
     def robots():
         return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt', mimetype='text/plain')
+
     
 #def _configure_global_variables(app):
 #    """
@@ -196,4 +230,3 @@ def _configure_misc_handlers(app):
 #        g.conf_params = {}
 #        g.conf_params['PRINT_DEBUG_TEMPLATE'] = config.PRINT_DEBUG_TEMPLATE
 #        g.conf_params['APP_VERSION'] = config.APP_VERSION
-    

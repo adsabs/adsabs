@@ -11,7 +11,7 @@
     <div class="action-box rounded">
     	<div class="titlebar">
     		<h2>Settings</h2>
-    		<h3>Email, Password, Personal Info</h3>
+    		<!--h3>Email, Password, Personal Info</h3-->
     	</div>
     	<div class="listbar">
     		<div class="listbox">
@@ -22,20 +22,56 @@
     				<li><a href="{{ url_for('user.reset_password') }}">Forgot Password?</a></li>
     			</ul>
     		</div>
-    		<div class="listbox">
+    		<!--div class="listbox">
     			<h4>Advanced Account Setting</h4>
     			<ul class="unstyled">
     				<li><a class="disabled">Delete Your Account</a></li>
     			</ul>
-    		</div>
+    		</div-->
+
     		<div class="clearfix"></div>
     	</div>
     </div>
     
     <div class="action-box rounded">
+        <div class="titlebar">
+            <h2>Your Stuff</h2>
+            <!--h3>Saved Items, Libraries, and Groups</h3-->
+        </div>
+        <div class="listbar">
+            <div class="listbox">
+                <ul class="unstyled">
+                    <li>
+                        <a href="{{ url_for('adsgut.udgHtmlFromAdsid', adsid=current_user.get_username()) }}">Saved Items</a><span class="listbox-inline-help">all items you ever saved, in any library</span>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('adsgut.userProfileFromAdsidHtml', adsid=current_user.get_username()) }}">Libraries</a><span class="listbox-inline-help">your individual libraries, such as paper citation lists, papers to read, etc</span>
+                    </li>
+                    <li>
+                        <span>Notifications</span><span class="listbox-inline-help"> (coming soon) saved searches and notifications based on them</span>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=current_user.get_username()) }}">My Groups</a><span class="listbox-inline-help">your collaborations, such as your research group, journal clubs, etc
+                    </li>
+                    <!--li><a href="{{ url_for('adsgut.publicHtml') }}">Public Feed</a></li-->
+                </ul>
+            </div>
+            <!--div class="listbox">
+                <ul class="unstyled">
+                    <li>all items you ever saved, in any context</li>
+                    <li>your libraries, such as paper citation lists, stuff to read, etc</li>
+                    <li>updates to searches and people you follow</li>
+                    <li>your groups, such as your research group, journal clubs, etc</li>
+                </ul>
+            </div-->
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="action-box rounded">
     	<div class="titlebar">
     		<h2>Developer</h2>
-    		<h3>Developer settings and options</h3>
+    		<!--h3>Developer settings and options</h3-->
     	</div>
     	<div class="listbar">
     		<div class="listbox">
@@ -43,18 +79,18 @@
     			<ul class="unstyled">
     				{% if current_user.is_authenticated() -%}
     					{% if current_user.get_developer_key() %}
-    					<li>Your developer key is <strong>{{ current_user.get_developer_key() }}</strong></li>
+    					<li>
+                            Your developer key is <strong>{{ current_user.get_developer_key() }}</strong>
+                        </li>
     					{% else%}
-    					<li><a target="_blank" href="https://github.com/adsabs/adsabs-dev-api">How to get a developer key</a></li>
+    					<li>
+                            <a target="_blank" href="https://github.com/adsabs/adsabs-dev-api">How to get a developer key</a><span class="listbox-inline-help">write scripts against the ADS web site</span>
+                        </li>
     					{% endif %}
     					
     				{% endif %}
     			</ul>
 			</div>
-    		<!-- div class="listbox">
-    			<h4></h4>
-    			<ul class="unstyled"></ul>
-    		</div-->
     		<div class="clearfix"></div>
     	</div>
     </div>

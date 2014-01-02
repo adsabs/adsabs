@@ -25,6 +25,10 @@ def dynamic_global_variables():
     """
     Serves JS content containing global dynamic variables 
     """
-    response = make_response(render_template('global_variables.js'))
+    if config.DEPLOYMENT_PATH:
+        ADS_PREFIX=config.DEPLOYMENT_PATH
+    else:
+        ADS_PREFIX=""
+    response = make_response(render_template('global_variables.js', ADS_PREFIX=ADS_PREFIX))
     response.headers['Content-Type'] = 'application/javascript'
     return response

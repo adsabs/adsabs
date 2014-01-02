@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% if not useras %}
+  <p> <a href="/login">Login</a> </p>
+{% else %}
+  <p> Your <a href="/user/{{useras.nick}}/profile/html">Profile</a> </p>
+  <p> Your <a href="/postable/{{useras.nick}}/group:default/filter/html">Saved Items</a> </p>
+{% endif %}
+<p> See <a href="/postable/adsgut/group:public/filter/html">Public Items</a> if you like.</p>
+<p>Here is a bookmarklet you can use on your ADS search results page to add things to your libraries and groups</p>
+<a href="javascript:(function(){if(window.myBookmarklet!==undefined){myBookmarklet();}else{document.body.appendChild(document.createElement('script')).src='http://localhost:4000/static/marklet.js';}})();">Save To ADS</a>
+
+<hr/>
+<p> If you are a superuser you will see more below. </p>
+<br/>
+<h5>Groups</h5>
+  {% for group in groups %}
+    <div>
+      <h5><a href="/group/{{ group.basic.fqin }}/profile/html">{{ group.basic.fqin }}</a></h5>
+      {{ group.basic.description|safe }}
+    </div>
+  {% endfor %}
+<hr/>
+<h5>Apps</h5>
+  {% for app in apps %}
+    <div>
+      <h5><a href="/app/{{ app.basic.fqin }}/profile/html">{{ app.basic.fqin }}</a></h5>
+      {{ app.basic.description|safe }}
+    </div>
+  {% endfor %}
+<hr/>
+
+<h5>Users</h5>
+  {% for user in users %}
+    <div>
+      <h5><a href="/user/{{ user.nick }}/profile/html">{{ user.nick }}</a></h5>
+      {{ user.adsid }}
+    </div>
+  {% endfor %}
+<hr/>
+
+<h5>Libraries</h5>
+  {% for library in libraries %}
+    <div>
+      <h5><a href="/library/{{ library.basic.fqin }}/profile/html">{{ library.basic.fqin }}</a></h5>
+      {{ library.basic.description|safe }}
+    </div>
+  {% endfor %}
+
+<hr/>
+{% endblock %}
