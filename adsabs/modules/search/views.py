@@ -3,6 +3,7 @@ import re
 from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
     Markup, redirect
 from flask.ext.solrquery import solr #@UnresolvedImport
+import re
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm
@@ -138,6 +139,14 @@ def bigquery():
     #return qid
     
     
+@search_blueprint.route('/classic-search', methods=('GET', 'POST'))
+def classic_search():
+    """
+    returns classic_search page
+    """
+
+    return render_template('classic-search.html')
+
 
 @search_blueprint.route('/facets', methods=('GET', 'POST'))
 def facets():
@@ -158,4 +167,3 @@ def search_advanced():
     """
     """
     pass
-
