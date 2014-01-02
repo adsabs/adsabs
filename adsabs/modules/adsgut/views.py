@@ -1376,7 +1376,12 @@ def postForm(itemtypens, itemtypename):
                     'rows': str(config.SEARCH_DEFAULT_ROWS)
                     })
 
-                resp = solr.query(**query_components)
+                req = solr.create_request(**query_components)
+                if 'bigquery' in request.values:
+                    from adsabs.core.solr import bigquery
+                    bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+                req = solr.set_defaults(req)
+                resp = solr.get_response(req)
 
                 if resp.is_error():
                     return render_template('errors/generic_error.html', error_message='Error while loading bibcodes for posting. Please try later.')

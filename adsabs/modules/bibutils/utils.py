@@ -285,14 +285,18 @@ def get_references(**args):
                 papers += doc['reference']
     return papers
 
-def get_publications_from_query(q,sort_order, list_type=None):
+def get_publications_from_query(q,sort_order, list_type=None, bigquery_id=None):
     try:
         # Get the information from Solr
         if list_type and list_type == 'similar':
-            query_func = get_document_similar
+            resp = get_document_similar(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
         else:
-            query_func = solr.query
-        resp = query_func(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+            req = solr.create_request(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+            if bigquery_id:
+                from adsabs.core.solr import bigquery
+                bigquery.prepare_bigquery_request(req, bigquery_id)
+            req = solr.set_defaults(req)
+            resp = solr.get_response(req)
 
     except SolrReferenceQueryError, e:
         app.logger.error("Solr publications query for %s blew up (%s)" % (q,e))

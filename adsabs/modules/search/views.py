@@ -6,8 +6,8 @@ from flask.ext.solrquery import solr #@UnresolvedImport
 
 #from flask.ext.login import current_user #@UnresolvedImport
 from .forms import QueryForm
-from .models import BigQuery
 from adsabs.core.solr import QueryBuilderSearch, AdsabsSolrqueryException
+from adsabs.core.solr.bigquery import prepare_bigquery_request, retrieve_bigquery, save_bigquery
 from adsabs.core.data_formatter import field_to_json
 from config import config
 from adsabs.core.logevent import log_event
@@ -62,55 +62,35 @@ def search():
         form = QueryForm.init_with_defaults(request.values)
         if form.validate():
             query_components = QueryBuilderSearch.build(form, request.values)
+            bigquery_id = request.values.get('bigquery')
             try:
                 
                 req = solr.create_request(**query_components)
-                bigquery = None
-                if 'bigquery' in request.values:
-                    bigquery = request.values['bigquery']
+
+                if bigquery_id:
+                    prepare_bigquery_request(req, request.values['bigquery'])
                     
-                    bq_data = retrieve_bigquery(bigquery)
-                    if bq_data is not None:
-                        req.headers = {'content-type': 'big-query/csv'}
-                        req.data=bq_data
-                        req.add_filter_query('{!bitset}')
-                    else:
-                        bigquery = None
-                
                 req = solr.set_defaults(req)
                 resp = solr.get_response(req)
                 
-                if bigquery:
+                if bigquery_id:
                     facets = resp.get_facet_parameters()
-                    facets.append(('bigquery', bigquery))
+                    facets.append(('bigquery', bigquery_id))
                 
             except Exception, e:
                 raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
             if resp.is_error():
                 flash(resp.get_error_message(), 'error')
-            return render_template('search_results.html', resp=resp, form=form, query_components=query_components)
+
+            return render_template('search_results.html', resp=resp, form=form, 
+                                   query_components=query_components, bigquery_id=bigquery_id)
         else:
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)
 
 
-def retrieve_bigquery(query_id):
-    cursor = BigQuery.query.filter(BigQuery.query_id==query_id) #@UndefinedVariable
-    query = cursor.first()
-    if query is None:
-        return None
-    return query.data
 
-def save_bigquery(data):
-    # save data inside mongo and get unique id
-    qid = str(uuid.uuid4())
-    new_rec = BigQuery(
-                query_id=qid,
-                created=datetime.utcnow().replace(tzinfo=pytz.utc),
-                data=data)
-    new_rec.save()
-    return qid
 
 @search_blueprint.route('/bigquery/', methods=('GET', 'POST'))
 def bigquery():

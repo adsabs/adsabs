@@ -51,7 +51,12 @@ def export_to_other_formats():
         if list_type == 'similar':
             resp = get_document_similar(**query_components)
         else:
-            resp = solr.query(**query_components)
+            req = solr.create_request(**query_components)
+            if 'bigquery' in request.values:
+                from adsabs.core.solr import bigquery
+                bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+            req = solr.set_defaults(req)
+            resp = solr.get_response(req)
         if resp.is_error():
             return render_template('errors/generic_error.html', error_message='Error while exporting records (code #2). Please try later.')
         #extract the bibcodes
@@ -103,7 +108,13 @@ def get_bibcodes_from_query():
     if list_type == 'similar':
         resp = get_document_similar(**query_components)
     else:
-        resp = solr.query(**query_components)
+        req = solr.create_request(**query_components)
+        if 'bigquery' in request.values:
+            from adsabs.core.solr import bigquery
+            bigquery.prepare_bigquery_request(req, request.values['bigquery'])
+        req = solr.set_defaults(req)
+        resp = solr.get_response(req)
+
     if resp.is_error():
         #@todo: logging of the error
         return ''
