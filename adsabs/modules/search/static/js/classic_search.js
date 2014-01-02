@@ -215,7 +215,7 @@ classicSearch.convertSearchObjectToDisplayFilters = function (searchObject)
 								}
 								else
 								{
-									var num = 200;
+									var num = 20;
 								}
 								var new_filter = $('<span class="classicAppliedFilter">'
 									+ 'Number of results: ' + num + '</span>');
@@ -435,10 +435,7 @@ classicSearch.classicFormFunction = function(){
 				 					{
 				 						filters.push("article=1")
 				 					}
-			 					if (classicSearch.searchObject['ref_filter']['ref_only']===false)
-			 						{
-			 							filters.push("prop_f=(\"notrefereed\"+OR+\"refereed\")")
-			 						}
+
 			 				}
 		 				else if (otherAreas[i]==='num_results')
 			 				{
@@ -455,13 +452,18 @@ classicSearch.classicFormFunction = function(){
 				 					}
 			 				}
 		 			}
-		 		}
+		 		};
+
+		 		if (classicSearch.searchObject['ref_filter']['ref_only']===true)
+			 		{
+			 			filters.push("prop_f=refereed")
+			 		};
 
 		 		return filters
 		 	}
 
 	$('#search_submit').on("click", function(e) {
-		e.preventDefault();
+		e.preventDefault(); 
  		var query = $("#classic_q").val();
  		var filters = classicSearch.findFilters() || "";
  		// in case someone marks a month
@@ -489,7 +491,7 @@ classicSearch.searchObject = {
 		date: {month_from:"", year_from:"", month_to:"", year_to:""},
 		title: {args: "", logic:'and' },
 		abstract: {args: "", logic:'and'},
-		num_results: {items: 200},
+		num_results: {items: 20},
 		ref_filter: {ref_only: true, articles_only: false},
 		bibstem: {args:""},
 	};
@@ -501,7 +503,7 @@ classicSearch.defaultSearchObject = {
 		date: {month_from:"", year_from:"", month_to:"", year_to:""},
 		title: {args: "", logic:'and' },
 		abstract: {args: "", logic:'and'},
-		num_results: {items: 200},
+		num_results: {items: 20},
 		ref_filter: {ref_only: true, articles_only: false},
 		bibstem: {args:""},
 	}; 
@@ -662,7 +664,7 @@ classicSearch.initiatePubAutocomplete = function () {
 	})
 	.autocomplete({
 		source: function( request, response ) {
-		  $.getJSON( "/autocomplete/pub", {
+			$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
 		    term: classicSearch.extractLast( request.term )
 		  }, response );
 		},
