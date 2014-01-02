@@ -139,7 +139,7 @@ def bigquery():
     #return qid
     
     
-@search_blueprint.route('/classic-search', methods=('GET', 'POST'))
+@search_blueprint.route('/classic-search/', methods=('GET', 'POST'))
 def classic_search():
     """
     returns classic_search page
