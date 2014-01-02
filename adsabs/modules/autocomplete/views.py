@@ -10,8 +10,9 @@ autocomplete_blueprint = Blueprint('autocomplete', __name__, template_folder="te
                              static_folder="static", url_prefix='/autocomplete')
 
 
+@autocomplete_blueprint.route('/', methods=['GET'])
 @autocomplete_blueprint.route('/<field>', methods=['GET'])
-def autocomplete(field):
+def autocomplete(field=None):
     """
     serves json for ajax requests
     """
