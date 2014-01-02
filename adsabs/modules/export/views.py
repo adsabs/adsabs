@@ -103,8 +103,12 @@ def get_bibcodes_from_query():
         return ''
     #update the query parameters to return only what is necessary
     query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
+    if 'sort' not in query_components:
+        # this might be an abstract citation/reference list view so get the sort from config
+        if list_type is not None and list_type in config.ABS_SORT_OPTIONS_MAP:
+            query_components['sort'] = [config.ABS_SORT_OPTIONS_MAP[list_type]]
+
     #execute the query
-    
     if list_type == 'similar':
         resp = get_document_similar(**query_components)
     else:

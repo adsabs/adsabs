@@ -118,11 +118,10 @@ var ResultListManager = function() {
         */
 		export_to_ads_classic: function() {
 			this.remove_hidden();
-			this.disable_sorting();
 
 			// if bibcodes are selected simply submit the form to the export url
 			if (this.bibcodes_checked().length > 0) {
-				this.enable_query_params();
+				this.disable_query_params();
 				this.submit_form(GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL);
 			// abstract view has only one bibcode
 			} else if (this.is_abstract_page()) {
@@ -139,6 +138,7 @@ var ResultListManager = function() {
 					RLM.ajax_submit(GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY, false, function(data) {
 						$.fancybox.hideLoading();
 						RLM.disable_query_params();
+						RLM.disable_sorting();
 						RLM.add_hidden_field('bibcode', data);
 						RLM.add_hidden_field('nr_to_return', numRecs);
 						//submit the form
@@ -165,6 +165,7 @@ var ResultListManager = function() {
         		this.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
 			} else {
 				var RLM = this;
+				this.enable_query_params();
 				this.record_input_dialog('export_other', function(numRecs) {
 					RLM.add_hidden_field('numRecs', numRecs);
 					RLM.ajax_submit(GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL, true);
