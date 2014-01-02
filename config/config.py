@@ -154,7 +154,7 @@ class AppConfig(object):
                                 'grant_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 'data_f':{'default_mode':'q', 'default_function':'_append_to_query'},
                                 'vizier_f':{'default_mode':'q', 'default_function':'_append_to_query'},
-                                'db_f':{'default_mode':'q', 'default_function':'_append_to_query'},
+                                'db_f':{'default_mode':'fq', 'default_function':'_append_to_list'},
                                 }
     #Dictionary of allowed facets from the web interface and mapping to the real facet field in SOLR
     ALLOWED_FACETS_FROM_WEB_INTERFACE = {'bib_f':'bibstem_facet',

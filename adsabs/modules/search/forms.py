@@ -62,16 +62,14 @@ class QueryForm(Form):
     q = TextField(u'Query', [required(), length(min=1, max=2048)], description=u"Query the ADS database")
 
     # make this hidden since we'll use database selection from the facets
-    db_f =  MultiFacetSelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('', 'all') ], description=u'Database', widget=widgets.HiddenInput(), default=config.SEARCH_DEFAULT_DATABASE)
+    db_f =  MultiFacetSelectField(u'Database', choices=[('astronomy', 'astronomy'), ('physics', 'physics'), ('(astronomy OR physics)', 'astronomy & physics'), ('', 'all') ], description=u'Database', default=config.SEARCH_DEFAULT_DATABASE)
 
     month_from = IntegerField(u'Month From', [optional(), validators.NumberRange(min=1, max=12, message='Starting month not valid: allowed values from 01 to 12')])
     month_to = IntegerField(u'Month To', [optional(), validators.NumberRange(min=1, max=12, message='Ending month not valid: allowed values from 01 to 12')])
     year_from = IntegerField(u'Year From', [optional(), validators.NumberRange(min=1, max=2500, message='Starting year not valid')])
     year_to = IntegerField(u'Year To', [optional(), validators.NumberRange(min=1, max=2500, message='Ending year not valid')])
     article = BooleanField(u'Articles', description=u'Articles only')
-    nr = SelectField(u'Number to view in page', [optional()], choices=[('', 'default results'), 
-                                                        ('20', '20 results'), ('50', '50 results'), ('100', '100 results'), 
-                                                        ('200', '200 results')] )
+    nr = IntegerField(u'Number of Records', [optional(), validators.NumberRange(min=10, max=3000, message="Please enter a number between 10 and 3000")], description='Number of Records') #, default=config.SEARCH_DEFAULT_ROWS)
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
     bigquery = HiddenField(u'Custom Query')
