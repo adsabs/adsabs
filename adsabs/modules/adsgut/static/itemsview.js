@@ -257,7 +257,8 @@
       ctxt = this.pview;
       loc = window.location;
       cback = function(data) {
-        return _this.update_note_ajax(data);
+        _this.update_note_ajax(data);
+        return format_item(_this.$('.searchresultl'), _this.e);
       };
       eback = function(xhr, etext) {
         return alert('Did not succeed');

@@ -98,7 +98,6 @@
         bibstring = biblist.join("\n");
         sections.$bigquery.val(bibstring);
         sections.$bigqueryform.attr("action", config.bq2url);
-        sections.$bigqueryform.attr("hello", "world");
         itemsq = itemlist.join("&");
         return syncs.taggings_postings_post_get(itemlist, config.pview, function(data) {
           var cb, eb, ido, k, notes, plinv, postings, ptimes, sorteditems, stags, times, v, _j, _len1, _ref, _ref1;
@@ -200,6 +199,7 @@
               } else {
                 e = {};
               }
+              plinv.itemviews[d.basic.fqin].e = e;
               _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));
             }
             return _results;

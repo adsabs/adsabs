@@ -59,11 +59,11 @@
             return pill;
         },
         addWithoutAjax: function(value, cback) {
-            console.log("CALLED WITHOUT AJAX");
+            //console.log("CALLED WITHOUT AJAX");
             cback();
         },
         addWithAjax: function(value, cback) {
-            console.log("CALLED WITH AJAX");
+            //console.log("CALLED WITH AJAX");
             cback();
         },
         onLoadSuggestions: function(values) {
@@ -214,7 +214,7 @@
 
         if(!value) {
             value = this._prepare([input.val()])[0];
-            console.log("|||||||||||||||||",value);
+            //console.log("|||||||||||||||||",value);
 
         }
 
@@ -326,7 +326,7 @@
                 });
             }
             $self.options.onRemove($this);
-            console.log("At", $this, tag, $self);
+            //console.log("At", $this, tag, $self);
             $this.remove();
         });
     }

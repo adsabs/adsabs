@@ -247,6 +247,7 @@ var ResultListManager = function() {
         },
         
         export_to_libraries: function() {
+            this.remove_hidden();
         	this.enable_query_params();
         	var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
         	
