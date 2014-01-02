@@ -69,7 +69,7 @@ class QueryForm(Form):
     year_from = IntegerField(u'Year From', [optional(), validators.NumberRange(min=1, max=2500, message='Starting year not valid')])
     year_to = IntegerField(u'Year To', [optional(), validators.NumberRange(min=1, max=2500, message='Ending year not valid')])
     article = BooleanField(u'Articles', description=u'Articles only')
-    nr = IntegerField(u'Number of Records', [validators.NumberRange(min=10, max=3000, message="Please enter a number between 10 and 3000")], description='Number of Records', default=config.SEARCH_DEFAULT_ROWS)
+    nr = IntegerField(u'Number of Records', [optional(), validators.NumberRange(min=10, max=3000, message="Please enter a number between 10 and 3000")], description='Number of Records') #, default=config.SEARCH_DEFAULT_ROWS)
     topn = IntegerField(u'Return top N results', [optional(), validators.NumberRange(min=1, message='TopN must be an integer bigger than 1')])
     no_ft = BooleanField(u'Disable full text', description=u'Disable fulltext')
     bigquery = HiddenField(u'Custom Query')
