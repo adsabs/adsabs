@@ -191,6 +191,7 @@ class ItemView extends Backbone.View
         #console.log "return data", data, loc
         #window.location=loc
         @update_note_ajax(data)
+        format_item(@$('.searchresultl'),@e)
     eback = (xhr, etext) =>
         #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap

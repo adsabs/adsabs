@@ -57,7 +57,6 @@ do_postable_filter = (sections, config, tagfunc) ->
             bibstring = biblist.join("\n")
             sections.$bigquery.val(bibstring)
             sections.$bigqueryform.attr("action", config.bq2url)
-            sections.$bigqueryform.attr("hello", "world")
             itemsq=itemlist.join("&")
             #$.get "#{config.itPURL}?#{itemsq}", (data)->
             syncs.taggings_postings_post_get itemlist, config.pview, (data)->
@@ -78,7 +77,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                     else
                         postings[k]=[]
                         times[k] = 0
-                #console.log "TIMES ARE ROCKING", times
+                #console.log "TIMES ARE ROCKING", stags, notes, times
                 sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
                 for i in sorteditems
                     i.whenposted = times[i.basic.fqin]
@@ -106,7 +105,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                     for d in theitems
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
                 cb = (data) ->
-                    ##console.log "CBDATA", JSON.stringify(data), data.response.docs
+                    #console.log "CBDATA", theitems.length, data.response.docs.length
                     thedocs = {}
                     for d in data.response.docs
                         thedocs[d.bibcode]=d
@@ -116,6 +115,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                             e=thedocs[d.basic.name]
                         else
                             e={}
+                        plinv.itemviews[d.basic.fqin].e = e
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
                 #console.log "ITTYS", theitems, (e.basic.fqin for e in theitems)
                 syncs.send_bibcodes(config.bq1url, theitems, cb, eb)

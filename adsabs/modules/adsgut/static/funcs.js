@@ -48,17 +48,17 @@
   };
 
   format_item = function($sel, iteminfo) {
-    var author, leave, month, pubdate, title, year, _ref, _ref1, _ref2, _ref3, _ref4;
-    _ref1 = (_ref = iteminfo.pubdate) != null ? _ref.split('-') : void 0, year = _ref1[0], month = _ref1[1], leave = _ref1[2];
+    var author, leave, month, pubdate, title, year, _ref, _ref1, _ref2, _ref3;
+    _ref = iteminfo.pubdate ? iteminfo.pubdate.split('-') : [void 0, void 0, void 0], year = _ref[0], month = _ref[1], leave = _ref[2];
     if (month === void 0) {
       pubdate = year != null ? year : "unknown";
     } else {
-      pubdate = (_ref2 = monthNamesShort[month] + " " + year) != null ? _ref2 : "unknown";
+      pubdate = (_ref1 = monthNamesShort[month] + " " + year) != null ? _ref1 : "unknown";
     }
     $sel.append("<span class='pubdate pull-right'><em>published in " + pubdate + "</em></span><br/>");
-    title = (_ref3 = iteminfo.title) != null ? _ref3 : "No title found";
+    title = (_ref2 = iteminfo.title) != null ? _ref2 : "No title found";
     $sel.append("<span class='title'><strong>" + title + "</strong></span><br/>");
-    author = (_ref4 = iteminfo.author) != null ? _ref4 : ['No authors found'];
+    author = (_ref3 = iteminfo.author) != null ? _ref3 : ['No authors found'];
     return $sel.append("<span class='author'>" + (short_authors(author)) + "</span>");
   };
 

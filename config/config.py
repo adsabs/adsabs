@@ -296,14 +296,14 @@ class AppConfig(object):
                    'authnetwork':1000,
                    'skymap':1000,
                    'export_other':3000,
-                   'export_library': 300,
+                   'export_library': 500,
                    }
     DEFAULT_EXPORTS = {'metrics':300, 
                    'wordcloud':750, 
                    'ADSClassic':300,
                    'authnetwork':750,
                    'skymap':750,
-                   'export_library': 20,
+                   'export_library': 100,
                    'export_other':300,
                    }
     #ADSGUT

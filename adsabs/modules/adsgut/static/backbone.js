@@ -602,9 +602,7 @@
     if (options.comparator !== void 0) this.comparator = options.comparator;
     this._reset();
     this.initialize.apply(this, arguments);
-    console.log("EE", models, options, arguments, this.models)
     if (models) this.reset(models, _.extend({silent: true}, options));
-    if (models) console.log("FF", this.models, models);
   };
 
   // Default options for `Collection#set`.

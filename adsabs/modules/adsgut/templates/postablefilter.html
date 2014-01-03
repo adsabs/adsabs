@@ -5,11 +5,12 @@
 {% block sidebar %}
 <ul class="nav nav-list" id="stags">
 </ul>
+{% if pflavor!='udg' %}
 <ul class="nav nav-list" id="users">
   <li class="nav-header">Posted by</li>
   <li> <a href="" id="useradder" data="off">you</a> </li>
 </ul>
-
+{% endif %}
 {% endblock %}
 
 {% block localbody %}

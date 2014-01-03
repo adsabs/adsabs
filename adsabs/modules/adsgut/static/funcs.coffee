@@ -40,12 +40,13 @@ parse_fqin = (fqin) ->
     return vals[-1+vals.length]
 
 format_item = ($sel, iteminfo) ->
-  #onsole.log '{',iteminfo.pubdate,'}'
-  [year, month, leave] = iteminfo.pubdate?.split('-')
+  #console.log '{',iteminfo,'}'
+  [year, month, leave] = if iteminfo.pubdate then iteminfo.pubdate.split('-') else [undefined, undefined, undefined]
   if month is undefined
     pubdate = year ? "unknown"
   else
     pubdate = monthNamesShort[month]+" "+year ? "unknown"
+
   $sel.append("<span class='pubdate pull-right'><em>published in #{pubdate}</em></span><br/>")
   title = iteminfo.title ? "No title found"
   $sel.append("<span class='title'><strong>#{title}</strong></span><br/>")
@@ -210,6 +211,7 @@ get_taggings = (data) ->
   for own k,v of data.taggings
     tp = data.taggingtp[k]
     tg = v[1]
+    #console.log "TGTP", tg, tp, v
     combi = _.zip(tg, tp)
     ##console.log "1>>>", k,v[0], v[1]
     if v[0] > 0
@@ -219,6 +221,7 @@ get_taggings = (data) ->
       stags[k]=[]
       notes[k]=[]
     #console.log "HHHHH", k, notes[k]
+  #console.log "HH", stags, notes
   return [stags, notes]
 
 get_groups = (nick, cback) ->

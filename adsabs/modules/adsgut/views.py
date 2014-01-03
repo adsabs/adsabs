@@ -1260,6 +1260,7 @@ def itemsTaggingsAndPostings():
             items, sort, fqpn)
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
+        #print "MEEP", taggingsdict, taggingsthispostable
         return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
     else:
         query=dict(request.args)
@@ -1338,12 +1339,15 @@ def tagtypes():
         count, thetypes=g.dbp.getTypesForQuery(g.currentuser, useras, criteria, usernick, isitemtype)
         return jsonify({'types':thetypes, 'count':count})
 
-@adsgut.route('/itemsinfo')
+@adsgut.route('/itemsinfo', methods = ['POST', 'GET'])
 def itemsinfo():
-    query=dict(request.args)
-    itemstring=query.get('items',[''])[0]
-    items=itemstring.split(':')
-    theitems=[{'basic':{'name':i.split('/')[-1], 'fqin':i}} for i in items]
+    if request.method=='POST':
+        pass
+    else:
+        query=dict(request.args)
+        itemstring=query.get('items',[''])[0]
+        items=itemstring.split(':')
+        theitems=[{'basic':{'name':i.split('/')[-1], 'fqin':i}} for i in items]
     return jsonify({'items': theitems, 'count':len(theitems)})
 
 from config import config
@@ -1357,9 +1361,13 @@ def postForm(itemtypens, itemtypename):
         if itemtype=="ads/pub": 
             #print "RVALS", request.values
             current_page=request.referrer
+            if request.values.has_key('numRecs'):
+                numrecs = request.values.get('numRecs')
+            else:
+                numrecs = config.SEARCH_DEFAULT_ROWS
+            print "++++++++++++++++++++got bibcodes here", numrecs, config.SEARCH_DEFAULT_ROWS
             if request.values.has_key('bibcode'):
                 bibcodes = request.values.getlist('bibcode')
-                #print "got bibcodes here", bibcodes
             else:
                 try:
                     query_components = json.loads(request.values.get('current_search_parameters'))
@@ -1373,7 +1381,7 @@ def postForm(itemtypens, itemtypename):
                     'facets': [],
                     'fields': ['bibcode'],
                     'highlights': [],
-                    'rows': str(config.SEARCH_DEFAULT_ROWS)
+                    'rows': str(numrecs)
                     })
 
                 req = solr.create_request(**query_components)
