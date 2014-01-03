@@ -136,6 +136,23 @@
 </div>
 {% endmacro %}
 
+{# ###Macro to render view/export menu #}
+{% macro render_abstract_export_menu() %}
+<div class="export_view_menu dropdown pull-right">
+	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> Export<i class="caret"></i></a>
+	<ul class="dropdown-menu">
+		<!--li class="nav-header">records (this page or selected):</li-->
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('BIBTEX')">in BibTeX</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('AASTeX')">in AASTeX</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('ENDNOTE')">in EndNote</a></li>
+		{% if current_user and current_user.is_authenticated() %}
+		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.single_export_to_libraries()">in Libraries</a></li>
+		{% endif %}
+	</ul>
+</div>
+{% endmacro %}
+
 {# ###Macro to render visualization menu #}
 {% macro render_view_menu() %}
 <div class="export_view_menu dropdown pull-right">

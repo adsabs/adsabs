@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, prefix, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, post_for_itemsinfo, prefix, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -363,6 +363,17 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
+  post_for_itemsinfo = function(url, itemstring, cback) {
+    var data, eback;
+    eback = function() {
+      return alert("Error Occurred");
+    };
+    data = {
+      items: itemstring
+    };
+    return send_params(url, data, cback, eback);
+  };
+
   root.syncs = {
     accept_invitation: accept_invitation,
     invite_user: invite_user,
@@ -380,7 +391,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     create_postable: create_postable,
     change_description: change_description,
     send_bibcodes: send_bibcodes,
-    taggings_postings_post_get: taggings_postings_post_get
+    taggings_postings_post_get: taggings_postings_post_get,
+    post_for_itemsinfo: post_for_itemsinfo
   };
 
 }).call(this);

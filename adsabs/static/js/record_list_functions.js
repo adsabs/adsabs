@@ -261,6 +261,18 @@ var ResultListManager = function() {
         		})
         	}
 
+        },
+
+        single_export_to_libraries: function() {
+            //this.remove_hidden();
+            //this.enable_query_params();
+            var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
+            this.add_hidden_field('bibcodes', bibcode);
+            var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
+            
+            this.ajax_submit(url, false, null, {'closeBtn': false});
+
+
         }
 	}
 

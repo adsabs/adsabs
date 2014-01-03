@@ -105,6 +105,7 @@
                 .addClass('tag-input')
                 .attr({"autocomplete": "off", "type": "text"})
                 .css('outline', 'none')
+                .css('margin-bottom', '0px')
                 .typeahead({
                     items: $self.options.suggestion_limit,
                     source: function(query, process) {

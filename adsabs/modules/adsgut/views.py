@@ -508,6 +508,7 @@ def userItems(nick):
 #DELETION methods not there BUG
 
 #BUG: check currentuser useras stuff here
+#BUG: postable really a tuple. change to reflect that
 def createPostable(g, request, ptstr):
     spec={}
     jsonpost=dict(request.json)
@@ -1342,7 +1343,11 @@ def tagtypes():
 @adsgut.route('/itemsinfo', methods = ['POST', 'GET'])
 def itemsinfo():
     if request.method=='POST':
-        pass
+        jsonpost=dict(request.json)
+        itemstring=jsonpost.get('items',[''])
+        items=itemstring.split(':')
+        #print "LLLL", itemstring, items
+        theitems=[{'basic':{'name':i.split('/')[-1], 'fqin':i}} for i in items]
     else:
         query=dict(request.args)
         itemstring=query.get('items',[''])[0]
@@ -1365,7 +1370,7 @@ def postForm(itemtypens, itemtypename):
                 numrecs = request.values.get('numRecs')
             else:
                 numrecs = config.SEARCH_DEFAULT_ROWS
-            print "++++++++++++++++++++got bibcodes here", numrecs, config.SEARCH_DEFAULT_ROWS
+            #print "++++++++++++++++++++got bibcodes here", numrecs, config.SEARCH_DEFAULT_ROWS
             if request.values.has_key('bibcode'):
                 bibcodes = request.values.getlist('bibcode')
             else:

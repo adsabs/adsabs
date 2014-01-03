@@ -254,6 +254,13 @@ taggings_postings_post_get = (items, pview, cback) ->
         data.fqpn = pview
     send_params(url, data, cback, eback)
 
+post_for_itemsinfo = (url, itemstring, cback) ->
+    eback = () ->
+        alert "Error Occurred"
+    data =
+        items:itemstring
+    send_params(url, data, cback, eback)
+
 root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
@@ -272,5 +279,6 @@ root.syncs=
     change_description: change_description
     send_bibcodes: send_bibcodes
     taggings_postings_post_get: taggings_postings_post_get
+    post_for_itemsinfo: post_for_itemsinfo
 
 

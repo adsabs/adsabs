@@ -329,11 +329,29 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
 multiselect = h.renderable (daclass, choices, choicedict) -> 
     #console.log "IN MULTISELECT"
     h.select ".multi#{daclass}", multiple:"multiple", ->
+        #h.option value:'new', "Create New Library"
+        for c in choices
+            h.option  value: c, choicedict[c]
+
+addchoices = h.renderable (choices, choicedict) ->
+    h.raw -> 
         for c in choices
             h.option  value: c, choicedict[c]
 
 #this should not be here. it should be built up hierarchically from other widgets and should itself be in views.
+postcontrol = h.renderable (librarychoices, librarychoicedict) ->
+    h.div ".control-group.postcontrol", ->
+        h.input ".span2.libtxt", type: 'text'
+        h.raw "&nbsp;&nbsp;"
+        h.button ".btn.btn-primary.libsub", type: 'button', "Create New"
+        h.raw "<p></p>"
+        multiselect("library", librarychoices, librarychoicedict)
+        h.raw "&nbsp;&nbsp;"
+        h.button ".btn.btn-primary.post", type:'button', "Apply"
+        
+
 postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
+    #console.log "librarych"
     librarychoicedict={}
     for c in librarychoices
         librarychoicedict[c]=parse_fqin(c)
@@ -348,11 +366,10 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     #     h.label ".checkbox.control-label", ->
     #         h.input ".controls.makepublic", type:"checkbox"
     #         h.text "Post to Public feed"
-    h.div ".control-group", ->
-        h.label ".control-label", "Libraries"
-        #h.input ".controls.librariesinput.input-xxlarge", type:"text", placeholder:"Lib names, comma separated" 
-        multiselect("library", librarychoices, librarychoicedict)
-    h.button ".btn.btn-primary.post", type:'button', "Add"
+
+    h.label  "Libraries"
+    h.div ".form-horizontal.posthorizontal", ->
+        postcontrol(librarychoices, librarychoicedict)
     h.br()
     h.br()
     h.legend "Tag all of these items"
@@ -397,3 +414,4 @@ root.widgets =
     decohelp: decohelp
     two_submit: two_submit
     editable_text: editable_text
+    postcontrol: postcontrol
