@@ -22,6 +22,8 @@ main_js = Bundle('js/libs/jquery.js',
                 'js/facets_components.js',
                 'js/query_form.js',
                 'js/libs/underscore-min.js',
+                 'bootstrap/bootstrap_tour/bootstrap-tour.min.js',
+                 'js/adstour.js',
                 filters=('yui_js'), output='compressed/all.js')
 
 main_css = Bundle('bootstrap/css/bootstrap.min.css',
@@ -30,4 +32,5 @@ main_css = Bundle('bootstrap/css/bootstrap.min.css',
                  'fancybox/source/helpers/jquery.fancybox-buttons.css',
                  'fancybox/source/helpers/jquery.fancybox-thumbs.css',
                  'css/bootstrap_custom.css',
+                 'bootstrap/bootstrap_tour/bootstrap-tour.min.css',
                  'css/styles.css',  filters=('yui_css', 'cssrewrite'), output="compressed/all.css")
