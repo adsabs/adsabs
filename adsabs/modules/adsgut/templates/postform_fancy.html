@@ -35,10 +35,10 @@
 $=jQuery
 #currently below only works for pubs, but ought to work otherwise too
 $ ->
-  myvar =  encodeURIComponent("{{ querystring | safe }}")
   config = 
+    itemstring :  "{{ querystring | safe }}"
     loc : "{{curpage | safe }}" 
-    itemsInfoURL :  "{{ url_for('adsgut.itemsinfo') }}?items=#{myvar}"
+    itemsInfoURL :  "{{ url_for('adsgut.itemsinfo') }}"
     itemsTPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"

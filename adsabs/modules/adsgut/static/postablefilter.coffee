@@ -26,6 +26,7 @@ do_postable_info = (sections, config, ptype) ->
 
 do_tags = (url, $sel, tqtype) ->
     $.get url, (data) ->
+        #console.log "DATA", data
         for own k,v of data.tags
             format_tags(k, $sel, get_tags(v, tqtype), tqtype)
 
@@ -43,6 +44,8 @@ do_postable_filter = (sections, config, tagfunc) ->
         if qtxtlist.length > 0
             sections.$breadcrumb.text('Tags: ')
             for e in qtxtlist
+                if e=="userthere=true"
+                    e = "Posted by you"
                 sections.$breadcrumb.append("<span class='badge'>#{e}</span>&nbsp;")
             sections.$breadcrumb.show()
         $.get config.itemsPURL, (data) ->
@@ -59,6 +62,7 @@ do_postable_filter = (sections, config, tagfunc) ->
             sections.$bigqueryform.attr("action", config.bq2url)
             itemsq=itemlist.join("&")
             #$.get "#{config.itPURL}?#{itemsq}", (data)->
+            #console.log "itemlist", itemlist
             syncs.taggings_postings_post_get itemlist, config.pview, (data)->
                 #console.log "POSTINGS", data.postings, config.fqpn
                 #console.log "TG", data.taggings

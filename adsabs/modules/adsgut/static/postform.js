@@ -11,13 +11,13 @@
   h = teacup;
 
   do_postform = function(sections, config) {
-    var $itemssec, itemsInfoURL, itemsTPURL, itemtype, loc, memberable, nam, tagsucwtURL;
-    itemsInfoURL = config.itemsInfoURL, itemsTPURL = config.itemsTPURL, tagsucwtURL = config.tagsucwtURL, memberable = config.memberable, itemtype = config.itemtype, nam = config.nam, loc = config.loc;
+    var $itemssec, itemsInfoURL, itemsTPURL, itemstring, itemtype, loc, memberable, nam, tagsucwtURL;
+    itemstring = config.itemstring, itemsInfoURL = config.itemsInfoURL, itemsTPURL = config.itemsTPURL, tagsucwtURL = config.tagsucwtURL, memberable = config.memberable, itemtype = config.itemtype, nam = config.nam, loc = config.loc;
     $itemssec = sections.$itemssec;
     return $.get("" + tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
       var suggestions;
       suggestions = data.simpletags;
-      return $.get(itemsInfoURL, function(data) {
+      return syncs.post_for_itemsinfo(itemsInfoURL, itemstring, function(data) {
         var i, itemlist, itemsq, thecount, theitems;
         theitems = data.items;
         thecount = data.count;
@@ -26,12 +26,12 @@
           _results = [];
           for (_i = 0, _len = theitems.length; _i < _len; _i++) {
             i = theitems[_i];
-            _results.push("items=" + (encodeURIComponent(i.basic.fqin)));
+            _results.push(i.basic.fqin);
           }
           return _results;
         })();
         itemsq = itemlist.join("&");
-        return $.get("" + config.itemsTPURL + "?" + itemsq, function(data) {
+        return syncs.taggings_postings_post_get(itemlist, 'none', function(data) {
           var cb, e, eb, ido, k, notes, plinv, postings, stags, v, _ref, _ref1;
           _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
           postings = {};

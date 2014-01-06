@@ -67,6 +67,9 @@
         sections.$breadcrumb.text('Tags: ');
         for (_i = 0, _len = qtxtlist.length; _i < _len; _i++) {
           e = qtxtlist[_i];
+          if (e === "userthere=true") {
+            e = "Posted by you";
+          }
           sections.$breadcrumb.append("<span class='badge'>" + e + "</span>&nbsp;");
         }
         sections.$breadcrumb.show();

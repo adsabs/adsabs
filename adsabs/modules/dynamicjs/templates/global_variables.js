@@ -27,4 +27,6 @@ GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/
 
 GlobalVariables.ADS_PREFIX = '{{ ADS_PREFIX }}';
 
+GlobalVariables.ADS_ABSTRACT_BASE_URL = '{{ url_for("abs.abstract") }}'
+
 GlobalVariables.AUTOCOMPLETE_BASE_URL = '{{ url_for("autocomplete.autocomplete") }}';

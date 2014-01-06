@@ -253,14 +253,18 @@ var ResultListManager = function() {
         	
         	if (this.bibcodes_checked().length > 0) {
         		this.ajax_submit(url, false, null, {'closeBtn': false});
-        	} else {
+			} else if (this.is_abstract_page()) {
+	        	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
+	        	this.add_hidden_field('bibcodes', bibcode);
+	        	var url=GlobalVariables.ADS_PREFIX+'/adsgut/postform/ads/pub/html';
+	        	this.ajax_submit(url, false, null, {'closeBtn': false});
+			} else {
         		var RLM = this;
         		this.record_input_dialog('export_library', function(numRecs) {
 					RLM.add_hidden_field('numRecs', numRecs);
 					RLM.ajax_submit(url, false, null, {'closeBtn': false});
         		})
         	}
-
         }
 	}
 
