@@ -35,12 +35,17 @@ def add_caching_header(response):
     response.headers.setdefault('Cache-Control', cache_header)
     return response
 
+@abs_blueprint.route('/', methods=['GET'])
 @abs_blueprint.route('/<bibcode>/', methods=['GET'])
-def abstract(bibcode):
+def abstract(bibcode=None):
     
+    if bibcode is None:
+        abort(404)
+        
     solrdoc = get_document(bibcode)
     if not solrdoc:
         abort(404)
+
     inveniodoc = invenio.get_invenio_metadata(bibcode)
     
     # log the request

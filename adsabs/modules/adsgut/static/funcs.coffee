@@ -173,7 +173,7 @@ format_postings_for_item = (fqin, postings, nick) ->
 
 # format_items = ($sel, nick, items, count, stags, notes, postings, formatter, asform=false) ->
 #   #console.log "HTML", $sel.html()
-#   adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
+#   adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
 #   htmlstring = ""
 #   #console.log items.length, "ITTABITTA", (i.basic.fqin for i in items), "}}"
 #   for i in items

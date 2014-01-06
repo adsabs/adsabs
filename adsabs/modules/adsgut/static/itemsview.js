@@ -157,7 +157,7 @@
     ItemView.prototype.render = function() {
       var additional, additionalpostings, adslocation, content, fqin, htmlstring, jslist, tagdict, thepostings, thetags, url;
       this.$el.empty();
-      adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/";
+      adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
       if (this.item.whenposted) {
         htmlstring = "<div class='searchresultl'>(" + this.counter + "). <a href=\"" + url + "\">" + this.item.basic.name + "</a>&nbsp;&nbsp;(saved " + (time_format_iv(this.item.whenposted)) + ")</div>";

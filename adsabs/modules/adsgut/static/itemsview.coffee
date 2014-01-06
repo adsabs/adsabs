@@ -101,7 +101,7 @@ class ItemView extends Backbone.View
 
   render: =>
     @$el.empty()
-    adslocation = "http://labs.adsabs.harvard.edu/adsabs/abs/"
+    adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
     if @item.whenposted
         htmlstring = "<div class='searchresultl'>(#{@counter}). <a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format_iv(@item.whenposted)})</div>"

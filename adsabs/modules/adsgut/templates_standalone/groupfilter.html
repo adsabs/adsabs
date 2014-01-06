@@ -39,7 +39,7 @@ format_tags = ($sel, tags)->
 
 
 format_items = ($sel, items, count, taggings, postings)->
-  adslocation="http://labs.adsabs.harvard.edu/adsabs/abs/"
+  adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
   htmlstring=""
   for i in items
     fqin=i.basic.fqin
