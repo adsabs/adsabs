@@ -34,7 +34,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
 
 
 (function() {
-  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, post_for_itemsinfo, prefix, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, post_for_itemsinfo, prefix, remove_items_from_postable, remove_note, remove_tagging, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -222,6 +222,43 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     }
   };
 
+  remove_note = function(item, tagname, ctxt, cback, eback) {
+    var data, tagtype, url;
+    tagtype = "ads/tagtype:note";
+    url = prefix + "/tagsremove/" + item;
+    data = {
+      tagtype: tagtype,
+      tagname: tagname
+    };
+    if (ctxt !== 'udg' && ctxt !== 'none' && ctxt !== 'public') {
+      data.fqpn = ctxt;
+    }
+    return send_params(url, data, cback, eback);
+  };
+
+  remove_tagging = function(item, tagname, cback, eback) {
+    var data, tagtype, url;
+    tagtype = "ads/tagtype:tag";
+    url = prefix + "/tagsremove/" + item;
+    data = {
+      tagtype: tagtype,
+      tagname: tagname
+    };
+    return send_params(url, data, cback, eback);
+  };
+
+  remove_items_from_postable = function(items, ctxt, cback, eback) {
+    var data, url;
+    url = prefix + "/itemsremove";
+    data = {
+      items: items
+    };
+    if (ctxt !== 'udg' && ctxt !== 'none' && ctxt !== 'public') {
+      data.fqpn = ctxt;
+    }
+    return send_params(url, data, cback, eback);
+  };
+
   submit_tags = function(items, tags, cback, eback) {
     var data, fqin, i, inames, itemtype, name, t, tagtype, ts, url, _i, _len;
     tagtype = "ads/tagtype:tag";
@@ -392,7 +429,10 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     change_description: change_description,
     send_bibcodes: send_bibcodes,
     taggings_postings_post_get: taggings_postings_post_get,
-    post_for_itemsinfo: post_for_itemsinfo
+    post_for_itemsinfo: post_for_itemsinfo,
+    remove_tagging: remove_tagging,
+    remove_note: remove_note,
+    remove_items_from_postable: remove_items_from_postable
   };
 
 }).call(this);

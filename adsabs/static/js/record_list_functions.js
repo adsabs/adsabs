@@ -267,6 +267,7 @@ var ResultListManager = function() {
         	}
         }
 	}
+	}
 
 }();
 

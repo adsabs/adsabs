@@ -21,7 +21,7 @@ do_postform = (sections, config) ->
                 postings={}
                 for own k,v of data.postings
                     if v[0] > 0
-                        postings[k]=(e.posting.postfqin for e in v[1])
+                        postings[k]=([e.posting.postfqin,e.posting.postedby] for e in v[1])
                     else
                         postings[k]=[]
                 ido=
