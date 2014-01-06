@@ -2,19 +2,17 @@
 $(document).ready( function() {	
 	
 	var currentPath = new Uri(window.location.href).path();
-	adsTour.makeTour(currentPath);
+	adsTour.init(currentPath);
 
 });
 
 var adsTour = function() {
 	return {
 
-		tour: new Tour({backdrop:false, storage:false}),
 		
 		flash: function(sel) {
-			var current = $(sel).css('color');
-			$(sel).animate( { color: 'rgb(255,0,0)' }, 200 );
-			$(sel).animate( { color: current }, 1000 );
+			$(sel).animate( { color: 'rgb(255,0,0)' }, 1000 );
+			$(sel).animate( { color: "black" }, 200 );
 		},
 		
 		appendToQ: function(s) {
@@ -27,6 +25,8 @@ var adsTour = function() {
 		},
 
 		makeTour: function(currentPath) {
+			this.tour= new Tour({backdrop:false, storage:false});
+
 			var tourPath = _.find(_.keys(tourSteps), function(pathKey) {
 				pathKey = GlobalVariables.ADS_PREFIX + pathKey;
 				return currentPath.match(new RegExp(pathKey, "i"))
@@ -35,13 +35,15 @@ var adsTour = function() {
 			if (tourPath == undefined) return;
 			var addStepsFunc = tourSteps[tourPath];
 			addStepsFunc(this);
-			adsTour.tour.init();
-			var self = this;
-			$("#tour").show().on("click", function(e) {
-				self.tour.start(true);
+			this.tour.init();
+			this.tour.start();
+			},
+
+		init : function(currentPath) {
+				$("#tour").show().on("click", function(e) {
+				adsTour.makeTour(currentPath);
 				e.preventDefault();					
-			});
-		}
+			})}
 	};
 }();
 
@@ -52,7 +54,7 @@ var tourSteps = {
 
 		adsTour.tour.addSteps([
 		  {
-		    element: "a#tour", 
+		    element: "li#tour", 
 		    title: "Welcome to the ADS Main Search Page", 
 		    content: "This tour will show you how to quickly write a targeted ADS query.",
 		    placement:'right'
@@ -70,9 +72,9 @@ var tourSteps = {
 		    content: "Our new one-box query form uses both fielded and unfielded search for a speedy, powerful search."
 		  },
 		  {
-		    element: "a[href=\"/search/classic-search\"]", 
+		    element: "#classic-search-tab", 
 		    title: "Classic Search", 
-		    content: "(You can click over to the classic search form and take a tour of that page if you want a more structured search experience.)"
+		    content: "(You can click over to the classic search form if you'd like a more structured search experience.)"
 		  },
 		  {
 		    element: "#q", 
@@ -141,7 +143,7 @@ var tourSteps = {
 		    onShown: function(tour) {adsTour.appendToQ("title:((exoplanets or \"extrasolar planets\") and kepler)")}
 		  },
 		  {
-		    element: "#tour_anchor_advanced_options", 
+		    element: "#tour-anchor-advanced-operators", 
 		    title: "Advanced Search Operators", 
 		    content: "These three operators wrap a finished query and give you new insight into your target area of study."
 		    		+ " For instance, the query currently in the search bar will return a ranked list of papers which are"
@@ -151,11 +153,11 @@ var tourSteps = {
 		  },
 
 		  {
-		  	element: "#tour_anchor_advanced_options",
+		  	element: "#tour-anchor-advanced-operators",
 		    title: "Advanced Search Operators", 
 		    content: "For a closer look at all three operators, mouse over one of the three links to read a short explanation.", 
 		    placement:'bottom',
-		    onShown: function(tour) {adsTour.appendToQ(currentSearch)}
+		    onShown: function(tour) {adsTour.appendToQ(currentSearch)},
 		  },
 
 		  {
@@ -179,7 +181,7 @@ var tourSteps = {
 	"^/search/$": function(adsTour) {
 		adsTour.tour.addSteps([
 				{
-			    element: "a#tour", 
+			    element: "li#tour", 
 			    title: "Welcome to the ADS Search Results Page", 
 			    content: "For best results with the tour, make sure you are showing multiple results from a fairly broad search term (e.g, \"exoplanets\"), and that you have not yet clicked anything on the page.",
 			    placement:'right'
@@ -290,7 +292,7 @@ var tourSteps = {
 	"^/abs/\\d{4}.{15}/$": function(adsTour) {
 		adsTour.tour.addSteps([
 				{
-			    element: "a#tour", 
+			    element: "li#tour", 
 			    title: "Welcome to the ADS Abstract View Page", 
 			    content: "Depending on the article you are currently viewing, you may not see all the possible options on this page during this tour.",
 			    placement:'right'
@@ -382,7 +384,7 @@ var tourSteps = {
 
 		adsTour.tour.addSteps([
 		  {
-		    element: "a#tour", 
+		    element: "li#tour", 
 		    title: "Welcome to the ADS Classic Search Page", 
 		    content: "This \"New Classic Search\" form offers an updated interface similar to the ADS Classic form that astronomers have been using for decades.",
 		    placement:'right'
