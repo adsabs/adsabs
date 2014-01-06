@@ -102,13 +102,18 @@ this_postable = (pval, pview) ->
     pble = ''
     return pble
 
-format_row = (notetext, notemode, notetime, user, currentuser, truthiness, pview) ->
+format_row = (noteid, notetext, notemode, notetime, user, currentuser, truthiness, pview) ->
   tf = time_format(notetime)
   uf = if user==currentuser then 'me' else email_split(user)
   lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
   nmf = if notemode is '1' then lock else ''
   nt = this_postable(truthiness, pview)
-  outstr = "<tr><td style='white-space: nowrap;'>#{tf}</td><td style='text-align: right;'>#{uf}&nbsp;&nbsp;</td><td>#{nmf}#{nt}#{notetext}</td></tr>"
+  #console.log "noteid is", noteid
+  outstr = "<tr><td style='white-space: nowrap;'>#{tf}</td><td style='text-align: right;'>#{uf}&nbsp;&nbsp;</td><td>#{nmf}#{nt}</td><td class='notetext'>#{notetext}</td>"
+  if uf=='me'
+    outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
+  else
+    outstr = outstr + "<td></td></tr>"
   return outstr
 
 format_notes_for_item = (fqin, notes, currentuser, pview) ->
@@ -120,11 +125,11 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[4], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
-  t3list = ( format_row(t[0], t[3], t[1], t[2], currentuser, t[4], pview) for t in notes[fqin])
+  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[4], pview) for t in notes[fqin])
   if t3list.length >0
     return start+t3list.join("")+end
   else
-    return ""
+    return start+end
 
 # format_tags_for_item = (fqin, stags, nick) ->
 #   t2list=("<a href=\"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}\">#{t[0]}</a>" for t in stags[fqin])
@@ -133,8 +138,8 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
 #   else
 #     return ""
 
-format_tags_for_item = (fqin, stags, nick) ->
-  t2list=({url:"#{prefix}/postable/#{nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}"} for t in stags[fqin])
+format_tags_for_item = (fqin, stags, memberable, tagajax=true) ->
+  t2list=({url:"#{prefix}/postable/#{memberable.nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
   #console.log("T@LIST", t2list)
   if t2list.length >0
     return t2list
@@ -156,9 +161,10 @@ parse_fortype = (fqin) ->
 #     return ""
 
 format_postings_for_item = (fqin, postings, nick) ->
+  postingslist = _.uniq(postings[fqin])
   publ= "adsgut/group:public"
   priv= "#{nick}/group:default"
-  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{parse_fqin(p)}</a>" for p in postings[fqin] when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
+  p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{parse_fqin(p)}</a>" for p in postingslist when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
   if p2list.length >0
     return p2list
   else
@@ -213,15 +219,15 @@ get_taggings = (data) ->
     tg = v[1]
     #console.log "TGTP", tg, tp, v
     combi = _.zip(tg, tp)
-    ##console.log "1>>>", k,v[0], v[1]
+    #console.log "1>>>", k,combi
     if v[0] > 0
-      stags[k]=([e[0].posting.tagname, e[0].posting.tagtype] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
-      notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
+      stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
+      notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
     else
       stags[k]=[]
       notes[k]=[]
     #console.log "HHHHH", k, notes[k]
-  #console.log "HH", stags, notes
+  #console.log "HH", notes
   return [stags, notes]
 
 get_groups = (nick, cback) ->

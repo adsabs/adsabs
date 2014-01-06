@@ -118,7 +118,7 @@
                 _results = [];
                 for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
                   e = _ref2[_j];
-                  _results.push(e.posting.postfqin);
+                  _results.push([e.posting.postfqin, e.posting.postedby]);
                 }
                 return _results;
               })();

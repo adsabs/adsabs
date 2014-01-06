@@ -156,6 +156,7 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     url= prefix+"/tags/"+item
     ts={}
     ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
+    #console.log "whee", ts
     data=
         tagspecs: ts
         itemtype:itemtype
@@ -175,6 +176,32 @@ submit_tag = (item, itemname, tag, cback, eback) ->
         itemtype:itemtype
     if tag != ""
         send_params(url, data, cback, eback)
+
+remove_note = (item, tagname, ctxt, cback, eback) ->
+    tagtype= "ads/tagtype:note"
+    url= prefix+"/tagsremove/"+item
+    data=
+        tagtype: tagtype
+        tagname: tagname
+    if ctxt not in ['udg', 'none', 'public']
+        data.fqpn = ctxt
+    send_params(url, data, cback, eback)
+
+remove_tagging = (item, tagname, cback, eback) ->
+    tagtype= "ads/tagtype:tag"
+    url= prefix+"/tagsremove/"+item
+    data=
+        tagtype: tagtype
+        tagname: tagname
+    send_params(url, data, cback, eback)
+
+remove_items_from_postable = (items, ctxt, cback, eback) ->
+    url= prefix+"/itemsremove"
+    data=
+        items: items
+    if ctxt not in ['udg', 'none', 'public']
+        data.fqpn = ctxt
+    send_params(url, data, cback, eback)
 
 submit_tags = (items, tags, cback, eback) ->
     tagtype= "ads/tagtype:tag"
@@ -280,5 +307,7 @@ root.syncs=
     send_bibcodes: send_bibcodes
     taggings_postings_post_get: taggings_postings_post_get
     post_for_itemsinfo: post_for_itemsinfo
-
+    remove_tagging: remove_tagging
+    remove_note: remove_note
+    remove_items_from_postable: remove_items_from_postable
 

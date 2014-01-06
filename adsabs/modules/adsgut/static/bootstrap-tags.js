@@ -226,7 +226,7 @@
     Tags.prototype.addTag = function(pills_list, value) {
         var $self = this;
         if(!value) return false;
-
+        //console.log("INVAL", value);
         if(parseInt($self.options.limit) > 0 && pills_list.children().length >= parseInt($self.options.limit)) {
             $self.options.onError(10, $self.options.lang.limit.format($self.options.limit));
             return false;
@@ -260,8 +260,10 @@
             value.text = '<a class="tag-link" ' + title + ' target="' + $self.options.tag_link_target + '" href="' + value.url + '">' + value.text + '</a>';
         }
 
+        value = $self.options.enhanceValue(value);
+
         var icon = '';
-        if($self.options.can_delete) {
+        if(value.by==true && $self.options.can_delete) {
             icon = $(document.createElement('a'))
                 .attr({
                     "href": "javascript:void(0)",
@@ -275,7 +277,6 @@
 
         var num = value.num > 0 ? $self.options.templates.number.format(value.num) : '';
 
-        value = $self.options.enhanceValue(value);
 
         var tag = $($self.options.templates.pill.format(value.text))
             .attr('data-tag-id', value.id)
