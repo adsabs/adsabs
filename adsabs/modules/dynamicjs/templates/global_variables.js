@@ -6,6 +6,7 @@ var GlobalVariables = new Object();
 
 //variable containig the url for ajax requests for the facets
 GlobalVariables.FACETS_REQUESTS = '{{ url_for("search.facets") }}';
+GlobalVariables.SEARCH_BASE_URL = '{{ url_for("search.search") }}';
 //variable with the url to export the records to ADS Classic
 GlobalVariables.ADS_CLASSIC_EXPORT_BASE_URL = '{{ config.ADS_CLASSIC_BASEURL }}/cgi-bin/nph-abs_connect';
 //variable containing the number of records to show in ADS Classic after the export
