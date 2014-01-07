@@ -28,8 +28,7 @@ var adsTour = function() {
 			this.tour= new Tour({backdrop:false, storage:false});
 
 			var tourPath = _.find(_.keys(tourSteps), function(pathKey) {
-				pathKey = GlobalVariables.ADS_PREFIX + pathKey;
-				return currentPath.match(new RegExp(pathKey, "i"))
+				return currentPath.replace(GlobalVariables.ADS_PREFIX, "").match(new RegExp(pathKey, "i"));
 			});
 
 			if (tourPath == undefined) return;
