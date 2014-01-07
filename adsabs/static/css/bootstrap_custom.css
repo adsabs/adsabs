@@ -91,3 +91,7 @@ ul.dropdown-menu-small {
 div.well-facets{
 	margin-bottom:10px;	
 }
+
+.popover-title {
+	font-weight: bold;
+}

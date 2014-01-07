@@ -11,8 +11,8 @@ var adsTour = function() {
 
 		
 		flash: function(sel) {
-			$(sel).animate( { color: 'rgb(255,0,0)' }, 1000 );
-			$(sel).animate( { color: "black" }, 200 );
+			$(sel).animate( { color: 'rgb(255,0,0)' }, 200 );
+			$(sel).animate( { color: "black" }, 1000 );
 		},
 		
 		appendToQ: function(s) {
@@ -171,7 +171,7 @@ var tourSteps = {
 		  },
 
 		  {
-		    element: ".tour-button-feedback-widget", 
+		    element: "#feedback_widget", 
 		    title: "Thank You!", 
 		    content: "Thank you for taking the tour of the ADS main page. If you have any questions or comments, click here to let us know!",
 		    placement:'right'
@@ -201,7 +201,7 @@ var tourSteps = {
 			   },
 			   	{
 			    element: "div.accordion-inner:eq(1)", 
-			    title: "Limit Results to Refereed Publications", 
+			    title: "Limit Results to Specific Authors", 
 			    content: "To limit your search to a certain author name, click on the name. To exclude an author name from your results, check the box next to the name, navigate to the \"apply\" button, and hit \"exclude\".",
 			    onNext:function(tour) {$(".expCollSubFacetaut_f:eq(0)").trigger("click")},
 			    placement:'right'
@@ -211,8 +211,10 @@ var tourSteps = {
 			    title: "Limit Results to Refereed Publications", 
 			    content: "If your search yields both refereed and non-refereed items, and you only wish to view refereed articles, you could click on the \"refereed\" link to instantly be taken to a narrowed set of results.",
 			    placement:'right',
-			    onShown: function(tour) {$("div.accordion-toggle:eq(6)").trigger("click");},
-			    onNext:function(tour) {$("div.accordion-toggle:eq(6)").trigger("click");}
+			    onShown: function(tour) {
+			    	$("div.accordion-toggle:eq(6)").removeClass("collapsed"); 
+			    	$("#collapserefereed_f").toggleClass("in");
+			    	} 
 			   },
 			   	{
 			    element: "div.accordion-toggle:eq(11)", 
@@ -267,7 +269,7 @@ var tourSteps = {
 				{
 				element: "a.btn.dropdown-toggle:contains(Export)", 
 			    title: "Export Your Results", 
-			    content: "Use this button to export your search results in ADS Classic, BibTeX, AASTeX or Endnote.",
+			    content: "Use this button to export your search results to the ADS Classic interface; BibTeX, AASTeX or Endnote formats; or to a personal or shared library.",
 			    placement:'top',
 			    onShown: function(tour) {setTimeout(function(){$("a.btn.dropdown-toggle:contains(Export)").trigger("click")},1000)},
 			    onNext:function(tour) {$("a.btn.dropdown-toggle:contains(Export)").trigger("click")}
@@ -281,7 +283,7 @@ var tourSteps = {
 			    onNext:function(tour) {$("a.btn.dropdown-toggle:contains(Sort)").trigger("click")}
 				},
 			  {
-			    element: "#button_feedback_widget button", 
+			    element: "#feedback_widget", 
 			    title: "Thank You!", 
 			    content: "Thank you for taking the tour of the ADS search results page. If you have any questions or comments, click here to let us know!",
 			    placement:'right'

@@ -473,7 +473,7 @@ classicSearch.classicFormFunction = function(){
  			}
  		else 
  			{
- 				window.location.href = 'http://labs.adsabs.harvard.edu/adsabs/search/?q='+encodeURIComponent(query) +'&' + filters.join('&')
+ 				window.location.href = GlobalVariables.SEARCH_BASE_URL + '?q='+encodeURIComponent(query) +'&' + filters.join('&')
  			}
  	})
 			
