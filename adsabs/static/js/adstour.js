@@ -209,12 +209,8 @@ var tourSteps = {
 			  {
 			    element: "div.accordion-toggle:eq(6)", 
 			    title: "Limit Results to Refereed Publications", 
-			    content: "If your search yields both refereed and non-refereed items, and you only wish to view refereed articles, you could click on the \"refereed\" link to instantly be taken to a narrowed set of results.",
-			    placement:'right',
-			    onShown: function(tour) {
-			    	$("div.accordion-toggle:eq(6)").removeClass("collapsed"); 
-			    	$("#collapserefereed_f").toggleClass("in");
-			    	} 
+			    content: "If your search yields both refereed and non-refereed items, and you only wish to view refereed articles, you can open the Refereed Status filter and click on the \"refereed\" link to instantly be taken to a narrowed set of results.",
+			    placement:'right'
 			   },
 			   	{
 			    element: "div.accordion-toggle:eq(11)", 
