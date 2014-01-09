@@ -195,21 +195,27 @@ var ResultListManager = function() {
          */
         citation_helper: function() {
         	this.remove_hidden();
-        	this.disable_query_params();
         	this.add_hidden_field('return_nr', 10)
 
-        	var $inputs = (this.bibcodes_checked().length > 0)
-        		? this.bibcodes_checked()
-        		: this.bibcodes_displayed();
+        	if (this.bibcodes_checked().length > 0) {
 
-        	var checked = new Array();
-        	$inputs.each(function() {
-        		checked.push($(this).attr('value'));
-        	});
+        		this.disable_query_params();
+        		var checked = new Array();
+        		this.bibcodes_checked().each(function() {
+        			checked.push($(this).attr('value'));
+        		});
+        		var collapsed_bibcodes = checked.join('\n');
+        		this.add_hidden_field('bibcodes', collapsed_bibcodes);
+        		this.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
 
-        	var collapsed_bibcodes = checked.join('\n');
-        	this.add_hidden_field('bibcodes', collapsed_bibcodes);
-        	this.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
+        	} else {
+				var RLC = this;
+        		this.enable_query_params();
+				this.record_input_dialog('citation_helper', function(numRecs) {
+					RLC.add_hidden_field('numRecs', numRecs);
+					RLC.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
+				});
+        	}
         },
 
         /*
