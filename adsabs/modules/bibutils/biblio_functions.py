@@ -53,7 +53,7 @@ def get_suggestions(**args):
     # and sort them, most frequent first
     paperFreq = sorted(paperFreq, key=operator.itemgetter(1),reverse=True)
     # remove all papers with frequencies smaller than threshold
-    paperFreq = filter(lambda a: a[1] > config.BIBUTILS_THRESHOLD_FREQUENCY, paperFreq)
+    paperFreq = filter(lambda a: a[1] > config.BIBUTILS_THRESHOLD_FREQUENCY and a[1] < len(bibcodes), paperFreq)
     # get metadata for suggestions
     meta_dict = get_meta_data(results=paperFreq[:Nsuggestions])
     # return results in required format
