@@ -5,6 +5,7 @@ Created on Nov 5, 2012
 '''
 
 import os
+import re
 import sys
 import site
 tests_dir = os.path.dirname(os.path.abspath(__file__))
@@ -542,12 +543,14 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.insert_user("foo", developer=True, level="devel")
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         
-        rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract')
+        regex = re.compile('<em>\(?black')
+
+        rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract&rows=1')
         resp = json.loads(rv.data)
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)
             self.assertIn('abstract', doc['highlights'])
-            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            self.assertTrue(regex.search(doc['highlights']['abstract'][0]))
             
         rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract:2')
         resp = json.loads(rv.data)
@@ -555,7 +558,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)
             self.assertIn('abstract', doc['highlights'])
-            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            self.assertTrue(regex.search(doc['highlights']['abstract'][0]))
             if len(doc['highlights']['abstract']) > maxh:
                 maxh = len(doc['highlights']['abstract'])
         
@@ -567,9 +570,9 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)
             self.assertIn('abstract', doc['highlights'])
-            self.assertIn('<em>black', doc['highlights']['abstract'][0])
+            self.assertTrue(regex.search(doc['highlights']['abstract'][0]))
             self.assertIn('body', doc['highlights'])
-            self.assertIn('<em>black', doc['highlights']['body'][0])
+            self.assertTrue(regex.search(doc['highlights']['body'][0]))
             self.assertTrue(len(doc['highlights']['abstract']) == 1, "Too many highlights")
             self.assertTrue(len(doc['highlights']['body']) == 3, "Too few highlights")    
         
