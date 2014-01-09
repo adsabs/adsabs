@@ -350,9 +350,9 @@ var tourSteps = {
 			    placement:'bottom'
 				},
 				{
-				element: "dt:contains(Full Text Sources)", 
-			    title: "Full Text Sources", 
-			    content: "Find links to the full text here. Open Access resources are indicated by an open lock.",
+				element: "#abstractRightMenu dl", 
+			    title: "Full Text & Data Products", 
+			    content: "If an article has associated links to fulltext or data products they will appear here. Open Access resources are indicated by an open lock.",
 			    placement:'left'
 				},
 				{
