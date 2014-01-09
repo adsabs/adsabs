@@ -191,9 +191,9 @@ var ResultListManager = function() {
         },
         
         /*
-         * Function to get Citation Helper results
+         * Function to get Citation Helper and Metrics results
          */
-        citation_helper: function() {
+        analyze: function(srvc) {
         	this.remove_hidden();
         	this.add_hidden_field('return_nr', 10)
 
@@ -211,38 +211,11 @@ var ResultListManager = function() {
         	} else {
 				var RLC = this;
         		this.enable_query_params();
-				this.record_input_dialog('citation_helper', function(numRecs) {
+				this.record_input_dialog(srvc, function(numRecs) {
 					RLC.add_hidden_field('numRecs', numRecs);
-					RLC.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
+					RLC.ajax_submit(GlobalVariables.SERVICE_URLS[srvc]);
 				});
         	}
-        },
-
-        /*
-        * Function to get Metrics results
-        */        
-        metrics: function() {
-        	this.remove_hidden();
-        	
-        	if (this.bibcodes_checked().length > 0) {
-
-        		this.disable_query_params();
-        		var checked = new Array();
-        		this.bibcodes_checked().each(function() {
-        			checked.push($(this).attr('value'));
-        		});
-        		var collapsed_bibcodes = checked.join('\n');
-        		this.add_hidden_field('bibcodes', collapsed_bibcodes);
-        		this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
-
-        	} else {
-				var RLM = this;
-        		this.enable_query_params();
-				this.record_input_dialog('metrics', function(numRecs) {
-					RLM.add_hidden_field('numRecs', numRecs);
-					RLM.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
-				});
-        	}        	
         },
         
         single_metrics: function() {
