@@ -71,7 +71,6 @@ class AppConfig(object):
         ('hl.maxAnalyzedChars', '150000'), 
         ('hl.requireFieldMatch', 'true'),
         ('hl.usePhraseHighlighter', 'true'),
-        #('fq', ['pubdate_sort:[* TO 20140000]']),
         ('indent', 'true')
     ]
 
@@ -92,14 +91,14 @@ class AppConfig(object):
 #    SEARCH_DEFAULT_DATABASE = 'astronomy'
     
     SEARCH_SORT_OPTIONS_MAP = {
-        'DATE': ('pubdate_sort', 'desc'),
+        'DATE': ('pubdate', 'desc'),
         'RELEVANCE': ('score', 'desc'),
         'CITED': ('citation_count', 'desc'),
         'POPULARITY': ('read_count', 'desc'),
     }
     ABS_SORT_OPTIONS_MAP = {
         'references': ('first_author_norm', 'asc'),
-        'citations': ('pubdate_sort', 'desc')
+        'citations': ('pubdate', 'desc')
     }
     SEARCH_DEFAULT_SECONDARY_SORT = ('bibcode', 'desc')
 
@@ -204,7 +203,7 @@ class AppConfig(object):
 
     API_CURRENT_VERSION = '0.1.1'
     API_DEFAULT_RESPONSE_FORMAT = 'json'
-    API_SOLR_DEFAULT_SORT = [('pubdate_sort','desc'),('bibcode','desc')]
+    API_SOLR_DEFAULT_SORT = [('pubdate','desc'),('bibcode','desc')]
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
                                'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]']

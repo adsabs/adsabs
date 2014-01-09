@@ -412,10 +412,10 @@ class BuildBasicQueryComponentsTestCase(AdsabsBaseTestCase):
         self.maxDiff = None
         with self.app.test_request_context('/search/?q=+author%3A"civano"&db_f=astronomy&re_sort_type=DATE&re_sort_dir=desc&topn=1000'):
             expected = deepcopy(QueryBuilderSearch.DEFAULT_COMPONENTS)
-            expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "pubdate_sort desc")'
+            expected['q'] = u'topn(1000, (( author:"civano") AND database:"astronomy"), "pubdate desc")'
             expected['ui_q'] = u' author:"civano"'
             expected['ui_filters'] = [u'database:"astronomy"']
-            expected['sort'] = [('pubdate_sort', 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT]
+            expected['sort'] = [('pubdate', 'desc'), config.SEARCH_DEFAULT_SECONDARY_SORT]
 
             form = QueryForm.init_with_defaults(request.values)
             actual = QueryBuilderSearch.build(form, request.values)
