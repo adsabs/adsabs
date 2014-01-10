@@ -1,5 +1,10 @@
 
-import unittest2 as unittest
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+    
 import page_objects as po
 from utils import BaseSeleniumTestCase
 

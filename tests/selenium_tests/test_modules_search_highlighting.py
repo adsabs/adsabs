@@ -1,7 +1,12 @@
 import nose
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest2 as unittest
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+    
 
 from utils import BaseSeleniumTestCase
 import page_objects as po

@@ -1,4 +1,9 @@
-import unittest2 as unittest
+import sys
+if sys.version_info < (2,7):
+    import unittest2 as unittest
+else:
+    import unittest
+    
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.wait import WebDriverWait
