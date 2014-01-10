@@ -206,7 +206,7 @@ var ResultListManager = function() {
         		});
         		var collapsed_bibcodes = checked.join('\n');
         		this.add_hidden_field('bibcodes', collapsed_bibcodes);
-        		this.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
+        		this.ajax_submit(GlobalVariables.SERVICE_URLS[srvc]);
 
         	} else {
 				var RLC = this;
