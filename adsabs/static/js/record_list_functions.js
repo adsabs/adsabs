@@ -222,7 +222,7 @@ var ResultListManager = function() {
         	// this is some serious wtf how this works right now
         	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
         	this.add_hidden_field('bibcodes', bibcode)
-        	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        	this.ajax_submit(GlobalVariables.SERVICE_URLS['metrics']);
         },
         
         export_to_libraries: function() {
