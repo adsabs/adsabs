@@ -17,6 +17,8 @@ class CitationHelperInputForm(Form):
     bibcodes = TextAreaField('bibcodes')
     return_nr = SelectField('return_nr', choices=[('10','10'),('20','20'),('30','30')])
     layout = TextField('layout')
+    current_search_parameters = TextField('current_search_parameters')
+    bigquery = TextField('bigquery')
     numRecs = TextField('numRecs')
 
 class MetricsInputForm(Form):

@@ -54,10 +54,30 @@ def citation_helper(**args):
     else:
         number_of_suggestions = config.BIBUTILS_DEFAULT_SUGGESTIONS
     if is_submitted_cust(form):
+        try:
+            number_of_records = int(form.numRecs.data)
+        except:
+            number_of_records = config.MAX_EXPORTS['citation_helper']
         # the form was submitted, so get the contents from the submit box
         # make sure we have a list of what seem to be bibcodes
         bibcodes = map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n'))
         bibcodes = filter(lambda a: len(a) == 19, bibcodes)
+        list_type = request.values.get('list_type', None)
+        if len(bibcodes) == 0:
+            try:
+                query_par = str(form.current_search_parameters.data.strip())
+                query = json.loads(query_par)['q']
+                sort  = json.loads(query_par).get('sort', None)
+                bigquery_id = form.bigquery.data
+                if sort is None:
+                    # this might be an abstract citation/reference list view so get the sort from config
+                    if list_type is not None and list_type in config.ABS_SORT_OPTIONS_MAP:
+                        sort = [config.ABS_SORT_OPTIONS_MAP[list_type]]
+                    else:
+                        sort = []
+                bibcodes = get_publications_from_query(query, sort, list_type, bigquery_id)[:number_of_records]
+            except:
+                bibcodes = []
         # no bibcodes? display message and re-display input form
         if len(bibcodes) == 0:
             flash('Citation Helper returned no results. Reason: No bibcodes were supplied')

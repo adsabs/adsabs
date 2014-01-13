@@ -191,33 +191,12 @@ var ResultListManager = function() {
         },
         
         /*
-         * Function to get Citation Helper results
+         * Function to get Citation Helper and Metrics results
          */
-        citation_helper: function() {
+        analyze: function(srvc) {
         	this.remove_hidden();
-        	this.disable_query_params();
         	this.add_hidden_field('return_nr', 10)
 
-        	var $inputs = (this.bibcodes_checked().length > 0)
-        		? this.bibcodes_checked()
-        		: this.bibcodes_displayed();
-
-        	var checked = new Array();
-        	$inputs.each(function() {
-        		checked.push($(this).attr('value'));
-        	});
-
-        	var collapsed_bibcodes = checked.join('\n');
-        	this.add_hidden_field('bibcodes', collapsed_bibcodes);
-        	this.ajax_submit(GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL);
-        },
-
-        /*
-        * Function to get Metrics results
-        */        
-        metrics: function() {
-        	this.remove_hidden();
-        	
         	if (this.bibcodes_checked().length > 0) {
 
         		this.disable_query_params();
@@ -227,23 +206,23 @@ var ResultListManager = function() {
         		});
         		var collapsed_bibcodes = checked.join('\n');
         		this.add_hidden_field('bibcodes', collapsed_bibcodes);
-        		this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        		this.ajax_submit(GlobalVariables.SERVICE_URLS[srvc]);
 
         	} else {
-				var RLM = this;
+				var RLC = this;
         		this.enable_query_params();
-				this.record_input_dialog('metrics', function(numRecs) {
-					RLM.add_hidden_field('numRecs', numRecs);
-					RLM.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+				this.record_input_dialog(srvc, function(numRecs) {
+					RLC.add_hidden_field('numRecs', numRecs);
+					RLC.ajax_submit(GlobalVariables.SERVICE_URLS[srvc]);
 				});
-        	}        	
+        	}
         },
         
         single_metrics: function() {
         	// this is some serious wtf how this works right now
         	var bibcode = $('#search_results_form').find('input[name="bibcode"]').val();
         	this.add_hidden_field('bibcodes', bibcode)
-        	this.ajax_submit(GlobalVariables.ADSABS2_METRICS_BASE_URL);
+        	this.ajax_submit(GlobalVariables.SERVICE_URLS['metrics']);
         },
         
         export_to_libraries: function() {

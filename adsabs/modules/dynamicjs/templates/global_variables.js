@@ -20,14 +20,13 @@ GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY = '{{ url_for("export.get_b
 //Variable with the url of the view to export the bibcodes in other formats
 GlobalVariables.ADSABS2_EXPORT_TO_OTHER_FORTMATS_BASE_URL = '{{ url_for("export.export_to_other_formats") }}';
 
-GlobalVariables.ADSABS2_CITATION_HELPER_BASE_URL = '{{ url_for("bibutils.citation_helper") }}';
-
-GlobalVariables.ADSABS2_METRICS_BASE_URL = '{{ url_for("bibutils.metrics") }}';
-
-GlobalVariables.ADSABS2_METRICS_ALT_BASE_URL = 'http://adsabs.harvard.edu/tools/metrics/';
-
 GlobalVariables.ADS_PREFIX = '{{ ADS_PREFIX }}';
 
 GlobalVariables.ADS_ABSTRACT_BASE_URL = '{{ url_for("abs.abstract") }}'
 
 GlobalVariables.AUTOCOMPLETE_BASE_URL = '{{ url_for("autocomplete.autocomplete") }}';
+
+GlobalVariables.SERVICE_URLS = {
+    'citation_helper' : '{{ url_for("bibutils.citation_helper") }}',
+    'metrics' : '{{ url_for("bibutils.metrics") }}',
+};

@@ -159,8 +159,8 @@
         <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-wrench"></i> Analyze <i class="caret"></i></a>
         <ul class="dropdown-menu">
                 <li class="nav-header">selected records:</li>
-                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.citation_helper()">Citation Helper</a></li>
-                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.metrics()">Metrics</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.analyze('citation_helper')">Citation Helper</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.analyze('metrics')">Metrics</a></li>
         </ul>
 </div>
 {% endmacro %}

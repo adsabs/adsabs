@@ -289,7 +289,8 @@ class AppConfig(object):
 
     # configuration parameters for maximum number of records used for various services (metrics, citation helper, exports, ...)
     EXPORT_DEFAULT_ROWS = 300
-    MAX_EXPORTS = {'metrics':3000, 
+    MAX_EXPORTS = {'metrics':3000,
+                   'citation_helper':3000,
                    'wordcloud':1000, 
                    'ADSClassic':3000,
                    'authnetwork':1000,
@@ -297,7 +298,8 @@ class AppConfig(object):
                    'export_other':3000,
                    'export_library': 500,
                    }
-    DEFAULT_EXPORTS = {'metrics':300, 
+    DEFAULT_EXPORTS = {'metrics':300,
+                   'citation_helper':300,
                    'wordcloud':750, 
                    'ADSClassic':300,
                    'authnetwork':750,
