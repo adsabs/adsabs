@@ -149,7 +149,7 @@ class Metrics():
         auth_nums    = map(lambda a: 1.0/float(a['author_num']), cls.metrics_data)
         tori = vector_product(rn_citations,auth_nums)
         try:
-            read10_reads = map(lambda a: a[7][-1], cls.reads10data)
+            read10_reads = map(lambda a: a[7][-2], cls.reads10data)
             read10_auths = map(lambda a: 1.0/float(a[4]), cls.reads10data)
             read10 = vector_product(read10_reads, read10_auths)
         except:
@@ -261,6 +261,8 @@ class TimeSeries():
             else:
                 threshold = year - 10
                 year_index = year - 1996
+                if year == maxYear:
+                    year_index -= 1
                 reads10data = filter(lambda a: len(a[7]) > 0 and int(a[0][:4]) > threshold, cls.attributes)
                 try:
                     read10_reads = map(lambda a: a[7][year_index], reads10data)
