@@ -21,11 +21,6 @@ import metricsmodels
 #manager = Manager()
 #model_results = manager.list([])
 # Helper functions
-
-metrics_help = {'metrics series':'Columns: h, g, i10, tori, m, roq, i100, read10*0.1',
-                'reads histogram':'Columns: reads, refereed reads, normalized reads, normalized refereed reads',
-                'paper histogram':'Columns: paper count, refereed paper count, normalized paper count, normalized refereed paper count',
-                'citation histogram':'Columns: all citations, all citations to refereed papers, refereed citations, refereed citations to refereed papers, normalized versions of previous columns'}
 def sort_list_of_lists(L, index, rvrs=True):
     """
     Sort a list of lists with 'index' as sort key

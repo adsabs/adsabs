@@ -11,7 +11,6 @@ from api_request import ApiSearchRequest, ApiRecordRequest
 from config import config
 
 from adsabs.modules.bibutils.metrics_functions import generate_metrics
-from adsabs.modules.bibutils.metrics_functions import metrics_help
 #definition of the blueprint for the user part
 api_blueprint = Blueprint('api', __name__,template_folder="templates", url_prefix='/api')
 api_errors.init_error_handlers(api_blueprint)
@@ -89,8 +88,6 @@ def metrics():
     search_response = resp.search_response()
     bibcodes = map(lambda a: a['bibcode'], filter(lambda a: 'bibcode' in a, search_response['results']['docs']))
     metrics = generate_metrics(bibcodes=bibcodes)
-    print metrics
-    search_response['help'] = metrics_help
     search_response['results'] = metrics
     return search_response
 
