@@ -107,7 +107,8 @@
 						.attr("pointer-events", "all")
 						.attr("id", "svg");
 		
-			    var z = d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.5, 10]);
+			    var z = d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.3, 10]);
+
 			    var g = svg.append("svg:g")
 						.call(z)
 						.append("svg:g");
@@ -127,7 +128,11 @@
 			    //adding zoom capability to the zoom buttons
 			    $('#zoom-in').on("click", function(){
 			    	var oldscale = z.scale()
-			    	var scale = z.scale() +1;
+			    	var scale = z.scale() +.5;
+			    	if (scale > 10)
+			    	{
+			    		return
+			    	}
 			    	var x = z.translate()[0] 
 			    	var y = z.translate()[1] 
 			   // This is not intuitive. The next two lines are the most important part.
@@ -148,7 +153,15 @@
 			    $('#zoom-out').on("click", function(){
 			    	var oldscale = z.scale();
 			    	var scale = z.scale() -1;
-			    	if (scale <=.5)
+
+			    	if (oldscale >= 1.5)
+			    	{
+			    		var scale = z.scale() - 1
+			    	}
+			    	else {
+			    		var scale = z.scale() -.2;
+			    	}
+			    	if (scale <.2)
 			    	{
 			    		return
 			    	}
