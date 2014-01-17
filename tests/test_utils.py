@@ -245,4 +245,53 @@ class ClassicADSSignonFixture(fixtures.MonkeyPatch):
         
         fixtures.MonkeyPatch.__init__(self, 'adsabs.modules.user.user.get_classic_user', get_classic_user)      
         
+class ReferenceDataFixture(fixtures.MonkeyPatch):
+    
+    REFERENCES = {'a': ['x','y','z'],
+                  'b': ['d','x'],
+                  'c': ['e','y']
+                 }
 
+    def __init__(self):
+        self.references = self.REFERENCES
+        
+        def get_references(**args):
+            refs = []
+            for paper in args['bibcodes']:
+                refs += self.references[paper]
+            return deepcopy(refs)
+
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.modules.bibutils.biblio_functions.get_references', get_references)
+
+class CitationDataFixture(fixtures.MonkeyPatch):
+    
+    CITATIONS  = {'a': ['p'],
+                  'b': ['p','f'],
+                  'c': ['p','y','z']
+                 }
+
+    def __init__(self):
+        self.citations  = self.CITATIONS
+
+        def get_citing_papers(**args):
+            cits = []
+            for paper in args['bibcodes']:
+                cits += self.citations[paper]
+            return deepcopy(cits)
+
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.modules.bibutils.biblio_functions.get_citing_papers', get_citing_papers)
+
+class MetaDataFixture(fixtures.MonkeyPatch):
+    
+    METADATA  = {'x': {'title':'x_title', 'author':'x_author'},
+                 'y': {'title':'y_title', 'author':'y_author'},
+                 'z': {'title':'z_title', 'author':'z_author'}
+                 }
+
+    def __init__(self):
+        self.metadata  = self.METADATA
+
+        def get_meta_data(**args):
+            return deepcopy(self.metadata)
+
+        fixtures.MonkeyPatch.__init__(self, 'adsabs.modules.bibutils.biblio_functions.get_meta_data', get_meta_data)
