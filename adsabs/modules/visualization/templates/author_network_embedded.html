@@ -35,7 +35,7 @@
 						<li><strong>Zoom</strong> in or out and pan to get a better look.</li>
 				    	<li> <strong>Filter</strong> ADS search results by selecting individual authors
 				    		and author clusters, then clicking on the 'filter search' button </li>
-				    	<li><strong>Type </strong>the name of an author in the search box to find the author
+				    	<li><strong>Search </strong> for the name of an author in the search box to find the author
 				     		node's exact position. </li>
 				     	<li><strong>Drag</strong> the node in interactive mode to dynamically alter the network. </li>
 				     	<li><strong>Select</strong> a node and each one of its links at once in group select mode.</li>        
@@ -74,7 +74,15 @@
 			
 		</div>
 		
-		<div class="span10" id="chart"></div>
+		<div class="span10" id="chart">
+			<div class="zoom-panel well well-small" style="position:absolute;right:20px;top:10px;">
+				<p> Zoom In and Out</p>
+				<div style="width:30px;margin:auto">
+				<button class="btn" style="display:block;margin-bottom:4px;" id = "zoom-in"><i class="icon-plus"></i></button>
+				<button class="btn" id="zoom-out"><i class="icon-minus"></i></button>
+				</div>
+				</div>
+		</div>
 		
 		<script type="text/javascript">
 			var json = {{ network_data|tojson|safe }};
@@ -99,7 +107,7 @@
 						.attr("pointer-events", "all")
 						.attr("id", "svg");
 		
-			    var z = d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.5, 8]);
+			    var z = d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.5, 10]);
 			    var g = svg.append("svg:g")
 						.call(z)
 						.append("svg:g");
@@ -115,8 +123,47 @@
 				        "translate(" + d3.event.translate + ")"
 				        + " scale(" + d3.event.scale + ")");
 			    }
+
+			    //adding zoom capability to the zoom buttons
+			    $('#zoom-in').on("click", function(){
+			    	var oldscale = z.scale()
+			    	var scale = z.scale() +1;
+			    	var x = z.translate()[0] 
+			    	var y = z.translate()[1] 
+			   // This is not intuitive. The next two lines are the most important part.
+			   // Basically, you need to calculate the offset of the current
+			  // center by doing ((w/2-x)/oldscale) and take that number and calculate the offset 
+			  // based on the new scale (need to look up svg transforms to understand this because it's complicated)
+			    	var translateX= -scale*((w/2-x)/oldscale)+w/2;
+					var translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+					z.scale(scale);
+			    	z.translate([translateX, translateY]);
+
+			    	d3.select(g[0][0]).transition().duration(1000)
+			    	.attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+			    });
+
+
+			    $('#zoom-out').on("click", function(){
+			    	var oldscale = z.scale();
+			    	var scale = z.scale() -1;
+			    	if (scale <=.5)
+			    	{
+			    		return
+			    	}
+			    	var x = z.translate()[0] 
+			    	var y = z.translate()[1] 
+			    	var translateX= -scale*((w/2-x)/oldscale)+w/2;
+					var translateY= -scale*((h/2-y)/oldscale)+h/2;
+					z.scale(scale);
+			    	z.translate([translateX, translateY]);
+
+			    	d3.select(g[0][0]).transition().duration(1000)
+			    	.attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+				});
 		
-		    	names=[]
+		    	names=[];
 		
 			    for (var i=0; i<json.nodes.length; i++) {
 			    	names.push(json.nodes[i]['nodeName']);
@@ -378,7 +425,7 @@
 												d3.select(g[0][0]).transition().duration(3500).attr('transform', 'translate('+ translateX+', '+ translateY+ ') scale('+scale+')');
 												//informing d3 that we zoomed in independently
 												z.translate([translateX, translateY]).scale([scale]);
-												d3.select(node[0][i]).transition().delay(1000).duration(3000).style('fill', '#CC00FF').transition().delay(5000).duration(3000).style('fill', '#00006B');
+												d3.select(node[0][i]).transition().delay(1000).duration(3000).style('fill', '#CC00FF');
 		                  					}
 		                				}
 		                			});
