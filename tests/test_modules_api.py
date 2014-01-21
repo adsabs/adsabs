@@ -74,7 +74,7 @@ class APITests(AdsabsBaseTestCase):
         self.assertEqual(rv.status_code, 401)
         self.assertIn("API authentication failed: unknown dev_key", rv.data)
         
-        rv = self.client.get('/api/record/1234')
+        rv = self.client.get('/api/record/1234/')
         self.assertEqual(rv.status_code, 401)
         
     def test_dev_user(self):
@@ -106,7 +106,7 @@ class APITests(AdsabsBaseTestCase):
         with canned_solr_response_data():
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
             self.assertEqual(rv.status_code, 200)
-            rv = self.client.get('/api/record/1234?dev_key=foo_dev_key')
+            rv = self.client.get('/api/record/1234/?dev_key=foo_dev_key')
             self.assertEqual(rv.status_code, 200)
     
     def test_empty_dev_key(self):
@@ -162,7 +162,7 @@ class APITests(AdsabsBaseTestCase):
         canned_data['response']['docs'][0]['title'] = 'Foo Bar Polarization'
 
         with canned_solr_response_data(canned_data):
-            rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+            rv = self.client.get('/api/record/2012ApJ...751...88M/?dev_key=foo_dev_key')
             resp_data = json.loads(rv.data)
             self.assertIn("Polarization", resp_data['title'])
         
@@ -174,7 +174,7 @@ class APITests(AdsabsBaseTestCase):
         canned_data['response']['numFound'] = 0
 
         with canned_solr_response_data(canned_data):
-            rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+            rv = self.client.get('/api/record/2012ApJ...751...88M/?dev_key=foo_dev_key')
             self.assertEqual(rv.status_code, 404)
             self.assertIn("No record found with identifier 2012ApJ...751...88M", rv.data)
         
@@ -187,7 +187,7 @@ class APITests(AdsabsBaseTestCase):
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key')
             self.assertIn('application/json', rv.content_type)
              
-            rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+            rv = self.client.get('/api/record/2012ApJ...751...88M/?dev_key=foo_dev_key')
             self.assertIn('application/json', rv.content_type)
          
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/json'}))
@@ -196,10 +196,10 @@ class APITests(AdsabsBaseTestCase):
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
             self.assertIn('text/xml', rv.content_type)
          
-            rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
+            rv = self.client.get('/api/record/2012ApJ...751...88M/?dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
             self.assertIn('text/xml', rv.content_type)
          
-            rv = self.client.get('/api/record/2012ApJ...751...88M?dev_key=foo_dev_key')
+            rv = self.client.get('/api/record/2012ApJ...751...88M/?dev_key=foo_dev_key')
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key&fmt=xml')
             self.assertIn('text/xml', rv.content_type)
              
@@ -211,7 +211,7 @@ class APITests(AdsabsBaseTestCase):
             rv = self.client.get('/api/settings/?dev_key=foo_dev_key&fmt=xml')
             self.assertIn('<settings>', rv.data)
              
-            rv = self.client.get('/api/record/xyz?dev_key=foo_dev_key&fmt=xml')
+            rv = self.client.get('/api/record/xyz/?dev_key=foo_dev_key&fmt=xml')
             self.assertIn('<bibcode type="str">xyz</bibcode', rv.data)
              
             rv = self.client.get('/api/search/?q=black+holes&dev_key=foo_dev_key', headers=Headers({'Accept': 'application/xml'}))
@@ -527,13 +527,13 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
     @unittest.skipUnless(SOLR_AVAILABLE, 'solr unavailable')
     def test_record_requests(self):
         self.insert_user("foo", developer=True, level="basic")
-        rv = self.client.get('/api/record/2000A&AS..143...85A?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/2000A&AS..143...85A/?dev_key=foo_dev_key')
         resp = json.loads(rv.data)
         self.assertIn('id', resp)
-        rv = self.client.get('/api/record/1005.1529?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/1005.1529/?dev_key=foo_dev_key')
         resp = json.loads(rv.data)
         self.assertIn('id', resp)
-        rv = self.client.get('/api/record/10.1126/science.1.19.520?dev_key=foo_dev_key')
+        rv = self.client.get('/api/record/10.1126/science.1.19.520/?dev_key=foo_dev_key')
         resp = json.loads(rv.data)
         self.assertIn('id', resp)
              

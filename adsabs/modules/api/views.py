@@ -10,6 +10,7 @@ from api_user import AdsApiUser
 from api_request import ApiSearchRequest, ApiRecordRequest
 from config import config
 
+from adsabs.modules.bibutils.metrics_functions import generate_metrics
 #definition of the blueprint for the user part
 api_blueprint = Blueprint('api', __name__,template_folder="templates", url_prefix='/api')
 api_errors.init_error_handlers(api_blueprint)
@@ -74,8 +75,23 @@ def search():
         raise api_errors.ApiInvalidRequest(search_req.input_errors())
     resp = search_req.execute()
     return resp.search_response()
-        
-@api_blueprint.route('/record/<path:identifier>', methods=['GET'])
+
+@api_blueprint.route('/search/metrics/', methods=['GET'])
+@api_user_required
+@api_ip_allowed
+@pushrod_view(xml_template="metrics.xml")
+def search_metrics():
+    search_req = ApiSearchRequest(request.args)
+    if not search_req.validate():
+        raise api_errors.ApiInvalidRequest(search_req.input_errors())
+    resp = search_req.execute()
+    search_response = resp.search_response()
+    bibcodes = map(lambda a: a['bibcode'], filter(lambda a: 'bibcode' in a, search_response['results']['docs']))
+    metrics = generate_metrics(bibcodes=bibcodes, fmt='API')
+    search_response['results'] = metrics
+    return search_response
+
+@api_blueprint.route('/record/<path:identifier>/', methods=['GET'])
 @api_user_required
 @api_ip_allowed
 @pushrod_view(xml_template="record.xml", wrap='doc')
@@ -88,14 +104,18 @@ def record(identifier):
         raise api_errors.ApiRecordNotFound(identifier)
     return resp.record_response()
         
-#@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
-#@api_user_required
-#@pushrod_view(xml_template="record.xml")
-#def record_operator(identifier, operator):
-#    pass
-
-#@api_blueprint.route('/mlt/', methods=['GET'])
-#@api_user_required
-#@pushrod_view(xml_template="mlt.xml")
-#def mlt():
-#    pass
+@api_blueprint.route('/record/<path:identifier>/metrics/', methods=['GET'])
+@api_user_required
+@api_ip_allowed
+@pushrod_view(xml_template="record_metrics.xml", wrap='metrics')
+def record_metrics(identifier):
+    record_req = ApiRecordRequest(identifier, request.args)
+    if not record_req.validate():
+        raise api_errors.ApiInvalidRequest(record_req.errors())
+    resp = record_req.execute()
+    if not resp.get_hits() > 0:
+        raise api_errors.ApiRecordNotFound(identifier)
+    record = resp.record_response()
+    metrics = generate_metrics(bibcodes=[record['bibcode']], fmt='API')
+    return metrics
+        
