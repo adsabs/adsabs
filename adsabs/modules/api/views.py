@@ -87,7 +87,7 @@ def metrics():
     resp = search_req.execute()
     search_response = resp.search_response()
     bibcodes = map(lambda a: a['bibcode'], filter(lambda a: 'bibcode' in a, search_response['results']['docs']))
-    metrics = generate_metrics(bibcodes=bibcodes)
+    metrics = generate_metrics(bibcodes=bibcodes, fmt='API')
     search_response['results'] = metrics
     return search_response
 

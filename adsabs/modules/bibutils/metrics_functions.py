@@ -170,5 +170,13 @@ def generate_metrics(**args):
     # Send the result back to our caller
     if format == 'legacy':
         return legacy_format(results)
+    elif format == 'API':
+        for key in results.keys():
+            newkey = key.replace(' ','_')
+            results[newkey] = results.pop(key)
+            if not 'histogram' in key or not 'series' in key:
+                for kee in results[newkey].keys():
+                    results[newkey][kee.replace(' ','_')] = results[newkey].pop(kee)
+        return results
     else:
         return results
