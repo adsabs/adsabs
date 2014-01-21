@@ -300,7 +300,7 @@ class AppConfig(object):
                    }
     DEFAULT_EXPORTS = {'metrics':300,
                    'citation_helper':300,
-                   'wordcloud':750, 
+                   'wordcloud':250, 
                    'ADSClassic':300,
                    'authnetwork':750,
                    'skymap':750,

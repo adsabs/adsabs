@@ -44,3 +44,4 @@ local_config.py
 
 adsabs/static/.webassets-cache
 adsabs/static/compressed
+adsabs/run.py

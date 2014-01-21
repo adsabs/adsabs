@@ -8,8 +8,10 @@ stemmer = PorterStemmer()
 
 sw = open(os.path.dirname(os.path.abspath(__file__)) +'/solr_stopwords.txt').read().split('\n')
 
-# so in 250 docs, token has to appear >= 4 times
-MIN_OCCURENCES_OF_WORD = 0.016
+# so in 250 docs, token has to appear >= 6 times
+MIN_PERCENT_WORD = 0.024
+#in all wordclouds, even small ones, a  stemmed token must appear 3 or more times (so in at least 2 articles)
+MIN_OCCURENCES_OF_WORD = 3
 
 
 def list_to_dict(l):
@@ -27,7 +29,6 @@ def list_to_dict(l):
     return d
 
 
-
 def wc_json(solr_json):
     tf_idf_info = list_to_dict(solr_json['termVectors'][2:])
     docs = solr_json['response']['docs']
@@ -36,8 +37,7 @@ def wc_json(solr_json):
     acr_freq_dict= {}
     # these characters indicate word boundaries 
     split_regex = re.compile(r'[\s/.]+')
-
-    markup_regex = re.compile(r'href=|<?sub>?.*?<?sub>?|<?sup>?.*?<?sup>?|\.edu|\.com|www', re.I)
+    markup_regex = re.compile(r'href=|<sub>.*?</?sub>|<sup>.*?</?sup>|^sub.?$|^.?sub$|^sup.?$|^.?sup$|\bedu\b|\bcom\b|www', re.I)
 
     def process_entry(a,t): 
         # creating tokens
@@ -100,7 +100,7 @@ def wc_json(solr_json):
             #missing a field, most likely abstract, so we ignore this entry
             continue
 
-    # keeping only stuff in token_freq_dict that appears > MIN_OCCURENCES_OF_WORD % of the time
+    # keeping only stuff in token_freq_dict that appears > MIN_PERCENT_WORD and > MIN_OCCURENCES
     # creating a new dict with the most common incarnation of the token, and the total # of times
     # related stemmed words appeared
     temp_dict = {}
@@ -116,11 +116,10 @@ def wc_json(solr_json):
         else:
             most_common_t = sorted(most_common_t_list, key=lambda x:len(x[0]))[0][0]
         num = sum(token_freq_dict[t].values())
-        if num/num_records>= MIN_OCCURENCES_OF_WORD :
+        if num/num_records>= MIN_PERCENT_WORD and num > MIN_OCCURENCES_OF_WORD:
             temp_dict[most_common_t] = {'total_occurences':num}
 
     token_freq_dict = temp_dict
-
 
     # now a function that attaches idf info to token_freq_dict
     def find_idf(term, dic, acr = False):
@@ -152,7 +151,6 @@ def wc_json(solr_json):
                         dic[term]['idf'] = idf
                         return 
 
-
     # now attaching tf/idf of most common example of token to the token_freq_dict
     for t in token_freq_dict:
         find_idf(t, token_freq_dict)
@@ -160,46 +158,15 @@ def wc_json(solr_json):
     # now attaching tf/idf of most common example of acronym to acr_freq_dict
     for a in acr_freq_dict:
         find_idf(a, acr_freq_dict, acr=True)
- 
 
-    #now calculating scores
+    #now also making sure acr_freq_dict only has words that appeared > MIN_PERCENT_WORD times
     temp_dict = {}
-    for t in token_freq_dict:
-        if 'idf' not in token_freq_dict[t]:
-            continue
-        else:
-            score = token_freq_dict[t]['idf']*token_freq_dict[t]['total_occurences']
-            temp_dict[t]=score
 
-    token_freq_dict = temp_dict
-
-    temp_dict = {}
     for a in acr_freq_dict:
-        # we don't care about idf for acronyms since it is a special category
-        temp_dict[a] = acr_freq_dict[a]['total_occurences']
-
+        if acr_freq_dict[a]['total_occurences']/num_records>= MIN_PERCENT_WORD and acr_freq_dict[a]['total_occurences'] > MIN_OCCURENCES_OF_WORD:
+            temp_dict[a]=acr_freq_dict[a]
     acr_freq_dict = temp_dict
+ 
+    token_freq_dict.update(acr_freq_dict)
 
-
-    # now, using a little discretion to create a 50-word word cloud with a number of different types of words
-    # we want a distribution of 1/5 dashed words, 1/10 acronyms, and everything else single tokens (so 10 - 5 - 35)
-    # we are also changing up the values so acronyms and dashed words don't dominate
-
-    final_dict = {}
-    top_un_dashed = sorted([(k,v) for k,v in token_freq_dict.items() if '-' not in k], key = lambda x:x[1], reverse=True)[:40] 
-    final_dict.update(dict(top_un_dashed))
-
-    average_undashed_score = sum([x[1] for x in top_un_dashed])/35
-
-    acronyms = sorted(acr_freq_dict.items(), key=lambda x:x[1], reverse=True)[:5]
-    average_ac_score = sum([x[1] for x in acronyms])/5
-
-    acronyms = [(x[0], x[1]/average_ac_score*average_undashed_score) for x in acronyms]
-    final_dict.update(dict(acronyms))
-
-    top_dashed = sorted([(k,v) for k,v in token_freq_dict.items() if '-' in k], key = lambda x:x[1], reverse=True)[:10]
-    average_dashed_score = sum([x[1] for x in top_dashed])/10
-
-    top_dashed = [(x[0], x[1]/average_dashed_score*average_undashed_score) for x in top_dashed]
-    final_dict.update(dict(top_dashed))
-    return final_dict
+    return token_freq_dict
