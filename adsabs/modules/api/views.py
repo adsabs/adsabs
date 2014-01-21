@@ -76,11 +76,11 @@ def search():
     resp = search_req.execute()
     return resp.search_response()
 
-@api_blueprint.route('/metrics/', methods=['GET'])
+@api_blueprint.route('/search/metrics/', methods=['GET'])
 @api_user_required
 @api_ip_allowed
 @pushrod_view(xml_template="metrics.xml")
-def metrics():
+def search_metrics():
     search_req = ApiSearchRequest(request.args)
     if not search_req.validate():
         raise api_errors.ApiInvalidRequest(search_req.input_errors())
@@ -91,7 +91,7 @@ def metrics():
     search_response['results'] = metrics
     return search_response
 
-@api_blueprint.route('/record/<path:identifier>', methods=['GET'])
+@api_blueprint.route('/record/<path:identifier>/', methods=['GET'])
 @api_user_required
 @api_ip_allowed
 @pushrod_view(xml_template="record.xml", wrap='doc')
@@ -104,14 +104,18 @@ def record(identifier):
         raise api_errors.ApiRecordNotFound(identifier)
     return resp.record_response()
         
-#@api_blueprint.route('/record/<identifier>/<operator>', methods=['GET'])
-#@api_user_required
-#@pushrod_view(xml_template="record.xml")
-#def record_operator(identifier, operator):
-#    pass
-
-#@api_blueprint.route('/mlt/', methods=['GET'])
-#@api_user_required
-#@pushrod_view(xml_template="mlt.xml")
-#def mlt():
-#    pass
+@api_blueprint.route('/record/<path:identifier>/metrics/', methods=['GET'])
+@api_user_required
+@api_ip_allowed
+@pushrod_view(xml_template="record_metrics.xml", wrap='metrics')
+def record_metrics(identifier):
+    record_req = ApiRecordRequest(identifier, request.args)
+    if not record_req.validate():
+        raise api_errors.ApiInvalidRequest(record_req.errors())
+    resp = record_req.execute()
+    if not resp.get_hits() > 0:
+        raise api_errors.ApiRecordNotFound(identifier)
+    record = resp.record_response()
+    metrics = generate_metrics(bibcodes=[record['bibcode']], fmt='API')
+    return metrics
+        
