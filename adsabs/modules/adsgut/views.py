@@ -1427,6 +1427,11 @@ def postForm(itemtypens, itemtypename):
                     'rows': str(numrecs)
                     })
 
+                list_type = request.values.get('list_type')
+                if 'sort' not in query_components:
+                    from adsabs.core.solr.query_builder import create_sort_param
+                    query_components['sort'] = create_sort_param(list_type=list_type)
+
                 req = solr.create_request(**query_components)
                 if 'bigquery' in request.values:
                     from adsabs.core.solr import bigquery
