@@ -8,6 +8,7 @@ from simplejson import JSONDecodeError
 from flask import (Blueprint, request, Response, current_app as app, abort, render_template)
 from adsabs.core.classic.export import get_classic_records_export
 from adsabs.core.solr import get_document_similar
+from adsabs.core.solr.query_builder import create_sort_param
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 
@@ -104,9 +105,7 @@ def get_bibcodes_from_query():
     #update the query parameters to return only what is necessary
     query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
     if 'sort' not in query_components:
-        # this might be an abstract citation/reference list view so get the sort from config
-        if list_type is not None and list_type in config.ABS_SORT_OPTIONS_MAP:
-            query_components['sort'] = [config.ABS_SORT_OPTIONS_MAP[list_type]]
+        query_components['sort'] = create_sort_param(list_type=list_type)
 
     #execute the query
     if list_type == 'similar':
