@@ -1,0 +1,9 @@
+
+Sent from: {{ page_url }}
+User ID: {{ user_id }}
+
+{{ feedback }}
+
+WSGI environment vars
+----------
+{{ environ|safe }}

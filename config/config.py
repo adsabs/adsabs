@@ -241,6 +241,7 @@ class AppConfig(object):
     RECAPTCHA_PUBLIC_KEY = ''
     RECAPTCHA_PRIVATE_KEY = ''
     RECAPTCHA_OPTIONS = {'theme' : 'white'}
+    RECAPTCHA_ENABLED = True
 
     PAGES_GIT_URL = "git@github.com:adsabs/adsabs-pages.git"
     PAGES_CONTENT_DIR = os.path.join(_basedir, "page_content")

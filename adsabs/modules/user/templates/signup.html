@@ -24,8 +24,11 @@
 					            {{ render_input_controlgroup(form.confirm_login, field_cls='span10', placeholder=form.confirm_login.description) }}
 					            {{ render_input_controlgroup(form.password, field_cls='span10', placeholder=form.password.description) }}
 					            {{ render_input_controlgroup(form.confirm_password, field_cls='span10', placeholder=form.confirm_password.description) }}
-					            {{ render_recaptcha_controlgroup(form.recaptcha) }}
-					            <div class="control-group">
+                                {% if config.RECAPTCHA_ENABLED %}
+                                    {# reCaptcha #}
+                                    {{ render_recaptcha_controlgroup(form.recaptcha) }}
+                                {% endif %}
+   					            <div class="control-group">
 									<div class="controls">
 										<span class="required_string">* Required fields</span>
 									</div>

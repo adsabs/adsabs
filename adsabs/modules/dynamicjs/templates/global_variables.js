@@ -30,3 +30,5 @@ GlobalVariables.SERVICE_URLS = {
     'citation_helper' : '{{ url_for("bibutils.citation_helper") }}',
     'metrics' : '{{ url_for("bibutils.metrics") }}',
 };
+
+GlobalVariables.FEEDBACK_URL = '{{ url_for("feedback.feedback") }}';
