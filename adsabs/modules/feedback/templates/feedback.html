@@ -13,7 +13,7 @@
 				{% if status == 'sent' %}
 					{{ render_success_message(feedb_req_mode) }}
 				{% else %}
-					{{ render_feedback_form(form, feedb_req_mode) }}
+					{{ render_feedback_form(form, feedb_req_mode, page_url, environ) }}
 				{% endif %}
 				
 				</div>
@@ -28,7 +28,7 @@
 		{% if status == 'sent' %}
 			{{ render_success_message(feedb_req_mode) }}
 		{% else %}
-			{{ render_feedback_form(form, feedb_req_mode) }}
+            {{ render_feedback_form(form, feedb_req_mode, page_url, environ) }}
 		{% endif %}
 		</div>
 	{% endblock %}

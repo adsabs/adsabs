@@ -1,6 +1,6 @@
 {% from "macros/misc.html" import render_input_controlgroup, render_textarea_controlgroup, render_recaptcha_controlgroup, render_action_controlgroup %}
 
-{% macro render_feedback_form(form, feedb_req_mode) %}
+{% macro render_feedback_form(form, feedb_req_mode, page_url, environ) %}
 <div class="container-fluid">
 	<div class="row-fluid">
 		<div class="span12">
@@ -36,17 +36,16 @@
 					{# Message -#}
 					{{ render_textarea_controlgroup(form.feedback_text, field_cls='span10', rows="6", placeholder="Your message") }}
 					
+					{% if config.RECAPTCHA_ENABLED %}
 					{# reCaptcha #}
 					{{ render_recaptcha_controlgroup(form.recaptcha) }}
+					{% endif %}
 
 					<div class="control-group">
 						<div class="controls">
 							<span class="required_string">* Required fields</span>
-							{% if request.values.get('current_url') -%}
-								{{ form.page_url_hidden(value=request.values.get('current_url')) }}
-							{% else -%}
-								{{ form.page_url_hidden(value=url_for('feedback.feedback')) }}
-							{% endif -%}
+                            {{ form.page_url(value=page_url) }}
+							{{ form.environ(value=environ) }}
 							<button class="btn btn-info">Submit</button>
 						</div>
 					</div>

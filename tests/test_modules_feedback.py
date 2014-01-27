@@ -76,8 +76,8 @@ class FeedbackTests(AdsabsBaseTestCase):
     def test_submit_feedback_1(self):
         """tests that a form submitted with all the necessary data """
         rv = self.client.post('/feedback/', data=dict(name='Foo Bar', email='foo@example.com', feedback_text='bla bla bla', 
-                                                      feedback_type='comment', page_url_hidden='/feedback/', recaptcha_challenge_field='test',
-                                                      recaptcha_response_field='test'))
+                                                      feedback_type='comment', page_url='/feedback/', recaptcha_challenge_field='test',
+                                                      recaptcha_response_field='test', environ='{"foo": "bar"}'))
         soup = BeautifulSoup(rv.data)
         #there is only a success message a not form
         tag = soup.find_all('div', class_='feedback_success')
@@ -92,8 +92,8 @@ class FeedbackTests(AdsabsBaseTestCase):
     def test_submit_feedback_2(self):
         """tests that a form submitted with not all the necessary data """
         rv = self.client.post('/feedback/', data=dict(name='Foo Bar', email='foo@example.com', feedback_text='', 
-                                                      feedback_type='comment', page_url_hidden='/feedback/', recaptcha_challenge_field='test',
-                                                      recaptcha_response_field='test'))
+                                                      feedback_type='comment', page_url='/feedback/', recaptcha_challenge_field='test',
+                                                      recaptcha_response_field='test', environ=""))
         soup = BeautifulSoup(rv.data)
         #there is only a success message a not form
         tag = soup.find_all('div', class_='feedback_success')

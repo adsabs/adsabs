@@ -26,7 +26,6 @@ class SignupForm(Form):
     confirm_login = EmailField(u'Confirm Email address', [required(), length(min=5, max=40), validators.Email(), validators.EqualTo('login', message='The two email fields must be equal')], description=u"Repeat your login email")
     password = PasswordField(u'Password', [required(), length(min=config.USER_MIN_PASSWORD_LENGTH, max=config.USER_MAX_PASSWORD_LENGTH)], description=u"Your password")
     confirm_password = PasswordField(u'Confirm Password', [required(), length(min=config.USER_MIN_PASSWORD_LENGTH, max=config.USER_MAX_PASSWORD_LENGTH), validators.EqualTo('password', message='The two password fields must be equal')], description=u"Repeat Your password")
-    recaptcha = RecaptchaField()
     submit = SubmitField('Create user')
     
     def validate(self):
@@ -38,7 +37,9 @@ class SignupForm(Form):
             self.lastname.errors.append('The name and the last name cannot be more than 29 chars long together (we will fix this, we promise)')
             return False
         return True
-    
+
+if config.RECAPTCHA_ENABLED:
+    setattr(SignupForm, "recaptcha", RecaptchaField())   
 
 class PreActivateUserForm(Form):
     act_em = EmailField(u"Email", [required(), length(min=5, max=40), validators.Email()], description=u"Your login email")
