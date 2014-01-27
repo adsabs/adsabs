@@ -36,11 +36,16 @@ man
 .pydevproject
 .settings
 
+logs
 adsabs.log
 #logging local configuration
 logging.conf
 
 local_config.py
+config/beaver.conf
+run.py
+src
+tmp
 
 adsabs/static/.webassets-cache
 adsabs/static/compressed
