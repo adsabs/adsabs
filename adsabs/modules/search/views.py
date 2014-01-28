@@ -111,9 +111,8 @@ def bigquery():
         form.add_rendered_element(Markup(render_template('bigquery.html', data=data)))
         return render_template('search.html', form=form)
     
-    
     # receive the data from the form
-    v = request.values.get('bigquery')
+    v = request.values.get('bigquerydata')
     if (v is None or len(v) == 0):
         form.add_rendered_element(Markup(render_template('bigquery.html', data="")))
         return render_template('search.html', form=form)
