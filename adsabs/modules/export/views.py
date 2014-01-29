@@ -96,6 +96,7 @@ def get_bibcodes_from_query():
     #list of bibcodes to extract
     bibcodes_to_export = []
     list_type = request.values.get('list_type')
+    numRecs   = request.values.get('numRecs', str(config.EXPORT_DEFAULT_ROWS))
     
     try:
         query_components = json.loads(request.values.get('current_search_parameters'))
@@ -103,7 +104,7 @@ def get_bibcodes_from_query():
         #@todo: logging of the error
         return ''
     #update the query parameters to return only what is necessary
-    query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': str(config.EXPORT_DEFAULT_ROWS)})
+    query_components.update({'facets':[], 'fields': ['bibcode'], 'highlights':[], 'rows': numRecs})
     if 'sort' not in query_components:
         query_components['sort'] = create_sort_param(list_type=list_type)
 
