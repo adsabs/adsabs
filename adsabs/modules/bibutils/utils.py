@@ -15,7 +15,6 @@ from multiprocessing import Process, Queue, cpu_count
 import xlwt
 import uuid
 import simplejson
-import pymongo
 from flask import current_app as app
 from flask.ext.solrquery import solr #@UnresolvedImport
 from flask.ext.adsdata import adsdata #@UnresolvedImport
@@ -29,56 +28,6 @@ from .errors import SolrMetaDataQueryError
 from .errors import MongoQueryError
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
-
-class DataHarvester(Process):
-    """
-    Class to allow parallel retrieval from publication data from Solr
-    """
-    def __init__(self, task_queue, result_queue):
-        Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
-
-    def run(self):
-        while True:
-            biblist = self.task_queue.get()
-            if biblist is None:
-                break
-            q = " OR ".join(map(lambda a: "bibcode:%s"%a, biblist))
-            fl = 'bibcode,reference,author_norm,property,read_count'
-            try:
-                result_field = 'results'
-                # do the query and filter out the results without the bibcode field
-                # (publications without citations return an empty document)
-                resp = solr.query(q, rows=config.BIBUTILS_MAX_HITS, fields=fl.split(','))
-                search_results = resp.search_response()
-                # gather citations and put them into the results queue
-                self.result_queue.put(search_results[result_field]['docs'])
-            except SolrCitationQueryError, e:
-                app.logger.error("Solr data query for %s blew up (%s)" % (q,e))
-                raise
-        return
-
-class MongoHarvester(Process):
-    """
-    Class to allow parallel retrieval from publication data from Mongo
-    """
-    def __init__(self, task_queue, result_queue):
-        Process.__init__(self)
-        self.task_queue = task_queue
-        self.result_queue = result_queue
-    def run(self):
-        while True:
-            bibcode = self.task_queue.get()
-            if bibcode is None:
-                break
-            try:
-                doc = adsdata.get_doc(bibcode, manipulate=False)
-                self.result_queue.put(doc)
-            except MongoQueryError, e:
-                app.logger.error("Mongo data query for %s blew up (%s)" % (bibcode,e))
-                raise
-        return
 
 class MongoCitationListHarvester(Process):
     """
@@ -109,24 +58,20 @@ class MongoCitationListHarvester(Process):
 
 class MetricsDataHarvester(Process):
     """
-    Class to allow parallel retrieval of citation data from Mongo
+    Class to allow parallel retrieval from publication data from Mongo
     """
     def __init__(self, task_queue, result_queue):
         Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        client = pymongo.MongoClient(config.METRICS_MONGO_HOST,config.METRICS_MONGO_PORT)
-        db = client[config.METRICS_DATABASE]
-        db.authenticate(config.METRICS_MONGO_USER, config.METRICS_MONGO_PASSWORD)
-        self.metrics_collection = db[config.METRICS_COLLECTION]
     def run(self):
         while True:
             bibcode = self.task_queue.get()
             if bibcode is None:
                 break
             try:
-                metr_data = self.metrics_collection.find_one({'_id': bibcode})
-                self.result_queue.put(metr_data)
+                doc = adsdata.get_metrics_data(bibcode, manipulate=False)
+                self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo metrics data query for %s blew up (%s)" % (bibcode,e))
                 raise
@@ -192,40 +137,6 @@ def get_meta_data(**args):
         if 'first_author' in doc: author = "%s,+"%doc['first_author'].split(',')[0]
         data_dict[doc['bibcode']] = {'title':title, 'author':author}
     return data_dict
-
-def get_mongo_data(**args):
-    """
-    Method to prepare the actual citation dictionary creation
-    """
-    # create the queues
-    tasks = Queue()
-    results = Queue()
-    # how many threads are there to be used
-    if 'threads' in args:
-        threads = args['threads']
-    else:
-        threads = cpu_count()
-    # initialize the "harvesters" (each harvester get the citations for a bibcode)
-    harvesters = [ MongoHarvester(tasks, results) for i in range(threads)]
-    # start the harvesters
-    for b in harvesters:
-        b.start()
-    # put the bibcodes in the tasks queue
-    num_jobs = 0
-    for bibcode in args['bibcodes']:
-        tasks.put(bibcode)
-        num_jobs += 1
-    # add some 'None' values at the end of the tasks list, to faciliate proper closure
-    for i in range(threads):
-        tasks.put(None)
-    # gather all results into one publication dictionary
-    ads_data = {}
-    while num_jobs:
-        data = results.get()
-        if data:
-            ads_data[data['_id']] = data
-        num_jobs -= 1
-    return ads_data
 
 def get_citing_papers(**args):
     # create the queues
