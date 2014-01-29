@@ -135,6 +135,7 @@ var ResultListManager = function() {
 				var RLM = this;
 				this.enable_query_params();
 				this.record_input_dialog('ADSClassic', function(numRecs) {
+					RLM.add_hidden_field('numRecs', numRecs);
 					RLM.ajax_submit(GlobalVariables.ADSABS2_GET_BIBCODES_ONLY_FROM_QUERY, false, function(data) {
 						$.fancybox.hideLoading();
 						RLM.disable_query_params();
