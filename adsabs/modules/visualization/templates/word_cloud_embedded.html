@@ -11,26 +11,30 @@
           </a>
           <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
               <li> This word cloud allows you to view interesting words from the titles and abstracts of your search
-                results. <br/> Click <strong> Frequent</strong> to view a word cloud that is simply composed of the words that appeared most frequently in your results. (This word cloud is likely to feature generic terms like "observations" prominently.) <br/> Click <strong>Unique</strong> to see a word cloud that shows words that appeared fairly often in your results but rarely in the rest of the ADS. This word cloud shows you what distinguishes your results from the rest of the ADS corpus.<br/>
+                results. <br/> Move the slider towards <strong> Frequent</strong> to view a word cloud that is simply composed of the words that appeared most frequently in your results. (This word cloud is likely to feature generic terms like "observations" prominently.) <br/> Move the slider towards <strong>Unique</strong> to see a word cloud that shows words that appeared in your results but which appear very rarely in the rest of the ADS corpus.<br/>
               To facet your ADS search, select words from the word cloud and click the "Apply Filter to Search"
                 button.</li>
           </ul>
         </div> 
 
 
-        <div class="well well-small vis_item_format"><span style="font-size:14px"> Recalculate Word Cloud</span><br/><br/>
+        <div class="well well-small vis_item_format"><span style="font-size:14px"> Recalculate Cloud</span><br/><br/>
+          <div id = "ticker">
 
-            <div id="word-choice">
-            <label class="radio">
-              <input type="radio" name="choice-radio" id="optionsRadios1" value="1">
-              Frequent
-            </label>
 
-            <label class="radio">
-              <input type="radio" name="choice-radio" id="optionsRadios2" value="3" checked>
-              Unique
-            </label>
           </div>
+            <div id="word-choice">
+
+          </div>
+                  <div class="row-fluid" style="margin-top:-5px;font-size:8px;">
+                <span style="display:inline-block;margin-left: 0%;">|</span>
+                 <span style="display:inline-block;margin-left: 24%;">|</span>
+                 <span style="display:inline-block;margin-left: 23%;">|</span>
+                 <span style="display:inline-block;margin-left: 22%;">|</span>
+                 <span style="display:block;float:right;">|</span>
+          </div>
+          <div id="labels" class="clearfix"><span class="pull-left">Unique</span><span class="pull-right">Frequent</span></div>
+          <div class="clearfix"></div>
 
         </div>
      <div class="well well-small vis_item_format ">
@@ -49,6 +53,7 @@
       <div class="span10" id="wordcloud_container"></div>
     </div>
   </div>
+
 
 <script>
 
@@ -70,13 +75,16 @@ var wordCloud = {
     rawWordDict : {{ wordcloud_data|tojson|safe }},
     baseurlandquery: window.location.href,
     colorRange: ["#80E6FF", "#7575FF", "#7575FF", "#47008F"],
-    sliderRange: {'1':[1,0],'3':[0,1]},
+    sliderRange: {'1':[1,0], '2':[.75, .25], '3':[.5,.5], '4':[.25,.75], '5':[0,1]},
     width : $(window).width()*.8,
     height : $(window).height()*.95,
     pixelScale : undefined,
     fill : undefined,
     glowScale : undefined,
-    highlight_color: "rgb(255, 165, 0)",
+    renderStatus : "firstRender",
+    //browser sometimes alternates between hex and rgb so put both versions of same color
+    highlight_color: ["rgb(255, 165, 0)","#ffa500"],
+    finalWords : "",
     selected : Array(),
 
     generateWordCloudArray : function (wordDict)
@@ -88,13 +96,73 @@ var wordCloud = {
                   };
                     return a
             },
-    render : function(weight) {
+    redraw : function(val) {
+      wordCloud.render(val);
+
+          var text = d3.select("#words-in-here").selectAll("text")
+
+                        .data(wordCloud.finalWords, function(d){return d.text});
+          text.enter()
+          .append("text")
+          .style("fill", function(d, i) {return wordCloud.fill(d.origSize);})
+          .attr("transform", function(d, i) { 
+                                //split into 4 groups to come from 4 diff directions
+                                if (i < 15) {
+                                  return "translate(" + [Math.random()*wordCloud.width, -wordCloud.height/2] + ")";
+
+                                }
+                                else if (i< 30)
+                                {
+                                  return "translate(" + [Math.random()*wordCloud.width, +wordCloud.height/2] + ")";
+                                }
+                                else if ( i < 45)
+                                {
+                                  return "translate(" + [-wordCloud.width/2, +Math.random()*wordCloud.height] + ")";
+                                }
+                                else 
+                                {
+                                  return "translate(" + [wordCloud.width/2, -Math.random()*wordCloud.height] + ")";
+                                }
+                                 
+                              })
+
+          text.exit().transition().duration(1000).style("opacity", 0).remove();
+
+          text
+          .classed("wordcloud_text vis_svgtext vis_hover_pointer", true)
+          .transition()
+         .duration(4000)
+          
+          .style("font-size", function(d) {return d.size + "px"; })
+          .style("fill", function(d, i) {return wordCloud.fill(d.origSize);})
+
+          .attr("text-anchor", "middle")
+          .attr("transform", function(d) 
+                              { 
+                                  return "translate(" + [d.x, d.y] + ")";
+                              })
+          .text(function(d) { return d.text; });
+
+          wordCloud.clickEvents(text);
+
+          
+
+
+    },
+   render : function(weight) {
+
+      var numWords= _.size(wordCloud.rawWordDict),
+          meanTF = _.reduce(_.map(_.values(wordCloud.rawWordDict), function(x){return x['total_occurences']}), function(m, n){return m +n}, 0)/numWords
+          meanIDF = _.reduce(_.map(_.values(wordCloud.rawWordDict), function(x){if (x['idf']){return x['idf']} else {return 0}}), function(m, n){return m +n}, 0)/numWords
 
          var wordDict = _.map(wordCloud.rawWordDict, function(val,key) {
+
                        
-                            var freq =  val['total_occurences'];
-                            var tfidf = val['idf'] * freq;
-                            var modifiedVal = wordCloud.sliderRange[weight][0]* freq + wordCloud.sliderRange[weight][1]* tfidf;
+                            var freq =  val['total_occurences']/meanTF;
+                            var idf = val['idf'] /meanIDF
+                            var tfidf = freq * idf
+                  
+                            var modifiedVal = wordCloud.sliderRange[weight][0] * idf + wordCloud.sliderRange[weight][1]*freq;
                             // some stuff might be NaN, so do || 0
                             return [key, modifiedVal||0]
                          }
@@ -104,8 +172,9 @@ var wordCloud = {
       var wordDict = _.last(_.sortBy(wordDict, function(l){return l[1]}), 60)
 
       var wordDict = _.object(wordDict),
-          min = _.min(_.values(wordDict)),
-          max = _.max(_.values(wordDict));
+          min = _.min(_.values(wordDict)) 
+          max = _.max(_.values(wordDict)); 
+
 
       wordCloud.fill = d3.scale.log().domain([min,max]);
       wordCloud.fill.domain([0, .25, 0.5, 0.75, 1].map(wordCloud.fill.invert));
@@ -117,11 +186,12 @@ var wordCloud = {
       wordCloud.glowScale=d3.scale.log()
                   .domain([min, max]).range([1.5,4]);
 
-      var wordList=wordCloud.generateWordCloudArray(wordDict);
+      wordCloud.wordList=wordCloud.generateWordCloudArray(wordDict);
+      
 
       d3.layout.cloud()
           .size([wordCloud.width, wordCloud.height])
-          .words(wordList)
+          .words(wordCloud.wordList)
           .padding(3)
           .rotate(function() { return 0})
           .font("Arial")
@@ -129,126 +199,167 @@ var wordCloud = {
           .on("end", wordCloud.draw)
           .start();
 
+
     },
 
     draw : function (words) {
+
+            if (wordCloud.renderStatus!=="firstRender")
+             { wordCloud.finalWords = words;
+              return
+              }
       d3.select("#wordcloud_container")
         .append("svg")
         .attr('width', wordCloud.width)
         .attr('height', wordCloud.height)
         .append("g")
+        .attr('id', 'words-in-here')
         .attr("transform", function()
                 {
                     return "translate(" + wordCloud.width/2+" "+ wordCloud.height/2+")"
                 })
         .selectAll("text")
-          .data(words)
+          .data(words, function(d){return d.text;})
           .enter()
           .append("text")
           .classed("wordcloud_text vis_svgtext vis_hover_pointer", true)
           .style("font-size", function(d) {return d.size + "px"; })
           .style("fill", function(d, i) {return wordCloud.fill(d.origSize);})
           .attr("text-anchor", "middle")
+          //initializing animation position
+          .attr("transform", function(d, i) { 
+                                //split into 4 groups to come from 4 diff directions
+                                if (i < 15) {
+                                  return "translate(" + [Math.random()*wordCloud.width, -wordCloud.height/2] + ")";
+
+                                }
+                                else if (i< 30)
+                                {
+                                  return "translate(" + [Math.random()*wordCloud.width, +wordCloud.height/2] + ")";
+                                }
+                                else if ( i < 45)
+                                {
+                                  return "translate(" + [-wordCloud.width/2, +Math.random()*wordCloud.height] + ")";
+                                }
+                                else 
+                                {
+                                  return "translate(" + [wordCloud.width/2, -Math.random()*wordCloud.height] + ")";
+                                }
+                                 
+                              })
+          .text(function(d) { return d.text; })
+          .transition()
+          .duration(4000)
           .attr("transform", function(d) 
                               { 
                                   return "translate(" + [d.x, d.y] + ")";
                               })
-          .text(function(d) { return d.text; })
-          .on("click", function(d){
-              if (d.select==false)
-                  {
-                      d3.select(this)
-                        .transition()
-                        .duration(500)
-                        .style("fill", wordCloud.highlight_color)
-                        d.select=true
-                        wordCloud.selected.push(d.text)
-                      //removing current list
-                      d3.select("#list")
-                          .selectAll("li")
-                          .remove()
-                      for (var i=0; i<wordCloud.selected.length; i++)
-                            {
-                              d3.select("#list")
-                              .append("li")
-                              .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
-                            }
-                    }
-              else    
-                  {
-                    d3.select(this)
-                      .transition()
-                      .duration(500)
-                    .style("fill", function(d, i) {return wordCloud.fill(d.origSize)});
-                      d.select=false;
-                      var i=wordCloud.selected.indexOf(d.text);
-                      wordCloud.selected.splice(i, 1);
-                    d3.select("#list")
-                        .selectAll("li")
-                        .remove()
-                      for (var i=0; i<wordCloud.selected.length; i++)
-                          {
-                            d3.select("#list")
-                            .append("li")
-                            .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
-                          }
-                  }
-                d3.select("#list")
-                        .append("li")
-                        .html(function()
-                            {
-                              if (wordCloud.selected.length==0)
+          
+          var t  = d3.select("#wordcloud_container").selectAll("text");
 
-                                {
-                                  return '<li> Click on a term to add it to this list.</li>'
-                                }
-                          })
+          wordCloud.clickEvents(t);
+          wordCloud.handleX();
 
-                  d3.select("#authorfacet")
-                      .on("click", wordCloud.generateSearch)
-                      });//end on(click)
 
-            var svg= d3.select("#wordcloud_container")
-                        .select("svg")
-                          
-            var filter= svg
-                            .append("filter")
-                            .attr("id", "glow");
-
-                filter.append("feColorMatrix")
-                        .attr("type", "matrix")
-                        .attr("values", "0 0 0 1  0  0 0 0 .35 0  0 0 0 0 0  0 0 0 1   0")
-            
-              var blur=  filter.append("feGaussianBlur")
-                        .attr("result", "coloredBlur");
-
-              var feMerge=filter.append("feMerge");
-                      
-                      feMerge.append("feMergeNode")
-                            .attr("in", "coloredBlur");
-                
-                      feMerge.append("feMergeNode")
-                              .attr("in", "SourceGraphic");
-
-              var text= svg.selectAll(".wordcloud_text");
-
-                      text.on("mouseover", function(d)
-                                { 
-                                  blur
-                                    .attr("stdDeviation", wordCloud.glowScale(d.origSize))
-                                    d3.select(this)
-                                      .attr("filter", "url(#glow)")
-                                }
-                            );
-
-                      text.on("mouseout", function()
-                                {
-                                  d3.selectAll(".wordcloud_text")
-                                    .attr("filter", null)
-                                  d3.select("svg")
-                                }
-                            );
           },
+
+  clickEvents : function (text){
+      text.on("click", function(d){
+                  if (d.select==false)
+                      {
+                          d3.select(this)
+                            .transition()
+                            .duration(500)
+                            .style("fill", wordCloud.highlight_color)
+                            d.select=true
+                            wordCloud.selected.push(d.text)
+                          //removing current list
+                          d3.select("#list")
+                              .selectAll("li")
+                              .remove()
+                          for (var i=0; i<wordCloud.selected.length; i++)
+                                {
+                                  d3.select("#list")
+                                  .append("li")
+                                  .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
+                                }
+                        }
+                  else    
+                      {
+                        d3.select(this)
+                          .transition()
+                          .duration(500)
+                        .style("fill", function(d, i) {return wordCloud.fill(d.origSize)});
+                          d.select=false;
+                          var i=wordCloud.selected.indexOf(d.text);
+                          wordCloud.selected.splice(i, 1);
+                        d3.select("#list")
+                            .selectAll("li")
+                            .remove()
+                          for (var i=0; i<wordCloud.selected.length; i++)
+                              {
+                                d3.select("#list")
+                                .append("li")
+                                .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
+                              }
+                      }
+                    d3.select("#list")
+                            .append("li")
+                            .html(function()
+                                {
+                                  if (wordCloud.selected.length==0)
+
+                                    {
+                                      return '<li> Click on a term to add it to this list.</li>'
+                                    }
+                              })
+
+                      d3.select("#authorfacet")
+                          .on("click", wordCloud.generateSearch)
+                          });//end on(click)
+
+                var svg= d3.select("#wordcloud_container")
+                            .select("svg")
+                              
+                var filter= svg
+                                .append("filter")
+                                .attr("id", "glow");
+
+                    filter.append("feColorMatrix")
+                            .attr("type", "matrix")
+                            .attr("values", "0 0 0 1  0  0 0 0 .35 0  0 0 0 0 0  0 0 0 1   0")
+                
+                  var blur=  filter.append("feGaussianBlur")
+                            .attr("result", "coloredBlur");
+
+                  var feMerge=filter.append("feMerge");
+                          
+                          feMerge.append("feMergeNode")
+                                .attr("in", "coloredBlur");
+                    
+                          feMerge.append("feMergeNode")
+                                  .attr("in", "SourceGraphic");
+
+                  var text= svg.selectAll(".wordcloud_text");
+
+                          text.on("mouseover", function(d)
+                                    { 
+                                      blur
+                                        .attr("stdDeviation", wordCloud.glowScale(d.origSize))
+                                        d3.select(this)
+                                          .attr("filter", "url(#glow)")
+                                    }
+                                );
+
+                          text.on("mouseout", function()
+                                    {
+                                      d3.selectAll(".wordcloud_text")
+                                        .attr("filter", null)
+                                      d3.select("svg")
+                                    }
+                                );
+
+        },
 
     generateSearch : function()
             {
@@ -265,40 +376,53 @@ var wordCloud = {
                 finalURI.replaceQueryParam('q', newQuery);
 
                 window.location.href = decodeURIComponent(finalURI.toString());
-            }
+            },
+
+   handleX : function() {
+                    $("body").on("click", "i.icon-remove", function(e){
+                            var val = $(e.currentTarget).parent().text();
+                            var fillColor = $(".wordcloud_text:contains("+val+")").filter(function(){return $(this).text()==val}).css("fill");
+
+                            //so if there is a word present that is highlighted that matches the removed word
+                            if (_.contains(wordCloud.highlight_color, fillColor)){
+                                $(".wordcloud_text:contains("+val+")").filter(function(){return $(this).text()==val}).d3Click();
+                                console.log($(".wordcloud_text:contains("+val+")").filter(function(){return $(this).text()==val}))
+                              }
+                          
+                          else //just re-render the list
+                              {  wordCloud.selected = _.without(wordCloud.selected, val);
+                                d3.select("#list")
+                                  .selectAll("li")
+                                  .remove()
+                                for (var i=0; i<wordCloud.selected.length; i++)
+                                    {
+                                      d3.select("#list")
+                                      .append("li")
+                                      .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
+                                    }
+                              }
+
+                          });
+
+                  }
 };
 
 
-$("body").on("click", "i.icon-remove", function(e){
-          var val = $(e.currentTarget).parent().text();
 
-          if ($(".wordcloud_text:contains("+val+")").filter(function(){return $(this).text()==val}).css("fill")===wordCloud.highlight_color)
-            {  
-              $(".wordcloud_text:contains("+val+")").filter(function(){return $(this).text()==val}).d3Click();
-            }
-        
-        else //just re-render the list
-            {  wordCloud.selected = _.without(wordCloud.selected, val);
-              d3.select("#list")
-                .selectAll("li")
-                .remove()
-              for (var i=0; i<wordCloud.selected.length; i++)
-                  {
-                    d3.select("#list")
-                    .append("li")
-                    .html(wordCloud.selected[i] + "<i class= \"icon-remove\"></i>")
-                  }
-            }
-
-        });
-
-     wordCloud.render("3");
-
-    $("input[name=\"choice-radio\"]").on('click', function() {
-          $("#wordcloud_container").empty();
-          wordCloud.render($(this).val());
+    $("#word-choice").slider({
+      value:3,
+      min:1,
+      max:5,
+      step:1,
+      slide: function(event, ui){
+        wordCloud.renderStatus = 'notFirst'
+        wordCloud.redraw(ui.value.toString())
         }
-    );     
+    })
+
+         wordCloud.render("3");
+
+
 });
       
 </script>
