@@ -34,7 +34,6 @@ simplejson>=3.3.0
 testtools>=0.9.32
 unittest2>=0.5.1
 numpy
-xmlrpclib
 xlwt
 multiprocessing
 Markdown>=2.3.1
