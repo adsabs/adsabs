@@ -10,7 +10,6 @@ from multiprocessing import Manager
 from flask import current_app as app
 # methods to retrieve various types of data
 from utils import get_metrics_data
-from utils import get_mongo_data
 from utils import get_publications_from_query
 from utils import chunks
 # Get all pertinent configs
