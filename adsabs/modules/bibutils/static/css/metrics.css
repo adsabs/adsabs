@@ -5,6 +5,20 @@
 	padding:0;
 }
 
+.metrics_title{
+    font-weight:bold;
+	font-style:italic;
+	color:#1111F7;
+	letter-spacing:1pt;
+	word-spacing:2pt;
+	font-size:13px;
+	text-align:left;
+	font-family:arial, helvetica, sans-serif;
+	line-height:1;
+	border: 1px solid #D1D1D1;
+	display:inline-block
+}
+
 table.metricsval {
 	text-align:right;
 	background: #EEE;
