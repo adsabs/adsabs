@@ -1,6 +1,8 @@
 
-
-var baseUrl = 'http://localhost:5000';
+/*
+ * This test checks that all jquery/css selectors used by the adstour
+ * are present in the pages they are associated with
+ */
 
 function checkSteps() {
 	var currentPath = new Uri(window.location.href).path();
@@ -26,17 +28,17 @@ function checkSteps() {
 
 casper.test.begin("testing adstour.js steps", {
 	test: function(test) {
-		casper.start(baseUrl + "/", function() {
+		casper.start(casper.baseTestUrl + "/", function() {
 			test.assertEval(checkSteps);
 			this.fill('#one_box_search', { q: 'black holes' }, true);
 		});
 		casper.then(function() {
 			test.assertEval(checkSteps);
 		});
-		casper.thenOpen(baseUrl + "/search/classic-search/", function() {
+		casper.thenOpen(casper.baseTestUrl + "/search/classic-search/", function() {
 			test.assertEval(checkSteps);
 		});
-		casper.thenOpen(baseUrl + "/abs/2314ADS..4305...27Q/", function() {
+		casper.thenOpen(casper.baseTestUrl + "/abs/2314ADS..4305...27Q/", function() {
 			test.assertEval(checkSteps);
 		});
 	    casper.run(function() {
