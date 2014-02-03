@@ -198,6 +198,7 @@ class QueryBuilderSearch(object):
         #the facets that are not included in the form
         for facet in config.ALLOWED_FACETS_FROM_WEB_INTERFACE:
             for elem in request_values.getlist(facet):
+                if not len(elem): continue
                 #I have to distinguish between a simple facet and a complex one
                 if not (elem.startswith('(') or elem.startswith('[') or elem.startswith('-(')):
                     cur_filter = u'%s:"%s"' % (config.ALLOWED_FACETS_FROM_WEB_INTERFACE[facet], elem)
