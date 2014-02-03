@@ -153,9 +153,6 @@ def _configure_extensions(app):
     app.jinja_env.add_extension('jinja2.ext.do')
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
     
-    if config.COMPACT_JINJA_TEMPLATES:
-        app.jinja_env.add_extension('jinja2compact.Compact')
-    
     app.logger.debug("initializing solrquery extension")
     solr.init_app(app)
     solr.add_request_adapter('http://', SolrRequestAdapter())

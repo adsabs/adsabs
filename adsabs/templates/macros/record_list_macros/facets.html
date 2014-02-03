@@ -217,36 +217,35 @@
 	{% set current_page = resp.get_pagination()['current_page']%}
 	<div class="row-fluid well well-small well-facets">
 		<div class="span11 firstspan">
-			{% for elem in selected_facets %}
-				<span class="appliedFilter">
-					{% if elem[0] == 'bib_f' %}
-						Publication :
-					{% elif elem[0] == 'aut_f' %}
-						Author :
-					{% elif elem[0] == 'key_f' %}
-						Keyword :
-					{% elif elem[0] == 'year_f' %}
-						Year :
-					{% elif elem[0] == 'bibgr_f' %}
-						Bibgroup :
-					{% elif elem[0] == 'grant_f' %}
-						Grant :
-					{% elif elem[0] == 'data_f' %}
-						Data :
-					{% elif elem[0] == 'vizier_f' %}
-						Vizier :
-					{% elif elem[0] == 'db_f' %}
-						Database :
-					{% elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'notrefereed' in elem[1]) %}
+			{%- for elem in selected_facets -%}
+				<span class="appliedFilter">{%- if elem[0] == 'bib_f' -%}
+						Publication
+					{%- elif elem[0] == 'aut_f' -%}
+						Author
+					{%- elif elem[0] == 'key_f' -%}
+						Keyword
+					{%- elif elem[0] == 'year_f' -%}
+						Year
+					{%- elif elem[0] == 'bibgr_f' -%}
+						Bibgroup
+					{%- elif elem[0] == 'grant_f' -%}
+						Grant
+					{%- elif elem[0] == 'data_f' -%}
+						Data
+					{%- elif elem[0] == 'vizier_f' -%}
+						Vizier
+					{%- elif elem[0] == 'db_f' -%}
+						Database
+					{%- elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'notrefereed' in elem[1]) -%}
 						{# no string and the actual text is converted using the template filter "format_special_ads_facet_str" #}
-					{% else %}
-						{{ elem[0] }} :
-					{% endif %}
-					{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str|format_special_ads_facet_str }} 
+					{%- else -%}
+						{{ elem[0] }}
+					{%- endif -%}
+					{{ " : " + elem[1]|format_complex_ads_facet_str|format_ads_facet_str|format_special_ads_facet_str }} 
 					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" data-rel="bootstrap_tooltip" 
 					   title="remove &ldquo;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&rdquo;"><i class="icon-remove-sign"></i></a>
 				</span>
-			{% endfor %}
+			{%- endfor -%}
 		</div>
 		<div class="span1">
 			{% set base_remove_all = [request.query_string|rem_par_url('page')] %}
