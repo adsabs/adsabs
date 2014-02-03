@@ -46,4 +46,4 @@ casper.test.begin("testing adstour.js steps", {
 	    });
 
 	}
-})
+});
