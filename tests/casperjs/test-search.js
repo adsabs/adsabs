@@ -42,7 +42,7 @@ casper.test.begin("testing extra search options", {
 
 		casper.then(function() {
 			console.log(this.fetchText('.appliedFilter'));
-			test.assertExists(x('//span[@class="appliedFilter"][text()="  Database :  astronomy "]'), 'selected database filter applied')
+			test.assertExists(x('//span[@class="appliedFilter"][contains(.,"Database : astronomy")]'), 'selected database filter applied')
 		});
 		
 		casper.then(function() {

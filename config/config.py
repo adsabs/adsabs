@@ -311,7 +311,6 @@ class AppConfig(object):
     #ADSGUT
     MONGODB_SETTINGS= {'HOST': 'mongodb://user:pass@localhost/adsgut', 'DB': 'adsgut'}
     
-    COMPACT_JINJA_TEMPLATES = True
     
 try:
     from local_config import LocalConfig
