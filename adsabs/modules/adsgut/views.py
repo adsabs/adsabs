@@ -654,8 +654,10 @@ def doInviteToGroup(groupowner, groupname):
 def addMemberToPostable(g, request, fqpn):
     jsonpost=dict(request.json)
     #BUG:need fqun right now. work with nicks later
+    #print jsonpost
     fqmn=_dictp('member', jsonpost)
     changerw=_dictp('changerw', jsonpost)
+    #print "for fqpmn", fqmn, changerw
     if not changerw:
         changerw=False
     # if not g.currentuser.nick:

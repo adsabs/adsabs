@@ -390,6 +390,38 @@ class InviteUser extends Backbone.View
     adsid=@$('.txt').val()
     syncs.invite_user(adsid, @postable, changerw, cback, eback)
 
+class MakePublic extends Backbone.View
+
+  tagName: 'div'
+
+  events:
+    "click .sub" : "makePublic"
+
+  initialize: (options) ->
+    {@postable} = options
+    @content=widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public")
+
+  render: () =>
+    @$el.html(@content)
+    return this
+
+  makePublic: =>
+    loc=window.location
+    #console.log "A"
+    cback = (data) ->
+            #console.log "return data", data, loc
+            window.location=location
+            syncs.add_group('adsgut/group:public', @postable, false, cback2, eback)
+    cback2 = (data) ->
+            #console.log "return data", data, loc
+            window.location=location
+    eback = (xhr, etext) ->
+        #console.log "ERROR", etext, loc
+        #replace by a div alert from bootstrap
+        alert "Did not succeed: #{etext}"
+    #console.log("GGG")
+    syncs.make_public(@postable, cback, eback)
+
 class AddGroup extends Backbone.View
 
   tagName: 'div'
@@ -484,6 +516,7 @@ root.views =
   group_info: postable_info
   postable_inviteds: postable_inviteds
   InviteUser: InviteUser
+  MakePublic: MakePublic
   AddGroup: AddGroup
   CreatePostable: CreatePostable
 root.templates =

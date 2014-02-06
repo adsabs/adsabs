@@ -6,11 +6,11 @@
   <br/><hr/>
   <h4>Members</h4><br/>
   <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}/members"></iframe-->
-  <p>Members of this library with "read and post" access can post into this library. Only the owner can see this information for every user: you can see your own access on your "Libraries" page</p>.
+  <p>Members of this library with "read and post" access can post into this library. Only the owner can see this information for every user: you can see your own access on your "Libraries" page.</p>
   <div id="members" style="display:none"></div>
 
   {% if owner %}
-
+  <div id="makepublicform" style="display:none"></div>
   <div id="invitedform" style="display:none"></div>
    <p>
     Members of this group will be able to read items posted into the library. Additionally, if you enable the checkbox above, they will also be able to post items into this library.
@@ -39,6 +39,7 @@ $ ->
     $infodiv : $('div#info')
     $membersdiv : $('div#members')
     $invitedform : $('div#invitedform')
+    $makepublicform: $('div#makepublicform')
     $invitedsdiv : $('div#inviteds')
 
   libraryprofile.get_info(sections, config)

@@ -31,7 +31,10 @@ class PostableView extends Backbone.View
         if @ownerfqin==@memberable
             content = w.table_from_dict_partial(@username+" (owner)", rwmap(@rwmode))
         else
-            content = w.table_from_dict_partial(@username, w.single_button_label(rwmap(@rwmode), "Toggle"))
+            uname = @username
+            if @username = 'anonymouse'
+                uname = "General Public"
+            content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(@rwmode), "Toggle"))
     #dahtml= "<td>a</td><td>b</td>"
     #console.log "CONTENT", content, @rwmode, @memberable, @fqpn, @username
     @$el.html(content)
@@ -103,7 +106,9 @@ get_info = (sections, config) ->
             if config.owner
                 #console.log "gaga", config.owner
                 viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
-                
+                viewp=new views.MakePublic({postable: config.fqpn})
+                sections.$makepublicform.append(viewp.render().$el)
+                sections.$makepublicform.show()
                 $.get config.guiURL, (data) ->
                     groups=data.groups
                     view=new views.AddGroup({postable: config.fqpn, groups:groups, withcb:true} )
