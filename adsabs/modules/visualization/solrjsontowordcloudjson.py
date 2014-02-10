@@ -8,10 +8,10 @@ stemmer = PorterStemmer()
 
 sw = open(os.path.dirname(os.path.abspath(__file__)) +'/solr_stopwords.txt').read().split('\n')
 
-# so in 250 docs, token has to appear >= 6 times
-MIN_PERCENT_WORD = 0.024
-#in all wordclouds, even small ones, a  stemmed token must appear 3 or more times (so in at least 2 articles)
-MIN_OCCURENCES_OF_WORD = 3
+# so in 250 docs, token has to appear 3 times
+MIN_PERCENT_WORD = 0.012
+#in all wordclouds, even small ones, a  stemmed token must appear 2 or more times 
+MIN_OCCURENCES_OF_WORD = 2
 
 
 def list_to_dict(l):
@@ -37,7 +37,7 @@ def wc_json(solr_json):
     acr_freq_dict= {}
     # these characters indicate word boundaries 
     split_regex = re.compile(r'[\s/.]+')
-    markup_regex = re.compile(r'href=|<sub>.*?</?sub>|<sup>.*?</?sup>|^sub.?$|^.?sub$|^sup.?$|^.?sup$|\bedu\b|\bcom\b|www', re.I)
+    markup_regex = re.compile(ur'href=|<sub>.*?</?sub>|<sup>.*?</?sup>|^\W*<?/?sub>?\S?\W*$|^\W*\S?<?/?sub>?\W*$|^\W*<?/?sup>?\S\W*$|^\W*\S?<?/?sup>?\W*$|\bedu\b|\bpng\b|\bjpeg\b|\bcom\b|www|^[\d\W]+$', re.I |re.U)
 
     def process_entry(a,t): 
         # creating tokens
