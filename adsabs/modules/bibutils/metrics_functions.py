@@ -10,7 +10,6 @@ from multiprocessing import Manager
 from flask import current_app as app
 # methods to retrieve various types of data
 from utils import get_metrics_data
-from utils import get_mongo_data
 from utils import get_publications_from_query
 from utils import chunks
 # Get all pertinent configs
@@ -27,7 +26,7 @@ def sort_list_of_lists(L, index, rvrs=True):
     """
     return sorted(L, key=operator.itemgetter(index), reverse=rvrs)
 # Creation of data vectors for stats calculations
-def make_vectors(pubs,ads_data,metrics_dict):
+def make_vectors(pubs,metrics_dict):
     """
     Most of the metrics/histograms are calculated by manipulation of lists
     (e.g. sums and averages over a list of numbers). Each publication is 
@@ -46,13 +45,13 @@ def make_vectors(pubs,ads_data,metrics_dict):
     attr_list = []
     for bibcode in pubs:
         vector = [str(bibcode)]
-        vector.append(int(ads_data.get(bibcode,{}).get('refereed',False)))
+        vector.append(int(metrics_dict.get(bibcode,{}).get('refereed',False)))
         vector.append(metrics_dict.get(bibcode,{}).get('citation_num',0))
         vector.append(metrics_dict.get(bibcode,{}).get('refereed_citation_num',0))
         vector.append(metrics_dict.get(bibcode,{}).get('author_num',1))
-        vector.append(sum(ads_data.get(bibcode,{}).get('reads',[])))
-        vector.append(sum(ads_data.get(bibcode,{}).get('downloads',[])))
-        vector.append(ads_data.get(bibcode,{}).get('reads',[]))
+        vector.append(sum(metrics_dict.get(bibcode,{}).get('reads',[])))
+        vector.append(sum(metrics_dict.get(bibcode,{}).get('downloads',[])))
+        vector.append(metrics_dict.get(bibcode,{}).get('reads',[]))
         vector.append(metrics_dict.get(bibcode,{}))
         attr_list.append(vector)
     return attr_list
@@ -73,24 +72,21 @@ def get_attributes(args):
         bibcodes = get_bibcodes_from_private_library(args['libid'])
     # Split the list of bibcodes up in chunks, for parallel processing
     biblists = list(chunks(bibcodes,config.METRICS_CHUNK_SIZE))
-    # Now gather all usage data numbers from the MongoDB 'adsdata' collection,
-    # keyed on bibcode
-    ads_data = get_mongo_data(bibcodes=bibcodes)
-    missing_bibcodes = filter(lambda a: a not in ads_data.keys(), bibcodes)
-    if len(missing_bibcodes) > 0:
-        app.logger.error("Bibcodes found with missing metadata: %s" % ",".join(missing_bibcodes))
-    bibcodes = filter(lambda a: a not in missing_bibcodes, bibcodes)
-    # Get precomputed and citation data
+    # Get precomputed metrics data, key-ed on bibcode
     metrics_data = get_metrics_data(bibcodes=bibcodes)
     missing_bibcodes = filter(lambda a: a not in metrics_data.keys(), bibcodes)
     if len(missing_bibcodes) > 0:
         app.logger.error("Bibcodes found with missing metrics data: %s" % ",".join(missing_bibcodes))
     bibcodes = filter(lambda a: a not in missing_bibcodes, bibcodes)
+    bibcodes_without_authnums = map(lambda b: b['_id'],filter(lambda a: a['author_num'] == 0, metrics_data.values()))
+    if len(bibcodes_without_authnums):
+        app.logger.error("Bibcodes found with author number equal to zero: %s" % ",".join(bibcodes_without_authnums))
+    bibcodes = filter(lambda a: a not in bibcodes_without_authnums, bibcodes)
     # Get the number of citing papers
     Nciting = len(list(set(itertools.chain(*map(lambda a: a['citations'], metrics_data.values())))))
     Nciting_ref = len(list(set(itertools.chain(*map(lambda a: a['refereed_citations'], metrics_data.values())))))
     # The attribute vectors will be used to calculate the metrics
-    attr_list = make_vectors(bibcodes,ads_data,metrics_data)
+    attr_list = make_vectors(bibcodes,metrics_data)
     # We sort the entries in the attribute list on citation count, which
     # will make e.g. the calculation of 'h' trivial
     attr_list = sort_list_of_lists(attr_list,2)
