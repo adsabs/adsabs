@@ -11,7 +11,7 @@ casper.test.begin("testing basic search interaction", {
 			test.assertTitle("ADS 2.0 - index");
 			this.fill("#one_box_search", { q: "black holes" }, true);
 		});
-		casper.then(function() {
+		casper.waitForSelector('title', function() {
 			test.assertTitle("ADS 2.0 - Search Results: black holes");
 		});
 		casper.run(function() {
