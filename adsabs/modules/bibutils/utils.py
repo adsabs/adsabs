@@ -260,8 +260,9 @@ def export_metrics(data):
     style.font = fnt
     #Writing the page with the tables of statistics
     sheet = wbk.add_sheet('Papers, citations, indices')
+    sheet.write(0, 0, data['title'], style)
     #counter of rows
-    row = 0
+    row = 1
     sheet.write(row, 0, 'Papers', style)
     row += 1
     sheet.write(row, 1, 'Total')
@@ -299,9 +300,10 @@ def export_metrics(data):
         row+=1
     #Writing the page with the data for the plot #1
     sheet = wbk.add_sheet('Publications per year')
+    sheet.write(0, 0, data['title'], style)
     #I delete useless keys in the dictionary
     del paperhist['type']
-    row = 0
+    row = 1
     #I write the name of the data 
     sheet.write(row, 0, 'Publications per year', style)
     row += 1
@@ -324,9 +326,10 @@ def export_metrics(data):
         row += 1
     #Writing the page with the data for the plot #2
     sheet = wbk.add_sheet('Reads per year')
+    sheet.write(0, 0, data['title'], style)
     #I delete useless keys in the dictionary
     del readshist['type']
-    row = 0
+    row = 1
     #I write the name of the data 
     sheet.write(row, 0, 'Reads per year', style)
     row += 1
@@ -349,8 +352,9 @@ def export_metrics(data):
         row += 1
     #Writing the page with the data for the plot #3
     sheet = wbk.add_sheet('Citations per year')
+    sheet.write(0, 0, data['title'], style)
     del citshist['type']
-    row = 0
+    row = 1
     #I write the name of the data 
     sheet.write(row, 0, 'Citations per year', style)
     row += 1
@@ -394,8 +398,9 @@ def export_metrics(data):
         row += 1
     # Writing the page with the data for the plot #4
     sheet = wbk.add_sheet('Indices')
+    sheet.write(0, 0, data['title'], style)
     del series['type']
-    row = 0
+    row = 1
     # Write the name of the data 
     sheet.write(row, 0, 'Indices', style)
     row += 1

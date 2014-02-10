@@ -10,6 +10,7 @@ from flask import (Blueprint, render_template, flash, request, jsonify, g, curre
 from flask import Response
 from werkzeug.datastructures import Headers
 import os
+import time
 import simplejson as json
 from adsabs.core.form_functs import is_submitted_cust
 from config import config #the global config object
@@ -154,6 +155,7 @@ def metrics(**args):
             return response
 
     results = None
+    title   = None
     format = ''
     layout = 'YES'
     if 'bibcodes' in args:
@@ -181,6 +183,7 @@ def metrics(**args):
             try:
                 query_par = str(form.current_search_parameters.data.strip())
                 query = json.loads(query_par)['q']
+                title = "Metrics report for query: %s" % query
                 sort  = json.loads(query_par).get('sort', None)
                 bigquery_id = form.bigquery.data
                 if sort is None:
@@ -203,8 +206,11 @@ def metrics(**args):
             return render_template('metrics.html', form=form)
     if len(bibcodes) > 0:
         # we have a list of bibcodes, so start working
+        if not title:
+            title = 'Metrics report generated on %s' % time.strftime("%c")
         try:
             results = generate_metrics(bibcodes=bibcodes, fmt=format)
+            results['title'] = title
         except Exception, err:
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
             return render_template('metrics_no_results.html', include_layout=layout)
