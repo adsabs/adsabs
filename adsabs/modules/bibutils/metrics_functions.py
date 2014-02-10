@@ -78,6 +78,10 @@ def get_attributes(args):
     if len(missing_bibcodes) > 0:
         app.logger.error("Bibcodes found with missing metrics data: %s" % ",".join(missing_bibcodes))
     bibcodes = filter(lambda a: a not in missing_bibcodes, bibcodes)
+    bibcodes_without_authnums = map(lambda b: b['_id'],filter(lambda a: a['author_num'] == 0, metrics_data.values()))
+    if len(bibcodes_without_authnums):
+        app.logger.error("Bibcodes found with author number equal to zero: %s" % ",".join(bibcodes_without_authnums))
+    bibcodes = filter(lambda a: a not in bibcodes_without_authnums, bibcodes)
     # Get the number of citing papers
     Nciting = len(list(set(itertools.chain(*map(lambda a: a['citations'], metrics_data.values())))))
     Nciting_ref = len(list(set(itertools.chain(*map(lambda a: a['refereed_citations'], metrics_data.values())))))
