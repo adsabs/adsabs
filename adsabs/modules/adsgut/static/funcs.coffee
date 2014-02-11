@@ -408,17 +408,20 @@ class MakePublic extends Backbone.View
   makePublic: =>
     loc=window.location
     #console.log "A"
-    cback = (data) ->
-            #console.log "return data", data, loc
-            window.location=location
+
+    cback2 = (data) =>
+            console.log "return data cback2", data, loc
+            window.location = location
+
+    cback = (data) =>
+            console.log "return data cback", data, loc, @postable
             syncs.add_group('adsgut/group:public', @postable, false, cback2, eback)
-    cback2 = (data) ->
-            #console.log "return data", data, loc
-            window.location=location
+    
     eback = (xhr, etext) ->
         #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
         alert "Did not succeed: #{etext}"
+
     #console.log("GGG")
     syncs.make_public(@postable, cback, eback)
 

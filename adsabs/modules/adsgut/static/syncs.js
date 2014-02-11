@@ -158,6 +158,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       member: selectedgrp,
       changerw: changerw
     };
+    console.log("DATA", data);
     return send_params(url, data, cback, eback);
   };
 
@@ -168,6 +169,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       member: 'adsgut/user:anonymouse',
       changerw: false
     };
+    console.log("make public");
     return send_params(url, data, cback, eback);
   };
 

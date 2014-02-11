@@ -525,14 +525,16 @@
     };
 
     MakePublic.prototype.makePublic = function() {
-      var cback, cback2, eback, loc;
+      var cback, cback2, eback, loc,
+        _this = this;
       loc = window.location;
-      cback = function(data) {
-        window.location = location;
-        return syncs.add_group('adsgut/group:public', this.postable, false, cback2, eback);
-      };
       cback2 = function(data) {
+        console.log("return data cback2", data, loc);
         return window.location = location;
+      };
+      cback = function(data) {
+        console.log("return data cback", data, loc, _this.postable);
+        return syncs.add_group('adsgut/group:public', _this.postable, false, cback2, eback);
       };
       eback = function(xhr, etext) {
         return alert("Did not succeed: " + etext);

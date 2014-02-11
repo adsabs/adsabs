@@ -20,7 +20,7 @@ class PostableView extends Backbone.View
 
   initialize: (options) ->
     {@rwmode, @memberable, @fqpn, @owner, @username, @ownerfqin} = options
-    #console.log "PVIN", @rwmode, @memberable, @fqpn
+    console.log "PVIN", @rwmode, @memberable, @fqpn, @username
 
   render: =>
     #content = w.one_col_table_partial(@memberable)
@@ -32,11 +32,15 @@ class PostableView extends Backbone.View
             content = w.table_from_dict_partial(@username+" (owner)", rwmap(@rwmode))
         else
             uname = @username
-            if @username = 'anonymouse'
+            if @username == 'group:public'
+                uname = "All ADS Users"
+
+            if @username != 'anonymouse'
+                content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(@rwmode), "Toggle"))
+            else
                 uname = "General Public"
-            content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(@rwmode), "Toggle"))
-    #dahtml= "<td>a</td><td>b</td>"
-    #console.log "CONTENT", content, @rwmode, @memberable, @fqpn, @username
+                content = w.table_from_dict_partial(uname, rwmap(@rwmode))
+    
     @$el.html(content)
     return this
 
@@ -62,7 +66,7 @@ class PostableListView extends Backbone.View
     @ownerfqin=options.ownerfqin
 
   render: =>
-    #console.log "RENDERING", @owner, @users
+    console.log "RENDERING", @owner, @users
     #if @owner is true
     views=(new PostableView({rwmode:@users[u][1], fqpn:@fqpn, memberable:u, username:@users[u][0], owner: @owner, ownerfqin:@ownerfqin}) for u of @users)
     rendered = (v.render().el for v in views)

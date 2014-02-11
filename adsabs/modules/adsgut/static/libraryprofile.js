@@ -38,7 +38,8 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin, options;
+      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin;
+      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn, this.username);
     };
 
     PostableView.prototype.render = function() {
@@ -50,10 +51,15 @@
           content = w.table_from_dict_partial(this.username + " (owner)", rwmap(this.rwmode));
         } else {
           uname = this.username;
-          if (this.username = 'anonymouse') {
-            uname = "General Public";
+          if (this.username === 'group:public') {
+            uname = "All ADS Users";
           }
-          content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(this.rwmode), "Toggle"));
+          if (this.username !== 'anonymouse') {
+            content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(this.rwmode), "Toggle"));
+          } else {
+            uname = "General Public";
+            content = w.table_from_dict_partial(uname, rwmap(this.rwmode));
+          }
         }
       }
       this.$el.html(content);
@@ -95,6 +101,7 @@
 
     PostableListView.prototype.render = function() {
       var $widget, rendered, u, v, views;
+      console.log("RENDERING", this.owner, this.users);
       views = (function() {
         var _results;
         _results = [];
