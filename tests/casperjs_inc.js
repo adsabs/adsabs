@@ -6,3 +6,4 @@ casper.baseTestUrl = casper.cli.has("baseTestUrl")
     ? casper.cli.get("baseTestUrl")
     : "http://localhost:5000";
 
+casper.options.stepTimeout = 5000;
