@@ -25,20 +25,45 @@ from adsabs.app import create_app
 
 class AdsabsBaseTestCase(fixtures.TestWithFixtures, unittest.TestCase):
     
+    @classmethod
+    def initMongo(cls):
+        
+        if hasattr(cls, 'box'):
+            return cls.box.client()
+        
+        cls.box = mongobox.MongoBox(scripting=True, auth=True)
+        
+        tries = 3
+        # mongobox init sometimes fails so try a few times
+        while True:
+            try:
+                cls.box.start()
+                client = cls.box.client()
+                client['admin'].add_user('foo','bar')
+
+                @atexit.register
+                def cleanupMongo():
+                    try: cls.box.stop()
+                    except: pass
+        
+                return client
+
+            except OSError, e:
+                if tries > 0:
+                    print >>sys.stderr, "mongobox failed to start; retrying: %s" % str(e)
+                    tries -= 1
+                else:
+                    print >>sys.stderr, "tries exhausted. es ist kaput!"
+                    sys.exit(1)
+
     def setUp(self):
         self.maxDiff = None
-        self.box = mongobox.MongoBox(scripting=True, auth=True)
-        self.box.start()
-        self.boxclient = self.box.client()
-        self.boxclient['admin'].add_user('foo','bar')
+        
+        self.boxclient = AdsabsBaseTestCase.initMongo()
         self.boxclient['admin'].authenticate('foo','bar')
+        self.boxclient.drop_database('test')
         self.boxclient['test'].add_user('test','test')
-        
-        @atexit.register
-        def cleanupMongo():
-            try: self.box.stop()
-            except: pass
-        
+
         config.TESTING = True
         config.MONGOALCHEMY_SERVER = 'localhost'
         config.MONGOALCHEMY_PORT = self.box.port
@@ -58,17 +83,9 @@ class AdsabsBaseTestCase(fixtures.TestWithFixtures, unittest.TestCase):
         config.REDIS_ENABLE = False
         config.SECRET_KEY = 'abcd1234'
         
-        try:
-            self.app = create_app(config)
-            self.client = self.app.test_client()
-            self.insert_user = user_creator
-        except:
-            # otherwise exceptions in create_app could leave a ton of mongobox procs layting around
-            self.box.stop()
-            raise
-        
-    def tearDown(self):
-        self.box.stop()
+        self.app = create_app(config)
+        self.client = self.app.test_client()
+        self.insert_user = user_creator
         
 def user_creator(username, developer=False, dev_perms=None, level=None, user_data=None):
     from adsabs.extensions import mongodb
