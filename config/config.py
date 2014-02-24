@@ -9,6 +9,10 @@ class AppConfig(object):
     DEBUG = False
     #Flask setting for unittest
     TESTING = False
+    
+    # Show a "Down for Maintenance" page
+    DOWN_FOR_MAINTENANCE = False
+    
     #prints the template in the bottom of the page with the link to SOLR
     PRINT_DEBUG_TEMPLATE = False
     PRINT_DEBUG_TEMPLATE_PARAM = None

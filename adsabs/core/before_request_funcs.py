@@ -44,3 +44,9 @@ def configure_before_request_funcs(app):
     @app.before_request
     def conf_set_user_cookie_id():
         return set_user_cookie_id()
+    
+    @app.before_request
+    def check_for_maintenance():
+        if config.DOWN_FOR_MAINTENANCE:
+            return 'Sorry, we\'re down momentarily for a teensey bit of maintenance!', 503
+ 
