@@ -356,7 +356,7 @@ var tourSteps = {
 			    placement:'left'
 				},
 				{
-				element: "dt.recommendation", 
+				element: "div#recommendations", 
 			    title: "Suggested Articles", 
 			    content: "This list will suggest other articles with similarities in citations, usage, and topics to the current search result.",
 			    placement:'left'
