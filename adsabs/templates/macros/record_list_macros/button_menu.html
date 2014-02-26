@@ -121,16 +121,18 @@
 
 {# ###Macro to render view/export menu #}
 {% macro render_export_menu() %}
+
+
 <div class="export_view_menu dropdown pull-right">
 	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-th"></i> Export<i class="caret"></i></a>
 	<ul class="dropdown-menu">
 		<!--li class="nav-header">records (this page or selected):</li-->
-		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
-		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('BIBTEX')">in BibTeX</a></li>
-		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('AASTeX')">in AASTeX</a></li>
-		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_records_in_other_format('ENDNOTE')">in EndNote</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="export,export_requested,ads_classic" onclick="ResultListManager.export_to_ads_classic()">in ADS Classic</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="export,export_requested,bibText" onclick="ResultListManager.export_records_in_other_format('BIBTEX')">in BibTeX</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="export,export_requested,AASTeX" onclick="ResultListManager.export_records_in_other_format('AASTeX')">in AASTeX</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="export,export_requested,Endnote" onclick="ResultListManager.export_records_in_other_format('ENDNOTE')">in EndNote</a></li>
 		{% if current_user and current_user.is_authenticated() %}
-		<li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.export_to_libraries()">in Libraries</a></li>
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="export,export_requested,libraries" onclick="ResultListManager.export_to_libraries()">in Libraries</a></li>
 		{% endif %}
 	</ul>
 </div>
@@ -142,11 +144,11 @@
 	<a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-picture"></i> View<i class="caret"></i></a>
 	<ul class="dropdown-menu">
 		{# <li class="nav-header">records:</li> #}
-		<li><a tabindex="-1" class="jslinkmenu" 
+		<li><a tabindex="-1" class="jslinkmenu"  data-ga-event="visualize,fancybox_request,author_network"
 		  onclick="ResultListManager.visualize('{{ url_for('visualization.author_network') }}', 'authnetwork')">Author network</a></li>
-		<li><a tabindex="-1" class="jslinkmenu" 
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="visualize,fancybox_request,skymap"
 		  onclick="ResultListManager.visualize('{{ url_for('visualization.alladin_lite') }}', 'skymap')">Objects skymap</a></li>
-		<li><a tabindex="-1" class="jslinkmenu" 
+		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="visualize,fancybox_request,wordcloud"
 		  onclick="ResultListManager.visualize('{{ url_for('visualization.word_cloud') }}', 'wordcloud')">Word cloud</a></li>
 
 	</ul>
@@ -159,8 +161,8 @@
         <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-wrench"></i> Analyze <i class="caret"></i></a>
         <ul class="dropdown-menu">
                 <li class="nav-header">selected records:</li>
-                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.analyze('citation_helper')">Citation Helper</a></li>
-                <li><a tabindex="-1" class="jslinkmenu" name="metrics" onclick="ResultListManager.analyze('metrics')">Metrics</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" name="metrics" data-ga-event="analyze,fancybox_request,biblist:citation_helper" onclick="ResultListManager.analyze('citation_helper')">Citation Helper</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" data-ga-event="analyze,fancybox_request,biblist:metrics" name="metrics" onclick="ResultListManager.analyze('metrics')">Metrics</a></li>
         </ul>
 </div>
 {% endmacro %}
@@ -171,7 +173,7 @@
         <a class="btn dropdown-toggle" data-toggle="dropdown" ><i class="icon-wrench"></i> Analyze <i class="caret"></i></a>
         <ul class="dropdown-menu">
                 <li class="nav-header">for this abstract:</li>
-                <li><a tabindex="-1" class="jslinkmenu" onclick="ResultListManager.single_metrics()">Metrics</a></li>
+                <li><a tabindex="-1" class="jslinkmenu" data-ga-event="analyze,fancybox_request,single_bibcode:metrics" onclick="ResultListManager.single_metrics()">Metrics</a></li>
         </ul>
 </div>
 {% endmacro %}

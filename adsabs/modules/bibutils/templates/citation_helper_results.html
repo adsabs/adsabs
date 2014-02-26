@@ -26,5 +26,11 @@ These results consist of publications that cite and/or are cited by papers in th
 <div class="span9">
 <a href="{{ url_for('bibutils.citation_helper') }}">Go back</a>
 </div>
+
+<script>
+	//pinging google analytics
+	_gaq.push(['_trackEvent','analyze','fancybox_load', 'citation_helper:results']);
+</script>
+
 {% endif %}
 {% endblock %}

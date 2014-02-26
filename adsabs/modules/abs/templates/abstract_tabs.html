@@ -107,5 +107,6 @@
 {% block footer %}
     {% include 'footer.html' %}
     {{ render_classic_log_request_js(solrdoc.bibcode, curview) }}
+    {% include 'ga_click_events.html' %}
     
 {% endblock %}

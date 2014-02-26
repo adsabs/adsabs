@@ -85,6 +85,9 @@
 		</div>
 		
 		<script type="text/javascript">
+
+
+
 			var json = {{ network_data|tojson|safe }};
 			var baseurlandquery = window.location.href;
 		      
@@ -552,8 +555,16 @@
 			node.on("click", null)
 			node.on("click", nodeClick)
 				}
+
+
 		        }); // end jquery document.ready()
 			</script>
+
+	<script>
+  		//pinging google analytics
+  		_gaq.push(['_trackEvent', 'visualize', 'fancybox_load', 'author_network']);
+	</script>
+
 		</div>
 	</div>
 </div>
