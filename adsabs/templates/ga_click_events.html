@@ -2,13 +2,13 @@
 
 
 
-
-<script type="text/javascript" id="test">
+<script type="text/javascript" >
 
 	$("body").on("click", "a[data-ga-event]", function(evt){
 		var data = $(this).data("gaEvent").split(",");
-		data.unshift("_trackEvent");
-		_gaq.push(data);
+		data.unshift('send', 'event');
+		ga.apply(null, data)
+
 	});
 
 </script>

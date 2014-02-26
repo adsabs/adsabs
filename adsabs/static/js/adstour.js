@@ -42,7 +42,8 @@ var adsTour = function() {
 				$("#tour").show().on("click", function(e) {
 				adsTour.makeTour(currentPath);
 				//pinging google analytics
-				_gaq.push(['_trackEvent','ADS_tour','tour_initiated', currentPath]);
+				ga('send','event', 'tour', 'tour_initiated', currentPath)
+
 				e.preventDefault();					
 			})}
 	};

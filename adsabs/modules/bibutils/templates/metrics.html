@@ -22,9 +22,10 @@ This tool will calculate various metrics and histograms for a list of publicatio
 </form>
 </div>
 
+
 <script>
   //pinging google analytics
-  _gaq.push(['_trackEvent', 'analyze', 'fancybox_load', 'metrics:input_bibcodes']);
+  ga('send', 'event', 'analyze', 'fancybox_load', 'metrics:input_bibcodes');
 </script>
 
 {% endblock %}
