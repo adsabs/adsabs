@@ -99,3 +99,10 @@
 		Request to SOLR: {{ resp.request.url }}
 	{% endblock %}
 {% endif %}
+
+
+
+{% block footer %}
+    {% include 'ga_click_events.html' %}
+    {% include 'footer.html' %}
+{% endblock %}
