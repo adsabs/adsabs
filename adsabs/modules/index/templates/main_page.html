@@ -1,5 +1,4 @@
 {% from "macros/search_macros.html" import render_search_form with context %}
-{% from "macros/search_macros.html" import render_classic_search_form with context %}
 
 {% extends "layout.html" %}
 
@@ -17,6 +16,7 @@
 	<ul class="nav nav-tabs" >
 		<li class="active"><a href="#tab1"> Search the ADS </a></li>
 		<li id="classic-search-tab"><a href="{{ url_for('search.classic_search') }}" > Classic Search </a></li>
+		<li id="pub-vol-page-tab"><a href="{{ url_for('search.pub_vol_page') }}" > Pub/Vol/Page </a></li>
     </ul>
 	<div class="tab-content">
 		<div class="tab-pane active fade in" id="tab1">

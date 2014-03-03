@@ -1,0 +1,71 @@
+
+
+#pub-vol-page .divide {
+	min-height: 2px;
+	border-bottom: 2px solid rgba(172, 185, 205, .4);
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+}
+
+#pub-vol-page textarea{
+	max-width: 80%;
+	margin: auto;
+	min-height: 300px;
+	max-height: 500px
+}
+
+#pub-vol-page label {
+	font-weight:500;
+}
+
+#pub-vol-page button {
+	float:right;
+	margin-left: 10px
+}
+
+
+#pub-vol-page #list-of-bibs form{
+	width:100%;
+	margin:auto;
+}
+
+#pub-vol-page .buffer {
+	margin-bottom: 20px;
+	margin-top:20px;
+}
+
+#pub-query form {
+	margin-top:21px;
+}
+
+
+#pub-query .group label {
+	margin-top: 5px;
+}
+
+#pub-query .group span {
+	display:inline-block;
+	width:20%;
+}
+
+#list-of-bibs span{
+	display: inline-block;
+	width: 20%;
+	position:relative;
+	top: -140px;
+}
+
+#pub-query, #list-of-bibs {
+	border: 1px solid rgba(172, 185, 205, .4);
+	border-radius: 5px;
+	padding: 20px;
+	height: 550px;
+}
+
+.pub-query-bottom-reposition {
+	margin-top:120px;
+
+
+.ui-autocomplete-loading { 
+	background:url('spiffygif_20x20.gif') no-repeat right center; 
+}

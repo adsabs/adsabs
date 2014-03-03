@@ -123,6 +123,175 @@
 {% endmacro %}
 
 
+{# ###### Macro for pub/vol/page ###### #}
+
+{% macro render_pub_vol_page() %}
+<div class="container" id="pub-vol-page">
+	<div class="row">
+		<div class="span6">
+			<div id="pub-query">
+				<h4 class="divide">Publication Query</h4>
+				<form id="pub-form" method="get" action="{{ url_for("search.search") }}">
+					<p> <em>Find articles from journal references by year, journal, volume, and/or page. Each of the fields is optional. The query will return all references that match the input parameters.
+					</em>
+				</p>
+				<div>
+					<div class="group">
+						<label for="pub" > <span> Publication: </span>
+							<input class="input-xlarge" type="text" id="bib-name" placeholder="full name or bibstem">
+							<input type="hidden" name="q">
+						</label>
+					</div>
+					<div class="group">
+						<label > <span> Year: </span>
+							<input  class="input-mini" type="text" id="pub-year" placeholder="year">
+						</label>
+					</div>
+					<div class="group">
+						<label > <span> Volume: </span>
+							<input  class="input-mini" type="text" id="pub-volume" placeholder="volume">
+						</label>
+					</div>
+					<div class="group">
+						<label for="page"> <span> Page: </span>
+							<input  class="input-mini" type="text" id="pub-page" placeholder="page">
+						</label>
+					</div>
+				</div>
+				<div class="pub-query-bottom-reposition ">
+				<div class="buffer">
+					Retrieve 
+					<input type="text" name="nr" class=" span1" placeholder="200" value="200">
+					abstracts.
+				</div>
+				<button type="submit" class="btn btn-info">Submit</button>
+				<button type="reset" class="btn">Clear form</button>
+			</div>
+
+
+			</form>	
+		</div>
+
+		<script>
+		$("#pub-query form").submit(function(e){
+			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:\"" + $("#bib-name").val() + "\" ") : "")
+												+ ($("#pub-year").val()? ("year:" + $("#pub-year").val() + " ") : "")
+												+ ($("#pub-volume").val()? ("volume:\"" +  $("#pub-volume").val() +"\"") : "")
+												+ ($("#pub-page").val()? ("page:\"" +  $("#pub-page").val() +"\"") : "")
+											 )
+			});
+
+		var auto = (function(){
+
+				split = function( val ) {
+				      return val.split( /,\s*/ );
+				    };
+
+				extractLast = function( term ) {
+				      return split( term ).pop();
+				    };
+
+				return {
+
+					initiatePubAutocomplete : function () {
+						$("#bib-name")
+						.bind( "keydown", function( event ) {
+						if ( event.keyCode === $.ui.keyCode.TAB &&
+						    $( this ).data( "ui-autocomplete" ).menu.active ) {
+						  event.preventDefault();
+							}
+						})
+						.autocomplete({
+							source: function( request, response ) {
+								$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
+							    term: extractLast( request.term )
+							  }, response );
+							},
+
+							search: function() {
+							  // custom minLength
+							  var term = extractLast( this.value );
+							  if ( term.length < 2 ) {
+							    return false;
+							  }
+							},
+							focus: function() {
+							  // prevent value inserted on focus
+							  return false;
+							},
+							select: function( event, ui ) {
+							  var terms = split( this.value );
+							  // remove the current input
+							  terms.pop();
+							  // add the selected item
+							  terms.push( ui.item.value );
+							  // add placeholder to get the comma-and-space at the end
+							  terms.push( "" );
+							  this.value = terms.join( ", " );
+
+							  return false;
+								}
+						});
+					}
+				}
+
+			})();
+
+			auto.initiatePubAutocomplete();
+
+		</script>
+	</div>
+
+	<div class="span6">
+		<div id="list-of-bibs">
+			<h4 class="divide">List of Bibcodes</h4>
+
+			<form method="post" action="{{ url_for("search.search") }}">
+				<p> <em> Enter Bibcode
+					(e.g. 1989ApJ...342L..71R)
+					or complete DOI
+					(one per line)
+				</em>
+			</p>
+			<label> 
+				<span> Bibcodes: </span>
+				<textarea id="raw-bibs"></textarea>
+				<input type="hidden" name="q">
+
+			</label>
+			<div class="buffer">
+
+				Retrieve 
+				<input type="text" name="nr" class="span1" value="200" placeholder="200" >
+				abstracts.
+			</div>
+
+			
+			<button type="submit" class="btn btn-info">Submit</button>
+			<button type="reset" class="btn">Clear form</button>
+
+
+		</form>
+
+	</div>
+</div>
+</div>
+		<script>
+
+		$("#list-of-bibs form").submit(function(e){
+			var b = $("#raw-bibs").val();
+			b= b.match(/(\r)?.{9,}(\r)?/g);
+			b = _.map(b, function(m){return  m.trim()})
+			joined_b = b.join(' OR ');
+			$("#list-of-bibs input[name=q]").val("bibcode:(" + joined_b + ")");
+
+			})
+		</script>
+</div>
+
+{% endmacro %} 
+
+
 {# ###### Macro for the classic search form ###### #}
 
 {% macro render_classic_search_form() %}
