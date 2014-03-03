@@ -71,6 +71,7 @@ class MetricsDataHarvester(Process):
                 break
             try:
                 doc = adsdata.get_metrics_data(bibcode, manipulate=False)
+                doc['author_num'] = max(doc['author_num'],1)
                 self.result_queue.put(doc)
             except MongoQueryError, e:
                 app.logger.error("Mongo metrics data query for %s blew up (%s)" % (bibcode,e))
@@ -105,12 +106,25 @@ def get_metrics_data(**args):
     metrics_data_dict = {}
     while num_jobs:
         data = results.get()
+        # First remove self-citations for tori data
+        try:
+            rn_citations = remove_self_citations(bibcodes,data)
+            data['rn_citations'] = rn_citations
+        except:
+            pass
         try:
             metrics_data_dict[data['_id']] = data
         except:
             pass
         num_jobs -= 1
     return metrics_data_dict
+
+def remove_self_citations(biblist,datadict):
+    # Remove all the entries in "datadict['rn_citation_data']" where the bibcode is
+    # in the supplied list of bibcodes
+    result = filter(lambda a: a['bibcode'] not in biblist, datadict['rn_citation_data'])
+    # Now we can aggregate the individual contributions to the overall normalized count
+    return sum(map(lambda a: a['ref_norm'], result))
 
 def get_meta_data(**args):
     """
