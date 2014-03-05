@@ -146,6 +146,8 @@
 		{# <li class="nav-header">records:</li> #}
 		<li><a tabindex="-1" class="jslinkmenu"  data-ga-event="visualize,fancybox_request,author_network"
 		  onclick="ResultListManager.visualize('{{ url_for('visualization.author_network') }}', 'authnetwork')">Author network</a></li>
+  		<li><a tabindex="-1" class="jslinkmenu"  data-ga-event="visualize,fancybox_request,paper_network"
+  		  onclick="ResultListManager.visualize('{{ url_for('visualization.paper_network') }}', 'papernetwork')">Paper network</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="visualize,fancybox_request,skymap"
 		  onclick="ResultListManager.visualize('{{ url_for('visualization.alladin_lite') }}', 'skymap')">Objects skymap</a></li>
 		<li><a tabindex="-1" class="jslinkmenu" data-ga-event="visualize,fancybox_request,wordcloud"
