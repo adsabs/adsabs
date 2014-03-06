@@ -38,14 +38,20 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin;
-      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn, this.username);
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin, options;
     };
 
     PostableView.prototype.render = function() {
       var content, uname;
       if (!this.owner) {
-        content = w.table_from_dict_partial(this.username, "Only owner can see this.");
+        uname = this.username;
+        if (this.username === 'group:public') {
+          uname = "All ADS Users";
+        }
+        if (this.username === 'anonymouse') {
+          uname = "General Public";
+        }
+        content = w.table_from_dict_partial(uname, "Only owner can see this.");
       } else {
         if (this.ownerfqin === this.memberable) {
           content = w.table_from_dict_partial(this.username + " (owner)", rwmap(this.rwmode));
@@ -101,7 +107,6 @@
 
     PostableListView.prototype.render = function() {
       var $widget, rendered, u, v, views;
-      console.log("RENDERING", this.owner, this.users);
       views = (function() {
         var _results;
         _results = [];
@@ -175,7 +180,8 @@
             withcb: true
           });
           viewp = new views.MakePublic({
-            postable: config.fqpn
+            postable: config.fqpn,
+            users: data.users
           });
           sections.$makepublicform.append(viewp.render().$el);
           sections.$makepublicform.show();

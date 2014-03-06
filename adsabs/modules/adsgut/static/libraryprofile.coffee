@@ -20,13 +20,18 @@ class PostableView extends Backbone.View
 
   initialize: (options) ->
     {@rwmode, @memberable, @fqpn, @owner, @username, @ownerfqin} = options
-    console.log "PVIN", @rwmode, @memberable, @fqpn, @username
+    #console.log "PVIN", @rwmode, @memberable, @fqpn, @username
 
   render: =>
     #content = w.one_col_table_partial(@memberable)
     #console.log "RWMODE", @rwmode
     if not @owner
-        content = w.table_from_dict_partial(@username, "Only owner can see this.")
+        uname = @username
+        if @username == 'group:public'
+            uname = "All ADS Users"
+        if @username == 'anonymouse'    
+            uname = "General Public"
+        content = w.table_from_dict_partial(uname, "Only owner can see this.")
     else
         if @ownerfqin==@memberable
             content = w.table_from_dict_partial(@username+" (owner)", rwmap(@rwmode))
@@ -66,7 +71,7 @@ class PostableListView extends Backbone.View
     @ownerfqin=options.ownerfqin
 
   render: =>
-    console.log "RENDERING", @owner, @users
+    #console.log "RENDERING", @owner, @users
     #if @owner is true
     views=(new PostableView({rwmode:@users[u][1], fqpn:@fqpn, memberable:u, username:@users[u][0], owner: @owner, ownerfqin:@ownerfqin}) for u of @users)
     rendered = (v.render().el for v in views)
@@ -110,7 +115,7 @@ get_info = (sections, config) ->
             if config.owner
                 #console.log "gaga", config.owner
                 viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
-                viewp=new views.MakePublic({postable: config.fqpn})
+                viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
                 sections.$makepublicform.append(viewp.render().$el)
                 sections.$makepublicform.show()
                 $.get config.guiURL, (data) ->

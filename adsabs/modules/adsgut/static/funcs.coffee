@@ -296,7 +296,7 @@ postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="fil
   if description is ""
     description = "not provided"
   if mode is "filter"
-    modetext = "Items"
+    modetext = "Link"
   else if mode is "profile"
     modetext = "Info"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
@@ -319,7 +319,7 @@ postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="fil
 
 postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="profile") ->
   if mode is "filter"
-    modetext = "Items"
+    modetext = "Link"
   else if mode is "profile"
     modetext = "Info/Admin"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
@@ -398,8 +398,17 @@ class MakePublic extends Backbone.View
     "click .sub" : "makePublic"
 
   initialize: (options) ->
-    {@postable} = options
-    @content=widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public")
+    {@postable, @users} = options
+    @ispublic=false
+    if @users['adsgut/group:public']?
+      @ispublic=true
+
+    if @ispublic
+      #console.log "POSTABLE", @postable
+      url= "#{prefix}/postable/#{@postable}/filter/html"
+      @content="<p><a class='btn btn-info' href='#{url}'>PUBLIC LINK</a></p>"
+    else
+      @content=widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public")
 
   render: () =>
     @$el.html(@content)
@@ -410,11 +419,11 @@ class MakePublic extends Backbone.View
     #console.log "A"
 
     cback2 = (data) =>
-            console.log "return data cback2", data, loc
+            #console.log "return data cback2", data, loc
             window.location = location
 
     cback = (data) =>
-            console.log "return data cback", data, loc, @postable
+            #console.log "return data cback", data, loc, @postable
             syncs.add_group('adsgut/group:public', @postable, false, cback2, eback)
     
     eback = (xhr, etext) ->

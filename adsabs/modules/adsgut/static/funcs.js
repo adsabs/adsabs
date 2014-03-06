@@ -375,7 +375,7 @@
       description = "not provided";
     }
     if (mode === "filter") {
-      modetext = "Items";
+      modetext = "Link";
     } else if (mode === "profile") {
       modetext = "Info";
     }
@@ -406,7 +406,7 @@
       mode = "profile";
     }
     if (mode === "filter") {
-      modetext = "Items";
+      modetext = "Link";
     } else if (mode === "profile") {
       modetext = "Info/Admin";
     }
@@ -515,8 +515,18 @@
     };
 
     MakePublic.prototype.initialize = function(options) {
-      this.postable = options.postable;
-      return this.content = widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public");
+      var url;
+      this.postable = options.postable, this.users = options.users;
+      this.ispublic = false;
+      if (this.users['adsgut/group:public'] != null) {
+        this.ispublic = true;
+      }
+      if (this.ispublic) {
+        url = "" + prefix + "/postable/" + this.postable + "/filter/html";
+        return this.content = "<p><a class='btn btn-info' href='" + url + "'>PUBLIC LINK</a></p>";
+      } else {
+        return this.content = widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public");
+      }
     };
 
     MakePublic.prototype.render = function() {
@@ -529,11 +539,9 @@
         _this = this;
       loc = window.location;
       cback2 = function(data) {
-        console.log("return data cback2", data, loc);
         return window.location = location;
       };
       cback = function(data) {
-        console.log("return data cback", data, loc, _this.postable);
         return syncs.add_group('adsgut/group:public', _this.postable, false, cback2, eback);
       };
       eback = function(xhr, etext) {
