@@ -492,6 +492,7 @@ div.absview div.row-fluid label {
 
 /* Visualization CSS*/
 
+
 .vis_center {
     display: block;
     margin: 0px auto;
@@ -531,14 +532,22 @@ div.absview div.row-fluid label {
 
 
 .vis_link {
-	stroke: rgba(0, 209, 157, 1);
-	stroke-opacity:.10;
+
+	stroke: rgba(164, 152, 225, 1);
+	stroke-opacity:.2;
 }
+
 
 .paper-network-link {
 
 	stroke: rgba(122, 255, 251, 1);
 	stroke-opacity:.1;
+
+}
+
+.paper-network-link:hover {
+
+		cursor: pointer;
 
 }
 
@@ -575,6 +584,12 @@ overflow:auto;
 position: relative;
 }
 
+.zoom-panel {
+	position:fixed;
+	right:6%;
+	top:5%;
+}
+
 .vis_btn {
 	font-size: 12px;
 }
@@ -583,8 +598,10 @@ position: relative;
  position: absolute;
 max-width: 200px;
 min-width: 50px;
+font-size: 12px;
 height: auto; 
-padding: 10px;
+padding: 5px;
+line-height: 13px;
  background-color: white;
   -webkit-border-radius: 4px;
    -moz-border-radius: 4px;

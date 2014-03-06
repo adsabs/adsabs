@@ -2,7 +2,7 @@
     <div class="vis_body">
         <div class="container-fluid">
             <div class="row-fluid">
-                <div class="span2" id="controlpanel"> 
+                <div class="span2" id="vis-control-panel"> 
 
                     <div class="dropdown">
                         <a class="btn dropdown-toggle vis_item_format btn-block vis_btn" data-toggle="dropdown" href="#">
@@ -26,6 +26,8 @@
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
+                                If your network is set to "rearrange", but you want to zoom in, click "explore graph."
+                                If you search for a paper and it isn't visible, you might have filtered it out. Try moving the slider back to the left.
                                 <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
                                 <li> <strong>Filter</strong> your graph to show the most essential papers by moving the slider. </li>
                                     <li><strong>Search </strong> for the name of an paper in the search box to find the paper.
@@ -76,7 +78,7 @@
                         </div>
 
                         <div class="span10" id="chart">
-                            <div class="zoom-panel well well-small" style="position:absolute;right:2%;top:3%;">
+                            <div class="zoom-panel well well-small">
                                 <p> Zoom In and Out</p>
                                 <div style="width:30px;margin:auto">
                                     <button class="btn" style="display:block;margin-bottom:4px;" id = "zoom-in"><i class="icon-plus"></i></button>
@@ -87,7 +89,7 @@
 
 <script type="text/javascript">
 
-        var authNet = (function(){
+        var paperNet = (function(){
 
             var json = {{ network_data|tojson|safe }};
             var numNodes;
@@ -103,7 +105,7 @@
             var nodeTitles= [];
 
             for (var i=0; i<json.nodes.length; i++) {
-                nodeTitles.push(json.nodes[i]['title']+ " (bibcode: "+ json.nodes[i]["nodeName"] +")" );
+                nodeTitles.push(json.nodes[i]['title']+ "; " +json.nodes[i]["first_author"] +"; "+ " (bibcode: "+ json.nodes[i]["nodeName"] +")" );
             }
 
             function findValues(listOfDicts, value){
@@ -123,7 +125,8 @@
             //declaring the variables here so that multiple methods have access to them
             var force, svg, g1, g, node, link, z;
 
-            initial = true;
+            var initial = true;
+            var animate = true;
 
             function redraw() {
                 g.attr("transform",
@@ -132,10 +135,6 @@
             };
 
             var nodeDrag, lnodes;
-
-            var animate = true;
-
-            var timer = 0;
 
             var highlightColor = "orange";
     
@@ -320,24 +319,29 @@
                         $("#vis-tooltip")
                         .offset(pos);
 
-                        d3.select("#vis-tooltip").html(d1.nodeName + "; "+ d1.first_author + "; "+  d1.title + "; "+  d1.year);
+                        d3.select("#vis-tooltip").html("<b>" + d1.nodeName + "</b>; "+ d1.first_author + "; "+  d1.title + "");
 
-                        //remember, d.index is the index before resort
+                        d3.select(this).classed("group-highlight", true)
+
                         for (var ji=0; ji<json.links.length; ji++)
-                            { 
-                                if(json.links[ji]['source']['index']==d1.index || json.links[ji]['target']['index']==d1.index )
+                            {   
+                                if(json.links[ji]['source']['index']==d1.index)
                                       {
                                         var partner=json.links[ji]["target"];
-                                        node.each(function(d2, i){
-                                            if (d2.nodeName==partner.nodeName)
-                                            {
-                                               d3.select(this).classed("group-highlight", true)
-                                            }
-                                        })
-                                      }
+                                        node.filter(function(d){return d ===partner}).classed("group-highlight", true)
+
+
+                                        }
+                                else if (json.links[ji]['target']['index']==d1.index)
+                                      {
+                                        var partner=json.links[ji]["source"];
+                                        node.filter(function(d){return d ===partner}).classed("group-highlight", true)
+
+
+                                        }
+
                                      
                             }
-
                     })
                     .on("mouseout", function(){
                         $("#vis-tooltip").hide();
@@ -445,10 +449,8 @@
                         if (ticks > maxTicks && initial === true )
                         {   
 
-                            force.stop();
-                            animate = false;
-                            $("#freezemode").addClass("btn-primary");
-                            $("#animatedmode").removeClass("btn-primary");
+                            that.endAnimate();
+
                             initial= false;
                         }
 
@@ -525,13 +527,31 @@
                             that.tick();
                             if (animate === true)
                             {
-                                force.resume();
+                                that.startAnimate();
                             }
                         };
 
                         node.call(nodeDrag);
 
                     },
+
+
+                    startAnimate : function(){
+                        force.start();
+                        animate = true;
+                        $("#animatedmode").addClass("btn-primary");
+                        $("#freezemode").removeClass("btn-primary");
+
+                    },
+
+                    endAnimate : function(){
+                        force.stop();
+                        animate = false;
+                        $("#animatedmode").removeClass("btn-primary");
+                        $("#freezemode").addClass("btn-primary");
+
+                    },
+
 
                     toggleOptions : function() {
 
@@ -547,22 +567,21 @@
                         //only making changes if it wasn't already default
 
                         if (!$t.hasClass("btn-primary")){
-                            $t.addClass("btn-primary")
-                            $o.removeClass("btn-primary");
 
                             if (cat === 'freeze-animate'){
 
                                 if ($t.attr("id")==="animatedmode") {
-                                    force.start();
-                                    animate = true;
+                                    that.startAnimate();
                                 }
                                 else {
-                                    force.stop();
-                                    animate = false;
+                                    that.endAnimate();
                                 }
                             }
 
                             else if ( cat === 'single-group'){
+
+                                $t.addClass("btn-primary")
+                                $o.removeClass("btn-primary");
 
                                 if ($t.text()==="single") {
                                     that.endMultiSelect();
@@ -575,6 +594,9 @@
                             else if (cat === "explore-rearrange")
 
                             {
+                                   $t.addClass("btn-primary")
+                                    $o.removeClass("btn-primary");
+
                                 if ($t.attr("id")==="explore") {
 
                                     z.scale(currentScale);
@@ -639,7 +661,7 @@
                             }//end else for multiple selected papers
                     
                             var finalURI= new Uri(baseurlandquery);
-                           finalURI.setQuery("q=" +decodeURIComponent(finalURI.getQueryParamValue("q"))+ " bibcode:("+ encodeURIComponent(querystring)+")")
+                           finalURI.setQuery("q=" +decodeURIComponent(finalURI.getQueryParamValue("q"))+ " bibcode:"+ encodeURIComponent(querystring)+"")
 
                             window.location.href = decodeURIComponent(finalURI.toString());
                           },
@@ -746,18 +768,18 @@
 
         })() //end module
 
-    // $(document).ready(function(){
+    $(document).ready(function(){
 
-        authNet.check(function(){
-        authNet.initialize(70, 1, -900);
-        authNet.start(30);
-        authNet.toggleOptions();
+        paperNet.check(function(){
+        paperNet.initialize(70, 1, -900);
+        paperNet.start(30);
+        paperNet.toggleOptions();
 
-        authNet.nodeSearch("#findpaper");
-        authNet.slideFilter();
+        paperNet.nodeSearch("#findpaper");
+        paperNet.slideFilter();
         })
         
-    // });
+    });
 
     </script>
 
