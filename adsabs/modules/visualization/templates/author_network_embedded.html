@@ -395,24 +395,29 @@
                 //joins the svgs with the force layout
                 start : function(maxTicks) {
                     var that = this;
+                    var zoomDict = {1: .4, 2: .6, 3: .7, 4: .8};
 
-                    if (numNodes > 400)
-                    {
-                        var oldscale = z.scale();
-                        var scale = z.scale() -.5;
+                    var subtractZoom = .2;
+                    var snn = numNodes.toString();
 
-                        var x = z.translate()[0], 
-                            y = z.translate()[1], 
-                            translateX= -scale*((w/2-x)/oldscale)+w/2,
-                            translateY= -scale*((h/2-y)/oldscale)+h/2;
-
-                            z.scale(scale);
-                            z.translate([translateX, translateY]);
-
-                            d3.select(g[0][0])
-                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
-
+                    if (snn.length > 3)
+                    { 
+                       subtractZoom =  zoomDict[snn[0]]
                     }
+
+                    var oldscale = z.scale();
+                    var scale = z.scale() - subtractZoom;
+
+                    var x = z.translate()[0], 
+                        y = z.translate()[1], 
+                        translateX= -scale*((w/2-x)/oldscale)+w/2,
+                        translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                        z.scale(scale);
+                        z.translate([translateX, translateY]);
+
+                        d3.select(g[0][0])
+                        .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
 
                 //customizing filter level
                 if (numLinks > 3000) {
@@ -424,12 +429,6 @@
                     initSliderLevel = sliderLevel
                 
                 }
-           
-                    // nodes initiated in center (this seems to produce better rendering)
-                    node.forEach(function(d, i) {
-                        d.x = w/2;
-                        d.y = h/2;
-                    });
 
                     force
                     .nodes(json.nodes)
@@ -438,21 +437,49 @@
 
                     var ticks = 0;
 
-                    force.on("tick", function(t) { 
+                    //hiding first 2 ticks
+                    if  (numNodes + numLinks > 5000)
+                    {   var o = false;
+                        node.style("opacity", 0)
+                        force.on("tick", function(t){
+                                ticks ++
+                                if (ticks > 1 && (ticks % 2 === 0))
+                                {   if (o === false) {
+                                        node.style("opacity", 1);
+                                        o = true;
+                                    }
+
+                                    that.tick(t); 
+
+                                    //so it won't go past 31 ticks
+                                    if (ticks > maxTicks && initial === true )
+                                        {   
+                                            that.endAnimate();
+                                            initial= false;
+                                        } 
+                                }
+
+                        })
+                    }
+
+                    else {
+
+                        force.on("tick", function(t) { 
                         ticks++;
                         that.tick(t);
 
-                        if (ticks > maxTicks && initial === true)
-                        {
-                            that.endAnimate();
+                        //so it won't go past 31 ticks
+                        if (ticks > maxTicks && initial === true )
+                            {   
 
-                            initial= false;
-                        }
+                                that.endAnimate();
 
-                    });
+                                initial= false;
+                            }
+                        })
+                    }
 
                 $("#filter-slider").slider('value', initSliderLevel);
-
 
                 },
 
@@ -723,6 +750,8 @@
                                         }
                                         });
 
+                                    shownNodes = _.uniq(shownNodes);
+
                                     link.each(function(d){
                                         if (_.contains(shownNodes, d.source.index) && _.contains(shownNodes, d.target.index))
                                         {
@@ -749,7 +778,7 @@
         authNet.initialize(35, 1, -500);
         authNet.slideFilter();
 
-        authNet.start(30);
+        authNet.start(40);
         authNet.toggleOptions();
 
         authNet.nodeSearch("#findauthor");

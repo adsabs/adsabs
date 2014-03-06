@@ -11,11 +11,8 @@
                         </a>
                         <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
                             <li>This visualization uses a simulation of physical forces to
-                                illustrate paper networks within ADS search results. 
-                                Paper nodes repel one another while links between papers
-                                bind nodes together.<br/></br/>
-                                The width of lines between papers signals number of references the two papers had in common
-                                , while the font size of bibcodes indicates the number of citations each paper received.<br/><br/>
+                                illustrate citation co-occurences within ADS search results.<br/></br/>
+                                The width and opacity of lines between papers signals  the coupling strength between two papers (a function of the number of references the papers have in common as well as other controlling factors), while the font size of bibcodes indicates the number of citations each paper node received.<br/><br/>
                                 Any paper in your results that had no references in common with other papers does not appear here.</li> 
                             </ul>
                         </div> 
@@ -57,7 +54,7 @@
                                 </div>
 
                                 <div class="well well-small vis_item_format" >
-                                    Filter by Citations
+                                    Filter by Link Strength
                                     <div id="filter-slider">
                                     </div>
                                     <small> (Initial view might be filtered)</small>
@@ -94,9 +91,8 @@
         var paperNet = (function(){
 
             var json = {{ network_data|tojson|safe }};
-            var numNodes,
-            numLinks = json.links.length;
-
+            var numNodes;
+            var numLinks = json.links.length;
 
             var baseurlandquery = window.location.href;
 
@@ -123,8 +119,9 @@
             var nodeWeights=findValues(json.nodes, "nodeWeight"),
             linkValues=findValues(json.links, "value");
 
-            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,14]), 
-            lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.4, 2]);
+            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,6]), 
+            lineOpacityScale =d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, .75]),
+            lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, 1.5]);
 
             //declaring the variables here so that multiple methods have access to them
             var force, svg, g1, g, node, link, z;
@@ -142,7 +139,6 @@
             var nodeDrag, lnodes;
 
             var highlightColor = "orange";
-
 
             return {
 
@@ -175,7 +171,6 @@
 
                     var that = this;
                     $("#paperfacet").on("click", that.generateSearch);
-
 
                     force = d3.layout.force()
                     .size([w, h])
@@ -274,6 +269,9 @@
                     .style("stroke-width", function(d){
                         return lineScale(d.value)
                     })
+                    .style("stroke-opacity", function(d){
+                        return lineOpacityScale(d.value)
+                    })
                     .on("mouseover", function(d){
 
                         $("#vis-tooltip").show();
@@ -291,8 +289,11 @@
 
                         $("#vis-tooltip").html("References in common:" + "<ul>" + ht.join(" ")+"</ul>");
                     })
-                    .on("mouseout", function(){$("#vis-tooltip").hide()});
+                    .on("mouseout", function(){$("#vis-tooltip").hide()})
+                    .sort(function(a,b){
+                        return a.value - b.value
 
+                        });
 
                     //defining nodes
                     node = g.selectAll(".node")
@@ -335,17 +336,13 @@
                                         var partner=json.links[ji]["target"];
                                         node.filter(function(d){return d ===partner}).classed("group-highlight", true)
 
-
                                         }
                                 else if (json.links[ji]['target']['index']==d1.index)
                                       {
                                         var partner=json.links[ji]["source"];
                                         node.filter(function(d){return d ===partner}).classed("group-highlight", true)
 
-
-                                        }
-
-                                     
+                                        }                                  
                             }
                     })
                     .on("mouseout", function(){
@@ -357,25 +354,19 @@
                     })
                     .sort(function(a,b){
                         return a.nodeWeight - b.nodeWeight
-
                         })
 
                 },
 
                 tick : function(){
 
-                    link.attr("x1", function(d) { return d.source.x; })
-                    .attr("y1", function(d) { return d.source.y; })
-                    .attr("x2", function(d) { return d.target.x; })
-                    .attr("y2", function(d) { return d.target.y; });
-
-                    // // bounding box
-                    //                   var r=6;
-                    //                 node.attr("x", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
-                    //                     .attr("y", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); }); 
+                    link.attr("x1", function(d) { return d.source.x })
+                    .attr("y1", function(d) { return d.source.y })
+                    .attr("x2", function(d) { return d.target.x})
+                    .attr("y2", function(d) { return d.target.y});
 
                     node.attr("x", function(d) { return d.x })
-                    .attr("y", function(d) { return d.y });
+                        .attr("y", function(d) { return d.y }); 
                 },
 
                 nodeClick : function(d) {
@@ -464,12 +455,6 @@
                 
                 }
 
-                    // //randomly initiate positions of nodes
-                    node.forEach(function(d, i) {
-                        d.x = w/2;
-                        d.y = h/2;
-                    });
-
                     force
                     .nodes(json.nodes)
                     .links(json.links)
@@ -477,20 +462,48 @@
 
                     var ticks = 0;
 
-                    force.on("tick", function(t) { 
+                    //hiding first 2 ticks
+                    if  (numNodes + numLinks > 5000)
+                    {   var o = false;
+                        node.style("opacity", 0)
+                        force.on("tick", function(t){
+                                ticks ++
+                                if (ticks > 1 && (ticks % 2 === 0))
+                                {   if (o === false) {
+                                        node.style("opacity", 1);
+                                        o = true;
+                                    }
+
+                                    that.tick(t); 
+
+                                    //so it won't go past 31 ticks
+                                    if (ticks > maxTicks && initial === true )
+                                        {   
+                                            that.endAnimate();
+                                            initial= false;
+                                        } 
+                                }
+
+                        })
+                    }
+
+                    else {
+
+                        force.on("tick", function(t) { 
                         ticks++;
                         that.tick(t);
 
                         //so it won't go past 31 ticks
                         if (ticks > maxTicks && initial === true )
-                        {   
+                            {   
 
-                            that.endAnimate();
+                                that.endAnimate();
 
-                            initial= false;
-                        }
+                                initial= false;
+                            }
+                        })
+                    }
 
-                    });
 
                     $("#filter-slider").slider('value', initSliderLevel);
                 },
@@ -548,11 +561,8 @@
                                 that.startAnimate();
                             }
                         };
-
                         node.call(nodeDrag);
-
                     },
-
 
                     startAnimate : function(){
                         force.start();
@@ -745,45 +755,41 @@
                             step:1,
                             change: function(event, ui){
                                 
-                                var r = (ui.value == 0) ? 0: numNodes % 10;
-                                var b = Math.floor(numNodes/10);
+                                var r = (ui.value == 0) ? 0: numLinks % 10;
+                                var b = Math.floor(numLinks/10);
 
                                 var shownNodes = [];
 
-                                //nodes are already sorted by weight upon initialization
-
-                                node.each(function(d, i){
-                                    var nodeIndex = i;
-                                        if  (i> r+b*ui.value) {
+                                //links are sorted by value
+                                link.each(function(d,i){
+                                    var linkIndex = i;
+                                        if  (i>= r+b*ui.value) {
                                             $(this).show();     
-                                            shownNodes.push(d.index)
-
+                                            shownNodes.push(d.source, d.target)
                                         }
 
                                         else {
                                             $(this).hide();
                                         }
-                                        });
+                                    });
 
-                                    link.each(function(d){
-                                        if (_.contains(shownNodes, d.source.index) && _.contains(shownNodes, d.target.index))
+                                shownNodes = _.uniq(shownNodes);
+
+                                node.each(function(d){
+
+                                        if (_.contains(shownNodes, d))
                                         {
                                             $(this).show();
                                         }
 
                                         else {
-                                        $(this).hide()
 
+                                            $(this).hide()
                                         }
-
                                     })
-
                                 }
-
                         })//end jquery slider function
-
                     }
-
         }//end returned object
 
         })() //end module
@@ -793,7 +799,7 @@
         paperNet.check(function(){
         paperNet.initialize(70, 1, -900);
         paperNet.slideFilter();
-        paperNet.start(30);
+        paperNet.start(40);
 
         paperNet.toggleOptions();
 
