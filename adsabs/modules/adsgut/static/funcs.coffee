@@ -296,7 +296,7 @@ postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="fil
   if description is ""
     description = "not provided"
   if mode is "filter"
-    modetext = "Items"
+    modetext = "Link"
   else if mode is "profile"
     modetext = "Info"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
@@ -319,7 +319,7 @@ postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="fil
 
 postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="profile") ->
   if mode is "filter"
-    modetext = "Items"
+    modetext = "Link"
   else if mode is "profile"
     modetext = "Info/Admin"
   url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
@@ -389,6 +389,50 @@ class InviteUser extends Backbone.View
         changerw=false
     adsid=@$('.txt').val()
     syncs.invite_user(adsid, @postable, changerw, cback, eback)
+
+class MakePublic extends Backbone.View
+
+  tagName: 'div'
+
+  events:
+    "click .sub" : "makePublic"
+
+  initialize: (options) ->
+    {@postable, @users} = options
+    @ispublic=false
+    if @users['adsgut/group:public']?
+      @ispublic=true
+
+    if @ispublic
+      #console.log "POSTABLE", @postable
+      url= "#{prefix}/postable/#{@postable}/filter/html"
+      @content="<p><a class='btn btn-info' href='#{url}'>PUBLIC LINK</a></p>"
+    else
+      @content=widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public")
+
+  render: () =>
+    @$el.html(@content)
+    return this
+
+  makePublic: =>
+    loc=window.location
+    #console.log "A"
+
+    cback2 = (data) =>
+            #console.log "return data cback2", data, loc
+            window.location = location
+
+    cback = (data) =>
+            #console.log "return data cback", data, loc, @postable
+            syncs.add_group('adsgut/group:public', @postable, false, cback2, eback)
+    
+    eback = (xhr, etext) ->
+        #console.log "ERROR", etext, loc
+        #replace by a div alert from bootstrap
+        alert "Did not succeed: #{etext}"
+
+    #console.log("GGG")
+    syncs.make_public(@postable, cback, eback)
 
 class AddGroup extends Backbone.View
 
@@ -484,6 +528,7 @@ root.views =
   group_info: postable_info
   postable_inviteds: postable_inviteds
   InviteUser: InviteUser
+  MakePublic: MakePublic
   AddGroup: AddGroup
   CreatePostable: CreatePostable
 root.templates =

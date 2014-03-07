@@ -48,82 +48,82 @@ do_postable_filter = (sections, config, tagfunc) ->
                     e = "Posted by you"
                 sections.$breadcrumb.append("<span class='badge'>#{e}</span>&nbsp;")
             sections.$breadcrumb.show()
-        $.get config.itemsPURL, (data) ->
-            theitems=data.items
-            #console.log("THEITEMS", theitems)
-            sections.$count.text("#{theitems.length} papers. ")
-            sections.$count.show()
-            thecount=data.count
-            #itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
-            itemlist=(i.basic.fqin for i in theitems)
-            biblist=(i.basic.name for i in theitems)
-            bibstring = biblist.join("\n")
-            sections.$bigquery.val(bibstring)
-            sections.$bigqueryform.attr("action", config.bq2url)
-            itemsq=itemlist.join("&")
-            #$.get "#{config.itPURL}?#{itemsq}", (data)->
-            #console.log "itemlist", itemlist
-            syncs.taggings_postings_post_get itemlist, config.pview, (data)->
-                #console.log "POSTINGS", data.postings, config.fqpn
-                #console.log "TG", data.taggings
-                [stags, notes]=get_taggings(data)
-                #console.log "===", stags, notes
-                postings={}
-                times={}
-                for own k,v of data.postings
-                    if v[0] > 0
-                        postings[k]=([e.posting.postfqin, e.posting.postedby] for e in v[1])
-                        ptimes = (e.posting.whenposted for e in v[1] when e.posting.postfqin==config.fqpn)
-                        #console.log "PTIMES", ptimes
-                        if ptimes.length > 0
-                            times[k]=ptimes[0]#currently ignore others if there are more than one post
-                        else
-                            times[k]=0#earliest :-)
+    $.get config.itemsPURL, (data) ->
+        theitems=data.items
+        #console.log("THEITEMS", theitems)
+        sections.$count.text("#{theitems.length} papers. ")
+        sections.$count.show()
+        thecount=data.count
+        #itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
+        itemlist=(i.basic.fqin for i in theitems)
+        biblist=(i.basic.name for i in theitems)
+        bibstring = biblist.join("\n")
+        sections.$bigquery.val(bibstring)
+        sections.$bigqueryform.attr("action", config.bq2url)
+        itemsq=itemlist.join("&")
+        #$.get "#{config.itPURL}?#{itemsq}", (data)->
+        #console.log "itemlist", itemlist
+        syncs.taggings_postings_post_get itemlist, config.pview, (data)->
+            #console.log "POSTINGS", data.postings, config.fqpn
+            #console.log "TG", data.taggings
+            [stags, notes]=get_taggings(data)
+            #console.log "===", stags, notes
+            postings={}
+            times={}
+            for own k,v of data.postings
+                if v[0] > 0
+                    postings[k]=([e.posting.postfqin, e.posting.postedby] for e in v[1])
+                    ptimes = (e.posting.whenposted for e in v[1] when e.posting.postfqin==config.fqpn)
+                    #console.log "PTIMES", ptimes
+                    if ptimes.length > 0
+                        times[k]=ptimes[0]#currently ignore others if there are more than one post
                     else
-                        postings[k]=[]
-                        times[k] = 0
-                #console.log "TIMES ARE ROCKING", stags, notes, times
-                sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
-                for i in sorteditems
-                    i.whenposted = times[i.basic.fqin]
-                #console.log "SORTEDITEMS"
-                #for i in sorteditems
-                #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs 
-                ido=
-                    stags:stags
-                    postings:postings
-                    notes:notes
-                    $el:sections.$items
-                    items: sorteditems
-                    noteform: true
-                    nameable: false
-                    itemtype:'ads/pub'
-                    memberable:config.memberable
-                    suggestions : suggestions
-                    pview: config.pview
-                    tagfunc: tagfunc
-                plinv=new itemsdo.ItemsFilterView(ido)
-                plinv.render()
-                #possible A&A issue
-                eb = (err) ->
-                    #console.log("ERR", err)
-                    for d in theitems
-                        format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
-                cb = (data) ->
-                    #console.log "CBDATA", theitems.length, data.response.docs.length
-                    thedocs = {}
-                    for d in data.response.docs
-                        thedocs[d.bibcode]=d
-                    docnames = (d.bibcode for d in data.response.docs)
-                    for d in theitems
-                        if d.basic.name in docnames
-                            e=thedocs[d.basic.name]
-                        else
-                            e={}
-                        plinv.itemviews[d.basic.fqin].e = e
-                        format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
-                #console.log "ITTYS", theitems, (e.basic.fqin for e in theitems)
-                syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
+                        times[k]=0#earliest :-)
+                else
+                    postings[k]=[]
+                    times[k] = 0
+            #console.log "TIMES ARE ROCKING", stags, notes, times
+            sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
+            for i in sorteditems
+                i.whenposted = times[i.basic.fqin]
+            #console.log "SORTEDITEMS"
+            #for i in sorteditems
+            #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs 
+            ido=
+                stags:stags
+                postings:postings
+                notes:notes
+                $el:sections.$items
+                items: sorteditems
+                noteform: true
+                nameable: false
+                itemtype:'ads/pub'
+                memberable:config.memberable
+                suggestions : []
+                pview: config.pview
+                tagfunc: tagfunc
+            plinv=new itemsdo.ItemsFilterView(ido)
+            plinv.render()
+            #possible A&A issue
+            eb = (err) ->
+                #console.log("ERR", err)
+                for d in theitems
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),d)
+            cb = (data) ->
+                #console.log "CBDATA", theitems.length, data.response.docs.length
+                thedocs = {}
+                for d in data.response.docs
+                    thedocs[d.bibcode]=d
+                docnames = (d.bibcode for d in data.response.docs)
+                for d in theitems
+                    if d.basic.name in docnames
+                        e=thedocs[d.basic.name]
+                    else
+                        e={}
+                    plinv.itemviews[d.basic.fqin].e = e
+                    format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
+            #console.log "ITTYS", theitems, (e.basic.fqin for e in theitems)
+            syncs.send_bibcodes(config.bq1url, theitems, cb, eb)
     loc = config.loc
     nonqloc=loc.href.split('?')[0]
     if sections.$ua.attr('data') is 'off'

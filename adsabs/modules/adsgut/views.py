@@ -654,13 +654,16 @@ def doInviteToGroup(groupowner, groupname):
 def addMemberToPostable(g, request, fqpn):
     jsonpost=dict(request.json)
     #BUG:need fqun right now. work with nicks later
+    #print jsonpost
     fqmn=_dictp('member', jsonpost)
     changerw=_dictp('changerw', jsonpost)
+    #print "for fqpmn", fqmn, changerw
     if not changerw:
         changerw=False
     # if not g.currentuser.nick:
     #     doabort("BAD_REQ", "No User Specified")
     user, postable=g.db.addMemberableToPostable(g.currentuser, g.currentuser, fqpn, fqmn, changerw)
+    #print "here"
     return user, postable
 
 def getMembersOfPostable(g, request, fqpn):
@@ -727,7 +730,9 @@ def addMemberToPostable_or_postableMembers(po, pt, pn):
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
         member, postable=addMemberToPostable(g, request, fqpn)
-        return jsonify({'status':'OK', 'info': {'member':member.basic.fqin, 'type':pt, 'postable':postable.basic.fqin}})
+        dictis = {'status':'OK', 'info': {'member':member.basic.fqin, 'type':pt, 'postable':postable.basic.fqin}}
+        #print "DICTIS", dictis
+        return jsonify(dictis)
     else:
         userdict=getMembersOfPostable(g, request, fqpn)
         return jsonify(userdict)
