@@ -110,7 +110,8 @@ class AppConfig(object):
     WORD_CLOUD_DEFAULT_FIRST_RESULTS = 250
     
     SOLR_SEARCH_DEFAULT_FIELDS = ['id','bibcode','bibstem', 'identifier', 'title','author','pub','score','property','abstract','keyword','doi', 'aff',
-                                  'pubdate','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader', '[citations]']
+                                  'pubdate','reference', 'pub_raw', 'copyright', 'links_data', 'ids_data', 'links', 'reader', '[citations]',
+                                  'keyword_norm', 'keyword_schema', 'email']
     
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS = None # None=use the defaults configured by our search service
     SOLR_SEARCH_DEFAULT_QUERY_FIELDS_METADATA_ONLY = "first_author^3.0 author^2 title^1.4 abstract^1.3 keyword^1.4 keyword_norm^1.4 all year"
@@ -210,7 +211,8 @@ class AppConfig(object):
     API_SOLR_DEFAULT_SORT = [('pubdate','desc'),('bibcode','desc')]
     
     API_SOLR_DEFAULT_FIELDS = ['id','bibcode','title','author','pub','property','abstract','keyword','citation_count','bibstem',
-                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]']
+                               'aff','database','identifier','doi','grants','year','issue','volume','page','pubdate','[citations]',
+                               'keyword_norm', 'keyword_schema']
     API_SOLR_EXTRA_FIELDS = ['body','references','ack','score']
     API_SOLR_HIGHLIGHT_FIELDS = ['title','abstract','body','ack']
     
