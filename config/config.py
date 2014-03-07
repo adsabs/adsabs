@@ -17,7 +17,7 @@ class AppConfig(object):
     PRINT_DEBUG_TEMPLATE = False
     PRINT_DEBUG_TEMPLATE_PARAM = None
     
-    APP_VERSION = '2013_12_27_v1'
+    APP_VERSION = '2014_03_07_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
@@ -301,6 +301,7 @@ class AppConfig(object):
                    'wordcloud':1000, 
                    'ADSClassic':3000,
                    'authnetwork':1000,
+                   'papernetwork':1000,
                    'skymap':1000,
                    'export_other':3000,
                    'export_library': 500,
@@ -310,6 +311,7 @@ class AppConfig(object):
                    'wordcloud':250, 
                    'ADSClassic':300,
                    'authnetwork':750,
+                   'papernetwork':750,
                    'skymap':750,
                    'export_library': 100,
                    'export_other':300,

@@ -1,0 +1,771 @@
+    <!-- Code written by Alex Holachek -->
+    <div class="vis_body">
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span2" id="controlpanel"> 
+
+                    <div class="dropdown">
+                        <a class="btn dropdown-toggle vis_item_format btn-block vis_btn" data-toggle="dropdown" href="#">
+                            What Is The Paper Network?
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
+                            <li>This visualization uses a simulation of physical forces to
+                                illustrate paper networks within ADS search results. 
+                                Paper nodes repel one another while links between papers
+                                bind nodes together.<br/></br/>
+                                The width of lines between papers signals number of references the two papers had in common
+                                , while the font size of bibcodes indicates the number of citations each paper received.<br/><br/>
+                                Any paper in your results that had no references in common with other papers does not appear here.</li> 
+                            </ul>
+                        </div> 
+
+                        <div class="dropdown">
+                            <a class="btn dropdown-toggle btn-block vis_item_format vis_btn" data-toggle="dropdown" href="#">
+                                How Do I Use It?
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
+                                <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
+                                <li> <strong>Filter</strong> your graph to show the most essential papers by moving the slider. </li>
+                                    <li><strong>Search </strong> for the name of an paper in the search box to find the paper.
+                                        node's exact position. </li>
+                                        <li><strong>Drag</strong> the node after selecting "rearrange graph" to dynamically alter the network. </li>
+                                        <li><strong>Select</strong> a node and each one of its links at once in group select mode.</li>   
+                                        <li><strong>Limit</strong> your current set of ADS search results by selecting one or more papers and clicking "apply filter to search".</li>   
+
+
+                                    </ul>
+                                </div> 
+
+                                <div class="row-fluid" id="explore-rearrange">
+                                    <button type="button" class="btn span6 vis_item_format vis_btn btn-primary toggle-func" id="explore">Explore Graph</button>
+                                    <button type="button" class="btn span6 vis_item_format vis_btn toggle-func " id="rearrange"> Rearrange Graph</button> 
+                                </div>
+
+                                <div class="row-fluid" id= "freeze-animate">
+                                    <button type="button" class="btn span6 vis_item_format vis_btn btn-primary toggle-func" id="animatedmode" >Animate</button>
+                                    <button type="button" class="btn span6 vis_item_format vis_btn toggle-func " id="freezemode">Freeze</button>
+                                </div>
+
+                                <div class="row-fluid" id="single-group">
+                                    <button type="button" class="btn span6 vis_item_format vis_btn btn-primary toggle-func" id="singlepaper">Select Single</button> 
+                                    <button type="button" class="btn span6 vis_item_format vis_btn toggle-func " id="multipaper">Select Group</button>
+                                </div>
+
+                                <div class="well well-small vis_item_format" >
+                                    Filter by Citations
+                                    <div id="filter-slider">
+                                    </div>
+                                </div>
+
+                                <div class="well well-small clearfix vis_item_format"><p>Search for a paper: 
+                                </p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findpaper"> </input>
+                                <button class ="btn pull-right btn-info vis_btn " id="searchsubmit" >Search</button>
+                            </div>
+
+                            <div class="well well-small vis_item_format ">
+                                <p> Selected papers: </p>
+                                <ul class="vis_ul vis_select_list" id="list">
+                                    <li> Click on a name to add it to this list.</li>
+                                    <li> Click again on the name to remove it.</li>
+                                </ul>
+                                <button type="button" class="btn vis_item_format btn-block btn-info vis_btn" id="paperfacet" style="margin:20px 0 20px 0">Apply Filter To Search</button>
+                            </div> 
+
+                        </div>
+
+                        <div class="span10" id="chart">
+                            <div class="zoom-panel well well-small" style="position:absolute;right:2%;top:3%;">
+                                <p> Zoom In and Out</p>
+                                <div style="width:30px;margin:auto">
+                                    <button class="btn" style="display:block;margin-bottom:4px;" id = "zoom-in"><i class="icon-plus"></i></button>
+                                    <button class="btn" id="zoom-out"><i class="icon-minus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+<script type="text/javascript">
+
+        var authNet = (function(){
+
+            var json = {{ network_data|tojson|safe }};
+            var numNodes;
+
+            var baseurlandquery = window.location.href;
+
+            var w = $(window).width()*.8,
+            h= $(window).height();
+
+            var selected=[];
+
+            //list of all PAPER names in network (not bibcodes)
+            var nodeTitles= [];
+
+            for (var i=0; i<json.nodes.length; i++) {
+                nodeTitles.push(json.nodes[i]['title']+ " (bibcode: "+ json.nodes[i]["nodeName"] +")" );
+            }
+
+            function findValues(listOfDicts, value){
+                var newList= [];
+                for (var i=0; i< listOfDicts.length; i++){
+                    newList.push(listOfDicts[i][value]);
+                }
+                return newList;
+            };
+
+            var nodeWeights=findValues(json.nodes, "nodeWeight"),
+            linkValues=findValues(json.links, "value");
+
+            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,14]), 
+            lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.4, 2]);
+
+            //declaring the variables here so that multiple methods have access to them
+            var force, svg, g1, g, node, link, z;
+
+            initial = true;
+
+            function redraw() {
+                g.attr("transform",
+                    "translate(" + d3.event.translate + ")"
+                    + " scale(" + d3.event.scale + ")");
+            };
+
+            var nodeDrag, lnodes;
+
+            var animate = true;
+
+            var timer = 0;
+
+            var highlightColor = "orange";
+    
+
+            return {
+
+                //all code for first rendering of network
+
+                check : function(d){
+
+                    //list of node indexes that have at least one link
+                    lnodes = _.map(json.links, function(l){return [l.source, l.target] });
+                    lnodes = _.unique(_.flatten(lnodes));
+
+                    numNodes = _.filter(json.nodes, function(num, i){return _.contains(lnodes, i)}).length;
+
+                    if (numNodes !== 0 ){
+                        d();
+                    }
+
+                    else{
+                     $("#chart").append("<div id=\"vis-tooltip\" > </div>")
+
+                        $("#vis-tooltip")
+                        .offset({top:h/2, left: w/2})
+                        .show()
+                        .text("Sorry, there wasn't enough information to generate a network!");
+                    }
+
+                },
+
+                initialize : function(linkDistance, gravity, charge) {
+
+                    var that = this;
+                    $("#paperfacet").on("click", that.generateSearch);
+
+
+                    force = d3.layout.force()
+                    .size([w, h])
+                    .linkDistance(linkDistance)
+                    .gravity(gravity)
+                    .charge(charge);
+
+                    $("#chart").append("<div id=\"vis-tooltip\" > </div>")
+
+                    svg = d3.select("#chart").append("svg:svg")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .attr("pointer-events", "all")
+                    .attr("id", "svg");
+
+                    //container for network
+                    //need two gs because of weird panning requirement
+                    g1 = svg.append("svg:g").attr("id", "g1");
+                    
+                    g= g1.append("svg:g");
+
+                    g.append("svg:rect")
+                    .attr("width", w)
+                    .attr("height", h)
+                    .attr("id", "g")
+                    .attr("fill", "#F9F9F9");
+
+                    //now initializing all zoom behaviors, including button zoom
+                    (function(){
+
+                        z = d3.behavior.zoom().on("zoom", redraw).scaleExtent([0.3, 10]);
+
+                        //applying to z
+                        g1.call(z)
+
+                        //adding zoom capability to the zoom buttons
+                        $('#zoom-in').on("click", function(){
+                            var oldscale = z.scale();
+                            var scale = z.scale() +.5;
+                            if (scale > 10)
+                            {
+                                return
+                            }
+                            var x = z.translate()[0] 
+                            var y = z.translate()[1] 
+                           // This is not intuitive. The next two lines are the most important part.
+                           // Basically, you need to calculate the offset of the current
+                          // center by doing ((w/2-x)/oldscale) and take that number and calculate the offset 
+                          // based on the new scale (need to look up svg transforms to understand this because it's complicated)
+                          var translateX= -scale*((w/2-x)/oldscale)+w/2;
+                          var translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                          z.scale(scale);
+                          z.translate([translateX, translateY]);
+
+                          d3.select(g[0][0]).transition().duration(1000)
+                          .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+                        });
+
+
+                        $('#zoom-out').on("click", function(){
+                            var oldscale = z.scale();
+                            var scale = z.scale() -1;
+
+                            if (oldscale >= 1.5)
+                            {
+                                scale = z.scale() - 1
+                            }
+                            else {
+                                scale = z.scale() -.2;
+                            }
+                            if (scale <.2)
+                            {
+                                return
+                            }
+                            var x = z.translate()[0] 
+                            var y = z.translate()[1] 
+                            var translateX= -scale*((w/2-x)/oldscale)+w/2;
+                            var translateY= -scale*((h/2-y)/oldscale)+h/2;
+                            z.scale(scale);
+                            z.translate([translateX, translateY]);
+
+                            d3.select(g[0][0]).transition().duration(1000)
+                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+                        });
+                    })(); //end zoom function
+
+
+                    //defining links
+                    //must define links before nodes so that nodes go on top of links
+                    //improving mouseover interaction (svg doesn't use z index)
+                    link=g.selectAll(".link")
+                    .data(json.links)
+                    .enter().append("line")
+                    .attr("class", "paper-network-link")
+                    .style("stroke-width", function(d){
+                        return lineScale(d.value)
+                    })
+                    .on("mouseover", function(d){
+
+                        $("#vis-tooltip").show();
+
+                        var pos = $(this).offset();
+
+                        pos.top = d3.event.pageY +10;
+                        pos.left = d3.event.pageX +10;
+
+                        $("#vis-tooltip")
+                        .offset(pos);
+
+                        var ht = [];
+                        _.each(d.overlap, function(t){ht.push("<li>"+ t + "</li>")});
+
+                        $("#vis-tooltip").html("References in common:" + "<ul>" + ht.join(" ")+"</ul>");
+                    })
+                    .on("mouseout", function(){$("#vis-tooltip").hide()});
+
+
+                    //defining nodes
+                    node = g.selectAll(".node")
+                    .data(json.nodes)
+                    .enter()
+                    .append("text");
+
+                    node = node.filter(function(d, i){return _.contains(lnodes, i)});
+
+                    node.classed("vis_node vis_hover_pointer vis_svgtext", true )
+                    .each(function(d){
+                        d.select=false;
+                    })
+                    .text(function(d) {return d.nodeName})
+                    .attr("font-size", function(d){
+                        return fontScale(d.nodeWeight)+"px";
+                    })
+                    .attr("text-anchor", "middle")
+                    .on("click", that.nodeClick)
+                    .on("mouseover", function(d1, i){
+
+                        $("#vis-tooltip").show();
+
+                        var pos = $(this).offset();
+
+                        pos.top = d3.event.pageY +10;
+                        pos.left = d3.event.pageX +10;
+
+                        $("#vis-tooltip")
+                        .offset(pos);
+
+                        d3.select("#vis-tooltip").html(d1.nodeName + "; "+ d1.first_author + "; "+  d1.title + "; "+  d1.year);
+
+                        //remember, d.index is the index before resort
+                        for (var ji=0; ji<json.links.length; ji++)
+                            { 
+                                if(json.links[ji]['source']['index']==d1.index || json.links[ji]['target']['index']==d1.index )
+                                      {
+                                        var partner=json.links[ji]["target"];
+                                        node.each(function(d2, i){
+                                            if (d2.nodeName==partner.nodeName)
+                                            {
+                                               d3.select(this).classed("group-highlight", true)
+                                            }
+                                        })
+                                      }
+                                     
+                            }
+
+                    })
+                    .on("mouseout", function(){
+                        $("#vis-tooltip").hide();
+                        node.each(function(){
+                            d3.select(this).classed("group-highlight", false)
+                        })
+
+                    })
+                    .sort(function(a,b){
+                        return a.nodeWeight - b.nodeWeight
+
+                        })
+
+                },
+
+                tick : function(){
+
+                    link.attr("x1", function(d) { return d.source.x; })
+                    .attr("y1", function(d) { return d.source.y; })
+                    .attr("x2", function(d) { return d.target.x; })
+                    .attr("y2", function(d) { return d.target.y; });
+
+                    // // bounding box
+                    //                   var r=6;
+                    //                 node.attr("x", function(d) { return d.x = Math.max(r, Math.min(w - r, d.x)); })
+                    //                     .attr("y", function(d) { return d.y = Math.max(r, Math.min(h - r, d.y)); }); 
+
+                    node.attr("x", function(d) { return d.x })
+                    .attr("y", function(d) { return d.y });
+                },
+
+                nodeClick : function(d) {
+                    var that = this;
+                  if (d.select === false || !d.hasOwnProperty("select")) {
+                        d3.select(this)
+                        .transition()
+                        .duration(500)
+                        .style("fill", highlightColor);
+                        //adding to selected array
+                        d.select=true;
+                        selected.push(d.nodeName);
+                        //removing current list
+                        d3.select("#list")
+                        .selectAll("li")
+                        .remove();
+                        //adding new list
+                        for (var i=0; i<selected.length; i++)
+                           {
+                            d3.select("#list")
+                              .append("li")
+                              .text(selected[i]+"  ");
+                            }
+                    }
+                    else if (d.select === true) {
+                        d3.select(this)
+                        .transition()
+                        .duration(1000)
+                        .style("fill", "#00006B");
+                        d.select=false;
+                        var i = selected.indexOf(d.nodeName);
+                        selected.splice(i, 1);
+                        d3.select("#list")
+                        .selectAll("li")
+                        .remove();
+                        for (var i=0; i<selected.length; i++)
+                            {
+                               d3.select("#list")
+                                .append("li")
+                                .text(selected[i]);
+                            }
+                    }
+                    //adding search button                 
+                    d3.select("#list")
+                        .append("li")
+                        .html(function(){
+                          if(selected.length==0)
+                            {
+                            return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>';
+                            }
+                        });
+                }, //end nodeClick   
+
+                //joins the svgs with the force layout
+                start : function(maxTicks) {
+                    var that = this;
+
+                    // //randomly initiate positions of nodes
+                    node.forEach(function(d, i) {
+                        d.x = w/2;
+                        d.y = h/2;
+                    });
+
+                    force
+                    .nodes(json.nodes)
+                    .links(json.links)
+                    .start();
+
+                    var ticks = 0;
+
+                    force.on("tick", function(t) { 
+                        ticks++;
+                        that.tick(t);
+
+                        //so it won't go past 31 ticks
+                        if (ticks > maxTicks && initial === true )
+                        {   
+
+                            force.stop();
+                            animate = false;
+                            $("#freezemode").addClass("btn-primary");
+                            $("#animatedmode").removeClass("btn-primary");
+                            initial= false;
+                        }
+
+                    });
+
+                    //customizing zoom level for large networks
+                    if (numNodes > 350)
+                    {
+                        var oldscale = z.scale();
+                        var scale = z.scale() -.6;
+
+                        var x = z.translate()[0], 
+                            y = z.translate()[1], 
+                            translateX= -scale*((w/2-x)/oldscale)+w/2,
+                            translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                            z.scale(scale);
+                            z.translate([translateX, translateY]);
+
+                            d3.select(g[0][0])
+                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+
+                    }
+
+                },
+
+                nodeSearch: function(id) {
+                    //the searchbox
+                    $(id).typeahead({source:nodeTitles});
+
+                    d3.select("#searchsubmit")
+                    .on("click", function(){
+                        var n=$("#findpaper").val().match(/\(bibcode: (.*)\)/)[1].trim();
+                        for (var i=0; i<node[0].length; i++)
+                        { 
+                            if (jQuery.trim(node[0][i].childNodes[0]['data'])==n)
+                            {
+                                var x= node[0][i]['attributes'][3].value,
+                                y= node[0][i]['attributes'][4].value;
+                                var scale=3;
+                                var translateX=-scale*x +w/2;
+                                var translateY=-scale*y +h/2;
+                                d3.select(g[0][0]).transition().duration(3500).attr('transform', 'translate('+ translateX+', '+ translateY+ ') scale('+scale+')');
+                                                //informing d3 that we zoomed in independently
+                                                z.translate([translateX, translateY]).scale([scale]);
+                                                d3.select(node[0][i]).transition().delay(1000).duration(3000).style('fill', '#CC00FF');
+                                            }
+                                        }
+                                    });
+                },
+
+                implementDrag : function(){
+                    var that = this;
+
+                    nodeDrag = d3.behavior.drag()
+                    .on("dragstart", dragstart)
+                    .on("drag", dragmove)
+                    .on("dragend", dragend);
+
+                    function dragstart(d, i) {
+                            force.stop() // stops the force auto positioning before you start dragging
+                        };
+
+                        function dragmove(d, i) {
+                            d.px += d3.event.dx;
+                            d.py += d3.event.dy;
+                            d.x += d3.event.dx;
+                            d.y += d3.event.dy; 
+                            that.tick(); // this is the key to make it work together with updating both px,py,x,y on d !
+                        };
+
+                        function dragend(d, i) {
+                            d.fixed = true; // of course set the node to fixed so the force doesn't include the node in its auto positioning stuff
+                            that.tick();
+                            if (animate === true)
+                            {
+                                force.resume();
+                            }
+                        };
+
+                        node.call(nodeDrag);
+
+                    },
+
+                    toggleOptions : function() {
+
+                        var currentScale, currentTranslate;
+
+                        var that = this;
+
+                        $(".toggle-func").on("click", function(){
+                            var $t = $(this);
+                            var cat = $t.parent().attr("id");
+                            var $o = $($t.siblings().get(0));
+
+                        //only making changes if it wasn't already default
+
+                        if (!$t.hasClass("btn-primary")){
+                            $t.addClass("btn-primary")
+                            $o.removeClass("btn-primary");
+
+                            if (cat === 'freeze-animate'){
+
+                                if ($t.attr("id")==="animatedmode") {
+                                    force.start();
+                                    animate = true;
+                                }
+                                else {
+                                    force.stop();
+                                    animate = false;
+                                }
+                            }
+
+                            else if ( cat === 'single-group'){
+
+                                if ($t.text()==="single") {
+                                    that.endMultiSelect();
+                                }
+                                else {
+                                    that.startMultiSelect();
+                                }
+                            }
+
+                            else if (cat === "explore-rearrange")
+
+                            {
+                                if ($t.attr("id")==="explore") {
+
+                                    z.scale(currentScale);
+                                    z.translate(currentTranslate);
+
+                                    z.on("zoom", redraw);
+                                    $(".zoom-panel").show();
+
+                                    nodeDrag.on("dragstart", null)
+                                        .on("drag", null)
+                                        .on("dragend", null);
+
+                                }
+
+                                else {
+                                   
+                                    currentScale = z.scale();
+                                    currentTranslate =  z.translate();
+                                    $(".zoom-panel").hide();
+                                    z.on("zoom",null);
+                                    that.implementDrag(); 
+                                    
+                                }
+                            }
+                        }
+                    })
+
+                    },
+
+                    //implementing paper selection and search faceting
+
+                   generateSearch : function() {
+                          var names=[],
+                            querypieces=[];
+                          if (selected.length==1)
+                          {
+                            var querystring = selected[0];
+                          }
+                          else 
+                          {
+                            querypieces.push("(");
+                            for (var i=0; i< selected.length; i++) 
+                            {
+                                names.push(selected[i]);
+                            }
+                            for (var i=0; i<names.length; i++)
+                            {
+                                if (i==0)
+                                {
+                                  querypieces.push(names[i]);
+                                }
+                                else
+                                {
+                                  querypieces.push('OR');
+                                  querypieces.push(names[i]);
+                                }
+                            }
+                              querypieces.push(")");
+                              var querystring=querypieces[0];
+                              querystring+=querypieces.slice(1,-1).join(' ');
+                              querystring+=querypieces.slice(-1)
+                            }//end else for multiple selected papers
+                    
+                            var finalURI= new Uri(baseurlandquery);
+                           finalURI.setQuery("q=" +decodeURIComponent(finalURI.getQueryParamValue("q"))+ " bibcode:("+ encodeURIComponent(querystring)+")")
+
+                            window.location.href = decodeURIComponent(finalURI.toString());
+                          },
+
+                endMultiSelect : function() {
+                    //remove event listener
+                  node.on("click.group", null)
+                  node.on("click", null)
+                  node.on("click", nodeClick)
+                    },
+
+                startMultiSelect : function() {
+                    var that = this;
+                      //add special event listener to node that highlights its friends
+                      //namespaced for easy removal
+                      //two options because we don't know the order of the link entries
+                      node.on("click.group", function(d1, i){
+
+                        //remember, d.index is the index before resort
+                                    for (var ji=0; ji<json.links.length; ji++)
+                                    {
+                                      if(json.links[ji]['source']['index']==d1.index)
+                                      {
+                                        var partner=json.links[ji]["target"];
+                                        node.each(function(d2, i){
+                                               //ok so the select settings are different because the click event
+                                               //for the primary node has already fired
+                                               if (d2.nodeName==partner.nodeName && d1.select==true && d2.select==false)
+                                               {
+                                                 that.nodeClick.apply(this,[d2]);
+                                               }
+                                               //unselecting main and everything attached to it
+                                               else if (d2.nodeName==partner.nodeName && d1.select==false && d2.select==true)
+                                               {
+                                                that.nodeClick.apply(this,[d2]);
+                                               }
+                                            });
+                                      }
+                                      else if(json.links[ji]['target']['index']== d1.index)
+                                      {
+                                         var partner=json.links[ji]['source'];
+                                         node.each(function(d2, i){
+                                            if (d2.nodeName==partner.nodeName && d1.select==true && d2.select==false)
+                                            {
+                                              that.nodeClick.apply(this,[d2]);
+                                            }
+                                            else if (d2.nodeName==partner.nodeName && d1.select==false && d2.select==true)
+                                            {
+                                              that.nodeClick.apply(this,[d2]);
+                                            }
+                                          });
+                                      }
+                                    }
+                            }); //end of node.on
+                    },
+
+                    slideFilter : function() {
+
+                        $("#filter-slider").slider({
+                            value:0,
+                            min:0,
+                            max:9,
+                            step:1,
+                            slide: function(event, ui){
+                                
+                                var r = (ui.value == 0) ? 0: numNodes % 10;
+                                var b = Math.floor(numNodes/10);
+
+                                var shownNodes = [];
+
+                                //nodes are already sorted by weight upon initialization
+
+                                node.each(function(d, i){
+                                    var nodeIndex = i;
+                                        if  (i> r+b*ui.value) {
+                                            $(this).show();     
+                                            shownNodes.push(d.index)
+
+                                        }
+
+                                        else {
+                                            $(this).hide();
+                                        }
+                                        });
+
+                                    link.each(function(d){
+                                        if (_.contains(shownNodes, d.source.index) && _.contains(shownNodes, d.target.index))
+                                        {
+                                            $(this).show();
+                                        }
+
+                                        else {
+                                        $(this).hide()
+
+                                        }
+
+                                    })
+
+                                }
+                        })//end jquery slider function
+                    }
+
+        }//end returned object
+
+        })() //end module
+
+    // $(document).ready(function(){
+
+        authNet.check(function(){
+        authNet.initialize(70, 1, -900);
+        authNet.start(30);
+        authNet.toggleOptions();
+
+        authNet.nodeSearch("#findpaper");
+        authNet.slideFilter();
+        })
+        
+    // });
+
+    </script>
+
+    <script>
+            //pinging google analytics
+            ga('send', 'event', 'visualize', 'fancybox_load', 'paper_network');
+            </script>
+
+        </div>
+      </div>
+    </div>
