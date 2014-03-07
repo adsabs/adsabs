@@ -17,7 +17,7 @@ class AppConfig(object):
     PRINT_DEBUG_TEMPLATE = False
     PRINT_DEBUG_TEMPLATE_PARAM = None
     
-    APP_VERSION = '2013_12_27_v1'
+    APP_VERSION = '2014_03_07_v1'
     
     # Override in local_config.py, e.g. DEPLOYMENT_PATH = "/adsabs"
     DEPLOYMENT_PATH = None
