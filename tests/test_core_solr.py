@@ -15,7 +15,7 @@ if sys.version_info < (2,7):
 else:
     import unittest
 
-from adsabs.core.solr import SolrDocument
+from adsabs.core.solr import SolrDocument, denormalize_solr_doc
 from config import config
 from test_utils import AdsabsBaseTestCase, canned_solr_response_data
 
@@ -125,6 +125,91 @@ class TestSolrDoc(unittest.TestCase):
         self.assertFalse(doc.has_highlights('blah'))
         self.assertEqual(doc.get_highlights('foo'), ['bar','baz'])
         self.assertEqual(doc.get_highlights('blah'), None)
+        
+    def test_denormalize(self):
+        
+        data = {
+                "author":["Quest, Cosmo", 
+                          "Schlegel, David J.",
+                          "Finkbeiner, Douglas P.",
+                          "Davis, Marc"],
+                "keyword":["cosmology diffuse radiation",
+                      "cosmology cosmic microwave background",
+                      "ism dust extinction",
+                      "ism dust extinction",
+                      "interplanetary medium",
+                      "astronomy infrared",
+                      "astrophysics",
+                      "COSMOLOGY: DIFFUSE RADIATION",
+                      "COSMOLOGY: COSMIC MICROWAVE BACKGROUND",
+                      "ISM: DUST",
+                      "EXTINCTION",
+                      "INTERPLANETARY MEDIUM",
+                      "INFRARED: ISM: CONTINUUM",
+                      "Astrophysics",
+                      "cosmology diffuse radiation",
+                      "cosmology cosmic microwave background",
+                      "ism dust extinction",
+                      "ism dust extinction",
+                      "interplanetary medium",
+                      "astronomy infrared",
+                      "astrophysics"],
+                "keyword_norm":["cosmology diffuse radiation",
+                      "cosmology cosmic microwave background",
+                      "ism dust extinction",
+                      "ism dust extinction",
+                      "interplanetary medium",
+                      "astronomy infrared",
+                      "astrophysics"],
+                'keyword_schema': ['ADS',
+                            'ADS',
+                            'ADS',
+                            'ADS',
+                            'foo',
+                            'ADS',
+                            'foo'],
+                "aff":["aff1",
+                       "aff2;aff2b",
+                       "aff3",
+                       # 4th missing intentionally
+                       ],
+                "email":["krticka@physics.muni.cz",
+                         "krticka@physics.muni.cz mysicka@physics.muni.cz"],
+                "bibcode":"1907PASP...19..240K",
+                "title": ["An Artist's View of the Next Generation ADS Digital Library System"],
+            }
+        solrdoc = SolrDocument(data)
+        newdoc = denormalize_solr_doc(solrdoc)
+        expected = {'author': [{'affiliation': 'aff1',
+                     'email': 'krticka@physics.muni.cz',
+                     'name': 'Quest, Cosmo'},
+                    {'affiliation': 'aff2;aff2b',
+                     'email': 'krticka@physics.muni.cz mysicka@physics.muni.cz',
+                     'name': 'Schlegel, David J.'},
+                    {'affiliation': 'aff3', 
+                     'name': 'Finkbeiner, Douglas P.'},
+                    {'name': 'Davis, Marc'}],
+         'bibcode': '1907PASP...19..240K',
+         'keyword': ['Astrophysics',
+                     'COSMOLOGY: COSMIC MICROWAVE BACKGROUND',
+                     'COSMOLOGY: DIFFUSE RADIATION',
+                     'EXTINCTION',
+                     'INFRARED: ISM: CONTINUUM',
+                     'INTERPLANETARY MEDIUM',
+                     'ISM: DUST',
+                     'astronomy infrared',
+                     'astrophysics',
+                     'cosmology cosmic microwave background',
+                     'cosmology diffuse radiation',
+                     'interplanetary medium',
+                     'ism dust extinction'],
+         'keyword_norm': {'ADS': ['astronomy infrared',
+                          'cosmology cosmic microwave background',
+                          'cosmology diffuse radiation',
+                          'ism dust extinction'],
+                  'foo': ['astrophysics', 'interplanetary medium']},
+         'title': "An Artist's View of the Next Generation ADS Digital Library System"}
+        self.assertEqual(expected, newdoc.data)
 
 class TestSolrHAProxyCookie(AdsabsBaseTestCase):
      

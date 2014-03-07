@@ -1,12 +1,12 @@
-{% macro render_abstract(solrdoc, inveniodoc) %}
+{% macro render_abstract(solrdoc, denormdoc) %}
 
-{# I get the links #}
 {% set links = solrdoc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
 {% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
-{# I get the ids #}
+
 {% set ids = solrdoc.getattr_func('ids_data', g.formatter_funcs.field_to_json) %}
 {% set id_types = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') %}{% do id_types.append(id.get('description')) %}{% endif %}{% endfor %}{% endif %}
 {% set arxiv_id = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') =='arXiv' %}{% do arxiv_id.append(id.get('identifier')) %}{% endif %}{% endfor %}{% endif %}
+
 {# few variables to build the letters #}
 {% if solrdoc.property %}{% if 'ADS_SCAN' in solrdoc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
 {% if solrdoc.property %}{% if 'PUB_OPENACCESS' in solrdoc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
@@ -20,21 +20,19 @@
 				<div class="row-fluid">
 					<div class="span12 abstractTitle">{% if solrdoc.title %}{{ solrdoc.title[0] }}{% else %}No title{% endif %}</div>
 				</div>
-				{% if inveniodoc.author %}
+				{% if denormdoc.author %}
 				<div class="row-fluid">
 					<div class="span12 abstractAuthors">
-						{% for author in inveniodoc.author %}
+						{% for author in denormdoc.author %}
 							<span class="author {% if loop.index > 10%}authorMoreTen strHidden{% endif %}">
 								<span class="authorName">{{ author.name }}</span>
-								{% if author.affiliations %}
+								{% if author.affiliation %}
 								<span class="authorAffiliation strHidden">(
-									{% for aff in author.affiliations %}
-										{{ aff }}{% if not loop.last %}; {% endif %}
-									{% endfor %}
+										{{ author.affiliation }}
 								)</span>{% endif %}{% if not loop.last %}; {% endif %}
 							</span>
 						{% endfor %}
-						{% if inveniodoc.author|length > 10 %}<a class="coauthorsToggle"> <span class="textToggle">and</span> {{ inveniodoc.author|length - 10 }} coauthors </a>{% endif %}
+						{% if denormdoc.author|length > 10 %}<a class="coauthorsToggle"> <span class="textToggle">and</span> {{ denormdoc.author|length - 10 }} coauthors </a>{% endif %}
 						{% if solrdoc.aff %}<a class="affiliationToggle blockToggle"> <span class="textToggle">show</span> affiliations </a>{% endif %}
 					</div>
 				</div>
@@ -81,21 +79,21 @@
 						</span>
 					</div>
 				</div>
-				{% if inveniodoc.keyword.free or inveniodoc.keyword.controlled %}
+				{% if denormdoc.keyword or denormdoc.keyword_norm %}
 				<div class="row-fluid">
 					<div class="span12 abstractKeyword">
 						<span class="keywordTitle blockToggle">Keywords:</span>
-						{% if inveniodoc.keyword.free %}
+						{% if denormdoc.keyword %}
 							<div class="keywordGroup">
 								<span class="keywordTitle">Free Keywords:</span>
-								{% for key in inveniodoc.keyword.free %}<span class="keywordKey">{{ key.keyword }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
+								{% for key in denormdoc.keyword %}<span class="keywordKey">{{ key }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
 							</div>
 						{% endif %}
-						{% if inveniodoc.keyword.controlled %}
-							{% for schema in inveniodoc.keyword.controlled %}
+						{% if denormdoc.keyword_norm %}
+							{% for schema in denormdoc.keyword_norm %}
 								<div class="keywordGroup">
 									<span class="keywordTitle">{{ schema }}:</span>
-									{% for key in inveniodoc.keyword.controlled[schema] %}<span class="keywordKey">{{ key.keyword }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
+									{% for key in denormdoc.keyword_norm[schema] %}<span class="keywordKey">{{ key }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
 								</div>
 							{% endfor %}
 						{% endif %}
@@ -232,14 +230,14 @@
 
 
 
-{% macro render_abstract_macro_tags(solrdoc, inveniodoc) %}
+{% macro render_abstract_macro_tags(solrdoc, denormdoc) %}
 {% if solrdoc.property %}{% if 'PRIVATE' in solrdoc.property %}{% set private_abstract = True %}{% else %}{% set private_abstract = False %}{%endif%}{% else %}{% set private_abstract = False %}{% endif %}
 {# I get the ids #}
 {% set ids = solrdoc.getattr_func('ids_data', g.formatter_funcs.field_to_json) %}
 {% set id_types = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') %}{% do id_types.append(id.get('description')) %}{% endif %}{% endfor %}{% endif %}
 {% set arxiv_id = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') =='arXiv' %}{% do arxiv_id.append(id.get('identifier')) %}{% endif %}{% endfor %}{% endif %}
 
-	<meta property="og:title" content="{% if inveniodoc.author %}{{ inveniodoc.author[0].name }}:{% endif %} {% if solrdoc.title %}{{ solrdoc.title[0] }}{% else %}No title{% endif %}" />
+	<meta property="og:title" content="{% if denormdoc.author %}{{ denormdoc.author[0].name }}:{% endif %} {% if solrdoc.title %}{{ solrdoc.title[0] }}{% else %}No title{% endif %}" />
 	<meta property="og:description" content="{% if not private_abstract %}
 								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape }}{% else %}Abstract not available.{% endif %}
 							{% else %}
@@ -258,8 +256,8 @@
 	{% if arxiv_id %}
 		<meta name="DC.identifier" content="{{ arxiv_id[0] }}" />
 	{% endif %}
-	{% if inveniodoc.author %}
-		{% for author in inveniodoc.author %}
+	{% if denormdoc.author %}
+		{% for author in denormdoc.author %}
 			<meta name="DC.creator" content="{{ author.name }}" />
 		{% endfor %}
 	{% endif %}
@@ -289,8 +287,8 @@
 	{% else %}
 		<meta name="citation_title" content="No title" />
 	{% endif %}
-	{% if inveniodoc.author %}
-		<meta name="citation_authors" content="{% for author in inveniodoc.author %}{{ author.name }}{% if not loop.last %}; {% endif %}{% endfor %}" />
+	{% if denormdoc.author %}
+		<meta name="citation_authors" content="{% for author in denormdoc.author %}{{ author.name }}{% if not loop.last %}; {% endif %}{% endfor %}" />
 	{% endif %}
 	<meta name="citation_journal_title" content="{{ solrdoc.pub_raw }}" />
 	{% if solrdoc.doi %}
