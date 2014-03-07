@@ -89,10 +89,11 @@ def get_papernetwork(solr_data, weighted=True, equalization=False):
     for paper1 in papers:
         for paper2 in papers:
             if paper1 != paper2:
+                overlap = filter(lambda a: a in reference_dictionary[paper1], reference_dictionary[paper2])
                 scale = sqrt(len(reference_dictionary[paper1])*len(reference_dictionary[paper2]))
                 force = 100*C[papers.index(paper1),papers.index(paper2)] / scale
                 if force > 0:
-                    links.append({'source':papers.index(paper1), 'target': papers.index(paper2), 'value':int(round(force))})
+                    links.append({'source':papers.index(paper1), 'target': papers.index(paper2), 'value':int(round(force)), 'overlap':overlap})
                 link_dict["%s\t%s"%(paper1,paper2)] = int(round(force))
     # If histogram equalization was selected, do this and replace the links list
     if equalization:
@@ -101,9 +102,10 @@ def get_papernetwork(solr_data, weighted=True, equalization=False):
         link_dict_eq = HE.hist_eq()
         for paper1 in papers:
             for paper2 in papers:
+                overlap = filter(lambda a: a in reference_dictionary[paper1], reference_dictionary[paper2])
                 force = link_dict_eq["%s\t%s"%(paper1,paper2)]
                 if force !=0:
-                    links.append({'source':papers.index(paper1), 'target': papers.index(paper2), 'value':force})
+                    links.append({'source':papers.index(paper1), 'target': papers.index(paper2), 'value':force, 'overlap':overlap})
     # Compile node information
     nodes = []
     for paper in papers:
