@@ -108,8 +108,9 @@ def get_metrics_data(**args):
         data = results.get()
         # First remove self-citations for tori data
         try:
-            rn_citations = remove_self_citations(bibcodes,data)
+            rn_citations, rn_hist = remove_self_citations(bibcodes,data)
             data['rn_citations'] = rn_citations
+            data['rn_citations_hist'] = rn_hist
         except:
             pass
         try:
@@ -123,8 +124,15 @@ def remove_self_citations(biblist,datadict):
     # Remove all the entries in "datadict['rn_citation_data']" where the bibcode is
     # in the supplied list of bibcodes
     result = filter(lambda a: a['bibcode'] not in biblist, datadict['rn_citation_data'])
+    rn_hist = {}
+    for item in result:
+        try:
+            rn_hist[item['bibcode'][:4]] += item['ref_norm']
+        except:
+            rn_hist[item['bibcode'][:4]] = item['ref_norm']
+
     # Now we can aggregate the individual contributions to the overall normalized count
-    return sum(map(lambda a: a['ref_norm'], result))
+    return sum(map(lambda a: a['ref_norm'], result)), rn_hist
 
 def get_meta_data(**args):
     """
