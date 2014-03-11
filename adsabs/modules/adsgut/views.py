@@ -57,6 +57,7 @@ else:
     from adsabs.extensions import solr
     #adsgut_app.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
 
+
 ##print dir(adsgut), type(adsgut)
 #print "HELLO"
 #adsgut.config.from_object(__name__)
@@ -548,6 +549,7 @@ def createLibrary():
         doabort("BAD_REQ", "GET not supported")
 
 from adsabs.modules.user.user import AdsUser
+from adsabs.modules.user.user import send_email_to_user
 @adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
 def doPostableChanges(po, pt, pn):
     #add permit to match user with groupowner
@@ -581,7 +583,12 @@ def doPostableChanges(po, pt, pn):
                 adsuser=g.db.getUserForNick(adsgutuser, 'ads')
                 memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
                 memberable, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', memberable.nick)
+
             utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
+            emailtitle="Invitation to ADS Library %s" % pn
+            emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
+            send_email_to_user(emailtitle, emailtext,[memberable.adsid])
+
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
         elif op=='accept':
             memberable=g.db.getUserForAdsid(g.currentuser, memberable)
