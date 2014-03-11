@@ -85,9 +85,12 @@ def get_papernetwork(solr_data, weighted=True, equalization=False, do_cutoff=Fal
     ref_list = list(set([ref for sublist in reference_dictionary.values() for ref in sublist]))
     # Construct the paper-citation occurence matrix R
     entries = []
-    # Can this be done faster?
     for p in papers:
-        entries.append(map(lambda b: int(b), map(lambda a: a in reference_dictionary[p], ref_list)))
+        vec = [0]*len(ref_list)
+        ref_ind = map(lambda a: ref_list.index(a), reference_dictionary[p])
+        for entry in ref_ind:
+            vec[entry] = 1
+        entries.append(vec)
     R = mat(entries).T
     # Contruct the weights matrix, in case we are working with normalized strengths
     if weighted:
@@ -107,7 +110,8 @@ def get_papernetwork(solr_data, weighted=True, equalization=False, do_cutoff=Fal
     link_dict = {}
     # Can this be done faster? It looks like this could be done via matrix multiplication
     # Don't forget that this is a symmetrical relationship and the diagonal is irrelevant, 
-    # so we will only iterate over the upper diagonal
+    # so we will only iterate over the upper diagonal. Seems like this could be pulled in
+    # the generation of W (above)
     Npapers = len(papers)
     for i in range(Npapers):
         for j in range(i+1,Npapers):
@@ -115,6 +119,7 @@ def get_papernetwork(solr_data, weighted=True, equalization=False, do_cutoff=Fal
             force = 100*C[papers.index(papers[i]),papers.index(papers[j])] / scale
             if force > 0:
                 link_dict["%s\t%s"%(papers[i],papers[j])] = int(round(force))
+                link_dict["%s\t%s"%(papers[j],papers[i])] = int(round(force))
     # Cut the list of links to the maximum allowed by first sorting by force strength and then cutting by maximum allowed
     if do_cutoff:
         link_dict = _sort_and_cut_results(link_dict)
