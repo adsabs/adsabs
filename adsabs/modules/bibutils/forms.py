@@ -27,6 +27,7 @@ class MetricsInputForm(Form):
     """
     bibcodes = TextAreaField('bibcodes')
     layout = TextField('layout')
+    format = TextField('format')
     current_search_parameters = TextField('current_search_parameters')
     bigquery = TextField('bigquery')
     numRecs = TextField('numRecs')
