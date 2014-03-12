@@ -33,8 +33,9 @@
                             </a>
                             <ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
 
-                            	If your network is set to "rearrange", but you want to zoom in, click "explore graph."
+                                <strong>Note: </strong>  If your network is set to "rearrange", but you want to zoom in, click "explore graph."
                                 If you search for a paper and it isn't visible, you might have filtered it out. Try moving the slider back to the left.
+                                <br/>
                                 <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
                                 <li> <strong>Filter</strong> your graph to show the most essential authors by moving the slider. </li>
                                     <li><strong>Search </strong> for the name of an author in the search box to find the author.
@@ -42,7 +43,6 @@
                                         <li><strong>Drag</strong> the node after selecting "rearrange graph" to dynamically alter the network. </li>
                                         <li><strong>Select</strong> a node and each one of its links at once in group select mode.</li>   
                                         <li><strong>Limit</strong> your current set of ADS search results by selecting one or more authors and clicking "apply filter to search".</li>   
-
 
                                     </ul>
                                 </div> 
@@ -63,9 +63,11 @@
                                 </div>
 
                                 <div class="well well-small vis_item_format" >
-                                    Filter by author weight
+                                    Filter by author frequency
                                     <div id="filter-slider">
                                     </div>
+                                <small> (Initial view might be filtered)</small>
+
                                 </div>
 
                                 <div class="well well-small clearfix vis_item_format"><p>Search for an Author: 
@@ -99,7 +101,8 @@
         var authNet = (function(){
 
             var json = {{ network_data|tojson|safe }};
-            var numNodes = json.nodes.length;
+            var numNodes = json.nodes.length,
+            numLinks = json.links.length;
 
             var baseurlandquery = window.location.href;
 
@@ -131,9 +134,9 @@
 
             var force, svg, g1, g, node, link, z;
 
-            initial = true;
-            var animate = true;
-
+            var initial = true,
+            animate = true,
+            initSliderLevel = 0;
 
             function redraw() {
                 g.attr("transform",
@@ -145,11 +148,11 @@
 
             var animate = true;
 
-                var highlightColor = "orange";
+            var highlightColor = "orange";
 
             return {
 
-            	check : function(d){
+                check : function(d){
 
                     if (numNodes !== 0 ){
                         d();
@@ -290,10 +293,10 @@
                         })
                     .on("mouseover", function(d1){
 
-                    	d3.select(this).classed("group-highlight", true)
+                        d3.select(this).classed("group-highlight", true)
 
                         for (var ji=0; ji<json.links.length; ji++)
-                            { 	
+                            {   
                                 if(json.links[ji]['source']['index']==d1.index)
                                       {
                                         var partner=json.links[ji]["target"];
@@ -320,9 +323,6 @@
                         })
 
                     })
-
-                                    console.log(node, link)
-
 
                 },
 
@@ -396,6 +396,34 @@
                 start : function(maxTicks) {
                     var that = this;
 
+                    if (numNodes > 400)
+                    {
+                        var oldscale = z.scale();
+                        var scale = z.scale() -.5;
+
+                        var x = z.translate()[0], 
+                            y = z.translate()[1], 
+                            translateX= -scale*((w/2-x)/oldscale)+w/2,
+                            translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                            z.scale(scale);
+                            z.translate([translateX, translateY]);
+
+                            d3.select(g[0][0])
+                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+
+                    }
+
+                //customizing filter level
+                if (numLinks > 3000) {
+                    var avgLperN = numLinks/numNodes;
+                    //we want the initial view of the network to have ~2000 links
+                    var nodesToShow = Math.floor(3000/avgLperN)
+                    //rough calculation
+                    var sliderLevel =10 -  Math.ceil((10*nodesToShow)/numNodes)
+                    initSliderLevel = sliderLevel
+                
+                }
            
                     // nodes initiated in center (this seems to produce better rendering)
                     node.forEach(function(d, i) {
@@ -423,24 +451,8 @@
 
                     });
 
-                    //customizing zoom level for large networks
-                    if (numNodes > 350)
-                    {
-                        var oldscale = z.scale();
-                        var scale = z.scale() -.6;
+                $("#filter-slider").slider('value', initSliderLevel);
 
-                        var x = z.translate()[0], 
-                            y = z.translate()[1], 
-                            translateX= -scale*((w/2-x)/oldscale)+w/2,
-                            translateY= -scale*((h/2-y)/oldscale)+h/2;
-
-                            z.scale(scale);
-                            z.translate([translateX, translateY]);
-
-                            d3.select(g[0][0])
-                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
-
-                    }
 
                 },
 
@@ -690,7 +702,7 @@
                             min:0,
                             max:9,
                             step:1,
-                            slide: function(event, ui){
+                            change: function(event, ui){
                                 
                                 var r = (ui.value == 0) ? 0: numNodes % 10;
                                 var b = Math.floor(numNodes/10);
@@ -733,18 +745,29 @@
         })(); //end module
 
   $(document).ready(function(){
-    	authNet.check(function(){
+        authNet.check(function(){
+        authNet.initialize(35, 1, -500);
+        authNet.slideFilter();
 
-    	authNet.initialize(35, 1, -500);
         authNet.start(30);
         authNet.toggleOptions();
 
         authNet.nodeSearch("#findauthor");
-        authNet.slideFilter();
 
-    	})
+        })
        
     });
+
+    </script>
+
+    <script>
+            //pinging google analytics
+            ga('send', 'event', 'visualize', 'fancybox_load', 'author_network');
+            </script>
+
+        </div>
+      </div>
+    </div>    
 
     </script>
 

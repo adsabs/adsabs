@@ -26,8 +26,9 @@
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
-                                If your network is set to "rearrange", but you want to zoom in, click "explore graph."
+                                <strong>Note: </strong>If your network is set to "rearrange", but you want to zoom in, click "explore graph."
                                 If you search for a paper and it isn't visible, you might have filtered it out. Try moving the slider back to the left.
+                                <br/>
                                 <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
                                 <li> <strong>Filter</strong> your graph to show the most essential papers by moving the slider. </li>
                                     <li><strong>Search </strong> for the name of an paper in the search box to find the paper.
@@ -59,6 +60,7 @@
                                     Filter by Citations
                                     <div id="filter-slider">
                                     </div>
+                                    <small> (Initial view might be filtered)</small>
                                 </div>
 
                                 <div class="well well-small clearfix vis_item_format"><p>Search for a paper: 
@@ -92,7 +94,9 @@
         var paperNet = (function(){
 
             var json = {{ network_data|tojson|safe }};
-            var numNodes;
+            var numNodes,
+            numLinks = json.links.length;
+
 
             var baseurlandquery = window.location.href;
 
@@ -125,8 +129,9 @@
             //declaring the variables here so that multiple methods have access to them
             var force, svg, g1, g, node, link, z;
 
-            var initial = true;
-            var animate = true;
+            var initial = true,
+                animate = true,
+                initSliderLevel = 0;
 
             function redraw() {
                 g.attr("transform",
@@ -137,7 +142,7 @@
             var nodeDrag, lnodes;
 
             var highlightColor = "orange";
-    
+
 
             return {
 
@@ -426,7 +431,38 @@
 
                 //joins the svgs with the force layout
                 start : function(maxTicks) {
-                    var that = this;
+                        var that = this;
+
+
+                //customizing zoom level for large networks
+                    if (numNodes > 350)
+                    {
+                        var oldscale = z.scale();
+                        var scale = z.scale() -.3;
+
+                        var x = z.translate()[0], 
+                            y = z.translate()[1], 
+                            translateX= -scale*((w/2-x)/oldscale)+w/2,
+                            translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                            z.scale(scale);
+                            z.translate([translateX, translateY]);
+
+                            d3.select(g[0][0])
+                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+
+                    }
+
+                //customizing filter level
+                if (numLinks > 2000) {
+                    var avgLperN = numLinks/numNodes;
+                    //we want the initial view of the network to have ~2000 links
+                    var nodesToShow = Math.floor(2000/avgLperN)
+                    //rough calculation
+                    var sliderLevel =10 -  Math.ceil((10*nodesToShow)/numNodes);
+                    initSliderLevel = sliderLevel;
+                
+                }
 
                     // //randomly initiate positions of nodes
                     node.forEach(function(d, i) {
@@ -456,25 +492,7 @@
 
                     });
 
-                    //customizing zoom level for large networks
-                    if (numNodes > 350)
-                    {
-                        var oldscale = z.scale();
-                        var scale = z.scale() -.6;
-
-                        var x = z.translate()[0], 
-                            y = z.translate()[1], 
-                            translateX= -scale*((w/2-x)/oldscale)+w/2,
-                            translateY= -scale*((h/2-y)/oldscale)+h/2;
-
-                            z.scale(scale);
-                            z.translate([translateX, translateY]);
-
-                            d3.select(g[0][0])
-                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
-
-                    }
-
+                    $("#filter-slider").slider('value', initSliderLevel);
                 },
 
                 nodeSearch: function(id) {
@@ -721,11 +739,11 @@
                     slideFilter : function() {
 
                         $("#filter-slider").slider({
-                            value:0,
+                            value: 0,
                             min:0,
                             max:9,
                             step:1,
-                            slide: function(event, ui){
+                            change: function(event, ui){
                                 
                                 var r = (ui.value == 0) ? 0: numNodes % 10;
                                 var b = Math.floor(numNodes/10);
@@ -761,7 +779,9 @@
                                     })
 
                                 }
+
                         })//end jquery slider function
+
                     }
 
         }//end returned object
@@ -772,11 +792,12 @@
 
         paperNet.check(function(){
         paperNet.initialize(70, 1, -900);
+        paperNet.slideFilter();
         paperNet.start(30);
+
         paperNet.toggleOptions();
 
         paperNet.nodeSearch("#findpaper");
-        paperNet.slideFilter();
         })
         
     });
