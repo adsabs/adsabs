@@ -175,11 +175,12 @@ def restore(indir=None):
                      os.path.join(indir, config.MONGOALCHEMY_DATABASE)])
     
 @mongo_manager.command
-def migrate(commit):
+def migrate(migration_id):
 
     def import_migration():
-        package_path = 'migrations.migrate_%s' % commit
+        package_path = 'migrations.migrate_%s' % migration_id
         m = __import__(package_path)
+        # traverse the package path
         for n in package_path.split(".")[1:]:
             m = getattr(m, n)
         return m
