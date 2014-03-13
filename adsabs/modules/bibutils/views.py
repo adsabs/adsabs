@@ -18,6 +18,7 @@ from .biblio_functions import get_suggestions
 from .metrics_functions import generate_metrics
 from .metrics_functions import legacy_format
 from .utils import export_metrics
+from .utils import create_metrics_report
 from .utils import get_publications_from_query
 from .errors import CitationHelperCannotGetResults
 
@@ -128,9 +129,16 @@ def metrics(**args):
     except:
         bibcodes = []
     if request.method == 'POST':
+        export_file = ''
         export_id = request.form.get('exportid','')
+        pdf_report = request.form.get('pdf_report','')
         if export_id:
             export_file = config.METRICS_TMP_DIR + '/' + export_id
+            output_file = 'Metrics.xls'
+        elif pdf_report:
+            export_file = config.METRICS_TMP_DIR + '/' + pdf_report
+            output_file = 'Metrics.pdf'
+        if export_file:
             try:
                 xls_file = open(export_file)
             except Exception, err:
@@ -146,7 +154,7 @@ def metrics(**args):
             'Cache-Control': 'must-revalidate, post-check=0, pre-check=0',
             'Cache-Control': 'private',  # required for certain browsers,
             'Content-Type': 'text/xls; charset=UTF-8',
-            'Content-Disposition': 'attachment; filename=\"Metrics.xls\";',
+            'Content-Disposition': 'attachment; filename=\"%s\";'%output_file,
             'Content-Transfer-Encoding': 'binary',
             'Content-Length': len(response.data)
             })
@@ -188,6 +196,7 @@ def metrics(**args):
                 query_par = str(form.current_search_parameters.data.strip())
                 query = json.loads(query_par)['q']
                 title = "Metrics report for query: %s" % query
+                pdf_title = title
                 sort  = json.loads(query_par).get('sort', None)
                 bigquery_id = form.bigquery.data
                 if sort is None:
@@ -212,6 +221,7 @@ def metrics(**args):
         # we have a list of bibcodes, so start working
         if not title:
             title = 'Metrics report generated on %s' % time.strftime("%c")
+            pdf_title = ''
         try:
             results = generate_metrics(bibcodes=bibcodes, fmt=format)
             results['title'] = title
@@ -219,10 +229,17 @@ def metrics(**args):
             app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,err))
             return render_template('metrics_no_results.html', include_layout=layout)
     if results:
+        single_record = False
+        if len(bibcodes) == 1:
+            single_record = True
         try:
-            excel_id = export_metrics(results)
+            excel_ready = export_metrics(results)
         except:
-            excel_id = ''
+            excel_ready = False
+        try:
+            pdf_ready = create_metrics_report(results, file_name=excel_ready.replace('.xls','.pdf'), report_name=pdf_title, single_record=single_record)
+        except:
+            pdf_ready = False
         mode = 'normal'
         if len(bibcodes) == 1:
             mode = 'singlebibcode'
@@ -230,5 +247,5 @@ def metrics(**args):
         if format == 'json':
             return jsonify(metrics=results)
         else:
-            return render_template('metrics_results.html', results=results, include_layout=layout, export_id=excel_id)
+            return render_template('metrics_results.html', results=results, include_layout=layout, excel_report=excel_ready, pdf_report=pdf_ready)
     return render_template('metrics.html', form=form)

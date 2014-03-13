@@ -392,14 +392,22 @@
 				</tbody>
 			</table>
 			{% endif %}
-			        {% if export_id is defined %}
+			        {% if excel_report %}
 	                <div id="export" style="clear:both; margin:30px;">
                         <form action="{{ url_for('bibutils.metrics')}}" method="post">
-                                <input type="hidden" name="exportid" value="{{export_id}}"/>
+                                <input type="hidden" name="exportid" value="{{excel_report}}"/>
                                 <input type="submit" value="Export to xls" style="border: 1px outset #AAA; background-color:#EEE; font-size:1.1em; height: 30px;">
                         </form>
                 </div>
         {% endif %}
+		{% if pdf_report %}
+		    <div id="pdf_report" style="clear:both; margin:30px;">
+				<form action="{{ url_for('bibutils.metrics')}}" method="post">
+					<input type="hidden" name="pdf_report" value="{{pdf_report}}"/>
+					<input type="submit" value="Get PDF report" style="border: 1px outset #AAA; background-color:#EEE; font-size:1.1em; height: 30px;">
+					</form>
+			</div>
+		{% endif %}
 	</div>
 	<div id="metrics_plots" class="wrapper group_wrapper">
 		{% if results['mode'] == 'normal' %}
