@@ -58,7 +58,7 @@ class TemplateFiltersTestCase(AdsabsBaseTestCase):
         
     def test_format_special_ads_facet_str(self):
         self.assertEqual(tf.format_special_ads_facet_str('Foobar'), 'Foobar')
-        self.assertEqual(tf.format_special_ads_facet_str('notrefereed'), u'not refereed')
+        self.assertEqual(tf.format_special_ads_facet_str('notrefereed'), u'non-refereed')
        
     def test_safe_html_unescape(self):
         self.assertEqual(tf.safe_html_unescape('Foobar'), u'Foobar')
