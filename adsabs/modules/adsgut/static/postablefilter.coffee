@@ -67,7 +67,15 @@ do_postable_filter = (sections, config, tagfunc) ->
             #console.log "POSTINGS", data.postings, config.fqpn
             #console.log "TG", data.taggings
             [stags, notes]=get_taggings(data)
-            #console.log "===", stags, notes
+            tagoutput = {}
+            for prop of stags
+                clist = stags[prop]
+                if clist.length==0
+                    tagoutput[prop]=[]
+                else
+                    tagoutput[prop] = (e[0] for e in clist)
+
+            #console.log JSON.stringify(tagoutput)
             postings={}
             times={}
             for own k,v of data.postings

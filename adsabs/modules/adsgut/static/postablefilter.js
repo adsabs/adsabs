@@ -104,8 +104,26 @@
       sections.$bigqueryform.attr("action", config.bq2url);
       itemsq = itemlist.join("&");
       return syncs.taggings_postings_post_get(itemlist, config.pview, function(data) {
-        var cb, e, eb, ido, k, notes, plinv, postings, ptimes, sorteditems, stags, times, v, _i, _len, _ref, _ref1;
+        var cb, clist, e, eb, ido, k, notes, plinv, postings, prop, ptimes, sorteditems, stags, tagoutput, times, v, _i, _len, _ref, _ref1;
         _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
+        tagoutput = {};
+        for (prop in stags) {
+          clist = stags[prop];
+          if (clist.length === 0) {
+            tagoutput[prop] = [];
+          } else {
+            tagoutput[prop] = (function() {
+              var _i, _len, _results;
+              _results = [];
+              for (_i = 0, _len = clist.length; _i < _len; _i++) {
+                e = clist[_i];
+                _results.push(e[0]);
+              }
+              return _results;
+            })();
+          }
+        }
+        console.log(JSON.stringify(tagoutput));
         postings = {};
         times = {};
         _ref1 = data.postings;
