@@ -219,29 +219,29 @@
 		<div class="span11 firstspan">
 			{%- for elem in selected_facets -%}
 				<span class="appliedFilter">{%- if elem[0] == 'bib_f' -%}
-						Publication
+						Publication : 
 					{%- elif elem[0] == 'aut_f' -%}
-						Author
+						Author : 
 					{%- elif elem[0] == 'key_f' -%}
-						Keyword
+						Keyword : 
 					{%- elif elem[0] == 'year_f' -%}
-						Year
+						Year : 
 					{%- elif elem[0] == 'bibgr_f' -%}
-						Bibgroup
+						Bibgroup : 
 					{%- elif elem[0] == 'grant_f' -%}
-						Grant
+						Grant : 
 					{%- elif elem[0] == 'data_f' -%}
-						Data
+						Data : 
 					{%- elif elem[0] == 'vizier_f' -%}
-						Vizier
+						Vizier : 
 					{%- elif elem[0] == 'db_f' -%}
-						Database
+						Database : 
 					{%- elif elem[0] == 'prop_f' and ('refereed' in elem[1] or 'notrefereed' in elem[1]) -%}
 						{# no string and the actual text is converted using the template filter "format_special_ads_facet_str" #}
 					{%- else -%}
-						{{ elem[0] }}
+						{{ elem[0] }} : 
 					{%- endif -%}
-					{{ " : " + elem[1]|format_complex_ads_facet_str|format_ads_facet_str|format_special_ads_facet_str }} 
+					{{ " " + elem[1]|format_complex_ads_facet_str|format_ads_facet_str|format_special_ads_facet_str }} 
 					<a href="{{ url_for('search.search') }}?{{ request.query_string|rem_par_url('page')|rem_par_url(elem[0], elem[1]) }}" data-rel="bootstrap_tooltip" 
 					   title="remove &ldquo;{{ elem[1]|format_complex_ads_facet_str|format_ads_facet_str }}&rdquo;"><i class="icon-remove-sign"></i></a>
 				</span>

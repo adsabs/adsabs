@@ -98,7 +98,7 @@ def format_special_ads_facet_str(value):
     But any other special case can be added here (and in the tests)
     """
     if value == 'notrefereed':
-        return u'not refereed'
+        return u'non-refereed'
     
     #in any other case returns the original string
     return value
