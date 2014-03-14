@@ -76,6 +76,9 @@ do_postable_filter = (sections, config, tagfunc) ->
                     tagoutput[prop] = (e[0] for e in clist)
 
             #console.log JSON.stringify(tagoutput)
+            $('#asjson').click (e)->
+                window.document.write(JSON.stringify(tagoutput))
+                e.preventDefault()
             postings={}
             times={}
             for own k,v of data.postings

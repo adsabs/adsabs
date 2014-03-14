@@ -123,7 +123,10 @@
             })();
           }
         }
-        console.log(JSON.stringify(tagoutput));
+        $('#asjson').click(function(e) {
+          window.document.write(JSON.stringify(tagoutput));
+          return e.preventDefault();
+        });
         postings = {};
         times = {};
         _ref1 = data.postings;
