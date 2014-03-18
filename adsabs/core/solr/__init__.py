@@ -83,19 +83,20 @@ def _extract_authors(solrdoc):
     affs = 'aff' in solrdoc and solrdoc['aff'] or []
     emails = 'email' in solrdoc and solrdoc['email'] or []
     
-    for a in solrdoc['author']:
-        author = {'name': a}
-        if len(affs) > i:
-            author['affiliation'] = affs[i]
-        if len(emails) > i:
-            author['email'] = emails[i]
-        i += 1
-        authors.append(author)
-    
-    if affs:
-        del solrdoc['aff']
-    if emails:
-        del solrdoc['email']
+    if 'author' in solrdoc:
+        for a in solrdoc['author']:
+            author = {'name': a}
+            if len(affs) > i:
+                author['affiliation'] = affs[i]
+            if len(emails) > i:
+                author['email'] = emails[i]
+            i += 1
+            authors.append(author)
+        
+        if affs:
+            del solrdoc['aff']
+        if emails:
+            del solrdoc['email']
     return authors
 
 def _extract_controlled_keywords(solrdoc):
