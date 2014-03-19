@@ -533,7 +533,7 @@ App.initiatePubAutocomplete = function () {
 		  this.value = terms.join( ", " );
 		  // added this to make query bar at top work
 		  $("textarea[name=query-bibstem-args]").val(terms.join( ", " ))
-		  $("textarea[name=query-bibstem-args]").trigger('click')
+		  $("textarea[name=query-bibstem-args]").trigger('keyup')
 		  return false;
 		}
 	})
