@@ -46,6 +46,7 @@ var adsTour = function() {
 
 				e.preventDefault();					
 			})}
+
 	};
 }();
 
@@ -379,75 +380,87 @@ var tourSteps = {
 			  }]);		
 	},
 	"^/search/classic-search/$": function(adsTour) {
-		var authorContent = $("div#author textarea").val()
-		var authorLogic= $("input:radio[name='author_logic']:checked");
+		var authorContent = $("textarea[name=query-author-args]").val()
+		var authorLogic= $("div.author-radio input:checked");
+		var pubFieldContent = $("textarea[name=query-bibstem-args]").val()
 
 		adsTour.tour.addSteps([
 		  {
 		    element: "li#tour", 
 		    title: "Welcome to the ADS Classic Search Page", 
-		    content: "This \"New Classic Search\" form offers an updated interface similar to the ADS Classic form that astronomers have been using for decades.",
+		    content: "This form offers an updated interface similar to the ADS Classic form that astronomers have been using for decades.",
 		    placement:'right'
 		  },
 		  	{
 		    element: "#classic_q", 
 		    title: "A New Way to Search", 
-		    content: "As you fill in the fields below, this search bar will automatically show your query as you would write it in in the ADS One-Box Search. You cannot edit this field.",
-		    placement:'left'
-			},
-			{
-		    element: "span#classic_help_button", 
-		    title: "Help Mode", 
-		    content: "For a more detailed description of each of the search fields, you can turn on help mode and mouse over any part of the form that interests you.",
-		    onShown: function(tour) {$("span#classic_help_button").trigger("click")},
-		    onNext:function(tour) {$("span#classic_help_button").trigger("click")}
-		  },
-
-		  {
-		    element: "div#author textarea", 
-		    title: "Try it out", 
-		    content: "Type \"Berger, E\", hit return, then type \"Fong, W \" into this text field and watch as the query bar above updates automatically.",
+		    content: "As you fill in the fields below, this search bar will automatically show your query as you would write it in in the regular ADS search (accessible in the \"Search the ADS\" tab). <br/> You cannot edit this field.",
 		    placement:'right'
+			},
+
+		  {
+		    element: "textarea[name=query-author-args]", 
+		    title: "Find Authors", 
+		    content: "Here we are searching for papers with Edo Berger as first author and Wen-fai Fong as co-author.",
+		    placement:'right',
+		    onShown:  function(tour){
+		    				$( "textarea[name=query-author-args]").val("^Berger, E \n Fong, W");
+		    				$( "textarea[name=query-author-args]").trigger("keyup");
+		    			}
 		  },
 
 		  {
-		    element: "div#author label.radio:eq(2)", 
-		    title: "Try it Out", 
-		    content: "Now that you have entered multiple authors in the form, you can choose to use 'and', 'or', or simple logic to join the names.",
+		    element: "div.author-radio", 
+		    title: "Changing the Logic", 
+		    content: "Once you have entered multiple authors in the form, you can use 'and', 'or', or simple logic to join the names.",
 		    placement:'right',
 		    onShown: function(tour) {
-	    							setTimeout(function(){$("div#author input.or").trigger("click")},3000);
-	    							setTimeout(function(){$("div#author input.simple").trigger("click")},5000);
-									setTimeout(function(){authorLogic.trigger("click")},5000)
+	    							setTimeout(function(){$("div.author-radio input[value=or]").trigger("click")},1000);
+	    							setTimeout(function(){$("div.author-radio input[value=simple]").trigger("click")},3000);
+									setTimeout(function(){$("div.author-radio input[value=and]").trigger("click")},5000)
 		    						},
 		    onNext:function(tour) {
-		    						$("div#author textarea").val(authorContent);
-		    						$("div#author textarea").trigger("click");
+		    			    		$( "textarea[name=query-author-args]").val(authorContent);
+		    						$( "textarea[name=query-author-args]").trigger("keyup");
+		    						authorLogic.click();
 		    					}
 		  },
 
 		  {
-		    element: "textarea#pubtext", 
-		    title: "Try it Out", 
-		    content: "Entering in the first few letters of either the full name or bibstem of a publication will trigger an autocomplete. Try typing the word \"astrophysical\"",
+		    element: "textarea[name=query-bibstem-args]", 
+		    title: "Limit Your Search to Certain Publications", 
+		    content: "Entering in the first few letters of either the full name or bibstem of a publication will trigger an autocomplete. Try typing in the word \"astrophysical\".",
 		    placement:'right',
+		    onShown: function(tour){
+
+		    						$("textarea[name=query-bibstem-args]").val("");
+		    						$("textarea[name=query-bibstem-args]").trigger("keyup");
+		    						},
 		    onNext:function(tour) {
-		    						$("textarea#pubtext").val("");
-		    						$("textarea#pubtext").trigger("click");
-		    					}
+		    						$("textarea[name=query-bibstem-args]").val(pubFieldContent);
+		    						$("textarea[name=query-bibstem-args]").trigger("keyup");
+		    						}
 		  },
 		  	{
 		    element: "#classic_filter_div", 
 		    title: "View Filters As They Are Applied", 
-		    content: "Any filter you apply to your query, say, by changing the queried databases, will be reflected here immediately.",
-		    placement:'left'
+		    content: "Any filter you apply to your query, for example, changing the queried databases, will be reflected here immediately.",
+		    placement:'left',
+		    onShown : function(tour){
+						    			setTimeout(function(){$( "input[name=filter-database][value=physics]").trigger("click")}, 2500)
+						    			$( "textarea[name=query-author-args]").trigger("keyup");
+						    			$("div.author-radio input[value=and]").trigger("click");
+		    						},
+		    onNext: function(tour){
+		    						$( "input[name=filter-database][value=physics]").trigger("click")
+		    						}
 		  },
 
 		  {
 		    element: "#search_submit", 
 		    title: "Keep in Mind this Change", 
 		    content: "Unlike in the original ADS search form, individual fields within your search will be joined with an implicit \"and\" rather than an \"or\". This means everything you enter will factor in to your search results.",
-		    placement:'top'
+		    placement:'bottom'
 		  },
 
 		  {
