@@ -155,7 +155,6 @@ lib.formData = Backbone.NestedModel.extend({
 				}
 			}
 		})	
-			console.log(query)
 			return query;
 	},
 
@@ -247,7 +246,9 @@ lib.formDataView = Backbone.View.extend({
 	events : {"click #search_submit" : "transmitData",
 				"click #clear" : "resetForm",
 				"keyup input[type=\"text\"], textarea": "updateModel",
-				// we dont want to call change event for text or textarea, since we are already capturing keydowns
+				//added the blur, which catches changes when someone held down a key for a long time (this will never happen in real life but w/e)
+				"blur input[type=\"text\"], textarea": "updateModel",
+				// we dont want to call change event for text or textarea, since we are already capturing keyup
 				"change input[type=\"checkbox\"], input[type=\"radio\"]" : "updateModel"
 			},
 
@@ -258,12 +259,10 @@ lib.formDataView = Backbone.View.extend({
 
 		if (infoOnBackButton) {
 			startData = JSON.parse(infoOnBackButton);
-			console.log(startData)
-
 			this.model.set(startData);
 
-			//finally, trigger change event on each input + textarea
-			$(".classic_form_styling input, .classic_form_styling textarea ").trigger("change");
+			//finally, trigger model change event
+			this.model.trigger("change");
 		}
 
 	},
@@ -300,7 +299,6 @@ lib.formDataView = Backbone.View.extend({
 					}
 				});
 			});
-		this.model.trigger("change")
 	},
 
 	transmitData : function() {
@@ -329,7 +327,7 @@ lib.formDataView = Backbone.View.extend({
 			var model_id = n.replace(/-/g, ".").trim();
 			this.model.set(model_id, newVal)
 
-		}	
+		}
 	}
 })
 
