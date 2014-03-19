@@ -130,7 +130,7 @@ lib.formData = Backbone.NestedModel.extend({
 			object: {args: "", logic:'and', simbad:false, ned: false, ads: false},
 			title: {args: "", logic:'and' },
 			abstract: {args: "", logic:'and'},
-			bibstem: {args:""}
+			bibstem: {args:"", logic: 'or'}
 		}
 
 	},
