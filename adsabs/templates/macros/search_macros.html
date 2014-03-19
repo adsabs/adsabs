@@ -177,14 +177,14 @@
 		(function(){
 				//make sure only first potential bibstem is returned
 			getFirst = function(s){
-					return s.match(/\w+/)
+					return s.match(/[\w&]+/)[0]
 				};
 
 			$("#pub-query form").submit(function(e){
-			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:(" + getFirst($("#bib-name").val()) + ")") : "")
+			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:(" + getFirst($("#bib-name").val()) + ") ") : "")
 												+ ($("#pub-year").val()? ("year:" + $("#pub-year").val() + " ") : "")
-												+ ($("#pub-volume").val()? ("volume:\"" +  $("#pub-volume").val() +"\"") : "")
-												+ ($("#pub-page").val()? ("page:\"" +  $("#pub-page").val() +"\"") : "")
+												+ ($("#pub-volume").val()? ("volume:(" +  $("#pub-volume").val() +") ") : "")
+												+ ($("#pub-page").val()? ("page:(" +  $("#pub-page").val() +") ") : "")
 											 )
 			});
 
@@ -200,6 +200,7 @@
 						}
 					})
 					.autocomplete({
+						open: function(){$('#div .ui-menu').width(300)},
 						source: function( request, response ) {
 							$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
 						    term: getFirst( request.term )
@@ -227,7 +228,7 @@
 
 		auto.initiatePubAutocomplete();
 
-		})()
+		}())
 		
 
 		</script>
