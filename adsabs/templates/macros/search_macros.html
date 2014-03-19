@@ -173,71 +173,62 @@
 		</div>
 
 		<script>
-		$("#pub-query form").submit(function(e){
-			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:\"" + $("#bib-name").val() + "\" ") : "")
+
+		(function(){
+				//make sure only first potential bibstem is returned
+			getFirst = function(s){
+					return s.match(/\w+/)
+				};
+
+			$("#pub-query form").submit(function(e){
+			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:(" + getFirst($("#bib-name").val()) + ")") : "")
 												+ ($("#pub-year").val()? ("year:" + $("#pub-year").val() + " ") : "")
 												+ ($("#pub-volume").val()? ("volume:\"" +  $("#pub-volume").val() +"\"") : "")
 												+ ($("#pub-page").val()? ("page:\"" +  $("#pub-page").val() +"\"") : "")
 											 )
 			});
 
-		var auto = (function(){
 
-				split = function( val ) {
-				      return val.split( /,\s*/ );
-				    };
+			var auto = {
 
-				extractLast = function( term ) {
-				      return split( term ).pop();
-				    };
-
-				return {
-
-					initiatePubAutocomplete : function () {
-						$("#bib-name")
-						.bind( "keydown", function( event ) {
-						if ( event.keyCode === $.ui.keyCode.TAB &&
-						    $( this ).data( "ui-autocomplete" ).menu.active ) {
-						  event.preventDefault();
+				initiatePubAutocomplete : function () {
+					$("#bib-name")
+					.bind( "keydown", function( event ) {
+					if ( event.keyCode === $.ui.keyCode.TAB &&
+					    $( this ).data( "ui-autocomplete" ).menu.active ) {
+					  event.preventDefault();
+						}
+					})
+					.autocomplete({
+						source: function( request, response ) {
+							$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
+						    term: getFirst( request.term )
+						  }, response );
+						},
+						search: function() {
+						  // custom minLength
+						  var term = getFirst(this.value);
+						  if ( term.length < 2 ) {
+						    return false;
+						  }
+						},
+						focus: function() {
+						  // prevent value inserted on focus
+						  return false;
+						},
+						select: function( event, ui ) {
+						  this.value = ui.item.value
+						  return false;
 							}
-						})
-						.autocomplete({
-							source: function( request, response ) {
-								$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
-							    term: extractLast( request.term )
-							  }, response );
-							},
-
-							search: function() {
-							  // custom minLength
-							  var term = extractLast( this.value );
-							  if ( term.length < 2 ) {
-							    return false;
-							  }
-							},
-							focus: function() {
-							  // prevent value inserted on focus
-							  return false;
-							},
-							select: function( event, ui ) {
-							  var terms = split( this.value );
-							  // remove the current input
-							  terms.pop();
-							  // add the selected item
-							  terms.push( ui.item.value );
-							  // add placeholder to get the comma-and-space at the end
-							  terms.push( "" );
-							  this.value = terms.join( ", " );
-
-							  return false;
-								}
-						});
-					}
+					});
 				}
+			};
 
-			})();
 
-			auto.initiatePubAutocomplete();
+		auto.initiatePubAutocomplete();
+
+		})()
+		
 
 		</script>
 	</div>
