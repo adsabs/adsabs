@@ -129,8 +129,17 @@ create_postable = (postable, postabletype, cback, eback) ->
 add_group = (selectedgrp, postable, changerw, cback, eback) ->
     url= prefix+"/postable/"+postable+"/members"
     data=
-        member:selectedgrp
-        changerw:changerw
+        member: selectedgrp
+        changerw: changerw
+    #console.log "DATA", data
+    send_params(url, data, cback, eback)
+
+make_public = (postable, cback, eback) ->
+    url= prefix+"/postable/"+postable+"/members"
+    data=
+        member: 'adsgut/user:anonymouse'
+        changerw: false
+    #console.log "make public"
     send_params(url, data, cback, eback)
 
 #This one is not particularly useful and dosent seem to be used
@@ -292,6 +301,7 @@ root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
     add_group: add_group
+    make_public: make_public
     change_ownership: change_ownership
     toggle_rw: toggle_rw
     get_postables: get_postables

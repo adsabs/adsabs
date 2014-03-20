@@ -1,13 +1,9 @@
 
-// module name is "classicSearch"
+	lib = {utility : {}};
+	App = {};
 
-classicSearch = {};
-
-//utility functions
-
-//takes a string, returns a list of split tokens that have quotation marks correctly inserted
-classicSearch.fieldParse = function (field, str, searchObject)
-	{
+lib.utility.fieldParse = function (field, str, logic)
+	{	
 		if (field === 'author')
 			//we have to split on return rather than whitespace
 			{	
@@ -22,13 +18,11 @@ classicSearch.fieldParse = function (field, str, searchObject)
 							tempArgs.push(args[i].trim())
 							}
 					}
-
 					args = tempArgs;
-
 					var tempArgs = []
 
 					// and we need to put quotes around words, not +s and -s
-					{	if (searchObject['author']['logic']==='simple')
+					if (logic==='simple')
 						// we need an extra parsing step
 							{ for (var i=0; i< args.length; i++)
 								{ 	parsed = args[i].match(/^\s*\+|^\s*\-/)||"" 
@@ -43,18 +37,16 @@ classicSearch.fieldParse = function (field, str, searchObject)
 										}
 								}
 							}
-						else //OR or AND-- just add quotes
+					else //OR or AND-- just add quotes
 							{for (var i=0; i< args.length; i++)
 								{
 									tempArgs.push(args[i]='"'+args[i]+'"')
 								}
 							}
-					}
 
 				args = tempArgs
 			}
 
-		
 		else if (field === 'bibstem')
 			//split on commas
 			{	var commaSplit = /\s*,\s*/
@@ -77,115 +69,342 @@ classicSearch.fieldParse = function (field, str, searchObject)
 				var args = str.match(quoteSplit);
 			}
 		return args
-	}
+	},
 
-// joins split tokens based on logic
-classicSearch.fieldJoin = function(l, logic)
-	{ 
-		if (l.length==1)
-		{
-			return l
+lib.utility.fieldJoin = function(l, logic) { 
+					if (l && l.length==1)
+						{
+							return l
+						}
+
+					else if (l)
+							{if (logic ==='and')
+								{
+									var joined = l.join(' AND ');
+								}
+							else if (logic ==='or')
+								{
+									var joined = l.join(' OR ');
+								}
+							else if (logic==='simple')
+								{
+									var joined =l.join(',  ');
+								}
+							}
+
+						return joined
+					};
+
+//autocomplete functions
+lib.utility.split = function( val ) {
+      return val.split( /,\s*/ );
+    };
+
+lib.utility.extractLast = function( term ) {
+      return lib.utility.split( term ).pop();
+    };
+
+
+lib.utility.uniqueFormNames = function(selector, currentEl) {
+	return _.uniq(currentEl.find(selector).map(function(){return $(this).attr("name")}).get());
+
+}
+
+
+//using: one model and two views (one for form and one for query/filter view)
+
+//have to use nested plugin because we want the change event to register throughout the model
+//for ui updating purposes
+
+lib.formData = Backbone.NestedModel.extend({
+
+	defaults : {
+		filter: {
+			database: ['astronomy'],
+			date: {month_from:"", year_from:"", month_to:"", year_to:""},
+			num_results: {items: 20},
+			ref_filter: [],
+		},
+		query : {
+			author: {args: "", logic:'and'} ,
+			object: {args: "", logic:'and', simbad:false, ned: false, ads: false},
+			title: {args: "", logic:'and' },
+			abstract: {args: "", logic:'and'},
+			bibstem: {args:"", logic: 'or'}
 		}
 
-		else
-			{if (logic ==='and')
-				{
-					var joined = l.join(' AND ');
-				}
-			else if (logic ==='or')
-				{
-					var joined = l.join(' OR ');
-				}
-			else if (logic==='simple')
-				{
-					var joined =l.join(' ');
+	},
+
+	initialize : function() {
+		this.on("submit", this.submitData, this);
+	},
+
+	queryToString : function() { 
+			query = "";
+			var logicDict = {"and": " AND", "or": " OR", "boolean":"", "simple":", "};
+			_.each(this.attributes.query, function(val, key) {
+			if (val.args !== "" ){
+				if (_.has(val, 'logic')) {
+					//so that there aren't too many quotation marks
+
+								query= query + key + ":(" + lib.utility.fieldParse(key, val.args, val.logic).join(logicDict[val.logic] +' ')+ ") "
+						}
+							
+				else {
+						query= query + key + ":(" + lib.utility.fieldParse(key, val.args, val.logic).join(',') + ") "
 				}
 			}
+		})	
+			return query;
+	},
 
-		return joined
-	}
+	submitData : function() {
+
+		var queryString = this.queryToString();
+
+ 		var fullQueryObject = _.extend({'q' : queryString}, this.findFilters());
+
+		var fullQuery = $.param(fullQueryObject)
+
+		  if (fullQuery.length > 2000) {
+
+		  	 //send in post request using a form
+		  	 $("#classic_interact").append("<form id=\"workaround\" method=\"POST\" action=\""+GlobalVariables.SEARCH_BASE_URL+"\"></form>");
+
+		  	 _.each(fullQueryObject, function(val, key){
+
+		  	 	$("#workaround").append("<input name=\""+key+"\" value=\""+ val.toString().replace(/"/g, "&quot;") +"\" ></input>")
+		  	 })
 
 
-//this function takes a classicSearch.searchObject and returns a string that represents a proper solr query
-classicSearch.convertSearchObjectToDisplayQuery = function (searchObject)
-	{	var solrQuery = [];
-		var textAreas = ['author', 'object', 'title', 'abstract'];
+		  	// now add parameters to the form
+		  	 $("#workaround").submit()
+		}
 
-		for (key in searchObject) 
-			{	///we only care if it doesn't match the default
-				//we need to compare string representations since there is no easy way
-				//to check for object equivalence in javascript
-				if (searchObject[key]["args"]!= [])
-					{
-						var d = searchObject[key];
-						//cycling through textAreas
-						for (var i=0; i<textAreas.length; i++)
-							{
-								if (key ===textAreas[i])
-									
-									{ 
-										var args = d['args'];
+		  else {
+		  	 		window.location.href = GlobalVariables.SEARCH_BASE_URL + "?" + fullQuery
+			}
+	},
 
-										if (d['logic']==='boolean')
-											//the user has already formulated the query
-											//for you and it can be added as-is
-											{
-												solrQuery.push(key+ ':('+args+')')
-												break
-											}
+	findFilters : function()
+		 	{   var that = this;
+		 		var f = this.attributes.filter;
+		 		var filters = {};
 
-										else {	
+		 		//filter has to be there no matter what
+		 		var dbf = [];
+				_.each(f.database, function(x)
+				{ 
+						dbf.push(x)
+				});	
 
-												args = classicSearch.fieldParse(textAreas[i], args, searchObject)
-												args = classicSearch.fieldJoin(args, d['logic'] )
-												//if author field and "require author for selection", we need to put a 
-												// plus sign in front of the field itself
-												if (d['require']===true)
-													{	
-														solrQuery.push('+'+key+ ':('+args+')')
-														break
-													}
-												else
-													{
-														solrQuery.push(key+ ':('+args+')')
-														break
-													}
-											}
-									}			
-							}
+		 		filters.db_f = "(" + dbf.join(' OR ')+ ")";
+
+		 		_.each(f, function(val, key) {
+		 			//adding facets only if they're not defaults!
+		 			if (!_.isEqual(val, that.defaults.query[key])) 
+		 				{
+
+		 				if (key === 'ref_filter')
+			 				{
+			 					if (f.ref_filter.articles_only===true)
+				 					{
+				 						filters.article = 1
+				 					}
+			 				}
+		 				else if (key === 'num_results')
+			 				{
+			 					filters.nr= f.num_results.items
+			 				}
+		 				else if (key === 'date')
+			 				{
+			 					for (x in f.date)
+				 					{
+				 						if (f.date[x]!=="")
+				 						{
+				 							filters[x] = f.date[x]
+				 						}
+				 					}
+			 				}
+		 			}
+		 		});
+
+		 		if (f.ref_filter.ref_only===true)
+			 		{
+			 			filters.prop_f = refereed
+			 		};
+
+		 		return filters
+		 	}
+}),
+
+
+lib.formDataView = Backbone.View.extend({
+
+	el : "#classic_container",
+
+	events : {"click #search_submit" : "transmitData",
+				"click #clear" : "resetForm",
+				"keyup input[type=\"text\"], textarea": "updateModel",
+				//added the blur, which catches changes when someone held down a key for a long time (this will never happen in real life but w/e)
+				"blur input[type=\"text\"], textarea": "updateModel",
+				// we dont want to call change event for text or textarea, since we are already capturing keyup
+				"change input[type=\"checkbox\"], input[type=\"radio\"]" : "updateModel"
+			},
+
+
+	initializeForm : function(){
+
+		infoOnBackButton  = $("#json-data").val();
+
+		if (infoOnBackButton) {
+			startData = JSON.parse(infoOnBackButton);
+			this.model.set(startData);
+
+			//finally, trigger model change event
+			this.model.trigger("change");
+		}
+
+	},
+
+	resetForm : function (){
+		this.model.clear().set(this.model.defaults);
+
+		var that = this;
+		//reset textareas and text inputs, easy
+		this.$el.find("textarea").val("");
+		this.$el.find("input[type=text]").val("");
+		// less easy-get names of radio and checkbox groups
+		var radioGroups = lib.utility.uniqueFormNames("input[type=\"radio\"]", that.$el); 
+		var checkboxGroups = lib.utility.uniqueFormNames("input[type=\"checkbox\"]", that.$el);
+
+		_.each(radioGroups, function(t){
+			var model_id = t.replace(/-/g, ".").trim();
+			var resetVal = that.model.get(model_id);
+			$('input[value="'+resetVal+'"]').prop('checked', true);
+
+		});
+
+		_.each(checkboxGroups, function(n){
+			var model_id = n.replace("-", ".").trim();
+			var resetVals = that.model.get(model_id)
+			$('input[name='+n+']').each( function(){
+
+				if (_.contains(resetVals,$(this).val()))
+					{	
+						$(this).prop("checked", true)
 					}
+				else {	
+						$(this).prop("checked", false)
+					}
+				});
+			});
+	},
+
+	transmitData : function() {
+
+		//first, update the hidden field so it is available on a possible back navigate
+		$("#json-data").val(JSON.stringify(this.model.toJSON()))
+		this.model.trigger("submit")
+	},
+
+	updateModel : function(e){
+		var eel = e.target;
+		if ($(eel).attr("type")==="checkbox") {
+				var n = $(eel).attr("name");
+				var model_id = n.replace(/-/g, ".").trim();
+				// create list from checked boxes
+				var vals = [];
+				$("input[name="+ n +"]:checked").each(function(){
+						vals.push($(this).val())
+					})
+				this.model.set(model_id, vals)
+
 			}
+		else {
+			var newVal = $(eel).val();
+			var n = $(eel).attr("name");
+			var model_id = n.replace(/-/g, ".").trim();
+			this.model.set(model_id, newVal)
 
-		//now dealing with bibstem special case
-		if (searchObject["bibstem"]["args"]!="")
-
-			{
-				var args =  classicSearch.fieldParse('bibstem', searchObject["bibstem"]["args"]);
-				solrQuery.push('bibstem:(' + classicSearch.fieldJoin(args, 'or') + ')')
-			}
-
-		return solrQuery.join(" ")
-
+		}
 	}
+})
 
-classicSearch.convertSearchObjectToDisplayFilters = function (searchObject) 
-		{
-			var otherAreas = ['date', 'num_results', 'ref_filter', 'Database'];
-			$('#classic_filter_div').empty();
 
-			for (key in searchObject) 
-				{	
-							if (key ==="date" && !(searchObject["date"]["month_from"] === "" 
-								&& searchObject["date"]["year_from"] === ""
-							 	&& searchObject["date"]["month_to"] === "" && searchObject["date"]["year_to"] ===""))
-							{ 	var d = searchObject["date"]
-								//turn into two lists
-								var start = [];
+lib.queryDisplayView = Backbone.View.extend({
+
+	el : "#classic_container",
+
+	initialize : function() {
+		this.listenTo(this.model, 'change:filter', this.filterConvert)
+		this.listenTo(this.model, 'change:query', this.queryBarConvert)
+	},
+
+	events : {"click #classic_q" : "preventEdit",
+			  "keyup #classic_q" :"preventEdit",
+			  "keydown #classic_q" : "preventEdit"},
+
+	preventEdit : function (e) {	
+		var q = $(e.target);
+			q.prop("disabled", true);
+			setTimeout(function(){q.prop("disabled", false)},5000);
+		},
+
+	queryBar : [],
+
+	queryBarConvert : function() {
+		this.queryBar = [];
+		var that = this;
+		_.each(this.model.attributes.query, function(val, key, list){
+			// only displaying if there are args and it is different from default
+			if (!_.isEqual(val, that.model.defaults.query[key]) && val["args"]) {
+
+				//take care of bibstem special case, which only has 'or' logic
+				if (key=='bibstem') {
+					var args =  lib.utility.fieldParse('bibstem',that.model.attributes.query.bibstem.args, 'or');
+					that.queryBar.push('bibstem:(' + lib.utility.fieldJoin(args, 'or') + ')');
+					return
+				};
+
+				var logic = that.model.attributes.query[key]['logic']
+				// if logic is boolean, the user has already formatted the query, so just attach it to queryBar
+				if (logic === 'boolean') {
+					var args = that.model.attributes.query[key]["args"];
+						that.queryBar.push(key+ ':('+args+')');
+						return
+					}
+
+				var args = lib.utility.fieldParse(key, that.model.attributes.query[key].args, logic);
+				var args = lib.utility.fieldJoin(args, logic)
+				that.queryBar.push(key+ ':('+args+')')
+			}
+		});
+		var queryView = this.queryBar.join(" ");
+
+		this.$el.find('#classic_q').val(queryView);
+
+	},
+
+	filterConvert : function(){
+
+		var that = this;
+		this.$el.find('#classic_filter_div').empty();
+
+		_.each(this.model.attributes.filter, function(val, key, list){
+
+				// we have a filter val that has changed, so clear the div
+
+				if (key ==="date" && !(val.month_from === "" 
+								&& val.year_from === ""
+							 	&& val.month_to === "" && val.year_to ==="")) {
+
+						var start = [];
 								var end = [];
-								start.push(d['month_from']);
-								start.push(d['year_from']);
-								end.push(d['month_to']);
-								end.push(d['year_to']);
+								start.push(val.month_from);
+								start.push(val.year_from);
+								end.push(val.month_to);
+								end.push(val.year_to);
 
 								var s = (JSON.stringify(start) != JSON.stringify(["",""]) ? start.join('/') : '');
 								var e = (JSON.stringify(end) != JSON.stringify(["",""]) ? end.join('/') : '');
@@ -204,459 +423,83 @@ classicSearch.convertSearchObjectToDisplayFilters = function (searchObject)
 								
 								var new_filter = $('<span class="classicAppliedFilter">'
 									+ 'Date: ' + totalDate + '</span>');
-									$('#classic_filter_div').append(new_filter);
-									$('#classic_filter_div').append('<br/>');
-							}
-							else if (key ==="num_results")
-							{	if (searchObject['num_results']['items']!=="")
+									that.$el.find('#classic_filter_div').append(new_filter);
+									that.$el.find('#classic_filter_div').append('<br/>');
+					}
+
+				else if (key === "num_results") {
+
+							if (val.items !=="")
 
 								{
-									var num = searchObject[key]['items'];
+									var num = val.items;
 								}
 								else
 								{
 									var num = 20;
 								}
 								var new_filter = $('<span class="classicAppliedFilter">'
-									+ 'Number of results: ' + num + '</span>');
-									$('#classic_filter_div').append(new_filter);
-									$('#classic_filter_div').append('<br/>');
+									+ 'Results per page: ' + num + '</span>');
+									that.$el.find('#classic_filter_div').append(new_filter);
+									that.$el.find('#classic_filter_div').append('<br/>');
 							}
-							else if (key ==="ref_filter")
-							{	
-								if (searchObject['ref_filter']['ref_only']===true) 
+
+				else if (key ==="ref_filter")
+							{
+								if (_.contains(val, 'ref_only')) 
 									{
 									var new_filter = $('<span class="classicAppliedFilter">'
 									+ 'Refereed only </span>');
-									$('#classic_filter_div').append(new_filter);
-									$('#classic_filter_div').append('<br/>');
+									that.$el.find('#classic_filter_div').append(new_filter);
+									that.$el.find('#classic_filter_div').append('<br/>');
 									}
 								else  
 								{
 									var new_filter = $('<span class="classicAppliedFilter">'
 									+ 'Refereed <span style="font-variant:small-caps"> or </span> Non-refereed</span>');
-									$('#classic_filter_div').append(new_filter);
-									$('#classic_filter_div').append('<br/>');
+									that.$el.find('#classic_filter_div').append(new_filter);
+									that.$el.find('#classic_filter_div').append('<br/>');
 								}
 
-								if (searchObject['ref_filter']['articles_only']===true)
+								if (_.contains(val, 'articles_only'))
 								{
 									var new_filter = $('<span class="classicAppliedFilter">'
 									+ 'Articles only</span>');
-									$('#classic_filter_div').append(new_filter);
-									$('#classic_filter_div').append('<br/>'); 
+									that.$el.find('#classic_filter_div').append(new_filter);
+									that.$el.find('#classic_filter_div').append('<br/>'); 
 								}
 
 							}
+
+				else if (key === 'database') {
 						
-							else if (key ==="Database")
-									{	
-										var d = searchObject[key];
-										if (d['physics']===true && d['astronomy']===false)
-										{
-											var new_filter = $('<span class="classicAppliedFilter">'
-											+ 'Database: Physics' + '</span>');
-										}
-										else if (d['physics']===true && d['astronomy']===true)
-										{
-										 	var new_filter = $('<span class="classicAppliedFilter">'
-											+ 'Database: '+ ' Astro <span style="font-variant:small-caps">or</span> Physics' + '</span>');
-										}
-										else if (d['physics']===false && d['astronomy']===true)
-										{
-											 var new_filter = $('<span class="classicAppliedFilter">'
-											+ 'Database: Astronomy' + '</span>');
-										}
-
-										$('#classic_filter_div').append(new_filter);
-										$('#classic_filter_div').append('<br/>');
-							}
-				}				
-		}
-
-//big event function--using closure to hide classicSearch.searchObject
-//note--we have to listen to two different events: "change" as well as "keyup"
-//we alter the search object and from that the display query upon detection of either of these events
-
-classicSearch.classicFormFunction = function(){
-
-	var searchBar = $('#classic_q');
-	//filter is false until someone presses the button
-	var filter = false;
-
-	var formInteract = function() {
-
-		// this function reacts to a change in the form and updates the classicSearch.searchObject object
-		// to reflect that change. It then updates the query bar at the top. Note--only the event target is used to update the classicSearch.searchObject
-		// after every event, it doesn't look everywhere to redo the entire classicSearch.searchObject.
-		// For onChange, ultimately parental OR grandparental id is what we use to figure out the entry in classicSearch.searchObject that
-		// needs to be updated, so the id of the grandparent or great-grandparent or great-great-grandparent (var f) for all checkbox and radio form controls needs to 
-		// have an id that matches a search object field. (If grandparent, or further down the line then the parent itself cannot have an id or it won't work)
-
-	function onChange (evt)	
-			{ 	
-
-				//the element that was changed
-				var target = $(evt.target);
-				var type = target.attr('type')	
-
-				// it's a checkbox or radio field
-				if (type === "checkbox" || type === "radio")
-
-					{	var isChecked = target.prop('checked')
-						//sometimes its the grandparent, sometimes the great-grandparent or great-great-grandparent
-						var f = target.parents().eq(1).attr('id') || target.parents().eq(2).attr('id') || target.parents().eq(3).attr('id');
-						var name = target.attr("name")
-
-					if (f=="ref_filter")
-						{	
-							var id= target.attr("id");
-							classicSearch.searchObject[f][id]=isChecked;		
-						}
-					
-					else if (f === "Database")
-						{  
-							var id= target.attr("id");
-							classicSearch.searchObject[f][id]=isChecked
-						}
-
-					else
-						//it's an author, object, title, or abstract field
-						{
-							var c= target.attr("class")
-							// it's a logic radio
-							if (name !== undefined && name.indexOf("logic")!==-1)
-								{	
-									classicSearch.searchObject[f]['logic']=c
-								}
-						}
-					}
-
-				// it's an input field
-				else 
-				{			
-							// for bibstem, this is in grandparent
-							var f = target.parent().attr('id') || target.parents().eq(1).attr('id');
-							var type = target.attr("type");
-
-					if (['author', 'object', 'title', 'bibstem', 'abstract'].indexOf(f)!==-1) 
-						// it's a textarea
-						{
-							classicSearch.searchObject[f]['args']= target.val();
-						}	
-					// else, it's a filter 
-						else  {
-							if (f === "date")
-								{
-								    i = target.index();
-								    if (i === 0)
-								    {
-								    	classicSearch.searchObject[f]['month_from'] = target.val()
-								    }
-								    else if (i===1)
-								    {
-								    	classicSearch.searchObject[f]['year_from'] = target.val()
-								    }
-								    else if (i===2)
-								    {
-								    	classicSearch.searchObject[f]['month_to'] = target.val()
-								    }
-								    else if (i===3)
-								    {
-								    	classicSearch.searchObject[f]['year_to'] = target.val()
-								    }
-								}
-
-							else if (f === "num_results")
-							 		{	
-								    	classicSearch.searchObject["num_results"]['items'] = target.val()
-								    }
-
-						} //end filter augment
-
-				}
-			//this takes care of search bar
-			var newQuery = classicSearch.convertSearchObjectToDisplayQuery(classicSearch.searchObject);
-				searchBar.val(newQuery);
-
-			//this takes care of filter arguments
-			classicSearch.convertSearchObjectToDisplayFilters (classicSearch.searchObject);
-
-			}// end onChange 
-
-		// applying onChange to all relevant events
-		$("#classic_interact").on(
-			{
-				keyup:  function(evt) {onChange(evt)}
-			}
-		)
-		// do not apply this to the entire #classic_form or click events anywhere
-		// will have unforeseen events!
-		$("#classic_interact input, #classic_interact textarea").on(
-			{
-				click: function(evt) {onChange(evt)}
-			}
-		)
-
-		// // clearing the form upon back button usage
-		// $(window).bind("pageshow", function() {
-  //   			var form = $('#classic_form'); 
-  //   			// let the browser natively reset defaults
-  //   			form[0].reset();
-		// });
-
-
-		//finally, the function that converts searchObject entries to url parameters
-
-		classicSearch.findFilters = function()
-		 	{
-		 		var otherAreas = ['date', 'num_results', 'ref_filter', 'Database']
-		 		var filters = []
-
-		 		//filter has to be there no matter what
-		 		var dbf = [];
-				for (x in classicSearch.searchObject['Database'])
-				{
-					if (classicSearch.searchObject['Database'][x] === true)
-					{
-						dbf.push(x)
-					}
-				}					
-		 		filters.push('db_f=%28'+ encodeURIComponent(dbf.join(' OR '))+'%29')
-
-		 		for (var i=0; i< otherAreas.length; i++)
-		 		{
-		 			//adding facets only if they're not defaults!
-		 			if (JSON.stringify(classicSearch.searchObject[otherAreas[i]])!==JSON.stringify(classicSearch.defaultSearchObject[otherAreas[i]]))
-		 			{
-		 				if (otherAreas[i]==='ref_filter')
-			 				{
-			 					if (classicSearch.searchObject['ref_filter']['articles_only']===true)
-				 					{
-				 						filters.push("article=1")
-				 					}
-
-			 				}
-		 				else if (otherAreas[i]==='num_results')
-			 				{
-			 					filters.push("nr="+encodeURIComponent(classicSearch.searchObject[otherAreas[i]]["items"]))
-			 				}
-		 				else if (otherAreas[i]==='date')
-			 				{
-			 					for (x in classicSearch.searchObject['date'])
-				 					{
-				 						if (classicSearch.searchObject['date'][x]!=="")
-				 						{
-				 							filters.push(x+'='+encodeURIComponent(classicSearch.searchObject['date'][x]))
-				 						}
-				 					}
-			 				}
-		 			}
-		 		};
-
-		 		if (classicSearch.searchObject['ref_filter']['ref_only']===true)
-			 		{
-			 			filters.push("prop_f=refereed")
-			 		};
-
-		 		return filters
-		 	}
-
-	$('#search_submit').on("click", function(e) {
-		e.preventDefault(); 
- 		var query = $("#classic_q").val();
- 		var filters = classicSearch.findFilters() || "";
- 		// in case someone marks a month
- 		if ((filters.join('').match(/month_from/) && !filters.join('').match(/year_from/)) || (filters.join('').match(/month_to/) && !filters.join('').match(/year_to/)) )
- 			{
- 				$(".classic_container").prepend("<div class=\"alert alert-error\" style=\"width:82%\"><button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button><strong>Error!</strong> Month field designated without a corresponding year!</div>")
- 			}
- 		else 
- 			{
- 				window.location.href = GlobalVariables.SEARCH_BASE_URL + '?q='+encodeURIComponent(query) +'&' + filters.join('&')
- 			}
- 	})
-			
-			
-	} // end formInteract
-
-	return formInteract
-
-} // end  classicFormFunction
-
-classicSearch.searchObject = {
-		Database: {'astronomy':true, 'physics': false},
-		author: {args: "", logic:'and'} ,
-		object: {args: "", logic:'and', simbad:false, ned: false, ads: false},
-		date: {month_from:"", year_from:"", month_to:"", year_to:""},
-		title: {args: "", logic:'and' },
-		abstract: {args: "", logic:'and'},
-		num_results: {items: 20},
-		ref_filter: {ref_only: true, articles_only: false},
-		bibstem: {args:""},
-	};
-
-classicSearch.defaultSearchObject = {
-		Database: {'astronomy':true, 'physics': false},
-		author: {args: "", logic:'and'} ,
-		object: {args: "", logic:'and', simbad:false, ned: false, ads: false},
-		date: {month_from:"", year_from:"", month_to:"", year_to:""},
-		title: {args: "", logic:'and' },
-		abstract: {args: "", logic:'and'},
-		num_results: {items: 20},
-		ref_filter: {ref_only: true, articles_only: false},
-		bibstem: {args:""},
-	}; 
-
-
-
-classicSearch.preventEdit = function (e)
-	{	var $i = $("#classic_q");
-		$i.prop("disabled", true);
-		setTimeout(function(){$i.prop("disabled", false)},3000);
-
-
-	}
-
-classicSearch.tooltipToggle = function() {
-        var $t = $(this);
-        $t.toggleClass("help_activated");
- 
-        if ($t.hasClass("help_activated"))
-            {
-                $t.css({'background-color':'#C1F5D7', 
-                    'box-shadow': 'none'});
-                $("#classic_entire_filter_div").animate({'margin-top':'5px'}, 1500)
-                $("#classic_help_explanation").show(1500);
- 
-                $("#classic_form div").each(function()
-                    {
-                        var $this = $(this);
-                        var title = $this.data('hidden_title');
-                        $this.attr('data-original-title', title);
-                    }
-                )
- 
-                $("#classic_form div").tooltip({'placement':'top'});    
-            }
- 
-        else 
-            {
-                $t.css({'background-color':'white',
-                    'box-shadow': ''});
-                $("#classic_help_explanation").hide(1500);
-                $("#classic_entire_filter_div").animate({'margin-top':'140px'}, 1500);
-                $("#classic_form div").each(function()
-                    {
-                        var $this = $(this);
-                        $this.data('hidden_title', $this.attr('data-original-title'));
-                        $this.removeAttr('data-original-title');
-                        $this.removeAttr('title');
-                    }
-                )
- 
- 
-            }
-    }
-
-classicSearch.pageInitiate = function ($item)	
-		{ 	
-
-			//the element that was changed
-			var target = $item;
-			var type = target.attr('type')	
-
-			// it's a checkbox or radio field
-			if (type === "checkbox" || type === "radio")
-
-				{	var isChecked = target.prop('checked')
-					//sometimes its the grandparent, sometimes the great-grandparent or great-great-grandparent
-					var f = target.parents().eq(1).attr('id') || target.parents().eq(2).attr('id') || target.parents().eq(3).attr('id');
-					var name = target.attr("name")
-
-				if (f=="ref_filter")
-					{	
-						var id= target.attr("id");
-						classicSearch.searchObject[f][id]=isChecked;		
-					}
-				
-				else if (f === "Database")
-					{  
-						var id= target.attr("id");
-						classicSearch.searchObject[f][id]=isChecked
-					}
-
-				else
-					//it's an author, object, title, or abstract field
-					{
-						var c= target.attr("class")
-						// it's a logic radio
-						if (name !== undefined && name.indexOf("logic")!==-1)
-							{	
-								classicSearch.searchObject[f]['logic']=c
-							}
-					}
-				}
-
-			// it's an input field
-			else 
-			{			
-						// for bibstem, this is in grandparent
-						var f = target.parent().attr('id') || target.parents().eq(1).attr('id');
-						var type = target.attr("type");
-
-				if (['author', 'object', 'title', 'bibstem', 'abstract'].indexOf(f)!==-1) 
-					// it's a textarea
-					{
-						classicSearch.searchObject[f]['args']= target.val();
-					}	
-				// else, it's a filter 
-					else  {
-						if (f === "date")
+							if (_.contains(val, 'physics') && !_.contains(val, 'astronomy'))
 							{
-							    i = target.index();
-							    if (i === 0)
-							    {
-							    	classicSearch.searchObject[f]['month_from'] = target.val()
-							    }
-							    else if (i===1)
-							    {
-							    	classicSearch.searchObject[f]['year_from'] = target.val()
-							    }
-							    else if (i===2)
-							    {
-							    	classicSearch.searchObject[f]['month_to'] = target.val()
-							    }
-							    else if (i===3)
-							    {
-							    	classicSearch.searchObject[f]['year_to'] = target.val()
-							    }
+								var new_filter = $('<span class="classicAppliedFilter">'
+								+ 'Database: Physics' + '</span>');
+							}
+							else if (_.contains(val, 'physics') && _.contains(val, 'astronomy'))
+							{ 
+							 	var new_filter = $('<span class="classicAppliedFilter">'
+								+ 'Database: '+ ' Astro <span style="font-variant:small-caps">or</span> Physics' + '</span>');
+							}
+							else if (!_.contains(val,'physics') && _.contains(val, 'astronomy'))
+							{
+								 var new_filter = $('<span class="classicAppliedFilter">'
+								+ 'Database: Astronomy' + '</span>');
 							}
 
-						else if (f === "num_results")
-						 		{	
-							    	classicSearch.searchObject["num_results"]['items'] = target.val()
-							    }
+							that.$el.find('#classic_filter_div').append(new_filter);
+							that.$el.find('#classic_filter_div').append('<br/>');							
+						}
+		})
+	},
 
-					} //end filter augment
-
-			}
-
-		}// end pageInitiate
-
-
-//autocomplete functions
-classicSearch.split = function( val ) {
-      return val.split( /,\s*/ );
-    }
-
-classicSearch.extractLast = function( term ) {
-      return classicSearch.split( term ).pop();
-    }
+});
 
 //autocomplete
-classicSearch.initiatePubAutocomplete = function () {
-	$("#pubtext").bind( "keydown", function( event ) {
+App.initiatePubAutocomplete = function () {
+	$("textarea[name=query-bibstem-args]").bind( "keydown", function( event ) {
 	if ( event.keyCode === $.ui.keyCode.TAB &&
 	    $( this ).data( "ui-autocomplete" ).menu.active ) {
 	  event.preventDefault();
@@ -665,12 +508,12 @@ classicSearch.initiatePubAutocomplete = function () {
 	.autocomplete({
 		source: function( request, response ) {
 			$.getJSON( GlobalVariables.AUTOCOMPLETE_BASE_URL + "pub", {
-		    term: classicSearch.extractLast( request.term )
+		    term: lib.utility.extractLast( request.term )
 		  }, response );
 		},
 		search: function() {
 		  // custom minLength
-		  var term = classicSearch.extractLast( this.value );
+		  var term = lib.utility.extractLast( this.value );
 		  if ( term.length < 2 ) {
 		    return false;
 		  }
@@ -680,7 +523,7 @@ classicSearch.initiatePubAutocomplete = function () {
 		  return false;
 		},
 		select: function( event, ui ) {
-		  var terms = classicSearch.split( this.value );
+		  var terms = lib.utility.split( this.value );
 		  // remove the current input
 		  terms.pop();
 		  // add the selected item
@@ -689,9 +532,22 @@ classicSearch.initiatePubAutocomplete = function () {
 		  terms.push( "" );
 		  this.value = terms.join( ", " );
 		  // added this to make query bar at top work
-		  $('#pubtext').val(terms.join( ", " ))
-		  $('#pubtext').trigger('click')
+		  $("textarea[name=query-bibstem-args]").val(terms.join( ", " ))
+		  $("textarea[name=query-bibstem-args]").trigger('keyup')
 		  return false;
 		}
-	});
-}
+	})
+};
+
+
+$(document).ready(function(){
+
+	App.formData = new lib.formData();
+	App.formDataView = new lib.formDataView({model : App.formData});
+	App.queryDisplayView = new lib.queryDisplayView({model : App.formData});
+
+	App.initiatePubAutocomplete();
+	App.formDataView.initializeForm();
+
+
+})

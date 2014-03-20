@@ -5,8 +5,7 @@ Created on Sep 24, 2012
 '''
 from flask import Blueprint, request, g, render_template, abort
 
-from adsabs.core.solr import get_document, QueryBuilderSimple
-from adsabs.core import invenio
+from adsabs.core.solr import get_document, QueryBuilderSimple, denormalize_solr_doc
 from adsabs.core.data_formatter import field_to_json
 from config import config
 
@@ -45,28 +44,25 @@ def abstract(bibcode=None):
     solrdoc = get_document(bibcode)
     if not solrdoc:
         abort(404)
-
-    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    denormdoc = denormalize_solr_doc(solrdoc)
     
     # log the request
     abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="abstract")
     
-    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview='abstract')
+    return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview='abstract')
     
 @abs_blueprint.route('/<bibcode>/<list_type>/', methods=['GET'])
 def tab_list(bibcode, list_type):
 
-    #I get the document
     solrdoc = get_document(bibcode)
 
-    #if there are no references I return a 404
+    #if there are no references return a 404
     if not solrdoc or not solrdoc.has_assoc_list(list_type):
         abort(404)
 
-    #I get the additional metadata
-    inveniodoc = invenio.get_invenio_metadata(bibcode)
+    denormdoc = denormalize_solr_doc(solrdoc)
 
-    #I parse the get options 
+    #parse the get options 
     query_components = QueryBuilderSimple.build(request.values, list_type=list_type)
 
     # use the appropriate getter method
@@ -74,13 +70,13 @@ def tab_list(bibcode, list_type):
     if not list_method:
         abort(404)
 
-    #I get the list of associated docs
+    #get the list of associated docs
     resp = list_method(**query_components)
     
     # log the request
     abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type=list_type)
     
-    return render_template('abstract_tabs.html', solrdoc=solrdoc, inveniodoc=inveniodoc, curview=list_type, article_list=resp)
+    return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview=list_type, article_list=resp)
 
 @abstract_view_signal.connect
 def log_abstract_view(sender, **kwargs):

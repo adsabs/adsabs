@@ -7,7 +7,7 @@
                 <ul class="nav nav-list" id="header">
                   <li class="nav-header">Links</li>
                   <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a></span></li>
-                  <li><span><a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=current_user.get_username()) }}">Groups</a></span></li>
+                  <li><span><a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=current_user.adsid) }}">Groups</a></span></li>
                   <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">My Saved Items</a></span></li>
                   <li><span><a href="{{ url_for('user.index') }}">My Account</a></span></li>
                 </ul>
@@ -29,10 +29,9 @@
 <!-- Placed at the end of the document so the pages load faster -->
 {% block head %}
 <link rel=stylesheet type=text/css href="{{ url_for('adsgut.static', filename='localstyle.css') }}"></link>
-<link href="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap-editable/js/bootstrap-editable.min.js"></script>
 <script src="{{ url_for('adsgut.static', filename='bootstrap-tags.js') }}"></script>
-<script src="{{ url_for('adsgut.static', filename='backbone.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='coffee-script.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='teacup.js') }}"></script>
 <script src="{{ url_for('adsgut.static', filename='widgets.js') }}"></script>

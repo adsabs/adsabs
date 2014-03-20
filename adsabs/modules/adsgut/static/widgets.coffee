@@ -127,6 +127,12 @@ one_submit = h.renderable (ltext, btext) ->
         h.raw "&nbsp;&nbsp;&nbsp;"
         h.button ".btn.btn-primary.sub", type: 'button', btext
 
+zero_submit = h.renderable (ltext, btext) ->
+    h.label ltext
+    h.form ".form-inline", ->
+        h.raw "&nbsp;&nbsp;&nbsp;"
+        h.button ".btn.btn-primary.sub", type: 'button', btext
+
 two_submit = h.renderable (ltext1, ltext2, btext) ->
     h.form ".form-horizontal", ->
         h.div ".control-group", ->
@@ -405,6 +411,7 @@ root.widgets =
     table_from_dict_many: table_from_dict_many
     $table_from_dict_many: $table_from_dict_many
     one_submit: one_submit
+    zero_submit: zero_submit
     dropdown_submit: dropdown_submit
     one_submit_with_cb: one_submit_with_cb
     dropdown_submit_with_cb: dropdown_submit_with_cb

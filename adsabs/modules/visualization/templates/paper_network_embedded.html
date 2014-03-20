@@ -2,27 +2,18 @@
     <div class="vis_body">
         <div class="container-fluid">
             <div class="row-fluid">
-                <div class="span2" id="controlpanel"> 
+                <div class="span2" id="vis-control-panel"> 
 
                     <div class="dropdown">
                         <a class="btn dropdown-toggle vis_item_format btn-block vis_btn" data-toggle="dropdown" href="#">
-                            What Is The Author Network?
+                            What Is The Paper Network?
                             <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu vis_ul vis_explanation" role="menu" aria-labelledby="dLabel" >
                             <li>This visualization uses a simulation of physical forces to
-                                illustrate author networks within ADS search results. 
-                                Author nodes repel one another while links between authors
-                                bind nodes together.<br/></br/>
-                                The width of lines between authors signals the frequency
-                                with which the authors have co-authored papers, while the font size of author
-                                names indicates the total number of times the author
-                                appeared in the selection returned by the ADS search.<br/><br/>
-                                The data is prepared and thus slightly altered before the 
-                                creation of the visualization. For instance, papers with more 
-                                than 30 authors are not considered for the network visualization.
-                                Individual authors below a certain frequency threshold similarly 
-                                do not appear.</li> 
+                                illustrate citation co-occurences within ADS search results.<br/></br/>
+                                The width and opacity of lines between papers signals  the coupling strength between two papers (a function of the number of references the papers have in common as well as other controlling factors), while the font size of bibcodes indicates the number of citations each paper node received.<br/><br/>
+                                Any paper in your results that had no references in common with other papers does not appear here.</li> 
                             </ul>
                         </div> 
 
@@ -32,17 +23,17 @@
                                 <span class="caret"></span>
                             </a>
                             <ul class="dropdown-menu vis_ul vis_explanation"  role="menu"  aria-labelledby="dLabel" >
-
-                                <strong>Note: </strong>  If your network is set to "rearrange", but you want to zoom in, click "explore graph."
+                                <strong>Note: </strong>If your network is set to "rearrange", but you want to zoom in, click "explore graph."
                                 If you search for a paper and it isn't visible, you might have filtered it out. Try moving the slider back to the left.
                                 <br/>
                                 <li><strong>Zoom</strong> in or out and pan to get a better look.</li>
-                                <li> <strong>Filter</strong> your graph to show the most essential authors by moving the slider. </li>
-                                    <li><strong>Search </strong> for the name of an author in the search box to find the author.
+                                <li> <strong>Filter</strong> your graph to show the most essential papers by moving the slider. </li>
+                                    <li><strong>Search </strong> for the name of an paper in the search box to find the paper.
                                         node's exact position. </li>
                                         <li><strong>Drag</strong> the node after selecting "rearrange graph" to dynamically alter the network. </li>
                                         <li><strong>Select</strong> a node and each one of its links at once in group select mode.</li>   
-                                        <li><strong>Limit</strong> your current set of ADS search results by selecting one or more authors and clicking "apply filter to search".</li>   
+                                        <li><strong>Limit</strong> your current set of ADS search results by selecting one or more papers and clicking "apply filter to search".</li>   
+
 
                                     </ul>
                                 </div> 
@@ -58,30 +49,29 @@
                                 </div>
 
                                 <div class="row-fluid" id="single-group">
-                                    <button type="button" class="btn span6 vis_item_format vis_btn btn-primary toggle-func" id="singleauthor">Select Single</button> 
-                                    <button type="button" class="btn span6 vis_item_format vis_btn toggle-func " id="multiauthor">Select Group</button>
+                                    <button type="button" class="btn span6 vis_item_format vis_btn btn-primary toggle-func" id="singlepaper">Select Single</button> 
+                                    <button type="button" class="btn span6 vis_item_format vis_btn toggle-func " id="multipaper">Select Group</button>
                                 </div>
 
                                 <div class="well well-small vis_item_format" >
-                                    Filter by author frequency
+                                    Filter by Link Strength
                                     <div id="filter-slider">
                                     </div>
-                                <small> (Initial view might be filtered)</small>
-
+                                    <small> (Initial view might be filtered)</small>
                                 </div>
 
-                                <div class="well well-small clearfix vis_item_format"><p>Search for an Author: 
-                                </p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findauthor"> </input>
+                                <div class="well well-small clearfix vis_item_format"><p>Search for a paper: 
+                                </p><input type="text" data-provide="typeahead" class="searchquery" autocomplete="off" style="width:90%" id="findpaper"> </input>
                                 <button class ="btn pull-right btn-info vis_btn " id="searchsubmit" >Search</button>
                             </div>
 
                             <div class="well well-small vis_item_format ">
-                                <p> Selected Authors: </p>
+                                <p> Selected papers: </p>
                                 <ul class="vis_ul vis_select_list" id="list">
                                     <li> Click on a name to add it to this list.</li>
                                     <li> Click again on the name to remove it.</li>
                                 </ul>
-                                <button type="button" class="btn vis_item_format btn-block btn-info vis_btn" id="authorfacet" style="margin:20px 0 20px 0">Apply Filter To Search</button>
+                                <button type="button" class="btn vis_item_format btn-block btn-info vis_btn" id="paperfacet" style="margin:20px 0 20px 0">Apply Filter To Search</button>
                             </div> 
 
                         </div>
@@ -98,11 +88,11 @@
 
 <script type="text/javascript">
 
-        var authNet = (function(){
+        var paperNet = (function(){
 
             var json = {{ network_data|tojson|safe }};
-            var numNodes = json.nodes.length,
-            numLinks = json.links.length;
+            var numNodes;
+            var numLinks = json.links.length;
 
             var baseurlandquery = window.location.href;
 
@@ -111,11 +101,11 @@
 
             var selected=[];
 
-            //list of all names in network
+            //list of all PAPER names in network (not bibcodes)
             var nodeTitles= [];
 
             for (var i=0; i<json.nodes.length; i++) {
-                nodeTitles.push(json.nodes[i]['nodeName']);
+                nodeTitles.push(json.nodes[i]['title']+ "; " +json.nodes[i]["first_author"] +"; "+ " (bibcode: "+ json.nodes[i]["nodeName"] +")" );
             }
 
             function findValues(listOfDicts, value){
@@ -129,14 +119,16 @@
             var nodeWeights=findValues(json.nodes, "nodeWeight"),
             linkValues=findValues(json.links, "value");
 
-            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,14]), 
-            lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.1, 1.5]);
+            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,6]), 
+            lineOpacityScale =d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, .75]),
+            lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, 1.5]);
 
+            //declaring the variables here so that multiple methods have access to them
             var force, svg, g1, g, node, link, z;
 
             var initial = true,
-            animate = true,
-            initSliderLevel = 0;
+                animate = true,
+                initSliderLevel = 0;
 
             function redraw() {
                 g.attr("transform",
@@ -144,15 +136,21 @@
                     + " scale(" + d3.event.scale + ")");
             };
 
-            var nodeDrag;
-
-            var animate = true;
+            var nodeDrag, lnodes;
 
             var highlightColor = "orange";
 
             return {
 
+                //all code for first rendering of network
+
                 check : function(d){
+
+                    //list of node indexes that have at least one link
+                    lnodes = _.map(json.links, function(l){return [l.source, l.target] });
+                    lnodes = _.unique(_.flatten(lnodes));
+
+                    numNodes = _.filter(json.nodes, function(num, i){return _.contains(lnodes, i)}).length;
 
                     if (numNodes !== 0 ){
                         d();
@@ -169,17 +167,18 @@
 
                 },
 
-                //all code for first rendering of network
-
                 initialize : function(linkDistance, gravity, charge) {
 
                     var that = this;
+                    $("#paperfacet").on("click", that.generateSearch);
 
                     force = d3.layout.force()
                     .size([w, h])
                     .linkDistance(linkDistance)
                     .gravity(gravity)
                     .charge(charge);
+
+                    $("#chart").append("<div id=\"vis-tooltip\" > </div>")
 
                     svg = d3.select("#chart").append("svg:svg")
                     .attr("width", w)
@@ -198,7 +197,6 @@
                     .attr("height", h)
                     .attr("id", "g")
                     .attr("fill", "#F9F9F9");
-
 
                     //now initializing all zoom behaviors, including button zoom
                     (function(){
@@ -267,17 +265,45 @@
                     link=g.selectAll(".link")
                     .data(json.links)
                     .enter().append("line")
-                    .attr("class", "vis_link")
+                    .attr("class", "paper-network-link")
                     .style("stroke-width", function(d){
                         return lineScale(d.value)
-                    });
+                    })
+                    .style("stroke-opacity", function(d){
+                        return lineOpacityScale(d.value)
+                    })
+                    .on("mouseover", function(d){
+
+                        $("#vis-tooltip").show();
+
+                        var pos = $(this).offset();
+
+                        pos.top = d3.event.pageY +10;
+                        pos.left = d3.event.pageX +10;
+
+                        $("#vis-tooltip")
+                        .offset(pos);
+
+                        var ht = [];
+                        _.each(d.overlap, function(t){ht.push("<li>"+ t + "</li>")});
+
+                        $("#vis-tooltip").html("References in common:" + "<ul>" + ht.join(" ")+"</ul>");
+                    })
+                    .on("mouseout", function(){$("#vis-tooltip").hide()})
+                    .sort(function(a,b){
+                        return a.value - b.value
+
+                        });
 
                     //defining nodes
                     node = g.selectAll(".node")
                     .data(json.nodes)
                     .enter()
-                    .append("text")
-                    .classed("vis_node vis_hover_pointer vis_svgtext", true )
+                    .append("text");
+
+                    node = node.filter(function(d, i){return _.contains(lnodes, i)});
+
+                    node.classed("vis_node vis_hover_pointer vis_svgtext", true )
                     .each(function(d){
                         d.select=false;
                     })
@@ -287,11 +313,19 @@
                     })
                     .attr("text-anchor", "middle")
                     .on("click", that.nodeClick)
-                    .sort(function(a,b){
-                        return a.nodeWeight - b.nodeWeight
+                    .on("mouseover", function(d1, i){
 
-                        })
-                    .on("mouseover", function(d1){
+                        $("#vis-tooltip").show();
+
+                        var pos = $(this).offset();
+
+                        pos.top = d3.event.pageY +10;
+                        pos.left = d3.event.pageX +10;
+
+                        $("#vis-tooltip")
+                        .offset(pos);
+
+                        d3.select("#vis-tooltip").html("<b>" + d1.nodeName + "</b>; "+ d1.first_author + "; "+  d1.title + "");
 
                         d3.select(this).classed("group-highlight", true)
 
@@ -302,41 +336,37 @@
                                         var partner=json.links[ji]["target"];
                                         node.filter(function(d){return d ===partner}).classed("group-highlight", true)
 
-
                                         }
                                 else if (json.links[ji]['target']['index']==d1.index)
                                       {
                                         var partner=json.links[ji]["source"];
                                         node.filter(function(d){return d ===partner}).classed("group-highlight", true)
 
-
-                                        }
-
-                                     
+                                        }                                  
                             }
-
                     })
                     .on("mouseout", function(){
-                        
+                        $("#vis-tooltip").hide();
                         node.each(function(){
                             d3.select(this).classed("group-highlight", false)
                         })
 
                     })
+                    .sort(function(a,b){
+                        return a.nodeWeight - b.nodeWeight
+                        })
 
                 },
 
-
-
                 tick : function(){
 
-                    link.attr("x1", function(d) { return d.source.x; })
-                    .attr("y1", function(d) { return d.source.y; })
-                    .attr("x2", function(d) { return d.target.x; })
-                    .attr("y2", function(d) { return d.target.y; });
+                    link.attr("x1", function(d) { return d.source.x })
+                    .attr("y1", function(d) { return d.source.y })
+                    .attr("x2", function(d) { return d.target.x})
+                    .attr("y2", function(d) { return d.target.y});
 
                     node.attr("x", function(d) { return d.x })
-                    .attr("y", function(d) { return d.y });
+                        .attr("y", function(d) { return d.y }); 
                 },
 
                 nodeClick : function(d) {
@@ -345,7 +375,7 @@
                         d3.select(this)
                         .transition()
                         .duration(500)
-                        .style("fill", "#FF6600");
+                        .style("fill", highlightColor);
                         //adding to selected array
                         d.select=true;
                         selected.push(d.nodeName);
@@ -388,45 +418,40 @@
                             return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>';
                             }
                         });
-                    d3.select("#authorfacet")
-                      .on("click", that.generateSearch);
                 }, //end nodeClick   
 
                 //joins the svgs with the force layout
                 start : function(maxTicks) {
-                    var that = this;
-                    var zoomDict = {1: .4, 2: .6, 3: .7, 4: .8};
+                        var that = this;
 
-                    var subtractZoom = .2;
-                    var snn = numNodes.toString();
 
-                    if (snn.length > 3)
-                    { 
-                       subtractZoom =  zoomDict[snn[0]]
+                //customizing zoom level for large networks
+                    if (numNodes > 350)
+                    {
+                        var oldscale = z.scale();
+                        var scale = z.scale() -.3;
+
+                        var x = z.translate()[0], 
+                            y = z.translate()[1], 
+                            translateX= -scale*((w/2-x)/oldscale)+w/2,
+                            translateY= -scale*((h/2-y)/oldscale)+h/2;
+
+                            z.scale(scale);
+                            z.translate([translateX, translateY]);
+
+                            d3.select(g[0][0])
+                            .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
+
                     }
 
-                    var oldscale = z.scale();
-                    var scale = z.scale() - subtractZoom;
-
-                    var x = z.translate()[0], 
-                        y = z.translate()[1], 
-                        translateX= -scale*((w/2-x)/oldscale)+w/2,
-                        translateY= -scale*((h/2-y)/oldscale)+h/2;
-
-                        z.scale(scale);
-                        z.translate([translateX, translateY]);
-
-                        d3.select(g[0][0])
-                        .attr('transform', 'translate(' + translateX + ', ' + translateY+ ')' + 'scale(' + z.scale() + ')')
-
                 //customizing filter level
-                if (numLinks > 3000) {
+                if (numLinks > 2000) {
                     var avgLperN = numLinks/numNodes;
                     //we want the initial view of the network to have ~2000 links
-                    var nodesToShow = Math.floor(3000/avgLperN)
+                    var nodesToShow = Math.floor(2000/avgLperN)
                     //rough calculation
-                    var sliderLevel =10 -  Math.ceil((10*nodesToShow)/numNodes)
-                    initSliderLevel = sliderLevel
+                    var sliderLevel =10 -  Math.ceil((10*nodesToShow)/numNodes);
+                    initSliderLevel = sliderLevel;
                 
                 }
 
@@ -479,8 +504,8 @@
                         })
                     }
 
-                $("#filter-slider").slider('value', initSliderLevel);
 
+                    $("#filter-slider").slider('value', initSliderLevel);
                 },
 
                 nodeSearch: function(id) {
@@ -489,10 +514,10 @@
 
                     d3.select("#searchsubmit")
                     .on("click", function(){
-                        var n=jQuery.trim(document.getElementById("findauthor").value.toLowerCase());
+                        var n=$("#findpaper").val().match(/\(bibcode: (.*)\)/)[1].trim();
                         for (var i=0; i<node[0].length; i++)
-                        {
-                            if (jQuery.trim(node[0][i].childNodes[0]['data'].toLowerCase())==n)
+                        { 
+                            if (jQuery.trim(node[0][i].childNodes[0]['data'])==n)
                             {
                                 var x= node[0][i]['attributes'][3].value,
                                 y= node[0][i]['attributes'][4].value;
@@ -536,9 +561,7 @@
                                 that.startAnimate();
                             }
                         };
-
                         node.call(nodeDrag);
-
                     },
 
                     startAnimate : function(){
@@ -557,6 +580,7 @@
 
                     },
 
+
                     toggleOptions : function() {
 
                         var currentScale, currentTranslate;
@@ -570,7 +594,6 @@
 
                         //only making changes if it wasn't already default
 
-                    
                         if (!$t.hasClass("btn-primary")){
 
                             if (cat === 'freeze-animate'){
@@ -631,21 +654,21 @@
 
                     },
 
-                    //implementing author selection and search faceting
+                    //implementing paper selection and search faceting
 
                    generateSearch : function() {
                           var names=[],
                             querypieces=[];
                           if (selected.length==1)
                           {
-                            var querystring = '0/'+selected[0];
+                            var querystring = selected[0];
                           }
                           else 
                           {
                             querypieces.push("(");
                             for (var i=0; i< selected.length; i++) 
                             {
-                                names.push('"0/'+selected[i]+'"');
+                                names.push(selected[i]);
                             }
                             for (var i=0; i<names.length; i++)
                             {
@@ -663,10 +686,11 @@
                               var querystring=querypieces[0];
                               querystring+=querypieces.slice(1,-1).join(' ');
                               querystring+=querypieces.slice(-1)
-                            }//end else for multiple selected authors
+                            }//end else for multiple selected papers
                     
                             var finalURI= new Uri(baseurlandquery);
-                            finalURI.addQueryParam('aut_f', querystring);
+                           finalURI.setQuery("q=" +decodeURIComponent(finalURI.getQueryParamValue("q"))+ " bibcode:"+ encodeURIComponent(querystring)+"")
+
                             window.location.href = decodeURIComponent(finalURI.toString());
                           },
 
@@ -725,84 +749,70 @@
                     slideFilter : function() {
 
                         $("#filter-slider").slider({
-                            value:0,
+                            value: 0,
                             min:0,
                             max:9,
                             step:1,
                             change: function(event, ui){
                                 
-                                var r = (ui.value == 0) ? 0: numNodes % 10;
-                                var b = Math.floor(numNodes/10);
+                                var r = (ui.value == 0) ? 0: numLinks % 10;
+                                var b = Math.floor(numLinks/10);
 
                                 var shownNodes = [];
 
-                                //nodes are already sorted by weight upon initialization
-
-                                node.each(function(d, i){
-                                    var nodeIndex = i;
-                                        if  (i> r+b*ui.value) {
+                                //links are sorted by value
+                                link.each(function(d,i){
+                                    var linkIndex = i;
+                                        if  (i>= r+b*ui.value) {
                                             $(this).show();     
-                                            shownNodes.push(d.index)
+                                            shownNodes.push(d.source, d.target)
                                         }
 
                                         else {
                                             $(this).hide();
                                         }
-                                        });
+                                    });
 
-                                    shownNodes = _.uniq(shownNodes);
+                                shownNodes = _.uniq(shownNodes);
 
-                                    link.each(function(d){
-                                        if (_.contains(shownNodes, d.source.index) && _.contains(shownNodes, d.target.index))
+                                node.each(function(d){
+
+                                        if (_.contains(shownNodes, d))
                                         {
                                             $(this).show();
                                         }
 
                                         else {
-                                        $(this).hide()
 
+                                            $(this).hide()
                                         }
-
                                     })
-
                                 }
                         })//end jquery slider function
                     }
-
         }//end returned object
 
-        })(); //end module
+        })() //end module
 
-  $(document).ready(function(){
-        authNet.check(function(){
-        authNet.initialize(35, 1, -500);
-        authNet.slideFilter();
+    $(document).ready(function(){
 
-        authNet.start(40);
-        authNet.toggleOptions();
+        paperNet.check(function(){
+        paperNet.initialize(70, 1, -900);
+        paperNet.slideFilter();
+        paperNet.start(40);
 
-        authNet.nodeSearch("#findauthor");
+        paperNet.toggleOptions();
 
+        paperNet.nodeSearch("#findpaper");
         })
-       
+        
     });
 
     </script>
 
     <script>
             //pinging google analytics
-            ga('send', 'event', 'visualize', 'fancybox_load', 'author_network');
-            </script>
-
-        </div>
-      </div>
-    </div>    
-
-    </script>
-
-    <script>
-            //pinging google analytics
-            ga('send', 'event', 'visualize', 'fancybox_load', 'author_network');
+            ga('send', 'event', 'visualize', 'fancybox_load', 'paper_network');
             </script>
 
         </div>

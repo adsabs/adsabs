@@ -24,6 +24,8 @@ main_js = Bundle('js/libs/jquery.js',
                 'js/libs/underscore-min.js',
                  'bootstrap/bootstrap_tour/bootstrap-tour.min.js',
                  'js/adstour.js',
+                 'js/libs/backbone.min.js',
+                 'js/libs/backbone-nested.js',
                 filters=('yui_js'), output='compressed/all.js')
 
 main_css = Bundle('bootstrap/css/bootstrap.min.css',

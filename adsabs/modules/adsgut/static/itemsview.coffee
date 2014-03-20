@@ -169,20 +169,28 @@ class ItemView extends Backbone.View
             add_pill: '<span class="label label-info tag-badge" style="margin-right:3px;margin-left:7px;">add tag</span>&nbsp;',
             input_pill: '<span></span>&nbsp;'
             ok_icon: '<btn class="btn btn-primary">Apply</btn>'
+    if @memberable.nick=='anonymouse'
+        tagdict.can_add = false
+    #console.log "TAGDICT", tagdict
     jslist=[]
     @.$('.tagls').tags(jslist,tagdict)
     @tagsobject = jslist[0]
     #console.log("TAGSOBJECT", @tagsobject)
     ##console.log "PVIEW2 IS", @pview
-    if @noteform
+    if @noteform and @memberable.adsid!='anonymouse'
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, @pview), theclass: ".postalnote"})
         @$el.append(@hv.render("<strong>Notes</strong>: ").$el)
         if @hv.state is 0
             @hv.hide()
-        if @therebenotes
+    if @memberable.adsid=='anonymouse' and @therebenotes
+        @$el.append("<div class='anony'><span><strong>Notes</strong>:</span></div>")
+    if @therebenotes
+        if @memberable.adsid=='anonymouse'
+            @.$('.anony').append("<p class='notes'></p>")
+        else
             @$el.append("<p class='notes'></p>")
-            #console.log "NOTES", @notes
-            @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview))
+        #console.log "NOTES", @notes
+        @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview))
     @$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>')
     return this
 

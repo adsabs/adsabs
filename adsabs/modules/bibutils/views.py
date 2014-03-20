@@ -178,6 +178,10 @@ def metrics(**args):
             bibcodes = filter(lambda b: len(b) == 19, map(lambda a: str(a).strip(), form.bibcodes.data.strip().split('\n')))
         except:
             bibcodes = []
+        try:
+            format = form.format.data.strip()
+        except:
+            pass
         list_type = request.values.get('list_type', None)
         if len(bibcodes) == 0:
             try:

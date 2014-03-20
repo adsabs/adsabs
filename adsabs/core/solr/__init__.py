@@ -3,6 +3,7 @@ from .response import *
 from .adapter import SolrRequestAdapter
 from .solrdoc import *
 from query_builder import QueryBuilderSimple, QueryBuilderSearch
+import copy 
 
 from flask import current_app as app, request as current_request, g
 from flask.ext.solrquery import solr, signals as solrquery_signals #@UnresolvedImport
@@ -74,3 +75,53 @@ def get_document_similar(q, **kwargs):
     query_url = config.SOLRQUERY_URL
     mlt_query_url = query_url.rsplit('/', 1)[0] + '/mlt'
     return solr.query(q, query_url=mlt_query_url, **params)
+
+
+def _extract_authors(solrdoc):
+    authors = []
+    i = 0
+    affs = 'aff' in solrdoc and solrdoc['aff'] or []
+    emails = 'email' in solrdoc and solrdoc['email'] or []
+    
+    if 'author' in solrdoc:
+        for a in solrdoc['author']:
+            author = {'name': a}
+            if len(affs) > i:
+                author['affiliation'] = affs[i]
+            if len(emails) > i:
+                author['email'] = emails[i]
+            i += 1
+            authors.append(author)
+        
+        if affs:
+            del solrdoc['aff']
+        if emails:
+            del solrdoc['email']
+    return authors
+
+def _extract_controlled_keywords(solrdoc):
+    kws = {}
+    if 'keyword_norm' in solrdoc and 'keyword_schema' in solrdoc and \
+        len(solrdoc['keyword_norm']) == len(solrdoc['keyword_schema']):
+        for schema,kw in zip(solrdoc['keyword_schema'], solrdoc['keyword_norm']):
+            if schema not in kws:
+                kws[schema] = set()
+            kws[schema].add(kw)
+        for k,v in kws.items():
+            kws[k] = sorted(v)
+        del solrdoc['keyword_norm']
+        del solrdoc['keyword_schema']
+    return kws
+    
+def denormalize_solr_doc(solrdoc):
+    """
+    Nested values are normalized in the solr document, this function
+    will group them again, eg. authors will get together with
+    their affiliations and emails
+    """
+    new_doc = copy.deepcopy(solrdoc.data)
+    new_doc['title'] = ': '.join('title' in new_doc and new_doc['title'] or [])
+    new_doc['keyword'] = sorted(set('keyword' in new_doc and new_doc['keyword'] or []))
+    new_doc['keyword_norm'] = _extract_controlled_keywords(new_doc)
+    new_doc['author'] = _extract_authors(new_doc)
+    return SolrDocument(new_doc)

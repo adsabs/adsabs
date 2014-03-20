@@ -7,6 +7,16 @@
     text-align: center;
 }
 
+#final-field {
+	margin-bottom: 12px;
+}
+
+button#clear {
+	float:right;
+	position: relative;
+	right:3%;
+}
+
 .classic_form_styling {
 	background-color: white;
 	color: #555555;
@@ -30,22 +40,23 @@
     margin-bottom:3px;
     text-align: center;
     height:35px;
-    border-radius: 5px;
-    position: relative;
-    bottom: 12px;
-    padding-top: 12px;
 }
 
 .classic_author_object {
-	display:inline-block;
-	margin: 0% 1% 0% 1%;
-	margin-top: -15px;
 	position:relative;
-	left:-2%;
-	top:-13px;
-
-
+	right:2%;
 }
+
+.author-radio {
+	text-align: center
+}
+
+.object-radio {
+	position: relative;
+	left:28%;
+}
+
+
 
 .classic_disabled {
 	color: #999999;
@@ -99,7 +110,7 @@
 	height: 140px;
 }
 
-#num_results{
+input[name="num_results-items"] {
 	padding-bottom: 12px;
 }
 
@@ -120,21 +131,6 @@
 	right: 25%;
 }
 
-/*#classic_edit_warning {
-	display:none;
-	position: absolute;
-	top:10%;
-	right:300px;
-	max-width: 600px;
-	background-color:#fcf8e3;
-	border: 2px solid #fbeed5;
-	color: #b78c43;
-	padding:10px;
-	padding-right: 40px;
-	border-radius: 5px;
-	font-weight:300;
-}*/
-
 #classic_help_explanation {
 	padding: 10px;
 	font-weight: 300;
@@ -153,9 +149,15 @@
 
 
 #classic_form textarea {
-	max-height: 200px;
     margin-top: 8px;
-    max-width: 650px;
+    resize: none;
+}
+
+#classic_form textarea[name="query-author-args"] {
+	resize: both;
+	max-height: 600px;
+	max-width: 300px;
+
 }
 
 .radio {
@@ -168,51 +170,26 @@
 	left:-3%;
 }
 
+
 ul.ui-autocomplete.ui-menu {
-	width:700px;
-	max-height:380px;
+	font-size: 13px;
+	max-width:600px !important;
+	max-height:200px !important;
 	overflow: auto;
+	overflow-x: hidden;
 	background-color: white;
 	list-style: none;
 	box-shadow: 5px 5px 7px rgba(50, 50, 50, 0.1);
 	border: 1px solid #ddd;
 	border-radius: 5px;
-	position:relative;
+	position:absolute;
 	top:100px;
 }
 
 ul.ui-autocomplete.ui-menu li {
-	padding:5px 2px 5px 8px;
+	padding:1px 2px 1px 3px;
 }
 
-ul.ui-autocomplete.ui-menu li a:hover {
-	text-decoration: none;
-}
-
-.ui-autocomplete-loading { 
-	background:url('spiffygif_20x20.gif') no-repeat right center; 
-}
-
-.ui-helper-hidden-accessible { 
-	position: absolute; left: -9999px;
-}
-
-ul.ui-autocomplete.ui-menu {
-	width:700px;
-	max-height:380px;
-	overflow: auto;
-	background-color: white;
-	list-style: none;
-	box-shadow: 5px 5px 7px rgba(50, 50, 50, 0.1);
-	border: 1px solid #ddd;
-	border-radius: 5px;
-	position:relative;
-	top:100px;
-}
-
-ul.ui-autocomplete.ui-menu li {
-	padding:5px 2px 5px 8px;
-}
 
 ul.ui-autocomplete.ui-menu li a:hover {
 	text-decoration: none;

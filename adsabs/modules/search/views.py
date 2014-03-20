@@ -136,6 +136,14 @@ def bigquery():
 
     # return the unique queryid
     #return qid
+
+@search_blueprint.route('/pub-vol-page/', methods=('GET', 'POST'))
+def pub_vol_page():
+    """
+    returns classic_search page
+    """
+
+    return render_template('pub-vol-page.html')
     
     
 @search_blueprint.route('/classic-search/', methods=('GET', 'POST'))

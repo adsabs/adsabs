@@ -1,0 +1,34 @@
+{% from "macros/search_macros.html" import render_pub_vol_page %}
+
+{% extends "layout.html" %}
+
+{% block titlehead %}Pub/Vol/Page Search{% endblock %}
+
+
+{% block head%}
+<!-- all unique classic search form css styles -->
+<link rel="stylesheet" href="{{ url_for('search.static', filename='css/pub-vol-page.css') }}">
+
+{% endblock %}
+
+{% block body %}
+
+<h3>The SAO/NASA Astrophysics Data System</h3>
+
+<div class="tabbable container">
+	<ul class="nav nav-tabs" >
+		<li><a href="{{ url_for('index.index') }}"> Search the ADS </a></li>
+		<li><a href="{{ url_for('search.classic_search') }}" > Classic Search </a></li>
+		<li class="active"><a href="tab3" > Pub/Vol/Page Search </a></li>
+
+
+	</ul>
+	<div class="tab-content">
+		<div class="tab-pane active fade in" id="tab3">
+    		{{ render_pub_vol_page() }}
+		</div>
+
+  	</div> 
+</div>
+
+{% endblock %}

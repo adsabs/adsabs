@@ -7,11 +7,11 @@
 
 {% extends "layout.html" %}
 
-{% block titlehead %}{% if inveniodoc.author|length > 0 and inveniodoc.author[0].get('name') %}{{ inveniodoc.author[0].get('name')}}: {% endif %}{{ inveniodoc.title }}{% endblock %}
+{% block titlehead %}{% if denormdoc.author|length > 0 and denormdoc.author[0].get('name') %}{{ denormdoc.author[0].get('name')}}: {% endif %}{{ denormdoc.title }}{% endblock %}
 
 {% block head%}
 	{% if curview == 'abstract' %}
-		{{ render_abstract_macro_tags(solrdoc, inveniodoc) }}
+		{{ render_abstract_macro_tags(solrdoc, denormdoc) }}
 	{% endif %}
 {% endblock %}
 
@@ -20,7 +20,7 @@
 <div class="container">
 	<div class="row-fluid">
 		<div class="span12 well well-small ">
-			<div class="span2 firstspan bibcodeHeader">{{ inveniodoc.bibcode }}</div>
+			<div class="span2 firstspan bibcodeHeader">{{ denormdoc.bibcode }}</div>
 			<div class="dropdown pull-right">
 			    {% if curview == 'abstract'%}
 					{{ render_export_menu() }}
@@ -38,7 +38,7 @@
 					   class="active"
 					   {%- endif %}><a
 					       {% if curview != 'abstract'%} 
-					       href="{{ url_for('abs.abstract', bibcode=inveniodoc.bibcode) }}"
+					       href="{{ url_for('abs.abstract', bibcode=denormdoc.bibcode) }}"
 					       {%- endif %}> Abstract </a></li>
 
 					<li {% if curview == 'references'%} 
@@ -47,7 +47,7 @@
 					   class="disabled"
 					   {%- endif %}><a
 					       {% if curview != 'references' and solrdoc.has_references() %}
-					       href="{{ url_for('abs.tab_list', list_type='references', bibcode=inveniodoc.bibcode) }}"
+					       href="{{ url_for('abs.tab_list', list_type='references', bibcode=denormdoc.bibcode) }}"
 					       {%- endif %}> References {% if solrdoc.has_references() %}({{ solrdoc.get_references_count() }}){% endif %}</a></li>
 
 					<li {% if curview == 'citations'%}
@@ -56,7 +56,7 @@
 					   class="disabled"
 					   {%- endif %}><a
 					       {% if curview != 'citations' and solrdoc.has_citations() %}
-					       href="{{ url_for('abs.tab_list', list_type='citations', bibcode=inveniodoc.bibcode) }}"
+					       href="{{ url_for('abs.tab_list', list_type='citations', bibcode=denormdoc.bibcode) }}"
 					       {%- endif %}> Citations {% if solrdoc.has_citations() %}({{ solrdoc.get_citation_count() }}){% endif %}</a></li>
 
 					<li {% if curview == 'coreads'%}
@@ -65,7 +65,7 @@
 					   class="disabled"
 					   {%- endif %}><a
 					       {% if curview != 'coreads' and solrdoc.has_coreads() %}
-					       href="{{ url_for('abs.tab_list', list_type='coreads', bibcode=inveniodoc.bibcode) }}"
+					       href="{{ url_for('abs.tab_list', list_type='coreads', bibcode=denormdoc.bibcode) }}"
 					       {%- endif %}> Co-Reads </a></li>
 
                     <li {% if curview == 'similar'%}
@@ -74,7 +74,7 @@
                        class="disabled"
                        {%- endif %}><a
                            {% if curview != 'similar' and solrdoc.has_similar() %}
-                           href="{{ url_for('abs.tab_list', list_type='similar', bibcode=inveniodoc.bibcode) }}"
+                           href="{{ url_for('abs.tab_list', list_type='similar', bibcode=denormdoc.bibcode) }}"
                            {%- endif %}> Similar Articles </a></li>
 					
 					<li {% if curview == 'toc'%}
@@ -83,7 +83,7 @@
 					   class="disabled"
 					   {%- endif %}><a
 					       {% if solrdoc.has_toc() %}
-					       href="{{ url_for('abs.tab_list', list_type='toc', bibcode=inveniodoc.bibcode) }}"
+					       href="{{ url_for('abs.tab_list', list_type='toc', bibcode=denormdoc.bibcode) }}"
 					       {%- endif %}> Table of contents </a></li>
 				</ul>
 			</div>
@@ -94,7 +94,7 @@
 
 			{% if curview == 'abstract' %}
 				{# converted to macro % include 'abstract.html' %#}
-				{{ render_abstract(solrdoc, inveniodoc) }}
+				{{ render_abstract(solrdoc, denormdoc) }}
 			{% else %}
 			    {{ render_list_articles(article_list, curview, solrdoc.bibcode) }}
 			{% endif %}
