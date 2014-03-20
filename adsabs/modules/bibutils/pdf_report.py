@@ -18,6 +18,7 @@ from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.lib.enums import TA_JUSTIFY
 import math
 from datetime import datetime
+import os
  
 ########################################################################
 class MetricsReport(object):
@@ -109,7 +110,8 @@ class MetricsReport(object):
         self.c = canvas
         normal = self.styles["Normal"]
         # Include a logo on the report
-        logo = Image("adsabs/modules/bibutils/static/img/adslogo_labs.jpg", 100, 48)
+        img_path = os.path.join(os.path.dirname(__file__), 'static/img/adslogo_labs.jpg')
+        logo = Image(img_path, 100, 48)
         data = [[logo]]
         table = Table(data, colWidths=4*inch)
         table.setStyle([("VALIGN", (0,0), (0,0), "TOP")])

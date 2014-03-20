@@ -234,11 +234,13 @@ def metrics(**args):
             single_record = True
         try:
             excel_ready = export_metrics(results)
-        except:
+        except Exception, e:
+            app.logger.error("Error generating excel report: %s", e)
             excel_ready = False
         try:
             pdf_ready = create_metrics_report(results, file_name=excel_ready.replace('.xls','.pdf'), report_name=pdf_title, single_record=single_record)
-        except:
+        except Exception, e:
+            app.logger.error("Error generating pdf report: %s", e)
             pdf_ready = False
         mode = 'normal'
         if len(bibcodes) == 1:
