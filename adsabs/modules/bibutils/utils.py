@@ -8,6 +8,7 @@ Created on Jul 16, 2013
 import sys
 import os
 import time
+from datetime import datetime
 import operator
 import glob
 from itertools import groupby
@@ -26,6 +27,7 @@ from .errors import SolrCitationQueryError
 from .errors import SolrReferenceQueryError
 from .errors import SolrMetaDataQueryError
 from .errors import MongoQueryError
+from .pdf_report import MetricsReport
 
 __all__ = ['get_suggestions','get_citations','get_references','get_meta_data']
 
@@ -444,11 +446,11 @@ def export_metrics(data):
         sheet.write(row, 4, float(datan[3]))
         row += 1
     # Save the spreadsheet to a temporary file
-    filename = config.METRICS_TMP_DIR + '/Metrics' + str(uuid.uuid4())
+    filename = config.METRICS_TMP_DIR + '/Metrics' + str(uuid.uuid4()) + ".xls"
     wbk.save(filename)
-    # Remove all temporary files older than 2 hours
+    # Remove all temporary Excel files older than 2 hours
     now = time.time()
-    stale_tmp_files = filter(lambda f: now-os.stat(f).st_mtime > 7200, glob.glob("%s/Metrics*"%config.METRICS_TMP_DIR))
+    stale_tmp_files = filter(lambda f: now-os.stat(f).st_mtime > 7200, glob.glob("%s/Metrics*.xls"%config.METRICS_TMP_DIR))
     for entry in stale_tmp_files:
         os.remove(entry)
     return os.path.basename(filename)
@@ -459,3 +461,29 @@ def chunks(l, n):
     """
     for i in xrange(0, len(l), n):
         yield l[i:i+n]
+
+def create_metrics_report(data,file_name='test', report_name='test report', single_record=False):
+    '''
+    Create a metrics report in PDF format
+    '''
+    report = MetricsReport()
+    # This is where the PDF file will be stored
+    report.file_name = config.METRICS_TMP_DIR + "/" + file_name
+    # String to be used as name for the report (if empty, only the creation date will get listed)
+    report.report_name = report_name
+    # Creation date for the report
+    report.report_date = datetime.now().strftime("%B %d, %Y (%I:%M%p)")
+    # If 'True' this is a report for a single record
+    report.single_record = single_record
+    # Data to create the report from
+    report.data = data
+    # Let's start cookin'
+    report.run()
+    # Remove all temporary PDF files older than 2 hours
+    now = time.time()
+    stale_tmp_files = filter(lambda f: now-os.stat(f).st_mtime > 7200, glob.glob("%s/Metrics*.pdf"%config.METRICS_TMP_DIR))
+    for entry in stale_tmp_files:
+        os.remove(entry)
+    # Return the file name of the report
+    return os.path.basename(report.file_name)
+    
