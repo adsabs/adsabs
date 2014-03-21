@@ -119,7 +119,7 @@
             var nodeWeights=findValues(json.nodes, "nodeWeight"),
             linkValues=findValues(json.links, "value");
 
-            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([4,6]), 
+            var fontScale= d3.scale.linear().domain([d3.min(nodeWeights), d3.max(nodeWeights)]).range([5,7]), 
             lineOpacityScale =d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, .75]),
             lineScale=d3.scale.linear().domain([d3.min(linkValues), d3.max(linkValues)]).range([.25, 1.5]);
 
