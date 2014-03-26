@@ -106,28 +106,32 @@ get_info = (sections, config) ->
           e.preventDefault()
           sections.$infodiv.find('.edtext').editable('toggle')
         sections.$infodiv.show()
-
-        $.get config.membersURL, (data) ->
-            #console.log "DATA", data
-            plinv=new PostableListView(users:data.users, fqpn:config.fqpn, owner:config.owner, ownerfqin: ownerfqin, $e_el: sections.$membersdiv)
-            plinv.render()
+        console.log "USER:", config.useras_nick
+        if config.useras_nick != 'anonymouse'
+            $.get config.membersURL, (data) ->
+                #console.log "DATA", data
+                plinv=new PostableListView(users:data.users, fqpn:config.fqpn, owner:config.owner, ownerfqin: ownerfqin, $e_el: sections.$membersdiv)
+                plinv.render()
+                sections.$membersdiv.show()
+                if config.owner
+                    #console.log "gaga", config.owner
+                    viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
+                    viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
+                    sections.$makepublicform.append(viewp.render().$el)
+                    sections.$makepublicform.show()
+                    $.get config.guiURL, (data) ->
+                        groups=data.groups
+                        view=new views.AddGroup({postable: config.fqpn, groups:groups, withcb:true} )
+                        sections.$invitedform.append(view.render().$el)
+                        sections.$invitedform.show()
+                        $.get config.invitedsURL, (data) ->
+                            content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
+                            sections.$invitedsdiv.prepend(viewu.render().el)
+                            sections.$invitedsdiv.append(content)
+                            sections.$invitedsdiv.show()
+        else
+            sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>")
             sections.$membersdiv.show()
-            if config.owner
-                #console.log "gaga", config.owner
-                viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
-                viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
-                sections.$makepublicform.append(viewp.render().$el)
-                sections.$makepublicform.show()
-                $.get config.guiURL, (data) ->
-                    groups=data.groups
-                    view=new views.AddGroup({postable: config.fqpn, groups:groups, withcb:true} )
-                    sections.$invitedform.append(view.render().$el)
-                    sections.$invitedform.show()
-                    $.get config.invitedsURL, (data) ->
-                        content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
-                        sections.$invitedsdiv.prepend(viewu.render().el)
-                        sections.$invitedsdiv.append(content)
-                        sections.$invitedsdiv.show()
 
 root.libraryprofile=
     PostableView: PostableView

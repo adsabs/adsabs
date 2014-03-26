@@ -163,47 +163,53 @@
         return sections.$infodiv.find('.edtext').editable('toggle');
       });
       sections.$infodiv.show();
-      return $.get(config.membersURL, function(data) {
-        var plinv, viewp, viewu;
-        plinv = new PostableListView({
-          users: data.users,
-          fqpn: config.fqpn,
-          owner: config.owner,
-          ownerfqin: ownerfqin,
-          $e_el: sections.$membersdiv
-        });
-        plinv.render();
-        sections.$membersdiv.show();
-        if (config.owner) {
-          viewu = new views.InviteUser({
-            postable: config.fqpn,
-            withcb: true
+      console.log("USER:", config.useras_nick);
+      if (config.useras_nick !== 'anonymouse') {
+        return $.get(config.membersURL, function(data) {
+          var plinv, viewp, viewu;
+          plinv = new PostableListView({
+            users: data.users,
+            fqpn: config.fqpn,
+            owner: config.owner,
+            ownerfqin: ownerfqin,
+            $e_el: sections.$membersdiv
           });
-          viewp = new views.MakePublic({
-            postable: config.fqpn,
-            users: data.users
-          });
-          sections.$makepublicform.append(viewp.render().$el);
-          sections.$makepublicform.show();
-          return $.get(config.guiURL, function(data) {
-            var groups, view;
-            groups = data.groups;
-            view = new views.AddGroup({
+          plinv.render();
+          sections.$membersdiv.show();
+          if (config.owner) {
+            viewu = new views.InviteUser({
               postable: config.fqpn,
-              groups: groups,
               withcb: true
             });
-            sections.$invitedform.append(view.render().$el);
-            sections.$invitedform.show();
-            return $.get(config.invitedsURL, function(data) {
-              content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, false);
-              sections.$invitedsdiv.prepend(viewu.render().el);
-              sections.$invitedsdiv.append(content);
-              return sections.$invitedsdiv.show();
+            viewp = new views.MakePublic({
+              postable: config.fqpn,
+              users: data.users
             });
-          });
-        }
-      });
+            sections.$makepublicform.append(viewp.render().$el);
+            sections.$makepublicform.show();
+            return $.get(config.guiURL, function(data) {
+              var groups, view;
+              groups = data.groups;
+              view = new views.AddGroup({
+                postable: config.fqpn,
+                groups: groups,
+                withcb: true
+              });
+              sections.$invitedform.append(view.render().$el);
+              sections.$invitedform.show();
+              return $.get(config.invitedsURL, function(data) {
+                content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, false);
+                sections.$invitedsdiv.prepend(viewu.render().el);
+                sections.$invitedsdiv.append(content);
+                return sections.$invitedsdiv.show();
+              });
+            });
+          }
+        });
+      } else {
+        sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>");
+        return sections.$membersdiv.show();
+      }
     });
   };
 

@@ -6,8 +6,8 @@
   <br/><hr/>
   <h4>Members</h4><br/>
   <!--iframe width="100%" src="/library/{{ thelibrary.basic.fqin}}/members"></iframe-->
-  <p>Members of this library with "read and post" access can post into this library. Only the owner can see this information for every user: you can see your own access on your "Libraries" page.</p>
-  <div id="members" style="display:none"></div>
+  
+  <div id="members" style="display:none"><p>Members of this library with "read and post" access can post into this library. Only the owner can see this information for every user: you can see your own access on your "Libraries" page.</p></div>
 
   {% if owner %}
   <div id="makepublicform" style="display:none"></div>
@@ -33,6 +33,7 @@ $ ->
     membersURL : "#{prefix}/library/{{ thelibrary.basic.fqin}}/members"
     invitedsURL : "#{prefix}/library/{{ thelibrary.basic.fqin}}/inviteds"
     owner : if '{{owner}}' == 'True' then true else false
+    useras_nick: '{{ useras.nick }}'
     guiURL : "#{prefix}/user/{{useras.nick}}/groupsuserisin"
 
   sections = 
