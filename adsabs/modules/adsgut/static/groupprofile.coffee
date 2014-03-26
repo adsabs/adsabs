@@ -58,26 +58,34 @@ class PostableListView extends Backbone.View
     #     @$el.html(w.inline_list userlist)
     return this
 
+make_editable_description = ($infodiv, fqpn) ->
+    cback = () ->
+        #console.log "cback"
+    eback = () ->
+        #console.log "eback" 
+    $.fn.editable.defaults.mode = 'inline'
+    $infodiv.find('.edtext').editable(
+      type:'textarea'
+      rows: 2
+      url: (params) ->
+        syncs.change_description(params.value,fqpn, cback, eback)
+    )
+    $infodiv.find('.edclick').click (e) ->
+      e.stopPropagation()
+      e.preventDefault()
+      $infodiv.find('.edtext').editable('toggle')
+
 get_info = (sections, config) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
         #console.log "eback" 
     $.get config.infoURL, (data) ->
-        content=views.group_info data, templates.group_info
+        content=views.group_info config.owner, data, templates.group_info
         ownerfqin=data.group.owner
         sections.$infodiv.append(content)
-        $.fn.editable.defaults.mode = 'inline'
-        sections.$infodiv.find('.edtext').editable(
-          type:'textarea'
-          rows: 2
-          url: (params) ->
-            syncs.change_description(params.value,config.fqpn, cback, eback)
-        )
-        sections.$infodiv.find('.edclick').click (e) ->
-          e.stopPropagation()
-          e.preventDefault()
-          sections.$infodiv.find('.edtext').editable('toggle')
+        if config.owner
+            make_editable_description(sections.$infodiv, config.fqpn)
         sections.$infodiv.show()
 
         $.get config.membersURL, (data) ->

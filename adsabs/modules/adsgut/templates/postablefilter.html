@@ -96,6 +96,7 @@ $ ->
     tqtype : "{{ tqtype }}"
     querystring: "{{ querystring | safe }}"
     pview: "{{pflavor}}"
+    owner : if '{{owner}}' == 'True' then true else false
 
   sections = 
     $info : $('div#info')

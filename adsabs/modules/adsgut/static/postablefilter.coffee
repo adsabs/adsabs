@@ -13,15 +13,32 @@ parse_querystring= (qstr) ->
     #console.log "QLIST", qlist
     return qlist
 
+make_editable_description = ($infodiv, fqpn) ->
+    cback = () ->
+        #console.log "cback"
+    eback = () ->
+        #console.log "eback" 
+    $.fn.editable.defaults.mode = 'inline'
+    $infodiv.find('.edtext').editable(
+      type:'textarea'
+      rows: 2
+      url: (params) ->
+        syncs.change_description(params.value,fqpn, cback, eback)
+    )
+    $infodiv.find('.edclick').click (e) ->
+      e.stopPropagation()
+      e.preventDefault()
+      $infodiv.find('.edtext').editable('toggle')
 
 do_postable_info = (sections, config, ptype) ->
     $.get config.infoURL, (data) ->
         if ptype=='library'
-            content=views.library_info data, templates.library_itemsinfo
+            content=views.library_info config.owner, data, templates.library_itemsinfo
         else if ptype=='group'
-            content=views.group_info data, templates.group_itemsinfo
-        
+            content=views.group_info config.owner, data, templates.group_itemsinfo
         sections.$info.append(content+'<hr/>')
+        if config.owner
+            make_editable_description(sections.$info, config.fqpn)
         sections.$info.show()
 
 do_tags = (url, $sel, tqtype) ->

@@ -363,16 +363,20 @@
     return template(fqpn, data.users, scmode);
   };
 
-  postable_info_layout = renderable(function(_arg, oname, cname, mode) {
+  postable_info_layout = renderable(function(isowner, _arg, oname, cname, mode) {
     var a, basic, description, dtext, modetext, nick, owner, url;
     basic = _arg.basic, owner = _arg.owner, nick = _arg.nick;
     if (mode == null) {
       mode = "filter";
     }
     description = basic.description;
-    dtext = w.editable_text(description);
     if (description === "") {
       description = "not provided";
+    }
+    if (isowner) {
+      dtext = w.editable_text(description);
+    } else {
+      dtext = description;
     }
     if (mode === "filter") {
       modetext = "Link";
@@ -422,24 +426,24 @@
     });
   });
 
-  library_info_template = renderable(function(data) {
-    return postable_info_layout(data.library, data.oname, data.cname);
+  library_info_template = renderable(function(isowner, data) {
+    return postable_info_layout(isowner, data.library, data.oname, data.cname);
   });
 
-  group_info_template = renderable(function(data) {
-    return postable_info_layout(data.group, data.oname, data.cname);
+  group_info_template = renderable(function(isowner, data) {
+    return postable_info_layout(isowner, data.group, data.oname, data.cname);
   });
 
-  library_itemsinfo_template = renderable(function(data) {
-    return postable_info_layout2(data.library, data.oname, data.cname);
+  library_itemsinfo_template = renderable(function(isowner, data) {
+    return postable_info_layout(isowner, data.library, data.oname, data.cname, "profile");
   });
 
-  group_itemsinfo_template = renderable(function(data) {
-    return postable_info_layout2(data.group, data.oname, data.cname);
+  group_itemsinfo_template = renderable(function(isowner, data) {
+    return postable_info_layout(isowner, data.group, data.oname, data.cname, "profile");
   });
 
-  postable_info = function(data, template) {
-    return template(data);
+  postable_info = function(isowner, data, template) {
+    return template(isowner, data);
   };
 
   InviteUser = (function(_super) {

@@ -290,11 +290,16 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 
 
-postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="filter") ->
-  description=basic.description
-  dtext = w.editable_text(description)
+postable_info_layout = renderable (isowner, {basic, owner, nick}, oname, cname, mode="filter") ->
+  #console.log isowner, basic, owner, nick, oname, cname
+  description = basic.description
   if description is ""
     description = "not provided"
+  if isowner
+    dtext = w.editable_text(description)
+  else
+    dtext = description
+  
   if mode is "filter"
     modetext = "Link"
   else if mode is "profile"
@@ -331,21 +336,21 @@ postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="pr
     dd ->
       raw a
 
-library_info_template = renderable (data) ->
-  postable_info_layout data.library, data.oname, data.cname
+library_info_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.library, data.oname, data.cname
 
-group_info_template = renderable (data) ->
-  postable_info_layout data.group, data.oname, data.cname
+group_info_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.group, data.oname, data.cname
   
-library_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.library, data.oname, data.cname
+library_itemsinfo_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.library, data.oname, data.cname, "profile"
 
-group_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.group, data.oname, data.cname
+group_itemsinfo_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.group, data.oname, data.cname, "profile"
 
 #controller style stuff should be added here.
-postable_info = (data, template) ->
-  template(data)
+postable_info = (isowner, data, template) ->
+  template(isowner, data)
 
 #content=widgets.one_submit_with_cb("invite_user","Invite a user using their email:", "Invite", "Can Post?")
 #$('div#invitedform').append(content)
