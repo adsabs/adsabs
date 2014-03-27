@@ -551,6 +551,7 @@ div.absview div.row-fluid label {
 
 }
 
+
 .vis_ul {
   padding:15px;
   margin-left: 0;
@@ -577,12 +578,7 @@ div.absview div.row-fluid label {
 textarea#bigquerydata {
   width:80%;
 }
- 
 
-.chart {
-overflow:auto;
-position: relative;
-}
 
 .zoom-panel {
 	position:fixed;
@@ -625,4 +621,14 @@ font-family: sans-serif;
 
 .group-highlight {
 	fill: rgba(36, 65, 255, 1) !important;
+}
+
+#vis-control-panel {
+	position:relative;
+	z-index: 1000000;
+}
+
+#chart {
+	position:relative;
+	z-index:0;
 }
