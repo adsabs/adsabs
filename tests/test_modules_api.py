@@ -543,7 +543,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.insert_user("foo", developer=True, level="devel")
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         
-        regex = re.compile('<em>\(?black')
+        regex = re.compile('<em>\(?black', re.IGNORECASE)
 
         rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract&rows=1')
         resp = json.loads(rv.data)
