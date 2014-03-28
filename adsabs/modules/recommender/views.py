@@ -7,8 +7,8 @@ from flask import (Blueprint, render_template, flash, g, jsonify, current_app as
 from adsabs.core.form_functs import is_submitted_cust
 from config import config #the global config object
 from .forms import SuggestionsInputForm
-from .utils import get_recommendations
-from .utils import get_suggestions
+from .recommender_utils import get_recommendations
+from .recommender_utils import get_suggestions
 from .errors import RecommenderCannotGetResults
 
 __all__ = ['recommender_blueprint','recommender','suggestions']
