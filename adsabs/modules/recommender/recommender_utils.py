@@ -305,6 +305,13 @@ def find_recommendations(G,remove=None):
     # get publication data for the top 100 most alsoread papers
     top100 = map(lambda a: a[0], AlsoFreq)
     top100_data = get_article_data(top100)
+    # For publications with no citations, Solr docs don't have a citation count
+    tmpdata = []
+    for item in top100_data:
+        if 'citation_count' not in item:
+            item.update({'citation_count':0})
+        tmpdata.append(item)
+    top100_data = tmpdata
     mostRecent = top100_data[0]['bibcode']
     top100_data = sorted(top100_data, key=operator.itemgetter('citation_count'),reverse=True)
     # get the most cited paper from the top 100 most alsoread papers
@@ -344,15 +351,6 @@ def find_recommendations(G,remove=None):
     except:
         Recommendations.append(RefFreq[0][0])
     Recommendations.append(MostCited)
-#    RecommDict = {}
-#    RecommDict['Closest']      =Recommendations[1]
-#    RecommDict['ReadBefore']   =Recommendations[2]
-#    RecommDict['ReadAfter']    =Recommendations[3]
-#    RecommDict['MostAlsoRead'] =Recommendations[4]
-#    RecommDict['MostRecent100']=Recommendations[5]
-#    RecommDict['MostCited100'] =Recommendations[6]
-#    RecommDict['MostRefer100'] =Recommendations[7]
-#    RecommDict['MostCited']    =Recommendations[8]
 
     return Recommendations
 
@@ -361,20 +359,12 @@ def get_recommendations(bibcode):
     '''
     Recommendations for a single bibcode
     '''
-    print "getting vector"
     vec = make_paper_vector(bibcode)
-    print "projecting paper"
     pvec = project_paper(vec)
-    print "finding paper cluster"
     pclust = find_paper_cluster(pvec,bibcode)
-    print "paper assigned to cluster: %s" % pclust
     cvec = project_paper(pvec,pcluster=pclust)
-    print "find closest cluster papers"
     close = find_closest_cluster_papers(pclust,cvec)
-    print close
-    print "gettings recommendations"
     R = find_recommendations(close,remove=bibcode)
-    print R
     # Get meta data for the recommendations
     meta_dict = get_article_data(R[1:], check_references=False)
     # Filter out any bibcodes for which no meta data was found
@@ -396,10 +386,10 @@ def get_suggestions(**args):
     assigned to, and then the cluster paper is determined
     that is most recent, most read and as close as possible.
     '''
-    if 'bibcodes' in args:
-        biblist = args['bibcodes']
-    elif 'cookie' in args:
+    if 'cookie' in args:
         biblist = get_recently_viewed(args['cookie'])
+    elif 'bibcodes' in args:
+        biblist = args['bibcodes']
     suggestions = []
     Nselect = config.RECOMMENDER_MAX_INPUT
     input_data = get_article_data(biblist)
@@ -446,12 +436,12 @@ def get_suggestions(**args):
         suggestions.append(a[0]['bibcode'])
         if len(suggestions) == config.RECOMMENDER_SUGGEST_NUMBER:
             break
-        # Get meta data for the recommendations
-        meta_dict = get_article_data(suggestions, check_references=False)
-        # Filter out any bibcodes for which no meta data was found
-        recommendations = filter(lambda a: a in meta_dict, recommendations)
-        result = {'type':'recently viewed',
+    # Get meta data for the recommendations
+    meta_dict = get_article_data(suggestions, check_references=False)
+    # Filter out any bibcodes for which no meta data was found
+    suggestions = filter(lambda a: a in meta_dict, suggestions)
+    result = {'type':'recently viewed',
                   'recommendations':[{'bibcode':x,'title':meta_dict[x]['title'], 
-                  'author':meta_dict[x]['author']} for x in recommendations]
-                 }
+                  'author':meta_dict[x]['author']} for x in suggestions]
+             }
     return result
