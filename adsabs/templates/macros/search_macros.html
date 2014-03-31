@@ -1,457 +1,517 @@
-{# ###### Macro for the basic search form ###### #}
-{% macro render_search_form(form) %}
+{# ###### Macro for the basic search form ###### #} {% macro render_search_form(form) %}
 
 <div class="container one_box_search_container" id="search_form">
     <form class="form-search form-search-cust" id="one_box_search" method="{{ form.method }}" action="{{ url_for(form.flask_route) }}">
         <fieldset>
-        	{#{ form.rows }#}
+            {#{ form.rows }#}
             <!-- legend>ADS metadata and fulltext integrated search</legend-->
             <div class="row">
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;', '&quot;');">Author</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;^', '&quot;');">First Author</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' title:&quot;', '&quot;');">Title</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' year:', '');">Year</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' bibstem:&quot;', '&quot;');">Publication</a></small></div>
-            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' full:&quot;', '&quot;');">Fulltext</a></small></div>
-            	<div class="span"><small><a class="link_only_js disabled">Object</a></small></div>
-            	<!-- div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' object:&quot;', '&quot;');">Object</a></small></div-->
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;', '&quot;');">Author</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' author:&quot;^', '&quot;');">First Author</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' title:&quot;', '&quot;');">Title</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' year:', '');">Year</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' bibstem:&quot;', '&quot;');">Publication</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapText('q', ' full:&quot;', '&quot;');">Fulltext</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js disabled">Object</a>
+                    </small>
+                </div>
+                <!-- div class="span"><small><a class="link_only_js" onclick="Misc.wrapText('q', ' object:&quot;', '&quot;');">Object</a></small></div-->
             </div>
             <div class="row">
-            	<div class="span12">
-			        {{ form.q(class="span8", placeholder=form.q.description, autofocus="autofocus") }}
-			        <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler"><i class="icon-plus"></i> options</span>
-			        <button class="btn btn-primary"><i class="icon-search icon-white"></i> Search</button>
-		        </div>
-	        </div>
-	        <div class="row">
-		        	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'trending', Misc.listOfAlternates);"
-		        						data-rel="bootstrap_tooltip" title="Returns the list of documents most read by all users who read recent papers 
-		        						on the topic being researched; these are papers currently being read by people interested in this field.">Trending</a></small></div> 
-	            	<div class="span" id = "tour-anchor-advanced-operators"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'useful', Misc.listOfAlternates);"
-	            						data-rel="bootstrap_tooltip" title="Returns the list of documents most cited by the most relevant papers on the 
-	            						topic being researched; these are papers most often cited by experts in the field.">Useful</a></small></div> 
-	            	<div class="span"><small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'instructive', Misc.listOfAlternates);"
-	            						data-rel="bootstrap_tooltip" title="Returns the list of documents citing the most cited papers on the topic being 
-	            						researched; these are papers containing the most extensive reviews of the field.">Instructive</a></small></div>
+                <div class="span12">
+                    {{ form.q(class="span8", placeholder=form.q.description, autofocus="autofocus") }}
+                    <span class="btn" onclick="search_form_drawer_manager($('#advanced_options'), $(this))" id="drawer_handler"><i class="icon-plus"></i> options</span>
+                    <button class="btn btn-primary"><i class="icon-search icon-white"></i> Search</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'trending', Misc.listOfAlternates);" data-rel="bootstrap_tooltip" title="Returns the list of documents most read by all users who read recent papers 
+		        						on the topic being researched; these are papers currently being read by people interested in this field.">Trending</a>
+                    </small>
+                </div>
+                <div class="span" id="tour-anchor-advanced-operators">
+                    <small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'useful', Misc.listOfAlternates);" data-rel="bootstrap_tooltip" title="Returns the list of documents most cited by the most relevant papers on the 
+	            						topic being researched; these are papers most often cited by experts in the field.">Useful</a>
+                    </small>
+                </div>
+                <div class="span">
+                    <small><a class="link_only_js" onclick="Misc.wrapContentWithFunction('q', 'instructive', Misc.listOfAlternates);" data-rel="bootstrap_tooltip" title="Returns the list of documents citing the most cited papers on the topic being 
+	            						researched; these are papers containing the most extensive reviews of the field.">Instructive</a>
+                    </small>
+                </div>
 
-	            	<div class="span" style="margin-left:380px;"><small><a class="link_only_js" onclick="search_form_drawer_manager($('#examples'), $(this))"
-	            						data-rel="bootstrap_tooltip" title="Click here to see some examples">Examples</a></small></div>
-	        </div>
-	        <div id="advanced_options" class="row">
-	        	<div class="span11 custom-well-small">
-	        	{# { form.sort_dir() } #}
+                <div class="span" style="margin-left:380px;">
+                    <small><a class="link_only_js" onclick="search_form_drawer_manager($('#examples'), $(this))" data-rel="bootstrap_tooltip" title="Click here to see some examples">Examples</a>
+                    </small>
+                </div>
+            </div>
+            <div id="advanced_options" class="row">
+                <div class="span11 custom-well-small">
+                    {# { form.sort_dir() } #}
 
-	        		<div class="span4 adv_opt_box">
-	        			<div class="row">
-	        				<div class="span4">Publication date between</div>
-	        			</div>
-	        			<div class="row">
-	        				<div class="span4">
-	        				{{ form.month_from(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_from(placeholder='YYYY', maxlength="4", class="span1") }} and 
-	        				{{ form.month_to(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_to(placeholder='YYYY', maxlength="4", class="span1") }}
-	        				</div>
-	        			</div>
-	        		</div>
-                                <div class="span3 adv_opt_box adv_opt_box_foll">
-                                        <div class="row">
-                                               <div class="span3">{{ form.db_f.description }}</div>
-                                       </div>
-                                       <div class="row">
-                                               <div class="span3">{{ form.db_f(class="span2") }}</div>
-                                       </div>
-				</div>
-	        		<div class="span2 adv_opt_box adv_opt_box_foll">
-	        			<div class="row">
-                                               <div class="span2">{{ form.nr.description }}</div>
-                                       </div>
-                                       <div class="row">
-                                               <div class="span2">{{ form.nr(maxlength="4", class="span1", placeholder="20") }}</div>
-                                       </div>
-				</div>					  
-	        		<div class="span2 adv_opt_box adv_opt_box_foll">
-	        			<div class="row">
-	        				{% if not form.no_ft.raw_data or form.no_ft.raw_data[0] == '1' %}
-	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.no_ft(value='1') }} {{ form.no_ft.description }}</label></div>
-	        				{% else %}
-	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.no_ft() }} Custom QF</label></div>
-	        				{% endif %}
-	        				
-	        			</div>
-	        			<div class="row">
-	        				<div class="span2"><label class="checkbox label_adv_opt_box">{{ form.article(value='1') }} {{ form.article.description }}</label></div>
-	        			</div>
-	        		</div>
-	        	</div>
-	        	{# ####COMMENTED### 
-	        	{% for radio in form.second_order_type %}
-	        		{% if loop.index == 1 %}
-	        			{{ radio(checked="checked", onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }} <br/>
-	        		{% else %}
-	        			{{ radio(onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }} <br/>
-	        		{% endif %} 
-	        	{% endfor %}####END COMMENTED### #}
-	        </div>
-	        <div id="examples" class="row" style="display: none">
-	        	<div class="span12 custom-well-small">
-	        	    <div class="span8 adv_opt_box">
-	                    <dl>
-							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;Huchra, John&quot;','');">Author search for 'John Huchra'</a></small></dd>
-							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', '&quot;cfa redshift survey&quot;','');">Phrase search for 'cfa redshift survey'</a></small></dd>
-	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'title:&quot;QSO&quot; -LHC','');">Publications with 'QSO' in their title, excluding 'LHC'</a></small></dd>
-	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'arXiv:1012.5859','');">Find publication corresponding with arXiv ID '1012.5859'</a></small></dd>
-	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'doi:10.1086/345794','');">Find publication corresponding with DOI '10.1086/345794'</a></small></dd>
-	                        <dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot;   bibstem:&quot;ApJ&quot;','');">Find publications in the Astrophysical Journal with John Huchra as first author</a></small></dd>
-							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot; OR &quot;cfa redshift survey&quot;  -title:&quot;2MASS&quot;','');">Find publications with 'John Huchra' as first author or with the phrase 'cfa redshift survey' but without '2MASS' in the title</a></small></dd>
-							<dd><small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'pos(author:&quot;Oort, J&quot;,2)','');">Find publications with 'Jan Oort' as second author</a></small></dd>
-	                    </dl>
-	                </div>
-	            </div>
-	        </div>
+                    <div class="span4 adv_opt_box">
+                        <div class="row">
+                            <div class="span4">Publication date between</div>
+                        </div>
+                        <div class="row">
+                            <div class="span4">
+                                {{ form.month_from(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_from(placeholder='YYYY', maxlength="4", class="span1") }} and {{ form.month_to(placeholder='MM', maxlength="2", class="span1") }}/{{ form.year_to(placeholder='YYYY', maxlength="4", class="span1") }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="span3 adv_opt_box adv_opt_box_foll">
+                        <div class="row">
+                            <div class="span3">{{ form.db_f.description }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="span3">{{ form.db_f(class="span2") }}</div>
+                        </div>
+                    </div>
+                    <div class="span2 adv_opt_box adv_opt_box_foll">
+                        <div class="row">
+                            <div class="span2">{{ form.nr.description }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="span2">{{ form.nr(maxlength="4", class="span1", placeholder="20") }}</div>
+                        </div>
+                    </div>
+                    <div class="span2 adv_opt_box adv_opt_box_foll">
+                        <div class="row">
+                            {% if not form.no_ft.raw_data or form.no_ft.raw_data[0] == '1' %}
+                            <div class="span2">
+                                <label class="checkbox label_adv_opt_box">{{ form.no_ft(value='1') }} {{ form.no_ft.description }}</label>
+                            </div>
+                            {% else %}
+                            <div class="span2">
+                                <label class="checkbox label_adv_opt_box">{{ form.no_ft() }} Custom QF</label>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                        <div class="row">
+                            <div class="span2">
+                                <label class="checkbox label_adv_opt_box">{{ form.article(value='1') }} {{ form.article.description }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {# ####COMMENTED### {% for radio in form.second_order_type %} {% if loop.index == 1 %} {{ radio(checked="checked", onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }}
+                <br/>{% else %} {{ radio(onChange="radio_second_order_type($('#sort_type'))") }} {{ radio.label }}
+                <br/>{% endif %} {% endfor %}####END COMMENTED### #}
+            </div>
+            <div id="examples" class="row" style="display: none">
+                <div class="span12 custom-well-small">
+                    <div class="span8 adv_opt_box">
+                        <dl>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;Huchra, John&quot;','');">Author search for 'John Huchra'</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', '&quot;cfa redshift survey&quot;','');">Phrase search for 'cfa redshift survey'</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'title:&quot;QSO&quot; -LHC','');">Publications with 'QSO' in their title, excluding 'LHC'</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'arXiv:1012.5859','');">Find publication corresponding with arXiv ID '1012.5859'</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'doi:10.1086/345794','');">Find publication corresponding with DOI '10.1086/345794'</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot;   bibstem:&quot;ApJ&quot;','');">Find publications in the Astrophysical Journal with John Huchra as first author</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'author:&quot;^Huchra, John&quot; OR &quot;cfa redshift survey&quot;  -title:&quot;2MASS&quot;','');">Find publications with 'John Huchra' as first author or with the phrase 'cfa redshift survey' but without '2MASS' in the title</a>
+                                </small>
+                            </dd>
+                            <dd>
+                                <small><a class="link_only_js" onclick="$('#q').val('');Misc.wrapText('q', 'pos(author:&quot;Oort, J&quot;,2)','');">Find publications with 'Jan Oort' as second author</a>
+                                </small>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
         </fieldset>
-        
-        {{ form.bigquery() }}
-        
-        {% if form.has_rendered_elements() %}
-          {% for rendered_element in form.get_rendered_elements() %}
-            <div class="form.includes">
-              {{ rendered_element }}
+
+        {{ form.bigquery() }} {% if form.has_rendered_elements() %} {% for rendered_element in form.get_rendered_elements() %}
+        <div class="form.includes">
+            {{ rendered_element }}
             <div>
-          {% endfor %}  
-        {% endif %}
+                {% endfor %} {% endif %}
     </form>
-</div>
-{% endmacro %}
+    </div>
+    {% endmacro %} {# ###### Macro for pub/vol/page ###### #} {% macro render_pub_vol_page() %}
+    <div class="container" id="pub-vol-page">
+        <div class="row">
+            <div class="span6">
+                <div id="pub-query">
+                    <h4 class="divide">Publication Query</h4>
+                    <form class="visible-form" method="get" action="">
+                        <p>
+                            <em>Find articles from journal references by year, journal, volume, and/or page. Each of the fields is optional. The query will return all references that match the input parameters.
+                            </em>
+                        </p>
+                        <div>
+                            <div class="group">
+                                <label for="pub">
+                                    <span>Publication:</span>
+                                    <input class="input-medium" type="text" id="bib-name" name="id-bib-name" placeholder="full name or bibstem">
+                                </label>
+                            </div>
+                            <div class="group">
+                                <label>
+                                    <span>Year:</span>
+                                    <input class="input-mini" type="text" id="pub-year" name="id-pub-year" placeholder="year">
+                                </label>
+                            </div>
+                            <div class="group">
+                                <label>
+                                    <span>Volume:</span>
+                                    <input class="input-mini" type="text" id="pub-volume" name="id-pub-volume" placeholder="volume">
+                                </label>
+                            </div>
+                            <div class="group">
+                                <label for="page">
+                                    <span>Page:</span>
+                                    <input class="input-mini" type="text" id="pub-page" name="id-pub-page" placeholder="page">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="pub-vol-page-options">
+                            Retrieve
+                            <input type="text" id="pub-num-results" class="span1" name="id-pub-num-results" placeholder="20">abstracts per page
 
-
-{# ###### Macro for pub/vol/page ###### #}
-
-{% macro render_pub_vol_page() %}
-<div class="container" id="pub-vol-page">
-	<div class="row">
-		<div class="span6">
-			<div id="pub-query">
-				<h4 class="divide">Publication Query</h4>
-				<form id="pub-form" method="get" action="{{ url_for("search.search") }}">
-					<p> <em>Find articles from journal references by year, journal, volume, and/or page. Each of the fields is optional. The query will return all references that match the input parameters.
-					</em>
-				</p>
-				<div>
-					<div class="group">
-						<label for="pub" > <span> Publication: </span>
-							<input class="input-medium" type="text" id="bib-name" placeholder="full name or bibstem">
-							<input type="hidden" name="q">
-						</label>
-					</div>
-					<div class="group">
-						<label > <span> Year: </span>
-							<input  class="input-mini" type="text" id="pub-year" placeholder="year">
-						</label>
-					</div>
-					<div class="group">
-						<label > <span> Volume: </span>
-							<input  class="input-mini" type="text" id="pub-volume" placeholder="volume">
-						</label>
-					</div>
-					<div class="group">
-						<label for="page"> <span> Page: </span>
-							<input  class="input-mini" type="text" id="pub-page" placeholder="page">
-						</label>
-					</div>
-				</div>
-				<div class="pub-vol-page-options">
-					Retrieve 
-				<input type="text" id="pub-num-results" class="span1" value="20" placeholder="20" >
-				<input type="hidden" name="nr">
-				abstracts per page
-
-				<button type="submit" class="btn btn-primary">Submit</button>
-				<button type="reset" class="btn">Clear form</button>
-				</div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="reset" class="btn">Clear form</button>
+                        </div>
 
 
 
-			</form>	
-		</div>
+                    </form>
 
-		<script>
+                    <form class="hidden-form" method="get" action="{{ url_for("search.search") }}">
+                        <input type="hidden" name="q">
+                        <input type="hidden" name="nr">
 
-		(function(){
-				//make sure only first potential bibstem is returned
+                    </form>
+                </div>
 
-			$("#pub-query form").submit(function(e){
+                <script>
+                (function() {
+                        //make sure only first potential bibstem is returned
 
-			var num_results = $("#pub-num-results").val();
-			if (num_results !== "20") {
-					$("#pub-query input[name=nr]").val(num_results)
-			}
-			else {
-					$("#pub-query input[name=nr]").val("")
-			};
+                        $("#pub-query .visible-form").submit(function(e) {
+                                var num_results = $("#pub-num-results").val();
+                                if (num_results !== "20") {
+                                		$(".hidden-form input[name=nr]").val(num_results)
+                                }
+                                else {
+                                		$(".hidden-form input[name=nr]").val("")
+                                };
 
-			$("#pub-query input[name=q]").val( ($("#bib-name").val()? ("bibstem:(" + $("#bib-name").val() + ") ") : "")
-												+ ($("#pub-year").val()? ("year:" + $("#pub-year").val() + " ") : "")
-												+ ($("#pub-volume").val()? ("volume:(" +  $("#pub-volume").val() +") ") : "")
-												+ ($("#pub-page").val()? ("page:(" +  $("#pub-page").val() +") ") : "")
-											 )
-			});
+                                $(".hidden-form input[name=q]").val( ($("#bib-name").val()? ("bibstem:" + $("#bib-name").val() + " ") : "")
+                                									+ ($("#pub-year").val()? ("year:" + $("#pub-year").val() + " ") : "")
+                                									+ ($("#pub-volume").val()? ("volume:" +  $("#pub-volume").val() +" ") : "")
+                                									+ ($("#pub-page").val()? ("page:" +  $("#pub-page").val() +" ") : "")
+                                								 )
 
+                                //submit hidden form
+                                $("#pub-query .hidden-form").submit(); 
 
-			var auto = {
-
-				initiatePubAutocomplete : function () {
-					$("#bib-name")
-					.bind( "keydown", function( event ) {
-					if ( event.keyCode === $.ui.keyCode.TAB &&
-					    $( this ).data( "ui-autocomplete" ).menu.active ) {
-					  event.preventDefault();
-						}
-					})
-					.autocomplete({
-						open: function(){$('#div .ui-menu').width(300)},
-						source: pubVolAuto,
-						search: function() {
-						  // custom minLength
-						  var term = this.value;
-						  if ( term.length < 3 ) {
-						    return false;
-						  }
-						},
-						focus: function() {
-						  // prevent value inserted on focus
-						  return false;
-						},
-						select: function( event, ui ) {
-						  this.value = ui.item.value
-						  return false;
-							}
-					});
-				}
-			};
+						e.preventDefault();
+                        });
 
 
-		auto.initiatePubAutocomplete();
+                    var auto = {
 
-		}())
-		
-
-		</script>
-	</div>
-
-	<div class="span6">
-		<div id="list-of-bibs">
-			<h4 class="divide">List of Bibcodes</h4>
-
-			<form method="post" action="{{ url_for("search.bigquery") }}">
-				<p> <em> Enter Bibcode
-					(e.g. 1989ApJ...342L..71R),
-					arXiv ID,
-					or complete DOI
-					(one per line).
-				</em>
-			</p>
-			<label> 
-				<span> Bibcodes:</span>
-				<textarea id="raw-bibs" name="bigquerydata"></textarea>
-
-			</label>
-			<div class="pub-vol-page-options">
-
-				Retrieve 
-				<input type="text" id="bibs-num-results" class="span1" value="20" placeholder="20" >
-				<input type="hidden" name="nr">
-				abstracts per page
-				<button type="submit" class="btn btn-primary">Submit</button>
-				<button type="reset" class="btn">Clear form</button>
-			</div>
-
-			
+                        initiatePubAutocomplete: function() {
+                            $("#bib-name")
+                                .bind("keydown", function(event) {
+                                    if (event.keyCode === $.ui.keyCode.TAB &&
+                                        $(this).data("ui-autocomplete").menu.active) {
+                                        event.preventDefault();
+                                    }
+                                })
+                                .autocomplete({
+                                    open: function() {
+                                        $('#div .ui-menu').width(300)
+                                    },
+                                    source: pubVolAuto,
+                                    search: function() {
+                                        // custom minLength
+                                        var term = this.value;
+                                        if (term.length < 3) {
+                                            return false;
+                                        }
+                                    },
+                                    focus: function() {
+                                        // prevent value inserted on focus
+                                        return false;
+                                    },
+                                    select: function(event, ui) {
+                                        this.value = ui.item.value
+                                        return false;
+                                    }
+                                });
+                        }
+                    };
 
 
+                    auto.initiatePubAutocomplete();
 
-		</form>
+                }())
+                </script>
+            </div>
+            <div class="span6">
+                <div id="list-of-bibs">
+                    <h4 class="divide">List of Bibcodes</h4>
 
-	</div>
-</div>
-</div>
-		<script>
+                    <form class="visible-form" action="">
+                        <p>
+                            <em>Enter Bibcode (e.g. 1989ApJ...342L..71R), arXiv ID, or complete DOI (one per line).
+                            </em>
+                        </p>
+                        <label>
+                            <span>Bibcodes:</span>
+                            <textarea name="id-bigquerydata" id="raw-bibs"></textarea>
 
-		$("#list-of-bibs form").submit(function(e){
+                        </label>
+                        <div class="pub-vol-page-options">
 
-			var num_results = $("#bibs-num-results").val();
-			if (num_results !== "20") {
-					$("#list-of-bibs form").attr('action', function(i, action) {
-						return action + '?' + $.param({'nr': num_results});
-					})
-			}
-
-			});
-		</script>
-</div>
-
-{% endmacro %} 
+                            Retrieve
+                            <input type="text" id="bibs-num-results" class="span1" name="id-bibs-num-results" placeholder="20">
+                            abstracts per page
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="reset" class="btn">Clear form</button>
+                        </div>
+                    </form>
 
 
-{# ###### Macro for the classic search form ###### #}
+                    <form method="post" action="{{ url_for("search.bigquery") }}" class="hidden-form">
+                    	<input type="hidden" name="nr"></input>
+                    	<input type="hidden" name = "bigquerydata"></input>
+                        
 
-{% macro render_classic_search_form() %}
-<div class="container" id="classic_container">
-    <div class="form-search form-search-cust"  id="classic_form">
+                </div>
+            </div>
+        </div>
+        <script>
+        $("#list-of-bibs .visible-form").submit(function(e) {
 
-		<div class="row">	
-			<div class="tab-content span8">
-				<input class="span8" id="classic_q" name="q" placeholder="Watch your query being generated as you type in the form below" type="text" value="">
-			</div>
-			<div class="span4">
-				<button class="btn btn-primary" id="search_submit"><i class="icon-search icon-white"></i> Search</button>
-			</div>
-		</div>
+        	var ids = $("#raw-bibs").val();
 
-        <div id = "classic_interact" >
-        	<div class="row">
-	    	<div class="span8 classic_form_styling">			
-	        	<div class="row">
-	        		<div class="span8 classic_top_row" >
-			        		Databases to query: 
-			        		<label class="checkbox">
-			        			<input type="checkbox" checked name="filter-database" value="astronomy"> Astronomy
-			        		</label>
-			        		<label class="checkbox">
-			        			<input type="checkbox" name="filter-database" value="physics"> Physics 
-			        		</label>
-			        	<button class="btn btn-default btn-small" id="clear">Reset</button>
-			    	</div>
+            var num_results = $("#bibs-num-results").val();
+            if (num_results !== "20") {
+                $("#list-of-bibs .hidden-form").attr('action', function(i, action) {
+                    return action + '?' + $.param({
+                        'nr': num_results
+                    });
+                })
+            }
+            $("#list-of-bibs .hidden-form input[name=bigquerydata]").val(ids);
 
-			    </div>
-	        	<div class="row classic_author_object" >
-	        		<div class="span4">
-	        		<div class="row">
-					<div class="offset1" style="height:100px">
-						<div class="author-radio">
-							<label class="radio">
-							  <input type="radio"  value="or" name = "query-author-logic"> or
-							</label>
-							<label class="radio ">
-							  <input type="radio" checked value="and" name = "query-author-logic"> and
-							</label>
-							<label class="radio">
-							  <input type="radio" value="simple" name = "query-author-logic"> simple
-							</label><br/>
-						</div>
-						<textarea class= "span3" style="position:relative;z-index:100001;" name= "query-author-args" autofocus rows= "4"  placeholder= "Authors (Last, First M, one per line)"></textarea>
-					</div>
-				</div>
-				</div>
-	        			<div class="span4 classic_disabled">
-	        			<div class="object-radio">
-	        				<label class="radio">
-								 <input type="radio" disabled="disabled" value="or" name="query-object-logic"> or
-							</label>
-							<label class="radio" >
-								 <input type="radio" disabled="disabled" value="and" name="query-object-logic"> and
-							</label><br/>
-						</div>
-	        			<textarea disabled name="query-object-args" class="span3 uneditable-textarea" rows= "4" placeholder= "Object name/position search (not yet available)"></textarea>
-						</div>
-		   		</div>
+             $("#list-of-bibs .hidden-form").submit();
 
-        	<div class="row">
-				<div class="span8 classic_field classic_date">Publication date between
-						<input class="span1"  maxlength="2" placeholder="MM" type="text" value="" name="filter-date-month_from">/<input class="span1"  maxlength="4" placeholder="YYYY" type="text" value="" name="filter-date-year_from"> and 
-						<input class="span1" maxlength="2"  placeholder="MM" type="text" value="" name="filter-date-month_to" >/<input class="span1"  maxlength="4"  placeholder="YYYY" type="text" value="" name="filter-date-year_to">
-				</div>
-			</div>
-        	<div class="row">
-        		<div class="span8 classic_field">
-        			<div class="row">
+            e.preventDefault();
 
-						<div class="span4 offset4 classic_logic_abs_title" >
-							<label class="radio inline">
-							  <input type="radio"  value= "or" name="query-title-logic"> or
-							</label>
-							<label class="radio inline">
-							  <input type="radio"  value= "and" name="query-title-logic" checked> and
-							</label>
-<!-- 							<label class="radio inline">
-							  <input type="radio"  value= "simple" name="query-title-logic"> simple
-							</label> -->
-							<label class="radio inline">
-							  <input type="radio" value="boolean" name="query-title-logic"> boolean
-							</label>
-						</div>
-        			<textarea class= "span6 " rows="1" placeholder="Title words" name="query-title-args"></textarea>
-        			</div>
-        		</div>
-        	</div>
-        	<div class="row">
-        		<div class="span8 classic_field">
-        			<div class="row" id="abstract">
-
-						<div class="span4 offset4 classic_logic_abs_title ">
-							<label class="radio inline">
-							  	<input type="radio" value= "or" name = "query-abstract-logic"> or
-							</label>
-							<label class="radio inline">
-							  	<input type="radio" value= "and" name = "query-abstract-logic" checked> and
-							</label>
-<!-- 							<label class="radio inline">
-							  	<input type="radio" value= "simple" name = "query-abstract-logic"> simple
-							</label>
- -->							<label class="radio inline">
-							  	<input type="radio" value= "boolean" name = "query-abstract-logic"> boolean
-							</label>
-						</div>
-        			<textarea class= "span6" rows="3" placeholder="Abstract words/keywords" name="query-abstract-args"></textarea>
-        			</div>
-        		</div>
-        	</div>
-
-     	<div class="row">
-        		<div class="span8 classic_field">
-        			<div class="row" id="bibstem">
-						<div class="span4 offset4 classic_logic_abs_title " >
-							<label class="checkbox">
-								<input type= "checkbox" name="filter-ref_filter" value="ref_only"> Refereed only &nbsp; &nbsp;
-							</label>
-							<label class="checkbox">
-								<input type= "checkbox" name="filter-ref_filter" value = "articles_only"> Select only articles
-							</label>
-						</div>
-						<div>
-        					<textarea name="query-bibstem-args"  rows="2" class= "span6" placeholder="Comma-separated bibstems of journal titles (with autoselect)" autocomplete="off"></textarea>
-        				</div>
-        			</div>
-        		</div>
-        	</div>
-		   		
-        	<div class="row"  id="final-field">
-			    <div class="span8 classic_field">
-		        	Search will return <input type="text" class="span1" placeholder=" 20" name="filter-num_results-items"> results per page
-				</div>
-			</div>
-		</div> 
-		<!-- end form  -->
-		<div class="span2">
-
-			<div id="classic_entire_filter_div">
-				<p id="classic_filter_title"><i class="icon-filter" ></i>  Current Filter Settings </p>
-				<div class = "classic_well" id= "classic_filter_div">
-					<span class="classicAppliedFilter">Database: Astronomy</span>
-					<span class="classicAppliedFilter">Results per page: 20</span>
-					<span class="classicAppliedFilter">Refereed <span style="font-variant:small-caps">or</span> Non-refereed</span>
-				</div>
-			</div>
-
-			<div style="display:none">
-				<input type="text" id="json-data">	
-				</input>
-			</div>
-
-		</div>
-
+        });
+        </script>
     </div>
 
-	</div>
+    {% endmacro %} {# ###### Macro for the classic search form ###### #} {% macro render_classic_search_form() %}
+    <div class="container" id="classic_container">
+        <div class="form-search form-search-cust" id="classic_form">
 
-</div>
+            <div class="row">
+                <div class="tab-content span8">
+                    <input class="span8" id="classic_q" name="q" placeholder="Watch your query being generated as you type in the form below" type="text" value="">
+                </div>
+                <div class="span4">
+                    <button class="btn btn-primary" id="search_submit"><i class="icon-search icon-white"></i> Search</button>
+                </div>
+            </div>
 
-{% endmacro %}
+            <div id="classic_interact">
+                <div class="row">
+                    <div class="span8 classic_form_styling">
+                        <div class="row">
+                            <div class="span8 classic_top_row">
+                                Databases to query:
+                                <label class="checkbox">
+                                    <input type="checkbox" checked name="filter-database" value="astronomy">Astronomy
+                                </label>
+                                <label class="checkbox">
+                                    <input type="checkbox" name="filter-database" value="physics">Physics
+                                </label>
+                                <button class="btn btn-default btn-small" id="clear">Reset</button>
+                            </div>
+
+                        </div>
+                        <div class="row classic_author_object">
+                            <div class="span4">
+                                <div class="row">
+                                    <div class="offset1" style="height:100px">
+                                        <div class="author-radio">
+                                            <label class="radio">
+                                                <input type="radio" value="or" name="query-author-logic">or
+                                            </label>
+                                            <label class="radio ">
+                                                <input type="radio" checked value="and" name="query-author-logic">and
+                                            </label>
+                                            <label class="radio">
+                                                <input type="radio" value="simple" name="query-author-logic">simple
+                                            </label>
+                                            <br/>
+                                        </div>
+                                        <textarea class="span3" style="position:relative;z-index:100001;" name="query-author-args" autofocus rows="4" placeholder="Authors (Last, First M, one per line)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="span4 classic_disabled">
+                                <div class="object-radio">
+                                    <label class="radio">
+                                        <input type="radio" disabled="disabled" value="or" name="query-object-logic">or
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" disabled="disabled" value="and" name="query-object-logic">and
+                                    </label>
+                                    <br/>
+                                </div>
+                                <textarea disabled name="query-object-args" class="span3 uneditable-textarea" rows="4" placeholder="Object name/position search (not yet available)"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="span8 classic_field classic_date">Publication date between
+                                <input class="span1" maxlength="2" placeholder="MM" type="text" value="" name="filter-date-month_from">/
+                                <input class="span1" maxlength="4" placeholder="YYYY" type="text" value="" name="filter-date-year_from">and
+                                <input class="span1" maxlength="2" placeholder="MM" type="text" value="" name="filter-date-month_to">/
+                                <input class="span1" maxlength="4" placeholder="YYYY" type="text" value="" name="filter-date-year_to">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="span8 classic_field">
+                                <div class="row">
+
+                                    <div class="span4 offset4 classic_logic_abs_title">
+                                        <label class="radio inline">
+                                            <input type="radio" value="or" name="query-title-logic">or
+                                        </label>
+                                        <label class="radio inline">
+                                            <input type="radio" value="and" name="query-title-logic" checked>and
+                                        </label>
+                                        <!-- 							<label class="radio inline">
+							  <input type="radio"  value= "simple" name="query-title-logic"> simple
+							</label> -->
+                                        <label class="radio inline">
+                                            <input type="radio" value="boolean" name="query-title-logic">boolean
+                                        </label>
+                                    </div>
+                                    <textarea class="span6 " rows="1" placeholder="Title words" name="query-title-args"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="span8 classic_field">
+                                <div class="row" id="abstract">
+
+                                    <div class="span4 offset4 classic_logic_abs_title ">
+                                        <label class="radio inline">
+                                            <input type="radio" value="or" name="query-abstract-logic">or
+                                        </label>
+                                        <label class="radio inline">
+                                            <input type="radio" value="and" name="query-abstract-logic" checked>and
+                                        </label>
+                                        <!-- 							<label class="radio inline">
+							  	<input type="radio" value= "simple" name = "query-abstract-logic"> simple
+							</label>
+ -->
+                                        <label class="radio inline">
+                                            <input type="radio" value="boolean" name="query-abstract-logic">boolean
+                                        </label>
+                                    </div>
+                                    <textarea class="span6" rows="3" placeholder="Abstract words/keywords" name="query-abstract-args"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="span8 classic_field">
+                                <div class="row" id="bibstem">
+                                    <div class="span4 offset4 classic_logic_abs_title ">
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="filter-ref_filter" value="ref_only">Refereed only &nbsp; &nbsp;
+                                        </label>
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="filter-ref_filter" value="articles_only">Select only articles
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <textarea name="query-bibstem-args" rows="2" class="span6" placeholder="Comma-separated bibstems of journal titles (with autoselect)" autocomplete="off"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" id="final-field">
+                            <div class="span8 classic_field">
+                                Search will return
+                                <input type="text" class="span1" placeholder=" 20" name="filter-num_results-items">results per page
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end form  -->
+                    <div class="span2">
+
+                        <div id="classic_entire_filter_div">
+                            <p id="classic_filter_title"><i class="icon-filter"></i> Current Filter Settings</p>
+                            <div class="classic_well" id="classic_filter_div">
+                                <span class="classicAppliedFilter">Database: Astronomy</span>
+                                <span class="classicAppliedFilter">Results per page: 20</span>
+                                <span class="classicAppliedFilter">Refereed
+                                    <span style="font-variant:small-caps">or</span>Non-refereed</span>
+                            </div>
+                        </div>
+
+                        <div style="display:none">
+                            <input type="text" id="json-data">
+                            </input>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endmacro %}
