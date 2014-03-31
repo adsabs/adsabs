@@ -632,3 +632,7 @@ font-family: sans-serif;
 	position:relative;
 	z-index:0;
 }
+
+.tour-tour {
+	z-index: 100002 !important;
+}
