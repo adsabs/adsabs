@@ -241,7 +241,7 @@
 		<div id="list-of-bibs">
 			<h4 class="divide">List of Bibcodes</h4>
 
-			<form method="post" action="{{ url_for("search.search") }}">
+			<form method="post" action="{{ url_for("search.bigquery") }}">
 				<p> <em> Enter Bibcode
 					(e.g. 1989ApJ...342L..71R),
 					arXiv ID,
@@ -251,8 +251,7 @@
 			</p>
 			<label> 
 				<span> Bibcodes:</span>
-				<textarea id="raw-bibs"></textarea>
-				<input type="hidden" name="q">
+				<textarea id="raw-bibs" name="bigquerydata"></textarea>
 
 			</label>
 			<div class="pub-vol-page-options">
@@ -277,23 +276,15 @@
 		<script>
 
 		$("#list-of-bibs form").submit(function(e){
-			var b = $("#raw-bibs").val();
-			var divide = /(\r)?.{9,}(\r)?/g;
-			b= b.match(divide);
-			b = _.map(b, function(m){return  "\"" + m.trim() +"\""});
-			joined_b = b.join(' OR ');
 
 			var num_results = $("#bibs-num-results").val();
 			if (num_results !== "20") {
-					$("#list-of-bibs input[name=nr]").val(num_results)
+					$("#list-of-bibs form").attr('action', function(i, action) {
+						return action + '?' + $.param({'nr': num_results});
+					})
 			}
-			else {
-					$("#list-of-bibs input[name=nr]").val("")
-			};
 
-			$("#list-of-bibs input[name=q]").val("identifier:(" + joined_b + ")");
-
-			})
+			});
 		</script>
 </div>
 
