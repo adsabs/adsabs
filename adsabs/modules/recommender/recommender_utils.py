@@ -22,9 +22,11 @@ from flask.ext.solrquery import solr #@UnresolvedImport
 from .errors import *
 from .recommender_defs import ASTkeywords
 from adsabs.modules.bibutils.utils import get_citing_papers
+from multiprocessing import Process, Queue, cpu_count
 
 __all__ = ['get_recommendations','get_suggestions']
 # Helper functions
+# Data conversion
 def flatten(items):
     """flatten(sequence) -> list
 
@@ -103,6 +105,34 @@ def make_date(datestring):
     if pubdate[1] == 0:
         pubdate[1] = 1
     return datetime(pubdate[0],pubdate[1],1)
+
+# Data retrieval
+class DistanceHarvester(Process):
+    '''
+    Class to find the distance between a given document, represented
+    by its document vector, and a cluster document
+    '''
+    def __init__(self, task_queue, result_queue):
+        Process.__init__(self)
+        self.task_queue = task_queue
+        self.result_queue = result_queue
+        client = pymongo.MongoClient(config.RECOMMENDER_MONGO_HOST,config.RECOMMENDER_MONGO_PORT)
+        db = client.recommender
+        db.authenticate(config.RECOMMENDER_MONGO_USER,config.RECOMMENDER_MONGO_PASSWORD)
+        self.paper_coll = db.clustering
+    def run(self):
+        while True:
+            data = self.task_queue.get()
+            if data is None:
+                break
+            try:
+                res = self.paper_coll.find_one({'paper':data[0]})
+                cvect = cPickle.loads(res['vector_low'])
+                dist = linalg.norm(data[1]-cvect)
+            except:
+                dist = 999999
+            self.result_queue.put((data[0],dist))
+        return
 
 def get_normalized_keywords(bibc):
     '''
@@ -251,16 +281,27 @@ def find_closest_cluster_papers(pcluster,vec):
     cluster_coll = db.clusters
     paper_coll = client.recommender.clustering
     res = cluster_coll.find_one({'cluster':int(pcluster)})
-    distances = []
+    # We will now calculate the distances of the new paper all cluster members
+    # This is done in parallel using the DistanceHarvester
+    threads = cpu_count()
+    tasks = Queue()
+    results =Queue()
+    harvesters = [DistanceHarvester(tasks,results) for i in range(threads)]
+    for b in harvesters:
+        b.start()
+    num_jobs = 0
     for paper in res['members']:
-        res = paper_coll.find_one({'paper':paper})
-        if res:
-            cvector = cPickle.loads(res['vector_low'])
-        else:
-            continue
-        dist = linalg.norm(vec-cvector)
-        distances.append((paper,dist))
+        tasks.put((paper,vec))
+        num_jobs += 1
+    for i in range(threads):
+        tasks.put(None)
+    distances = []
+    while num_jobs:
+        data = results.get()
+        distances.append(data)
+        num_jobs -= 1
     d = sorted(distances, key=operator.itemgetter(1),reverse=False)
+
     return map(lambda a: a[0],d[:config.RECOMMENDER_MAX_NEIGHBORS])
 
 def find_recommendations(G,remove=None):
