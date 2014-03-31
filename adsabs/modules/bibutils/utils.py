@@ -46,12 +46,11 @@ class MongoCitationListHarvester(Process):
                 break
             try:
                 pubyear = int(bibcode[:4])
-                cit_collection = adsdata.get_collection('citations')
-                res1 = cit_collection.find_one({'_id': bibcode})
-                if res1:
-                    citations = res1.get('citations',[])
-                else:
-                    citations = cits = ref_cits = non_ref_cits = []
+                doc = adsdata.get_metrics_data(bibcode, manipulate=False)
+                try:
+                    citations = doc.get('citations',[])
+                except:
+                    citations = []
                 self.result_queue.put({'citations':citations})
             except MongoQueryError, e:
                 app.logger.error("Mongo citation list query for %s blew up (%s)" % (bibcode,e))
