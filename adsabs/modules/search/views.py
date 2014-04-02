@@ -126,7 +126,7 @@ def bigquery():
     
     qid = save_bigquery(v)
     
-    flash("Please note that we do not guarantee the persistance of your query in our system (it will be deleted at some point)", "info")
+    flash("Please note that we do not guarantee the persistence of your query in our system (it will be deleted at some point)", "info")
     urlargs = dict(request.args)
     urlargs['bigquery'] = qid
     if 'q' not in urlargs:
