@@ -38,5 +38,8 @@ from flask.ext.adsdata import FlaskAdsdata #@UnresolvedImport
 adsdata = FlaskAdsdata()
 
 #RAHUL:added
-from flask.ext.mongoengine import MongoEngine
+from flask.ext.mongoengine import MongoEngine #@UnresolvedImport
 mongoengine=MongoEngine()
+
+from flask.ext.statsd import StatsD #@UnresolvedImport
+statsd = StatsD()

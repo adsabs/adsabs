@@ -12,6 +12,7 @@ from adsabs.core.solr.bigquery import prepare_bigquery_request, retrieve_bigquer
 from adsabs.core.data_formatter import field_to_json
 from config import config
 from adsabs.core.logevent import log_event
+from adsabs.extensions import statsd
 import traceback
 import uuid
 import pytz
@@ -72,7 +73,10 @@ def search():
                     prepare_bigquery_request(req, request.values['bigquery'])
                     
                 req = solr.set_defaults(req)
-                resp = solr.get_response(req)
+                
+                timing_stat = g.statsd_context + ".solr.query_response_time"
+                with statsd.timer(timing_stat):
+                    resp = solr.get_response(req)
                 
                 if bigquery_id:
                     facets = resp.get_facet_parameters()

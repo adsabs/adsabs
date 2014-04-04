@@ -5,8 +5,10 @@ Created on Apr 24, 2013
 '''
 
 import uuid
+
 from flask import request, g
 from flask.ext.login import current_user #@UnresolvedImport
+from adsabs.extensions import statsd
 from config import config
 
 def set_user_cookie_id():
@@ -49,4 +51,10 @@ def configure_before_request_funcs(app):
     def check_for_maintenance():
         if config.DOWN_FOR_MAINTENANCE:
             return 'Sorry, we\'re down momentarily for a teensey bit of maintenance!', 503
+        
+    @app.before_request
+    def set_statsd_context():
+        g.statsd_context = "%s.http.%s.%s" % (app.name, request.method, request.endpoint)
+        g.total_request_timer = statsd.timer(g.statsd_context + ".total_response_time")
+        g.total_request_timer.start()
  

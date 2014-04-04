@@ -319,6 +319,10 @@ class AppConfig(object):
     #ADSGUT
     MONGODB_SETTINGS= {'HOST': 'mongodb://user:pass@localhost/adsgut', 'DB': 'adsgut'}
     
+    # statsd metric collection extension
+    STATSD_HOST = "localhost"
+    STATSD_PORT = 8125
+    
     
 try:
     from local_config import LocalConfig
