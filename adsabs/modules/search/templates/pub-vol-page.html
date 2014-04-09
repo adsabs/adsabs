@@ -6,8 +6,11 @@
 
 
 {% block head%}
-<!-- all unique classic search form css styles -->
+<!-- css styles -->
 <link rel="stylesheet" href="{{ url_for('search.static', filename='css/pub-vol-page.css') }}">
+
+<!-- json for autocomplete -->
+<script type="text/javascript" src="{{ url_for('search.static', filename='js/autocomplete.js') }}?app_version={{ config.APP_VERSION }}"></script>
 
 {% endblock %}
 

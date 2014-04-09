@@ -7,19 +7,9 @@
 	padding-bottom: 10px;
 }
 
-#pub-vol-page textarea{
-	max-width: 80%;
-	margin: auto;
-	min-height: 300px;
-	max-height: 500px
-}
 
 #pub-vol-page label {
 	font-weight:500;
-}
-
-#list-of-bibs  label {
-		padding-top: 40px;
 }
 
 
@@ -28,16 +18,17 @@
 	margin-left: 10px
 }
 
+#pub-vol-page p {
+	height:50px;
+	margin-bottom: 20px;
+}
+
 
 #pub-vol-page #list-of-bibs form{
 	width:100%;
 	margin:auto;
 }
 
-#pub-vol-page .buffer {
-	margin-bottom: 20px;
-	margin-top:20px;
-}
 
 #pub-query form {
 	margin-top:21px;
@@ -48,7 +39,7 @@
 	margin-top: 5px;
 }
 
-#pub-query .group span {
+#pub-vol-page .group span {
 	display:inline-block;
 	width:20%;
 }
@@ -56,15 +47,14 @@
 #list-of-bibs span{
 	display: inline-block;
 	width: 20%;
-	position:relative;
-	top: -140px;
 }
 
 #pub-query, #list-of-bibs {
 	border: 1px solid rgba(172, 185, 205, .4);
 	border-radius: 5px;
 	padding: 20px;
-	height: 550px;
+	height: 420px;
+	position:relative;
 }
 
 .pub-query-bottom-reposition {
@@ -98,5 +88,22 @@ ul.ui-autocomplete.ui-menu li a:hover {
 	background:url('spiffygif_20x20.gif') no-repeat right center; 
 }
 
-.ui-helper-hidden-accessible { position: absolute; left: -9999px; }
+.ui-helper-hidden-accessible { position: absolute; left: -9999px; 
+
+}
+
+#raw-bibs {
+	height: 180px;
+	resize: none;
+	overflow: auto;
+	max-width: 80%;
+	margin: auto;
+}
+
+.pub-vol-page-options {
+	position: absolute;
+	bottom:15px;
+	width:90%;
+	margin:auto;
+}
 
