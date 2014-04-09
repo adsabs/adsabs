@@ -565,7 +565,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.assertTrue(maxh == 2, "Twere were too few/many hightlights returned, requested=2, returned=%s" % maxh )
         
         # multiple fields
-        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2013MNRAS.435.3559T&qf=body+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=body:3')
+        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2014MNRAS.440L.121D&qf=body+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=body:3')
         resp = json.loads(rv.data)
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)
