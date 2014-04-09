@@ -10,7 +10,7 @@ cdict=(fqin, l)->
     return d
 
 
-parse_fqin = (fqin) -> 
+parse_fqin = (fqin) ->
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
@@ -77,7 +77,7 @@ didupost = (postings, you, fqpn) ->
         return false
 
 class ItemView extends Backbone.View
-     
+
   tagName: 'div'
   className: 'itemcontainer'
 
@@ -142,7 +142,7 @@ class ItemView extends Backbone.View
         htmlstring = "<div class='searchresultl'>(#{@counter}). <a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;(saved #{time_format_iv(@item.whenposted)})&nbsp;&nbsp;#{deleter}</div>"
     else
         htmlstring = "<div class='searchresultl'>(#{@counter}). <a href=\"#{url}\">#{@item.basic.name}</a>&nbsp;&nbsp;#{deleter}</div>"
-      
+
     fqin=@item.basic.fqin
     content = ''
     content = content + htmlstring
@@ -155,7 +155,7 @@ class ItemView extends Backbone.View
     content = content + additional
     @$el.append(content)
     #console.log "THETAGS", thetags, @memberable
-    tagdict = 
+    tagdict =
         values: thetags
         enhanceValue: _.bind(enval, this)
         addWithAjax: _.bind(addwa, this)
@@ -348,7 +348,7 @@ class ItemsView extends Backbone.View
     @newposts=[]
     #console.log "PVIEW", @pview
     @tagajaxsubmit = false
-    @submittable = 
+    @submittable =
         state: false
 
   update_postings_taggings: () =>
@@ -395,7 +395,7 @@ class ItemsView extends Backbone.View
     counter=1
     for i in @items
         fqin=i.basic.fqin
-        ins = 
+        ins =
             stags: @stags[fqin]
             notes: @notes[fqin]
             postings: @postings[fqin]
@@ -420,10 +420,10 @@ class ItemsView extends Backbone.View
         alert 'Did not succeed'
     cback = (data) =>
         #console.log data
-        libs=_.union(data.libraries, data.groups)
+        libs=_.union(data.libraries, data.groups).sort()
         #console.log "libsa", libs
         $ctrls.append(w.postalall_form(@nameable, @itemtype, libs))
-        tagdict = 
+        tagdict =
             enhanceValue: _.bind(enval, this)
             addWithAjax: _.bind(addwa, this)
             addWithoutAjax: _.bind(addwoata, this)
@@ -450,7 +450,7 @@ class ItemsView extends Backbone.View
 
   subNewLib: =>
     #console?.log "in sublib"
-    postable = 
+    postable =
         name: @.$('.libtxt').val()
         description: ''
     postabletype = "library"
@@ -477,12 +477,12 @@ class ItemsView extends Backbone.View
                 @.$('.multilibrary').multiselect('select', value)
 
     cback = (data) =>
-        #console.log("data", data, @memberable.nick)   
+        #console.log("data", data, @memberable.nick)
         syncs.get_postables_writable(@memberable.nick, cback2, eback)
-        
+
     syncs.create_postable(postable, postabletype, cback, eback)
 
-  iCancel: => 
+  iCancel: =>
     $.fancybox.close()
 
   iDone: =>
@@ -491,7 +491,7 @@ class ItemsView extends Backbone.View
         #console.log "DATAHOO", data
         #window.location=@loc
         $.fancybox.close()
-        
+
     eback = (xhr, etext) =>
         #console.log "ERROR", etext
         #replace by a div alert from bootstrap
@@ -512,11 +512,11 @@ class ItemsView extends Backbone.View
     cback_posts = () =>
         #console.log "SAVING POSTS", postables
         syncs.submit_posts(@items, postables, cback_tags, eback)
-    
+
     #console.log "SAVING ITEMS"
     syncs.save_items(@items, cback_posts, eback)
-    
-    
+
+
     #SHOULD HAVE A TAB CLOSE
     #window.close()
     return false
@@ -604,7 +604,7 @@ class ItemsFilterView extends Backbone.View
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
     #console.log "PVIEW", @pview
     #console.log "ITEMS", @items, @suggestions
-    @submittable = 
+    @submittable =
         state: true
 
   render: =>
@@ -613,7 +613,7 @@ class ItemsFilterView extends Backbone.View
     counter = 1
     for i in @items
         fqin=i.basic.fqin
-        ins = 
+        ins =
             stags: @stags[fqin]
             notes: @notes[fqin]
             postings: @postings[fqin]

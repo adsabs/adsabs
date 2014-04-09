@@ -6,11 +6,12 @@ h = teacup
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
-parse_fqin = (fqin) -> 
+parse_fqin = (fqin) ->
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
 parse_userinfo = (data) ->
+    #console.log "DATA", data
     publ= "adsgut/group:public"
     priv= data.user.nick+"/group:default"
     postablesin=[]
@@ -56,6 +57,7 @@ parse_userinfo = (data) ->
         if ele.fqpn not in powfqin
             userdict.librariesin.push(ele)
     userdict.librariesin = _.union(userdict.librariesin, groupsin)
+    #console.log "USERDICT", userdict
     return userdict
 
 
@@ -94,7 +96,7 @@ make_postable_link_secondary = h.renderable (fqpn, libmode=false, ownermode=fals
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
             h.text parse_fqin(fqpn)
 
-lmap = 
+lmap =
     lib: 'Libraries'
     group: 'Groups'
 
@@ -104,10 +106,10 @@ class Postable extends Backbone.Model
 class PostableView extends Backbone.View
 
     tagName: "tr"
-       
+
     events:
         "click .yesbtn" : "clickedYes"
-    
+
     initialize: (options) ->
         @libmode=options.libmode
         @ownermode=options.ownermode
@@ -146,7 +148,7 @@ class PostableView extends Backbone.View
 
 
 class PostableList extends Backbone.Collection
-    
+
     model: Postable
 
     initialize: (models, options) ->
@@ -172,7 +174,6 @@ class PostableListView extends Backbone.View
         views = (new PostableView(model:m, libmode:@libmode, ownermode:@ownermode) for m in @collection.models)
         rendered = (v.render().el for v in views)
         #console.log "RENDER1", rendered
-        #console.log "RENDER2"
         if @collection.invite
             if views.length == 0
                 rendered = ["<td colspan=5>No Invitations</td>"]
@@ -208,24 +209,24 @@ render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
   plinv=new PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
   plinv.render()
 
-layout_userprofile = (sections, config, ptype) -> 
+layout_userprofile = (sections, config, ptype) ->
   {$create, $info, $owned, $in, $invited} = sections
   {userInfoURL, udgHtmlURL} = config
-  wordmap = 
+  wordmap =
     lib: "libraries"
     group: "groups"
-  wordmap_singular = 
+  wordmap_singular =
     lib: "library"
     group: "group"
   viewl=new views.CreatePostable({postabletype: wordmap_singular[ptype]})
   $create.append(viewl.render().$el)
-  
+
   $.get userInfoURL, (data) ->
     userdict=parse_userinfo(data)
 
     #content=widgets.info_layout(userdict.userinfo, name:'Name', email: 'Email', nick:'Nickname', whenjoined:'Joined')
     # if ptype=='lib'
-    #     additional = 
+    #     additional =
     #         saved : "<a href=\"#{udgHtmlURL}\">Items</a>"
     #     content=widgets.info_layout(_.extend(userdict.userinfo, additional), name:'Name', email: 'Email', saved: "Saved")
     # else
