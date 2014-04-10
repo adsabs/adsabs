@@ -175,6 +175,8 @@
 
                     var that = this;
 
+                    $("#authorfacet").on("click", that.generateSearch);
+
                     force = d3.layout.force()
                     .size([w, h])
                     .linkDistance(linkDistance)
@@ -388,8 +390,7 @@
                             return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>';
                             }
                         });
-                    d3.select("#authorfacet")
-                      .on("click", that.generateSearch);
+
                 }, //end nodeClick   
 
                 //joins the svgs with the force layout
