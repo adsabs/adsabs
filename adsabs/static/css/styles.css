@@ -636,3 +636,30 @@ font-family: sans-serif;
 .tour-tour {
 	z-index: 100002 !important;
 }
+
+/* css for pages markdown layout */
+.markdown-body table {
+	width: 100%;
+	overflow: auto;
+	margin: 15px 0;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.markdown-body thead {
+    vertical-align: middle	
+}
+
+.markdown-body table tr {
+	border-top: 1px solid #ccc;
+	background-color: #fff;
+}
+
+.markdown-body table tr:nth-child(2n) {
+	background-color: #f8f8f8;
+}
+
+.markdown-body table th, table td {
+	border: 1px solid #ddd;
+	padding: 6px 13px;
+}
