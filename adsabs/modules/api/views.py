@@ -46,6 +46,7 @@ def api_ip_allowed(func):
 @api_blueprint.before_request
 def get_api_version_header():
     g.api_version = request.headers.get('X-API-Version', config.API_CURRENT_VERSION)
+    
         
 @api_blueprint.after_request
 def add_api_version_header(response):
