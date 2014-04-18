@@ -44,8 +44,9 @@ def recommender(bibcode,format):
     """
     try:
         results = get_recommendations(bibcode=bibcode)
-    except RecommenderCannotGetResults, e:
+    except Exception, e:
         app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,e))
+        return render_template('recommendations_embedded.html', results={})
     if format == 'json':
         return jsonify(paper=bibcode, recommendations=results['recommendations'])
     elif format == 'python':
