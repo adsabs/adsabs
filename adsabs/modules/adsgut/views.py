@@ -288,7 +288,7 @@ def before_request():
         user=g.db.getUserForAdsid(None, adsid)
     else:
         try:
-            user=w.getUserForCookieid(None, cookieid)
+            user=g.db.getUserForCookieid(None, cookieid)
             if user.adsid != adsid:#user changed their email
                 #print "email changed"
                 user.adsid = adsid
@@ -296,15 +296,23 @@ def before_request():
             #print "---------->IN HERE", adsid
         except:
             #print "<----------OR HERE", adsid, sys.exc_info()
-            adsgutuser=w.getUserForNick(None, 'adsgut')
-            adsuser=w.getUserForNick(adsgutuser, 'ads')
-            #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
-            #this removes the possibility of the user adding a custom nick, for now
-            #cookieid=current_user.get_id()
-            #user=w.addUser(adsgutuser,{'adsid':adsid})
-            user=w.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-            #add the user to the flagship ads app, at the very least
-            user, adspubapp = w.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
+            adsgutuser=g.db.getUserForNick(None, 'adsgut')
+            adsuser=g.db.getUserForNick(adsgutuser, 'ads')
+            #we dont have the cookie, but we might have the adsid, because he was invited earlier
+            try:#partially in our database
+              user=g.db.getUserForAdsid(None, adsid)
+              user.cookieid=cookieid
+              user.save(safe=True)
+            except:#not at all in our database
+              #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
+              #this removes the possibility of the user adding a custom nick, for now
+              #cookieid=current_user.get_id()
+              #user=w.addUser(adsgutuser,{'adsid':adsid})
+              #Make sure this one is done on invite
+              user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+            #add the user to the flagship ads app, at the very least, to complete user
+            #being in our database
+            user, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
 
 
     #superuser if no login BUG: use only for testing
@@ -375,10 +383,13 @@ def userInfo(nick):
     return ujson
 
 from flask.ext.wtf import Form, RecaptchaField
-from wtforms import TextField
+from wtforms import TextField, BooleanField, HiddenField
+from wtforms.validators import DataRequired
 
 class InviteForm(Form):
-    username = TextField('email')
+    memberable = TextField('username', validators=[DataRequired()])
+    op = HiddenField(default="invite")
+    changerw = BooleanField("Can Post?")
     recaptcha = RecaptchaField()
 
 #x
@@ -562,33 +573,48 @@ from adsabs.modules.user.user import send_email_to_user
 def makeInvitations(po, pt, pn):
   fqpn=po+"/"+pt+":"+pn
   if request.method == 'POST':
-      #specify your own nick for accept or decline
-      #print "LALALALALLA", request.json
-      jsonpost=dict(request.json)
-      memberable=_dictp('memberable', jsonpost)
-      changerw=_dictp('changerw', jsonpost)
-      if changerw==None:
-          changerw=False
-      if not memberable:
-          doabort("BAD_REQ", "No User Specified")
-      try:
-          memberable=g.db.getUserForAdsid(g.currentuser, memberable)
-      except:
-          adsuser = AdsUser.from_email(memberable)
-          if adsuser==None:
-              doabort("BAD_REQ", "No such User")
-          cookieid = adsuser.get_id()
-          adsid = adsuser.get_username()
-          adsgutuser=g.db.getUserForNick(None, 'adsgut')
-          adsuser=g.db.getUserForNick(adsgutuser, 'ads')
-          memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-          memberable, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', memberable.nick)
-
-      utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
-      emailtitle="Invitation to ADS Library %s" % pn
-      emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
-      send_email_to_user(emailtitle, emailtext,[memberable.adsid])
-      return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
+      form = InviteForm()
+      if form.validate():
+        #specify your own nick for accept or decline
+        print "LALALALALLA", form.memberable.data, form.changerw.data
+        # jsonpost=dict(request.form)
+        memberable=form.memberable.data
+        changerw=form.changerw.data
+        # changerw=_dictp('changerw', jsonpost)
+        # if changerw==None:
+        #     changerw=False
+        if not memberable:
+             doabort("BAD_REQ", "No User Specified")
+        # print "memberable", memberable, changerw
+        try:
+            user=g.db.getUserForAdsid(g.currentuser, memberable)
+        except:
+            adsuser = AdsUser.from_email(memberable)
+            adsgutuser=g.db.getUserForNick(None, 'adsgut')
+            adsappuser=g.db.getUserForNick(adsgutuser, 'ads')
+            if adsuser==None:#not in giovanni db, just add to ours
+              #doabort("BAD_REQ", "No such User")
+              adsgutuser=g.db.getUserForNick(None, 'adsgut')
+              potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET'})
+              user=potentialuser
+            else:#already in giovanni db, add to ours
+              cookieid = adsuser.get_id()
+              adsid = adsuser.get_username()
+              user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+              user, adspubapp = g.db.addUserToPostable(adsappuser, 'ads/app:publications', user.nick)
+        #ok got user, now invite
+        utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, user, changerw)
+        emailtitle="Invitation to ADS Library %s" % pn
+        emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
+        send_email_to_user(emailtitle, emailtext,[user.adsid])
+        passdict={}
+        passdict[pt+'owner']=po
+        passdict[pt+'name']=pn
+        return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
+      else:
+        print "ERROES", form.errors
+        print "NOVAL", request.form
+      return profileHtmlNotRouted(po, pn, pt, inviteform=form)
 
 @adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
 def doPostableChanges(po, pt, pn):
@@ -810,8 +836,7 @@ def groupInfo(groupowner, groupname):
 #x
 @adsgut.route('/postable/<groupowner>/group:<groupname>/profile/html')
 def groupProfileHtml(groupowner, groupname):
-    group, owner, on, cn=postable(groupowner, groupname, "group")
-    return render_template('groupprofile.html', thegroup=group, owner=owner,  useras=g.currentuser)
+    return profileHtmlNotRouted(groupowner, groupname, "group", inviteform=None)
 
 
 #POST/GET in a lightbox?
@@ -828,8 +853,7 @@ def appInfo(appowner, appname):
 #x
 @adsgut.route('/postable/<appowner>/app:<appname>/profile/html')
 def appProfileHtml(appowner, appname):
-    app, owner, on, cn=postable(appowner, appname, "app")
-    return render_template('appprofile.html', theapp=app, owner=owner, useras=g.currentuser)
+    return profileHtmlNotRouted(appowner, appname, "app", inviteform=None)
 
 
 #POST/GET in a lightbox?
@@ -847,10 +871,13 @@ def libraryInfo(libraryowner, libraryname):
 #x
 @adsgut.route('/postable/<libraryowner>/library:<libraryname>/profile/html')
 def libraryProfileHtml(libraryowner, libraryname):
-    library, owner, on, cn=postable(libraryowner, libraryname, "library")
-    inviteform = InviteForm()
-    return render_template('libraryprofile.html', thelibrary=library, owner=owner, inviteform=inviteform, useras=g.currentuser)
+    return profileHtmlNotRouted(libraryowner, libraryname, "library", inviteform=None)
 
+def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
+    p, owner, on, cn=postable(powner, pname, ptype)
+    if not inviteform:
+      inviteform = InviteForm()
+    return render_template(ptype+'profile.html', thepostable=p, owner=owner, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
 @adsgut.route('/postable/<nick>/group:default/filter/html')
 def udgHtml(nick):
