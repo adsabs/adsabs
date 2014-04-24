@@ -15,7 +15,7 @@ class RedisLogFormatter(logging.Formatter):
         """
         expects a dict or a LogEvent (which acts as a dict) as the record's msg attribute
         """
-        r.msg['@source_path'] = "%s, %s:%d" % (r.funcName, r.pathname, r.lineno)
+        r.msg['source_path'] = "%s, %s:%d" % (r.funcName, r.pathname, r.lineno)
         return json.dumps(r.msg)
 
 class RedisLogHandler(logging.Handler):

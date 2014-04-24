@@ -21,10 +21,10 @@ class LogEvent(dict):
     @classmethod
     def new(cls, msg, **fields):
         event = cls()
-        event['@message'] = msg
+        event['message'] = msg
         if hasattr(request, 'remote_addr'):
             fields['client_addr'] = request.remote_addr
-        event['@fields'] = fields
+        event.update(fields)
         event.init()
         return event
     
@@ -37,4 +37,4 @@ class LogEvent(dict):
         """
         now = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         self['@timestamp'] = now.isoformat()
-        self['@source'] = self['@source_host'] = socket.gethostname()
+        self['source'] = self['source_host'] = socket.gethostname()
