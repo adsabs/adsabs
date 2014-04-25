@@ -8,7 +8,7 @@ from urllib import unquote_plus
 from .forms import FeedbackForm
 from flask.ext.mail import Message #@UnresolvedImport
 from flask.ext.login import current_user #@UnresolvedImport
-from adsabs.extensions import mail
+from adsabs.extensions import mail, statsd
 from config import config
 import simplejson as json
 from types import *
@@ -45,7 +45,9 @@ def send_feedback(form):
                   body=message_body,
                   sender=form.email.data,
                   recipients=config.FEEDBACK_RECIPIENTS)
+
     mail.send(msg)
+    statsd.incr("feedback.email.sent")
 
 @feedback_blueprint.route('/', methods=('GET', 'POST'))
 def feedback():

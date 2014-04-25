@@ -330,6 +330,7 @@ class AppConfig(object):
     # statsd metric collection extension
     STATSD_HOST = "localhost"
     STATSD_PORT = 8125
+    STATSD_PREFIX = APP_NAME
     
     
 try:

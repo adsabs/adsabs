@@ -12,7 +12,9 @@ from flask import jsonify
 def create_error_handler(app, status_code, template):
     @app.errorhandler(status_code)
     def f(error):    
+        from adsabs.extensions import statsd
         app.logger.error("[error] %s, %s" % (str(error), request.path))
+        statsd.incr("error.%s.handled" % str(status_code))
         return render_template(template), status_code
 
     

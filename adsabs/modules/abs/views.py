@@ -12,6 +12,7 @@ from config import config
 import logging
 from signals import abstract_view_signal
 from adsabs.core.logevent import LogEvent
+from adsabs.extensions import statsd
 
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
 
@@ -48,6 +49,7 @@ def abstract(bibcode=None):
     
     # log the request
     abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="abstract")
+    statsd.incr("abs.abstract.viewed")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview='abstract')
     
@@ -75,6 +77,7 @@ def tab_list(bibcode, list_type):
     
     # log the request
     abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type=list_type)
+    statsd.incr("abs.%s.viewed" % list_type)
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview=list_type, article_list=resp)
 

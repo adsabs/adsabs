@@ -174,7 +174,9 @@ def mongogut_error_handler(app):
     from flask import jsonify, request, render_template
     
     def f(error, template, status_code):    
+        from adsabs.extensions import statsd
         app.logger.error("[error] %s, %s" % (str(error), request.path))
+        statsd.incr("mongogut.error.%s.handled" % str(status_code))
         return render_template(template), status_code
 
     @app.errorhandler(MongoGutError)

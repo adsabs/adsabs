@@ -36,7 +36,6 @@ def set_user_cookie_id():
                 g.user_cookie_id = unicode(uuid.uuid4())
         else:
             g.user_cookie_id = current_user.get_id()
-        
 
 def configure_before_request_funcs(app):
     """
@@ -51,10 +50,15 @@ def configure_before_request_funcs(app):
     def check_for_maintenance():
         if config.DOWN_FOR_MAINTENANCE:
             return 'Sorry, we\'re down momentarily for a teensey bit of maintenance!', 503
+    
+    @app.before_request
+    def count_uniques():
+        statsd.set('unique_users', g.user_cookie_id)
+        statsd.set('unique_ips', request.remote_addr)
         
     @app.before_request
     def set_statsd_context():
-        g.statsd_context = "%s.http.%s.%s" % (app.name, request.method, request.endpoint)
-        g.total_request_timer = statsd.timer(g.statsd_context + ".total_response_time")
+        g.statsd_context = "%s.%s" % (request.endpoint, request.method)
+        g.total_request_timer = statsd.timer(g.statsd_context + ".response_time")
         g.total_request_timer.start()
  

@@ -9,7 +9,7 @@ from flask import (Blueprint, request, Response, current_app as app, abort, rend
 from adsabs.core.classic.export import get_classic_records_export
 from adsabs.core.solr import get_document_similar
 from adsabs.core.solr.query_builder import create_sort_param
-from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
+from flask.ext.solrquery import solr #@UnresovledImport
 from config import config
 
 
