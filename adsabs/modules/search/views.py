@@ -74,22 +74,25 @@ def search():
                     
                 req = solr.set_defaults(req)
                 
-                timing_stat = g.statsd_context + ".solr.query_response_time"
-                with statsd.timer(timing_stat):
+                with statsd.timer("search.solr.query_response_time"):
                     resp = solr.get_response(req)
                 
+                statsd.incr("search.solr.executed")
                 if bigquery_id:
                     facets = resp.get_facet_parameters()
                     facets.append(('bigquery', bigquery_id))
                 
             except Exception, e:
+                statsd.incr("search.solr.failed")
                 raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
             if resp.is_error():
+                statsd.incr("search.solr.error")
                 flash(resp.get_error_message(), 'error')
 
             return render_template('search_results.html', resp=resp, form=form, 
                                    query_components=query_components, bigquery_id=bigquery_id)
         else:
+            statsd.incr("search.solr.invalid_params")
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)

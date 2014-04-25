@@ -9,7 +9,7 @@ import os
 from itsdangerous import (URLSafeSerializer, TimestampSigner, BadSignature, SignatureExpired, BadTimeSignature)
 from flask.ext.mail import Message #@UnresolvedImport
 from .models import AdsUserRecord
-from adsabs.extensions import mail
+from adsabs.extensions import mail, statsd
 from config import config
 from adsabs.core.classic.user import *
 
@@ -188,6 +188,7 @@ def send_email_to_user(title, message_html, recipients, sender=None):
                   sender=sender,
                   recipients=recipients)
     mail.send(msg)  #@UndefinedVariable
+    statsd.incr("user.email.sent")
 
 
 def authenticate(login, password):
