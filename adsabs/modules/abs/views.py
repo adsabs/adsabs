@@ -48,7 +48,7 @@ def abstract(bibcode=None):
     denormdoc = denormalize_solr_doc(solrdoc)
     
     # log the request
-    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type="abstract")
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, list_type="abstract")
     statsd.incr("abs.abstract.viewed")
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview='abstract')
@@ -76,7 +76,7 @@ def tab_list(bibcode, list_type):
     resp = list_method(**query_components)
     
     # log the request
-    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, type=list_type)
+    abstract_view_signal.send(abs_blueprint, bibcode=bibcode, list_type=list_type)
     statsd.incr("abs.%s.viewed" % list_type)
     
     return render_template('abstract_tabs.html', solrdoc=solrdoc, denormdoc=denormdoc, curview=list_type, article_list=resp)
