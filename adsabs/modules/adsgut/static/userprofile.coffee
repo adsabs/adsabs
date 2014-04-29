@@ -54,7 +54,7 @@ parse_userinfo = (data) ->
     for ele in data.postablelibs
         if ele.reason != ''
             ele.reason = " (through #{ele.reason})"
-        if ele.fqpn not in powfqin
+        if ele.reason!="group:public" and ele.fqpn not in powfqin
             userdict.librariesin.push(ele)
     userdict.librariesin = _.union(userdict.librariesin, groupsin)
     #console.log "USERDICT", userdict

@@ -2,6 +2,13 @@ root = exports ? this
 $=jQuery
 #console.log "In Funcs"
 h = teacup
+
+csvstringify = (tdict) ->
+  start="#paper, tag\n"
+  for bibcode of tdict
+    for tag in tdict[bibcode]
+      start=start+bibcode+","+tag+"\n"
+  return start
 #redo this to use url parsing library, handle other types of queries besides tags
 parse_querystring= (qstr) ->
     #console.log "QQQ", qstr
@@ -17,7 +24,7 @@ make_editable_description = ($infodiv, fqpn) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.fn.editable.defaults.mode = 'inline'
     $infodiv.find('.edtext').editable(
       type:'textarea'
@@ -93,8 +100,18 @@ do_postable_filter = (sections, config, tagfunc) ->
                     tagoutput[prop] = (e[0] for e in clist)
 
             #console.log JSON.stringify(tagoutput)
-            $('#asjson').click (e)->
-                window.document.write(JSON.stringify(tagoutput))
+            sections.$asjson.click (e)->
+                data = JSON.stringify(tagoutput)
+                window.document.write(data)
+                #window.location.href = "data:application/json;base64," + data
+                e.preventDefault()
+            sections.$ascsv.click (e)->
+                data = csvstringify(tagoutput)
+                #window.document.write()
+                #console.log "data", data
+                #window.location.href = "data:text/csv;base64," + data
+                #towrite = "Content-Type: text/csv\n" + data
+                window.document.write("<pre>"+data+"</pre>")
                 e.preventDefault()
             postings={}
             times={}
@@ -116,7 +133,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                 i.whenposted = times[i.basic.fqin]
             #console.log "SORTEDITEMS"
             #for i in sorteditems
-            #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs 
+            #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs
             ido=
                 stags:stags
                 postings:postings
@@ -162,7 +179,7 @@ do_postable_filter = (sections, config, tagfunc) ->
         sections.$ua.attr('href', urla)
         sections.$ua.attr('data', 'on')
 
-root.postablefilter = 
+root.postablefilter =
     do_postable_info: do_postable_info
     do_postable_filter: do_postable_filter
     do_tags: do_tags

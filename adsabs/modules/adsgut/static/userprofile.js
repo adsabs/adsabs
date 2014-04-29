@@ -158,7 +158,7 @@
       if (ele.reason !== '') {
         ele.reason = " (through " + ele.reason + ")";
       }
-      if (_ref3 = ele.fqpn, __indexOf.call(powfqin, _ref3) < 0) {
+      if (ele.reason !== "group:public" && (_ref3 = ele.fqpn, __indexOf.call(powfqin, _ref3) < 0)) {
         userdict.librariesin.push(ele);
       }
     }

@@ -22,8 +22,9 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
   <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 <button class="btn" id="asjson">As JSON</button>
@@ -35,8 +36,9 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
   <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 </span>
@@ -53,8 +55,9 @@
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
   <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 </span>
@@ -79,7 +82,7 @@ $ ->
   ptype = "{{p.classname}}"
   vars="{{ querystring | safe }}"
 
-  config = 
+  config =
     fqpn : "{{p.basic.fqin}}"
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
     tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
@@ -89,7 +92,7 @@ $ ->
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
     bq2url : GlobalVariables.ADS_PREFIX+"/search/bigquery/"
-    memberable: 
+    memberable:
       nick: "{{useras.nick}}"
       adsid: "{{useras.adsid}}"
     loc : document.location
@@ -98,7 +101,7 @@ $ ->
     pview: "{{pflavor}}"
     owner : if '{{owner}}' == 'True' then true else false
 
-  sections = 
+  sections =
     $info : $('div#info')
     $items : $('#items')
     $ua : $('#useradder')
@@ -107,6 +110,8 @@ $ ->
     $bigqueryform : $('#bigqueryform')
     $breadcrumb: $('#breadcrumb')
     $count: $('#count')
+    $asjson: $('#asjson')
+    $ascsv: $('#ascsv')
 
   redo_tags = _.partial(postablefilter.do_tags, config.tagsPURL, sections.$tagssec, config.tqtype)
 
