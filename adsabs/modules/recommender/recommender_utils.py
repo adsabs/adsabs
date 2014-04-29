@@ -402,33 +402,33 @@ def get_recommendations(bibcode):
     '''
     try:
         vec = make_paper_vector(bibcode)
-    except:
-        raise RuntimeError('make_paper_vector: failed to make paper vector (%s)' % bibcode)
+    except Exception, e:
+        raise Exception('make_paper_vector: failed to make paper vector (%s): %s' % (bibcode,str(e)))
     try:
         pvec = project_paper(vec)
-    except:
-        raise RuntimeError('project_paper: failed to project paper vector (%s)' % bibcode)
+    except Exception, e:
+        raise Exception('project_paper: failed to project paper vector (%s): %s' % (bibcode,str(e)))
     try:
         pclust = find_paper_cluster(pvec,bibcode)
-    except:
-        raise RuntimeError('find_paper_cluster: failed to find cluster (%s)' % bibcode)
+    except Exception, e:
+        raise Exception('find_paper_cluster: failed to find cluster (%s): %s' % (bibcode,str(e)))
     try:
         cvec = project_paper(pvec,pcluster=pclust)
-    except:
-        raise RuntimeError('project_paper: failed to project %s within cluster %s'%(bibcode,pclust))
+    except Exception, e:
+        raise Exception('project_paper: failed to project %s within cluster %s: %s'%(bibcode,pclust, str(e)))
     try:
         close = find_closest_cluster_papers(pclust,cvec)
-    except:
-        raise RuntimeError('find_closest_cluster_papers: failed to find closest cluster papers (%s)'%bibcode)
+    except Exception, e:
+        raise Exception('find_closest_cluster_papers: failed to find closest cluster papers (%s): %s'%(bibcode,str(e)))
     try:
         R = find_recommendations(close,remove=bibcode)
-    except:
-        raise RuntimeError('find_recommendations: failed to find recommendations. paper: %s, closest: %s' % (bibcode,str(closest)))
+    except Exception, e:
+        raise Exception('find_recommendations: failed to find recommendations. paper: %s, closest: %s, error: %s' % (bibcode,str(closest),str(e)))
     # Get meta data for the recommendations
     try:
         meta_dict = get_article_data(R[1:], check_references=False)
-    except:
-        raise RuntimeError('get_article_data: failed to retrieve article data for recommendations (%s)'%bibcode)
+    except Exception, e:
+        raise Exception('get_article_data: failed to retrieve article data for recommendations (%s): %s'%(bibcode,str(e)))
     # Filter out any bibcodes for which no meta data was found
     recommendations = filter(lambda a: a in meta_dict, R)
 
