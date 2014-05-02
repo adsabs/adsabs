@@ -31,10 +31,11 @@ var FeedbackManager = function() {
 			$('#button_feedback_widget').attr('data-fancybox-href', this.get_href('nolayout'));
 		},
 		
-		set_topnav_link: function() {
+		set_links: function() {
 			$('#feedback-topnav').on('click', function() {
 				window.location = FeedbackManager.get_href();
 			});
+			$("footer a[href='/feedback/']").first().attr('href', FeedbackManager.get_href());
 		}
 	}
 }();
@@ -50,7 +51,7 @@ $(document).ready(function(){
 	$(window).resize(function(){
 		FeedbackManager.append_feedback_button();
 	})
-	FeedbackManager.set_topnav_link();
+	FeedbackManager.set_links();
 	FeedbackManager.set_fancybox_href();
 	//enable the fancybox button
 	$('#button_feedback_widget').fancybox();
