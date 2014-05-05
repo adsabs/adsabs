@@ -98,6 +98,32 @@ def userdel(email=None, dev_key=None):
         user.set_perms(perms={})
         
 @manager.command
+def setperms(email=None, dev_key=None, perms="{}"):
+    """
+    update the user's developer permission settings
+    new permissions should be a string that evals to a dictionary
+    e.g., "python shell.py api setperms -d <dev_key> -p '{"max_rows": 1000}'
+    """ 
+    import api_user
+        
+    if email:
+        user = api_user.AdsApiUser.from_email(email)
+    elif dev_key:
+        user = api_user.AdsApiUser.from_dev_key(dev_key)
+    else:
+        app.logger.error("You must provide an email address or dev_key for the lookup")
+        sys.exit(1)
+    try:
+        new_perms = eval(perms)
+    except Exception, e:
+        app.logger.error("New permissions did not eval. Check formatting. Error message: %s" % str(e))
+        return
+    user_perms = user.get_dev_perms()
+    user_perms.update(new_perms)
+    user.set_perms(perms=user_perms)
+    app.logger.info("Developer permissions updated.")
+        
+@manager.command
 def sendwelcome(email=None, dev_key=None, no_prompt=False):
     """send the welcome message to an api user"""
     import api_user
