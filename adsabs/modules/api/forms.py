@@ -16,7 +16,7 @@ MIN_QUERY_LENGTH = 2
 MAX_QUERY_LENGTH = 1000
 SORT_DIRECTIONS = ['asc','desc']
 
-from flask.ext.pushrod import Pushrod #@UnresolvedImport
+from flask.ext.pushrod import Pushrod 
 Pushrod.format_arg_name = 'fmt'
 
 class RepeatableField(Field):

@@ -7,7 +7,7 @@ import tempfile
 import subprocess
 from time import sleep
 
-from flask.ext.script import Manager, Command, prompt, prompt_pass, prompt_bool #@UnresolvedImport
+from flask.ext.script import Manager, Command, prompt, prompt_pass, prompt_bool 
 from flask import render_template
 
 from adsabs import create_app

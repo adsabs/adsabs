@@ -7,7 +7,7 @@ import uuid
 import pytz
 from datetime import datetime
 from adsabs.extensions import mongodb
-from flask.ext.mongoalchemy import document #@UnresolvedImport
+from flask.ext.mongoalchemy import document 
 
 class BigQuery(mongodb.Document): #@UndefinedVariable
     """

@@ -2,44 +2,29 @@
 
 from config import config
 
-# For import *
-#__all__ = ['login_manager', 'mongodb', 'pushrod', 'mail', 'cache', 'solr', 'adsdata', 'mongoengine']
-__all__ = ['login_manager', 'mongodb', 'pushrod', 'mail', 'cache']
-#from flask.ext.sqlalchemy import SQLAlchemy #@UnresolvedImport
-#db = SQLAlchemy()
-
-#from flask.ext.mail import Mail #@UnresolvedImport
-#mail = Mail()
-
-#from flask.ext.cache import Cache #@UnresolvedImport
-#cache = Cache()
-
-
-
-from flask.ext.login import LoginManager #@UnresolvedImport
+from flask.ext.login import LoginManager 
 login_manager = LoginManager()
 
-from flask.ext.mongoalchemy import MongoAlchemy #@UnresolvedImport
+from flask.ext.mongoalchemy import MongoAlchemy 
 mongodb = MongoAlchemy()
 
-from flask.ext.pushrod import Pushrod #@UnresolvedImport
+from flask.ext.pushrod import Pushrod 
 pushrod = Pushrod(default_renderer=config.API_DEFAULT_RESPONSE_FORMAT)
 
-from flask.ext.mail import Mail #@UnresolvedImport
+from flask.ext.mail import Mail 
 mail = Mail()
 
-from flask.ext.cache import Cache   #@UnresolvedImport
+from flask.ext.cache import Cache   
 cache = Cache()
 
-from flask.ext.solrquery import FlaskSolrQuery #@UnresolvedImport
+from flask.ext.solrquery import FlaskSolrQuery 
 solr = FlaskSolrQuery()
 
-from flask.ext.adsdata import FlaskAdsdata #@UnresolvedImport
+from flask.ext.adsdata import FlaskAdsdata 
 adsdata = FlaskAdsdata()
 
-#RAHUL:added
-from flask.ext.mongoengine import MongoEngine #@UnresolvedImport
+from flask.ext.mongoengine import MongoEngine 
 mongoengine=MongoEngine()
 
-from flask.ext.statsd import StatsD #@UnresolvedImport
+from flask.ext.statsd import StatsD 
 statsd = StatsD()

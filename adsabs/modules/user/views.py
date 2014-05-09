@@ -1,9 +1,9 @@
 #from datetime import datetime
 from flask import (Blueprint, request, flash, redirect, 
                    url_for, render_template, g, session, current_app as app)
-from flask.ext.login import (login_required, login_user,                    #@UnresolvedImport
-                current_user, logout_user,                                  #@UnresolvedImport
-                confirm_login, fresh_login_required, login_fresh)           #@UnresolvedImport
+from flask.ext.login import (login_required, login_user,                    
+                current_user, logout_user,                                  
+                confirm_login, fresh_login_required, login_fresh)           
 from time import time
 from .forms import (SignupForm, LoginForm, ResetPasswordForm, 
                    ChangePasswordForm, ReauthForm, ActivateUserForm,

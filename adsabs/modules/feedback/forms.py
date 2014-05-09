@@ -4,11 +4,11 @@ Created on May 9, 2013
 @author: dimilia
 '''
 
-from flask.ext.wtf import (Form, RecaptchaField)      #@UnresolvedImport
-from wtforms import (TextField, RadioField, TextAreaField, HiddenField, #SelectField, IntegerField, BooleanField,  , SubmitField, HiddenField,  #@UnresolvedImport
-                          validators)   #@UnresolvedImport
+from flask.ext.wtf import (Form, RecaptchaField)      
+from wtforms import (TextField, RadioField, TextAreaField, HiddenField, #SelectField, IntegerField, BooleanField,  , SubmitField, HiddenField,  
+                          validators)   
 from wtforms.validators import (required, length) #optional, ValidationError, equal_to, email 
-from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
+from flask.ext.wtf.html5 import EmailField 
 from config import config
 
 __all__ = ['FeedbackForm',]

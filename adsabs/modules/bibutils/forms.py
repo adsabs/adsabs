@@ -4,7 +4,7 @@ Created on Jul 16, 2013
 @author: ehenneken
 '''
 
-from flask.ext.wtf import Form  #@UnresolvedImport
+from flask.ext.wtf import Form  
 
 from wtforms import TextField, TextAreaField, SelectField
 

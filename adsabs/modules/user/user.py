@@ -2,12 +2,12 @@
 Module to interface with the back-end authentication system
 '''
 from flask import (current_app as app, g, url_for)
-from flask.ext.login import current_user                    #@UnresolvedImport
+from flask.ext.login import current_user                    
 import pytz
 from datetime import datetime, timedelta
 import os
 from itsdangerous import (URLSafeSerializer, TimestampSigner, BadSignature, SignatureExpired, BadTimeSignature)
-from flask.ext.mail import Message #@UnresolvedImport
+from flask.ext.mail import Message 
 from .models import AdsUserRecord
 from adsabs.extensions import mail, statsd
 from config import config

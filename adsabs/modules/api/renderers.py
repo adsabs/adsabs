@@ -7,7 +7,7 @@ Created on Nov 2, 2012
 import json
 import flask
 
-from flask.ext.pushrod.renderers import renderer #@UnresolvedImport
+from flask.ext.pushrod.renderers import renderer 
 from adsabs.extensions import pushrod
 
 VALID_FORMATS = []

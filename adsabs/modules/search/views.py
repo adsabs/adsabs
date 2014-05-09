@@ -2,10 +2,10 @@ import sys
 import re
 from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
     Markup, redirect
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 import re
 
-#from flask.ext.login import current_user #@UnresolvedImport
+#from flask.ext.login import current_user 
 from .forms import QueryForm
 from adsabs.core.solr import QueryBuilderSearch, AdsabsSolrqueryException
 from adsabs.core.solr.bigquery import prepare_bigquery_request, retrieve_bigquery, save_bigquery

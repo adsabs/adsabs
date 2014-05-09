@@ -5,7 +5,6 @@ import pytz
 import logging
 from webassets.loaders import PythonLoader
 from flask import Flask, send_from_directory
-from flask.ext.assets import Environment, Bundle
 from config import config, APP_NAME
 from wsgi_middleware import DeploymentPathMiddleware
 from adsabs.core.template_filters import configure_template_filters
@@ -54,6 +53,8 @@ def create_app(config=config, app_name=None):
 
 def _configure_assets(app):
     
+    from flask.ext.assets import Environment 
+
     assets = Environment(app)
     pyload = PythonLoader('config.assets')
     bundles = pyload.load_bundles()

@@ -23,7 +23,7 @@ from config import config
 from test_utils import AdsabsBaseTestCase
 
 from flask import request
-from werkzeug.datastructures import MultiDict, ImmutableMultiDict, CombinedMultiDict  #@UnresolvedImport
+from werkzeug.datastructures import MultiDict, ImmutableMultiDict, CombinedMultiDict  
 #from adsabs.modules.search.misc_functions import build_basicquery_components, build_singledoc_components
 from adsabs.core.solr import QueryBuilderSearch, QueryBuilderSimple
 from adsabs.core.solr.query_builder import create_sort_param
