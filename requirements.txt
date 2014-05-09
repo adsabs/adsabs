@@ -8,13 +8,11 @@ Flask-Login==0.2.7
 Flask-Mail>=0.8.2
 Flask-MongoAlchemy>=0.5.4
 Flask-Pushrod>=0.1.2
-Flask-SQLAlchemy>=0.16
 Flask-Script>=0.5.3
 Flask-WTF>=0.9.0
 Flask-Assets>=0.8
 Flask>=0.9
 MongoAlchemy>=0.14
-MySQL-python
 PyVirtualDisplay>=0.1.2
 WTForms>=1.0.4
 beautifulsoup4>=4.2.0
