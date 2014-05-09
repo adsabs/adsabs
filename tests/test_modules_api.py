@@ -19,11 +19,11 @@ else:
     
 import simplejson as json
 
-from werkzeug import Headers #@UnresolvedImport
+from werkzeug import Headers 
 
 from flask import request, g
-from flask.ext.pushrod.renderers import RendererNotFound #@UnresolvedImport
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.pushrod.renderers import RendererNotFound 
+from flask.ext.solrquery import solr 
 
 from adsabs.modules.user import AdsUser
 from adsabs.modules.api import AdsApiUser

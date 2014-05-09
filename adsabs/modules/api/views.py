@@ -1,7 +1,7 @@
 import sys
 
 from flask import Blueprint, request, g, current_app as app
-from flask.ext.pushrod import pushrod_view #@UnresolvedImport
+from flask.ext.pushrod import pushrod_view 
 
 from functools import wraps
 

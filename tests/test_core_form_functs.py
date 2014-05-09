@@ -9,11 +9,11 @@ if sys.version_info < (2,7):
 else:
     import unittest
 from flask import request
-from flask.ext.wtf import Form #@UnresolvedImport
-from wtforms import (TextField, RadioField,     #@UnresolvedImport
-                    TextAreaField, validators)#@UnresolvedImport
+from flask.ext.wtf import Form 
+from wtforms import (TextField, RadioField,     
+                    TextAreaField, validators)
 from wtforms.validators import (required, length) 
-from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
+from flask.ext.wtf.html5 import EmailField 
 from test_utils import AdsabsBaseTestCase
 
 

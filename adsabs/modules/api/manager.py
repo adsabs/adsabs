@@ -9,7 +9,7 @@ import gspread
 import simplejson
 
 from flask import current_app as app
-from flask.ext.script import Manager, prompt, prompt_choices, prompt_bool #@UnresolvedImport
+from flask.ext.script import Manager, prompt, prompt_choices, prompt_bool 
 from config import config
 
 manager = Manager("Perform api user operations", with_default_commands=False)

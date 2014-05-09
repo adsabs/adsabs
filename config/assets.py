@@ -1,4 +1,4 @@
-from flask.ext.assets import Environment, Bundle
+from flask.ext.assets import Bundle 
 
 main_js = Bundle('js/libs/jquery.js',
                 'jquery-ui/js/jquery-ui-1.10.3.custom.js',

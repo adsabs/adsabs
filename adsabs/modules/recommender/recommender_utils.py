@@ -18,7 +18,7 @@ import operator
 import cPickle
 import pymongo
 from flask import current_app as app
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 from .errors import *
 from .recommender_defs import ASTkeywords
 from adsabs.modules.bibutils.utils import get_citing_papers

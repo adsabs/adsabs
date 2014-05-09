@@ -5,8 +5,8 @@ Created on Nov 2, 2012
 '''
 import re
 import sys
-from flask import g #@UnresolvedImport
-from flask.ext.solrquery import solr, SearchRequest #@UnresolvedImport
+from flask import g 
+from flask.ext.solrquery import solr, SearchRequest 
 
 from config import config
 from .forms import ApiQueryForm

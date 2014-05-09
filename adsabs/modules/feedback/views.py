@@ -6,8 +6,8 @@ Created on May 9, 2013
 from flask import Blueprint, request, render_template, flash, g
 from urllib import unquote_plus
 from .forms import FeedbackForm
-from flask.ext.mail import Message #@UnresolvedImport
-from flask.ext.login import current_user #@UnresolvedImport
+from flask.ext.mail import Message 
+from flask.ext.login import current_user 
 from adsabs.extensions import mail, statsd
 from config import config
 import simplejson as json

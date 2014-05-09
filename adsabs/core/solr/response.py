@@ -10,7 +10,7 @@ from config import config
 from solrdoc import SolrDocument
 
 from flask import request as current_request, current_app as app
-from flask.ext.solrquery import SearchResponseMixin #@UnresolvedImport
+from flask.ext.solrquery import SearchResponseMixin 
 
 __all__ = ['SolrResponse']
 

@@ -19,7 +19,7 @@ from adsabs.core.solr import SolrDocument, denormalize_solr_doc
 from config import config
 from test_utils import AdsabsBaseTestCase, canned_solr_response_data
 
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 
 import requests
 NETWORK_AVAILABLE = False

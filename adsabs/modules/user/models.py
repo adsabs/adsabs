@@ -7,7 +7,7 @@ Created on Oct 25, 2012
 import pytz
 from datetime import datetime
 from adsabs.extensions import mongodb
-from flask.ext.mongoalchemy import document #@UnresolvedImport
+from flask.ext.mongoalchemy import document 
 
 class AdsUserRecord(mongodb.Document): #@UndefinedVariable
     """

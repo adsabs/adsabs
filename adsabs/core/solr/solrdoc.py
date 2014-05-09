@@ -9,7 +9,7 @@ from urllib2 import quote
 from urllib import urlencode
 from simplejson import dumps
 
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 
 from adsabs.core.classic import abstract_url
 from adsabs.extensions import statsd

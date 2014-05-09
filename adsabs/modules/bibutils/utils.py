@@ -17,8 +17,8 @@ import xlwt
 import uuid
 import simplejson
 from flask import current_app as app
-from flask.ext.solrquery import solr #@UnresolvedImport
-from flask.ext.adsdata import adsdata #@UnresolvedImport
+from flask.ext.solrquery import solr 
+from flask.ext.adsdata import adsdata 
 from adsabs.core.solr import get_document_similar
 
 # local imports

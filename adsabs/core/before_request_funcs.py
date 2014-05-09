@@ -7,7 +7,7 @@ Created on Apr 24, 2013
 import uuid
 
 from flask import request, g
-from flask.ext.login import current_user #@UnresolvedImport
+from flask.ext.login import current_user 
 from adsabs.extensions import statsd
 from config import config
 
