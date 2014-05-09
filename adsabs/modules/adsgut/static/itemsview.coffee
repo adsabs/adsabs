@@ -22,6 +22,7 @@ enval = (tag) ->
         title = tag.title ? ' data-toggle="tooltip" title="' + tag.title + '"' : '';
         #tag.text = '<a class="tag-link" ' + title + ' target="' + tagger.options.tag_link_target + '" href="' + tag.url + '">' + tag.text + '</a>';
         tag.id = tag.text
+        tag.pview=@pview
         tag.text = '<a class="tag-link" ' + title +  '" href="' + tag.url + '">' + tag.text + '</a>';
         tag.by = true
         #console.log("taggb",tag);
@@ -36,7 +37,7 @@ addwa = (tag, cback) ->
         #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
-    syncs.submit_tag(@item.basic.fqin, @item.basic.name, tag.id, cback, eback)
+    syncs.submit_tag(@item.basic.fqin, @item.basic.name, tag.id, tag.pview, cback, eback)
 
 addwoa = (tag, cback) ->
     #console.log "NEWTAG IN ADDWOA", tag
@@ -55,7 +56,7 @@ remIndiv = (pill) ->
         eback = (xhr, etext) =>
             alert 'Did not succeed'
         cback = (data) =>
-        syncs.remove_tagging(@item.basic.fqin, tag, cback, eback)
+        syncs.remove_tagging(@item.basic.fqin, tag, @pview, cback, eback)
 
 time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
@@ -485,6 +486,12 @@ class ItemsView extends Backbone.View
   iCancel: =>
     $.fancybox.close()
 
+  #THIS MUST BE FIXED TO
+  #(a) only get the new tags and notes
+  #(b) we dont want the tags to go everywhere, we want them to only go where the new postings are
+  #this may make the posting slower, or we need to support a routing where we only put the tags into
+  #the places where the items hasve now been posted. indeed this can be done in the default case by adding
+  #a payload of postables
   iDone: =>
     #loc=window.location
     cback = (data) =>
@@ -508,7 +515,7 @@ class ItemsView extends Backbone.View
         syncs.submit_notes(@items, ns, cback, eback)
     cback_tags = () =>
         #console.log "SAVING TAGS", ts
-        syncs.submit_tags(@items, ts, cback_notes, eback)
+        syncs.submit_tags(@items, ts, postables, cback_notes, eback)
     cback_posts = () =>
         #console.log "SAVING POSTS", postables
         syncs.submit_posts(@items, postables, cback_tags, eback)
@@ -521,6 +528,7 @@ class ItemsView extends Backbone.View
     #window.close()
     return false
 
+  #currently unused
   submitPosts: =>
     libs=@$('.multilibrary').val()
     if libs is null
@@ -572,6 +580,7 @@ class ItemsView extends Backbone.View
   collectPosts: =>
     return @newposts
 
+  #currntly unused
   submitTags: =>
     ts={}
     tagstring=@$('.tagsinput').val()

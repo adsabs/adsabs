@@ -38,6 +38,7 @@
         '"': ''
       };
       tag.id = tag.text;
+      tag.pview = this.pview;
       tag.text = '<a class="tag-link" ' + title + '" href="' + tag.url + '">' + tag.text + '</a>';
       tag.by = true;
     }
@@ -51,7 +52,7 @@
         return alert('Did not succeed');
       };
     })(this);
-    return syncs.submit_tag(this.item.basic.fqin, this.item.basic.name, tag.id, cback, eback);
+    return syncs.submit_tag(this.item.basic.fqin, this.item.basic.name, tag.id, tag.pview, cback, eback);
   };
 
   addwoa = function(tag, cback) {
@@ -694,7 +695,7 @@
       })(this);
       cback_tags = (function(_this) {
         return function() {
-          return syncs.submit_tags(_this.items, ts, cback_notes, eback);
+          return syncs.submit_tags(_this.items, ts, postables, cback_notes, eback);
         };
       })(this);
       cback_posts = (function(_this) {

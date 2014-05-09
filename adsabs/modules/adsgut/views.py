@@ -1007,6 +1007,7 @@ def itemsForPostable(po, pt, pn):
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         pagtuple = _pagtupleget(query)
+        #pagtuple=(2,1)
         criteria= _criteriaget(query)
         postable= po+"/"+pt+":"+pn
         q=_queryget(query)
@@ -1276,7 +1277,11 @@ def tagsRemoveForItem(ns, itemname):
         fqtn = useras.nick+'/'+tagtype+":"+tagname
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
-        val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
+        #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context
+        if fqpn==None:#nuke it
+          val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
+        else:#remove tag from postable (should only affect pinpostables)
+          val=g.dbp.removeTaggingFromPostable(g.currentuser, useras, fqpn, ifqin, fqtn)
         taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)

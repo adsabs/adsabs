@@ -76,6 +76,7 @@
 $=jQuery
 #console.log "In PostableFilter"
 
+#tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars_pageless}"
 
 $ ->
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
@@ -85,8 +86,8 @@ $ ->
   config =
     fqpn : "{{p.basic.fqin}}"
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
-    tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
     itURL : "{{ url_for('adsgut.itemsTaggings') }}"
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
