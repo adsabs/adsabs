@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    wsgi
-    ~~~~
+wsgi
+~~~
 
-    Deploy with apache2 wsgi.
+Deploy with apache2 wsgi.
 """
 
 import sys, os, pwd
