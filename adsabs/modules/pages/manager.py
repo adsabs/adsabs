@@ -10,7 +10,7 @@ import sys
 import requests
 import urlparse
 from flask import current_app as app, url_for
-from flask.ext.script import Manager, prompt_bool #@UnresolvedImport
+from flask.ext.script import Manager, prompt_bool 
 from config import config
 
 manager = Manager("Perform page content repository operations", with_default_commands=False)

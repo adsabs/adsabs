@@ -1,9 +1,9 @@
 #from datetime import datetime
 from flask import (Blueprint, request, flash, redirect, 
                    url_for, render_template, g, session, current_app as app)
-from flask.ext.login import (login_required, login_user,                    #@UnresolvedImport
-                current_user, logout_user,                                  #@UnresolvedImport
-                confirm_login, fresh_login_required, login_fresh)           #@UnresolvedImport
+from flask.ext.login import (login_required, login_user,                    
+                current_user, logout_user,                                  
+                confirm_login, fresh_login_required, login_fresh)           
 from time import time
 from .forms import (SignupForm, LoginForm, ResetPasswordForm, 
                    ChangePasswordForm, ReauthForm, ActivateUserForm,
@@ -13,6 +13,7 @@ from adsabs.core.after_request_funcs import after_this_request
 from config import config
 from .user import *
 from adsabs.core.form_functs import is_submitted_cust
+from adsabs.extensions import statsd
 
 # For import *
 __all__ = ['user_blueprint', 'index', 'login', 'reauth', 'logout', 'signup', 'activate', 
@@ -51,6 +52,7 @@ def index():
     app.logger.debug('Index of user page.')
     if current_user.is_authenticated():
         app.logger.debug('User already authenticated')
+        statsd.incr("user.profile.viewed")
         return render_template('user_home_page.html')
     
     app.logger.debug('User not authenticated: redirect to authentication page.')
@@ -67,6 +69,7 @@ def login():
     
     form = LoginForm(login=request.args.get('login', None), next=request.args.get('next', None), csrf_enabled=config.CSRF_ENABLED)
     if form.validate_on_submit():
+        statsd.incr("user.login.attempt")
         app.logger.debug('Authentication process')
         user, auth_msg = authenticate(form.login.data, form.password.data)
         if user and auth_msg == 'SUCCESS':
@@ -74,15 +77,19 @@ def login():
             remember = request.form.get('remember') == 'y'
             if login_user(user, remember=remember):
                 flash("Successfully logged in!", 'success')
+            statsd.incr("user.login.success")
             return redirect(generate_redirect_url(next_=form.next.data))
         elif not user and auth_msg == 'WRONG_PARAMS':
             flash('Sorry, invalid login parameters', 'error')
+            statsd.incr("user.login.failed")
         elif not user and auth_msg == 'LOCAL_NOT_ACTIVE':
             flash('Sorry, the user is not active yet. Please activate it before proceeding.', 'error')
             session['user_login_email'] = form.login.data
+            statsd.incr("user.login.failed")
             return redirect(url_for('user.activate'))
         else:
             flash('Sorry, authentication error. Please try later.', 'error')
+            statsd.incr("user.login.failed")
 
     return render_template('login.html', form=form)
 
@@ -100,6 +107,7 @@ def logout():
     #call of the function that runs a specific after_request to invalidate the user cookies
     invalidate_user_cookie()
     flash('You are now logged out', 'success')
+    statsd.incr("user.logout.success")
     return redirect(generate_redirect_url(next_=request.args.get('next', None)))
 
 
@@ -139,7 +147,10 @@ def change_password():
         success, message, message_type = change_user_password(form)
         flash(message, message_type)
         if success:
+            statsd.incr("user.password.changed.success")
             return redirect(generate_redirect_url(next_=url_for('user.index')))
+        else:
+            statsd.incr("user.password.changed.failed")
     
     return render_template('change_password.html', form=form)
 
@@ -155,7 +166,10 @@ def reset_password():
         success, message, message_type = reset_user_password_step_one(form)
         flash(message, message_type)
         if success:
+            statsd.incr("user.password.reset.success")
             return redirect(generate_redirect_url(next_=url_for('user.confirm_reset_password')))
+        else:
+            statsd.incr("user.password.reset.failed")
     return render_template('reset_password_1.html', form=form)
     
 @user_blueprint.route('/confirm_reset_password', methods=['GET', 'POST'])
@@ -177,7 +191,10 @@ def confirm_reset_password():
         success, message, message_type = reset_user_password_step_two(form)
         flash(message, message_type)
         if success:
+            statsd.incr("user.password.confirm_reset.success")
             return redirect(generate_redirect_url(next_=url_for('user.login')))
+        else:
+            statsd.incr("user.password.confirm_reset.failed")
     return render_template('reset_password_2.html', form=form)
             
 
@@ -199,9 +216,13 @@ def signup():
             if success:
                 #save the login email in the session
                 session['user_login_email'] = form.login.data
+                statsd.incr("user.signup.success")
                 return redirect(generate_redirect_url(next_=url_for('user.activate')))
+            else:
+                statsd.incr("user.signup.failed")
         else:
             flash('An user with the same email address already exists in the system. <a href="%s">Log in</a>' % url_for('user.login'), 'error')
+            statsd.incr("user.signup.duplicate")
     return render_template('signup.html', form=form)
 
 @user_blueprint.route('/resend_activation_code_email', methods=['GET', 'POST'])
@@ -231,8 +252,10 @@ def resend_activation_code_email():
     success, message, message_type =  resend_activation_email(session.get('user_login_email'))
     flash(message, message_type)
     if success:
+        statsd.incr("user.resend_activation.success")
         return redirect(generate_redirect_url(next_=url_for('user.activate')))
     else:
+        statsd.incr("user.resend_activation.failed")
         return redirect(generate_redirect_url(next_=url_for('user.resend_activation_code_email')))
 
 @user_blueprint.route('/activate', methods=['GET', 'POST'])
@@ -257,8 +280,10 @@ def activate():
             success, message, message_type = activate_user(form.id.data)
             if not success:
                 flash('Activation failed: %s' % message, message_type)
+                statsd.incr("user.activate.success")
             else:
                 flash('Your account is now active.', 'success')
+                statsd.incr("user.activate.failed")
                 session['user_login_email'] = None
                 return redirect(generate_redirect_url(url_for('user.login')))
     elif not session.get('user_login_email'):
@@ -306,7 +331,10 @@ def change_account_settings():
         success, message, message_type = change_user_settings(form)
         flash(message, message_type)
         if success:
+            statsd.incr("user.account_change.success")
             return redirect(generate_redirect_url(next_=url_for('user.index')))
+        else:
+            statsd.incr("user.account_change.failed")
     return render_template('change_params.html', form=form)
 
 @user_blueprint.route('/activate_new_email', methods=['GET', 'POST'])
@@ -325,7 +353,10 @@ def activate_new_email():
         success, message, message_type = activate_user_new_email(form)
         flash(message, message_type)
         if success:
+            statsd.incr("user.activate_new_email.success")
             return redirect(generate_redirect_url(next_=url_for('user.index')))
+        else:
+            statsd.incr("user.activate_new_email.failed")
     return render_template('activate_new_username.html', form=form)
 
 

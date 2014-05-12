@@ -2,14 +2,14 @@
 Module to interface with the back-end authentication system
 '''
 from flask import (current_app as app, g, url_for)
-from flask.ext.login import current_user                    #@UnresolvedImport
+from flask.ext.login import current_user                    
 import pytz
 from datetime import datetime, timedelta
 import os
 from itsdangerous import (URLSafeSerializer, TimestampSigner, BadSignature, SignatureExpired, BadTimeSignature)
-from flask.ext.mail import Message #@UnresolvedImport
+from flask.ext.mail import Message 
 from .models import AdsUserRecord
-from adsabs.extensions import mail
+from adsabs.extensions import mail, statsd
 from config import config
 from adsabs.core.classic.user import *
 
@@ -188,6 +188,7 @@ def send_email_to_user(title, message_html, recipients, sender=None):
                   sender=sender,
                   recipients=recipients)
     mail.send(msg)  #@UndefinedVariable
+    statsd.incr("user.email.sent")
 
 
 def authenticate(login, password):

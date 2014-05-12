@@ -11,6 +11,7 @@ from config import config
 from authorsnetwork import get_authorsnetwork
 from papersnetwork import get_papernetwork
 from solrjsontowordcloudjson import wc_json
+from adsabs.extensions import statsd
 #from alladinlite import get_objects
 
 visualization_blueprint = Blueprint('visualization', __name__, template_folder="templates", url_prefix='/visualization')
@@ -57,6 +58,7 @@ def author_network():
     #extract the authors
     lists_of_authors = [doc.author_norm for doc in resp.get_docset_objects() if doc.author_norm]
         
+    statsd.incr("visualization.author_network.viewed")
     return render_template('author_network_embedded.html', network_data=get_authorsnetwork(lists_of_authors))
 
 @visualization_blueprint.route('/paper_network', methods=['GET', 'POST'])
@@ -100,6 +102,7 @@ def paper_network():
     # prepare the info to send to the paper network machinery
     paper_info = [doc.__dict__['data'] for doc in resp.get_docset_objects() if doc.bibcode]
 
+    statsd.incr("visualization.paper_network.viewed")
     return render_template('paper_network_embedded.html', network_data=get_papernetwork(paper_info))
 
 @visualization_blueprint.route('/word_cloud', methods=['GET', 'POST'])
@@ -148,6 +151,7 @@ def word_cloud():
     if resp.is_error():
         return render_template('errors/generic_error.html', error_message='Error while creating the word cloud (code #2). Please try later.')
     
+    statsd.incr("visualization.word_cloud.viewed")
     return render_template('word_cloud_embedded.html', wordcloud_data=wc_json(resp.raw_response()))
 
 @visualization_blueprint.route('/alladin_lite', methods=['GET', 'POST'])
@@ -187,4 +191,5 @@ def alladin_lite():
 
         bibcodes = [x.bibcode for x in resp.get_docset_objects()]
 
+    statsd.incr("visualization.alladin_lite.viewed")
     return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})

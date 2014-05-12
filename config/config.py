@@ -293,7 +293,15 @@ class AppConfig(object):
     # configuration parameters for the recommender
     RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
     RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'
-
+    RECOMMENDER_SUGGEST_NUMBER = 10
+    RECOMMENDER_MAX_NEIGHBORS = 40
+    RECOMMENDER_MAX_INPUT = 500
+    RECOMMENDER_INPUT_LIMIT = 20
+    RECOMMENDER_MONGO_HOST = "localhost"
+    RECOMMENDER_MONGO_PORT = 27017
+    RECOMMENDER_MONGO_SAFE = True
+    RECOMMENDER_MONGO_USER = 'recommender'
+    RECOMMENDER_MONGO_PASSWORD = ''
     # configuration parameters for maximum number of records used for various services (metrics, citation helper, exports, ...)
     EXPORT_DEFAULT_ROWS = 300
     MAX_EXPORTS = {'metrics':3000,
@@ -318,6 +326,11 @@ class AppConfig(object):
                    }
     #ADSGUT
     MONGODB_SETTINGS= {'HOST': 'mongodb://user:pass@localhost/adsgut', 'DB': 'adsgut'}
+    
+    # statsd metric collection extension
+    STATSD_HOST = "localhost"
+    STATSD_PORT = 8125
+    STATSD_PREFIX = APP_NAME
     
     
 try:

@@ -6,7 +6,7 @@ Created on Nov 2, 2012
 
 import traceback
 from flask import g, current_app
-from flask.ext.pushrod import pushrod_view #@UnresolvedImport
+from flask.ext.pushrod import pushrod_view 
 
 from adsabs.core.logevent import log_event
 from adsabs.core.solr import AdsabsSolrqueryException

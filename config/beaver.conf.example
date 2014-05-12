@@ -1,16 +1,13 @@
+
+# best to use a different redis_namespace per log
+# unfortunately, that means a separate beaver proc for each
+# log being shipped. everything should be easy enough to manage
+# via supervisord
+
 [beaver]
 transport: redis
-redis_url: redis://localhost:6379/0
-redis_namespace: adsabs:<hostname>:logs
+redis_url: redis://adsfoo:6379/0
+redis_namespace: adsabs:foo
 
-[/path/to/apache.log]
-type: ads
-tags: beer,apache,access
-
-[/path/to/apache.err]
-type: ads
-tags: beer,apache,error
-
-[/path/to/adsabs.log]
-type: ads
-tags: beer,app
+[/path/to/file.log]
+type: beer-foo

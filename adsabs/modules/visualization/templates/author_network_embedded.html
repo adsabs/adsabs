@@ -2,7 +2,7 @@
     <div class="vis_body">
         <div class="container-fluid">
             <div class="row-fluid">
-                <div class="span2" id="controlpanel"> 
+                <div class="span2" id="vis-control-panel"> 
 
                     <div class="dropdown">
                         <a class="btn dropdown-toggle vis_item_format btn-block vis_btn" data-toggle="dropdown" href="#">
@@ -174,6 +174,8 @@
                 initialize : function(linkDistance, gravity, charge) {
 
                     var that = this;
+
+                    $("#authorfacet").on("click", that.generateSearch);
 
                     force = d3.layout.force()
                     .size([w, h])
@@ -388,8 +390,7 @@
                             return '<li> Click on a name to add it to this list.</li> <li> Click again on the name to remove it.</li>';
                             }
                         });
-                    d3.select("#authorfacet")
-                      .on("click", that.generateSearch);
+
                 }, //end nodeClick   
 
                 //joins the svgs with the force layout

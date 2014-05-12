@@ -7,7 +7,7 @@ from markdown.extensions.meta import MetaPreprocessor
 
 from config import config
 
-EXTENSIONS = ['headerid']
+EXTENSIONS = ['headerid', 'tables']
 
 def get_extensions():
     ext = [PagesExtension()]

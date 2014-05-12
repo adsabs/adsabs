@@ -16,6 +16,8 @@ from utils import chunks
 from config import config
 # Every type of 'metric' is calculated in a 'model'
 import metricsmodels
+from adsabs.extensions import statsd
+
 # memory mapped data
 #manager = Manager()
 #model_results = manager.list([])
@@ -139,8 +141,13 @@ def legacy_format(data):
         new_entries = [entries[entry_mapping[i]] for i in range(len(entries))]
         citation_histogram[year] = ":".join(new_entries)
     return data['all stats'],data['refereed stats'],data['all reads'],data['refereed reads'],data['paper histogram'],data['reads histogram'],citation_histogram,data['metrics series']
+
 # General metrics engine
 def generate_metrics(**args):
+
+    timer = statsd.timer("bibutils.generate_metrics.generate_time")
+    timer.start()
+
     # First we gather the necessary 'attributes' for all publications involved
     # (see above methods for more details)
     attr_list,num_cit,num_cit_ref = get_attributes(args)
@@ -163,6 +170,8 @@ def generate_metrics(**args):
     model_results = rez.get()
     # Now shape the results in the final format
     results = format_results(model_results)
+    timer.stop()
+
     # Send the result back to our caller
     if format == 'legacy':
         return legacy_format(results)

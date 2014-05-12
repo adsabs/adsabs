@@ -1,8 +1,8 @@
-from flask.ext.wtf import (Form, RecaptchaField)      #@UnresolvedImport
+from flask.ext.wtf import (Form, RecaptchaField)      
 from wtforms import (HiddenField, BooleanField,
                      PasswordField, SubmitField, TextField, validators)
 from wtforms.validators import (required, length)   #ValidationError, equal_to, email
-from flask.ext.wtf.html5 import EmailField #@UnresolvedImport
+from flask.ext.wtf.html5 import EmailField 
 
 from config import config
 

@@ -6,10 +6,11 @@ from query_builder import QueryBuilderSimple, QueryBuilderSearch
 import copy 
 
 from flask import current_app as app, request as current_request, g
-from flask.ext.solrquery import solr, signals as solrquery_signals #@UnresolvedImport
+from flask.ext.solrquery import solr, signals as solrquery_signals 
 from copy import deepcopy
 
 from adsabs.core.logevent import log_event
+from adsabs.extensions import statsd
 
 __all__ = [
     'SolrResponse',
@@ -61,7 +62,8 @@ class AdsabsSolrqueryException(Exception):
         
 def get_document(identifier, **kwargs):
     q = "identifier:%s" % identifier
-    resp = solr.query(q, rows=1, fields=config.SOLR_SEARCH_DEFAULT_FIELDS, **kwargs)
+    with statsd.timer("core.solr.document.query_response_time"):
+        resp = solr.query(q, rows=1, fields=config.SOLR_SEARCH_DEFAULT_FIELDS, **kwargs)
     if resp.get_hits() == 1:
         return resp.get_doc_object(0)
     else:

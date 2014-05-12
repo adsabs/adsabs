@@ -15,10 +15,15 @@ from config import config
 from utils import get_references
 from utils import get_citing_papers
 from utils import get_meta_data
+from adsabs.extensions import statsd
  
 __all__ = ['get_suggestions']
 
 def get_suggestions(**args):
+
+    timer = statsd.timer("bibutils.get_suggestions.generate_time")
+    timer.start()
+    
     # initializations
     papers = []
     bibcodes = []
@@ -56,6 +61,7 @@ def get_suggestions(**args):
     paperFreq = filter(lambda a: a[1] > config.BIBUTILS_THRESHOLD_FREQUENCY and a[1] < len(bibcodes), paperFreq)
     # get metadata for suggestions
     meta_dict = get_meta_data(results=paperFreq[:Nsuggestions])
+    timer.stop()
     # return results in required format
     if output_format == 'score':
         return [{'bibcode':x,'score':y, 'title':meta_dict[x]['title'], 'author':meta_dict[x]['author']} for (x,y) in paperFreq[:Nsuggestions] if x in meta_dict.keys()]

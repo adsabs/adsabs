@@ -13,7 +13,7 @@ from random import sample, choice
 from ipaddress import ip_address, ip_network
 
 from flask import g, render_template
-from flask.ext.login import current_user #@UnresolvedImport
+from flask.ext.login import current_user 
 
 from config import config
 from adsabs.modules.user import AdsUser

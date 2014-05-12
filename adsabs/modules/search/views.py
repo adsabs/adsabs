@@ -2,16 +2,17 @@ import sys
 import re
 from flask import Blueprint, request, g, render_template, flash, current_app, abort, url_for,\
     Markup, redirect
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 import re
 
-#from flask.ext.login import current_user #@UnresolvedImport
+#from flask.ext.login import current_user 
 from .forms import QueryForm
 from adsabs.core.solr import QueryBuilderSearch, AdsabsSolrqueryException
 from adsabs.core.solr.bigquery import prepare_bigquery_request, retrieve_bigquery, save_bigquery
 from adsabs.core.data_formatter import field_to_json
 from config import config
 from adsabs.core.logevent import log_event
+from adsabs.extensions import statsd
 import traceback
 import uuid
 import pytz
@@ -72,20 +73,26 @@ def search():
                     prepare_bigquery_request(req, request.values['bigquery'])
                     
                 req = solr.set_defaults(req)
-                resp = solr.get_response(req)
                 
+                with statsd.timer("search.solr.query_response_time"):
+                    resp = solr.get_response(req)
+                
+                statsd.incr("search.solr.executed")
                 if bigquery_id:
                     facets = resp.get_facet_parameters()
                     facets.append(('bigquery', bigquery_id))
                 
             except Exception, e:
+                statsd.incr("search.solr.failed")
                 raise AdsabsSolrqueryException("Error communicating with search service", sys.exc_info())
             if resp.is_error():
+                statsd.incr("search.solr.error")
                 flash(resp.get_error_message(), 'error')
 
             return render_template('search_results.html', resp=resp, form=form, 
                                    query_components=query_components, bigquery_id=bigquery_id)
         else:
+            statsd.incr("search.solr.invalid_params")
             for field_name, errors_list in form.errors.iteritems():
                 flash('errors in the form validation: %s.' % '; '.join(errors_list), 'error')
     return render_template('search.html', form=form)
@@ -126,7 +133,7 @@ def bigquery():
     
     qid = save_bigquery(v)
     
-    flash("Please note that we do not guarantee the persistance of your query in our system (it will be deleted at some point)", "info")
+    flash("Please note that we do not guarantee the persistence of your query in our system (it will be deleted at some point)", "info")
     urlargs = dict(request.args)
     urlargs['bigquery'] = qid
     if 'q' not in urlargs:

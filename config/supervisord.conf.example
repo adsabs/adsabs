@@ -1,0 +1,26 @@
+
+# example is for supervisord v2
+# best to use a different redis_namespace per log
+# unfortunately, that means a separate beaver proc for each
+# log being shipped. everything should be easy enough to manage
+# via supervisord
+
+[program:beaver-adsabs]                                                                                                                                                                         
+user = beer                                                                                                                                                                                     
+command = /usr/bin/beaver -c /proj/adsx/beer/adsabs/config/beaver.conf                                                                                                                          
+logfile = /proj/adsx/beer/adsabs/logs/beaver-adsabs.log                                                                                                                                         
+autorestart = true                                                                                                                                                                              
+                                                                                                                                                                                                
+[program:beaver-beer-http]                                                                                                                                                                      
+user = beer                                                                                                                                                                                     
+command = /usr/bin/beaver -c /proj/adsx/beer/adsabs/config/beaver-http.conf                                                                                                                     
+log_stderr = true                                                                                                                                                                               
+logfile = /proj/adsx/beer/adsabs/logs/beaver-http.log                                                                                                                                           
+autorestart = true                                                                                                                                                                              
+                                                                                                                                                                                                
+[program:beaver-beer-http-err]                                                                                                                                                                  
+user = beer                                                                                                                                                                                     
+command = /usr/bin/beaver -c /proj/adsx/beer/adsabs/config/beaver-http-err.conf                                                                                                                 
+log_stderr = true                                                                                                                                                                               
+logfile = /proj/adsx/beer/adsabs/logs/beaver-http-err.log                                                                                                                                       
+autorestart = true      

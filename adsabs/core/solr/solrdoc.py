@@ -9,9 +9,10 @@ from urllib2 import quote
 from urllib import urlencode
 from simplejson import dumps
 
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.solrquery import solr 
 
 from adsabs.core.classic import abstract_url
+from adsabs.extensions import statsd
 
 class SolrDocument(object):
         
@@ -108,14 +109,18 @@ class SolrDocument(object):
         Returns the list of references
         """
         q = "references(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return solr.query(q, **kwargs)
+        with statsd.timer("core.solr.references.query_response_time"):
+            resp = solr.query(q, **kwargs)
+        return resp
         
     def get_citations(self, **kwargs):
         """
         Returns the list of citations
         """
         q = "citations(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return solr.query(q, **kwargs)
+        with statsd.timer("core.solr.citations.query_response_time"):
+            resp = solr.query(q, **kwargs)
+        return resp
     
     def get_toc(self, **kwargs):
         """
@@ -129,18 +134,24 @@ class SolrDocument(object):
         else:
             bibquery = bibcode[:13]
         q = "bibcode:%s*" % bibquery
-        return solr.query(q, **kwargs)
+        with statsd.timer("core.solr.toc.query_response_time"):
+            resp = solr.query(q, **kwargs)
+        return resp
     
     def get_coreads(self, **kwargs):
         """returns the results of the 'trending' 2nd order operator"""
         q = "trending(%s:%s)" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return solr.query(q, **kwargs)
+        with statsd.timer("core.solr.coreads.query_response_time"):
+            resp = solr.query(q, **kwargs)
+        return resp
 
     def get_similar(self, **kwargs):
         
         from adsabs.core.solr import get_document_similar
         q = "%s:%s" % (config.SOLR_DOCUMENT_ID_FIELD, self.data[config.SOLR_DOCUMENT_ID_FIELD])
-        return get_document_similar(q, **kwargs)
+        with statsd.timer("core.solr.similar.query_response_time"):
+            resp = get_document_similar(q, **kwargs)
+        return resp
 
     def has_highlights(self, field=None):
         if not self.highlights or len(self.highlights) == 0:

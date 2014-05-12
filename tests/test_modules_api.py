@@ -19,11 +19,11 @@ else:
     
 import simplejson as json
 
-from werkzeug import Headers #@UnresolvedImport
+from werkzeug import Headers 
 
 from flask import request, g
-from flask.ext.pushrod.renderers import RendererNotFound #@UnresolvedImport
-from flask.ext.solrquery import solr #@UnresolvedImport
+from flask.ext.pushrod.renderers import RendererNotFound 
+from flask.ext.solrquery import solr 
 
 from adsabs.modules.user import AdsUser
 from adsabs.modules.api import AdsApiUser
@@ -543,7 +543,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.insert_user("foo", developer=True, level="devel")
         api_user = AdsApiUser.from_dev_key("foo_dev_key")
         
-        regex = re.compile('<em>\(?black')
+        regex = re.compile('<em>\(?black', re.IGNORECASE)
 
         rv = self.client.get('/api/search/?q=abstract:\"black+holes\"&dev_key=foo_dev_key&hl=abstract&rows=1')
         resp = json.loads(rv.data)
@@ -565,7 +565,7 @@ class ApiLiveSolrTests(AdsabsBaseTestCase):
         self.assertTrue(maxh == 2, "Twere were too few/many hightlights returned, requested=2, returned=%s" % maxh )
         
         # multiple fields
-        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2013MNRAS.435.3559T&qf=body+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=body:3')
+        rv = self.client.get('/api/search/?q=\"black+holes\"+AND+bibcode:2014MNRAS.440L.121D&qf=body+abstract&dev_key=foo_dev_key&hl=abstract:1&hl=body:3')
         resp = json.loads(rv.data)
         for doc in resp['results']['docs']:
             self.assertIn('highlights', doc)

@@ -7,8 +7,8 @@ from flask import (Blueprint, render_template, flash, g, jsonify, current_app as
 from adsabs.core.form_functs import is_submitted_cust
 from config import config #the global config object
 from .forms import SuggestionsInputForm
-from .utils import get_recommendations
-from .utils import get_suggestions
+from .recommender_utils import get_recommendations
+from .recommender_utils import get_suggestions
 from .errors import RecommenderCannotGetResults
 
 __all__ = ['recommender_blueprint','recommender','suggestions']
@@ -44,8 +44,9 @@ def recommender(bibcode,format):
     """
     try:
         results = get_recommendations(bibcode=bibcode)
-    except RecommenderCannotGetResults, e:
+    except Exception, e:
         app.logger.error('ID %s. Unable to get results! (%s)' % (g.user_cookie_id,e))
+        return render_template('recommendations_embedded.html', results={})
     if format == 'json':
         return jsonify(paper=bibcode, recommendations=results['recommendations'])
     elif format == 'python':
