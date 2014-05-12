@@ -47,7 +47,7 @@ addwoa = (tag, cback) ->
 
 remIndiv = (pill) ->
     tag = $(pill).attr('data-tag-id')
-    #console.log "TAGALOG", tag, pill, @tagajaxsubmit
+    #console.log "TAGALOG", @pview, @tagajaxsubmit
     if not @tagajaxsubmit
         #console.log "OLDNEWTAGS1", @tagajaxsubmit, @newtags
         @remove_from_tags(tag)

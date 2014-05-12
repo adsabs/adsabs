@@ -213,6 +213,7 @@ remove_tagging = (item, tagname, ctxt, cback, eback) ->
     data=
         tagtype: tagtype
         tagname: tagname
+    #console.log "ctxt is", ctxt
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
@@ -309,6 +310,7 @@ taggings_postings_post_get = (items, pview, cback) ->
         alert "Error Occurred"
     data=
         items:items
+    #console.log "PVIEW", pview
     if pview not in ['udg', 'none', 'public']
         data.fqpn = pview
     send_params(url, data, cback, eback)

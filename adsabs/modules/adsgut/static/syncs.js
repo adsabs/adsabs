@@ -248,13 +248,16 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
-    if (ctxt !== 'udg' && ctxt !== 'none' && ctxt !== 'public') {
+    if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
+    }
+    if (ctxt === 'public') {
+      data.fqpn = "adsgut/group:public";
     }
     return send_params(url, data, cback, eback);
   };
 
-  remove_tagging = function(item, tagname, cback, eback) {
+  remove_tagging = function(item, tagname, ctxt, cback, eback) {
     var data, tagtype, url;
     tagtype = "ads/tagtype:tag";
     url = prefix + "/tagsremove/" + item;
@@ -262,6 +265,12 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
+    if (ctxt !== 'udg' && ctxt !== 'none') {
+      data.fqpn = ctxt;
+    }
+    if (ctxt === 'public') {
+      data.fqpn = "adsgut/group:public";
+    }
     return send_params(url, data, cback, eback);
   };
 
@@ -271,8 +280,11 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     data = {
       items: items
     };
-    if (ctxt !== 'udg' && ctxt !== 'none' && ctxt !== 'public') {
+    if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
+    }
+    if (ctxt === 'public') {
+      data.fqpn = "adsgut/group:public";
     }
     return send_params(url, data, cback, eback);
   };
@@ -282,7 +294,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     tagtype = "ads/tagtype:tag";
     itemtype = "ads/itemtype:pub";
     url = prefix + "/items/taggings";
-    console.log("TAGS ARE", tags, "EFFIN POSTS", postables);
     ts = {};
     inames = [];
     for (_i = 0, _len = items.length; _i < _len; _i++) {

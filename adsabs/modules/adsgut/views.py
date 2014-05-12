@@ -1278,6 +1278,7 @@ def tagsRemoveForItem(ns, itemname):
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
         #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context
+        #print "FQPN is", fqpn
         if fqpn==None:#nuke it
           val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
         else:#remove tag from postable (should only affect pinpostables)
@@ -1376,6 +1377,7 @@ def itemsTaggingsAndPostings():
         items = _itemspostget(jsonpost)
         fqpn = _dictp('fqpn',jsonpost)
         #print "ITEMS", items
+        #print "FQPN", fqpn
         #print "SORT", sort, "useras", useras
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
@@ -1384,8 +1386,8 @@ def itemsTaggingsAndPostings():
             items, sort, fqpn)
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
-        #print "MEEP", taggingsdict, taggingsthispostable
-        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
+        #print "MEEP",taggingsthispostable
+        return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
@@ -1400,7 +1402,7 @@ def itemsTaggingsAndPostings():
         taggingsdict, taggingsthispostable=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort, fqpn)
         #print "MEEP",taggingsthispostable
-        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
+        return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
 
 @adsgut.route('/itemtypes', methods=['POST', 'GET'])
 def itemtypes():

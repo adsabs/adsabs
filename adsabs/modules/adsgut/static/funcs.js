@@ -268,28 +268,53 @@
       tg = v[1];
       combi = _.zip(tg, tp);
       if (v[0] > 0) {
-        stags[k] = (function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = combi.length; _i < _len; _i++) {
-            e = combi[_i];
-            if (e[0].posting.tagtype === "ads/tagtype:tag") {
-              _results.push([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby]);
+        if (data.fqpn === null) {
+          stags[k] = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = combi.length; _i < _len; _i++) {
+              e = combi[_i];
+              if (e[0].posting.tagtype === "ads/tagtype:tag") {
+                _results.push([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby]);
+              }
             }
-          }
-          return _results;
-        })();
-        notes[k] = (function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = combi.length; _i < _len; _i++) {
-            e = combi[_i];
-            if (e[0].posting.tagtype === "ads/tagtype:note") {
-              _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname]);
+            return _results;
+          })();
+          notes[k] = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = combi.length; _i < _len; _i++) {
+              e = combi[_i];
+              if (e[0].posting.tagtype === "ads/tagtype:note") {
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname]);
+              }
             }
-          }
-          return _results;
-        })();
+            return _results;
+          })();
+        } else {
+          stags[k] = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = combi.length; _i < _len; _i++) {
+              e = combi[_i];
+              if (e[0].posting.tagtype === "ads/tagtype:tag" && e[1] === true) {
+                _results.push([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby]);
+              }
+            }
+            return _results;
+          })();
+          notes[k] = (function() {
+            var _i, _len, _results;
+            _results = [];
+            for (_i = 0, _len = combi.length; _i < _len; _i++) {
+              e = combi[_i];
+              if (e[0].posting.tagtype === "ads/tagtype:note" && e[1] === true) {
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname]);
+              }
+            }
+            return _results;
+          })();
+        }
       } else {
         stags[k] = [];
         notes[k] = [];

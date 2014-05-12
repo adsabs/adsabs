@@ -74,7 +74,7 @@
       cback = (function(_this) {
         return function(data) {};
       })(this);
-      return syncs.remove_tagging(this.item.basic.fqin, tag, cback, eback);
+      return syncs.remove_tagging(this.item.basic.fqin, tag, this.pview, cback, eback);
     }
   };
 
