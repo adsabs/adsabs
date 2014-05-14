@@ -125,7 +125,7 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[4], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
-  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[4], pview) for t in notes[fqin])
+  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview) for t in notes[fqin])
   if t3list.length >0
     return start+t3list.join("")+end
   else
@@ -213,21 +213,23 @@ get_tags = (tags, tqtype) ->
 get_taggings = (data) ->
   stags={}
   notes={}
-  #console.log "DATA[", data.fqpn,"]"
+  #console.log "DATA[", data.fqpn,"]", data
   for own k,v of data.taggings
     tp = data.taggingtp[k]
+    td = data.taggingsdefault[k]
     tg = v[1]
-    #console.log "TGTP", tg, tp, v
-    combi = _.zip(tg, tp)
+    #console.log "TGTP", tp.length, td.length
+    tp2 = (e[0] or e[1] for e in _.zip(tp,td))
+    combi = _.zip(tg, tp2, tp)
     #console.log "1>>>", k,combi
     if v[0] > 0
-      if data.fqpn is null
+      if data.fqpn is null or data.fqpn is undefined
         #console.log "here"
         stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
       else
         stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag" and e[1] is true)
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname] for e in combi when e[0].posting.tagtype is "ads/tagtype:note"  and e[1] is true)
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note"  and e[1] is true)
     else
       stags[k]=[]
       notes[k]=[]

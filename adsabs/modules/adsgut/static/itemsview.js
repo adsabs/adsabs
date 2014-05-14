@@ -313,6 +313,7 @@
       var fqin, notes, stags, _ref;
       fqin = this.item.basic.fqin;
       _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
+      console.log("NOTES", notes, "DATA", data);
       this.stags = stags[fqin];
       this.notes = notes[fqin];
       if (this.notes.length > 0) {
@@ -327,19 +328,25 @@
       itemname = this.item.basic.name;
       notetext = this.$('.txt').val();
       notemode = '1';
-      if (this.$('.cb').is(':checked')) {
-        if (this.pview === 'pub') {
-          notemode = '0';
-        } else if (this.pview === 'udg' || this.pview === 'none') {
-          notemode = '0';
-        } else {
-          notemode = this.pview;
+      if (this.pview === 'udg') {
+        notemode = '0';
+      } else {
+        if (this.$('.cb').is(':checked')) {
+          if (this.pview === 'pub') {
+            notemode = '0';
+          } else if (this.pview === 'none') {
+            notemode = '0';
+          } else {
+            notemode = this.pview;
+          }
         }
       }
       ctxt = this.pview;
+      console.log("NOTESPEC", notetext, notemode, ctxt);
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
+          console.log("return data", data, loc);
           _this.update_note_ajax(data);
           return format_item(_this.$('.searchresultl'), _this.e);
         };
@@ -350,6 +357,7 @@
         };
       })(this);
       if (this.tagajaxsubmit) {
+        console.log("in ajax submit");
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback);
       } else {
         this.update_notes([notetext, notemode]);

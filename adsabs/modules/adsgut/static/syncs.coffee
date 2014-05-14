@@ -165,7 +165,7 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     url= prefix+"/tags/"+item
     ts={}
     ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
-    #console.log "whee", ts
+    console.log "whee", ts, notetuple
     data=
         tagspecs: ts
         itemtype:itemtype

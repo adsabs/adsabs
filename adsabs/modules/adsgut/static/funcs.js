@@ -151,7 +151,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
-        _results.push(format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[4], pview));
+        _results.push(format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview));
       }
       return _results;
     })();
@@ -257,7 +257,7 @@
   };
 
   get_taggings = function(data) {
-    var combi, e, k, notes, stags, tg, tp, v, _ref;
+    var combi, e, k, notes, stags, td, tg, tp, tp2, v, _ref;
     stags = {};
     notes = {};
     _ref = data.taggings;
@@ -265,10 +265,21 @@
       if (!__hasProp.call(_ref, k)) continue;
       v = _ref[k];
       tp = data.taggingtp[k];
+      td = data.taggingsdefault[k];
       tg = v[1];
-      combi = _.zip(tg, tp);
+      tp2 = (function() {
+        var _i, _len, _ref1, _results;
+        _ref1 = _.zip(tp, td);
+        _results = [];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          e = _ref1[_i];
+          _results.push(e[0] || e[1]);
+        }
+        return _results;
+      })();
+      combi = _.zip(tg, tp2, tp);
       if (v[0] > 0) {
-        if (data.fqpn === null) {
+        if (data.fqpn === null || data.fqpn === void 0) {
           stags[k] = (function() {
             var _i, _len, _results;
             _results = [];
@@ -286,7 +297,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.tagtype === "ads/tagtype:note") {
-                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname]);
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
               }
             }
             return _results;
@@ -309,7 +320,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.tagtype === "ads/tagtype:note" && e[1] === true) {
-                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname]);
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
               }
             }
             return _results;

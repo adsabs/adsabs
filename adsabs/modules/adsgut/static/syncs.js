@@ -198,6 +198,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
         tagmode: notetuple[1]
       }
     ];
+    console.log("whee", ts, notetuple);
     data = {
       tagspecs: ts,
       itemtype: itemtype

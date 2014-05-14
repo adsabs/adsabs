@@ -177,7 +177,7 @@ class ItemView extends Backbone.View
     @.$('.tagls').tags(jslist,tagdict)
     @tagsobject = jslist[0]
     #console.log("TAGSOBJECT", @tagsobject)
-    ##console.log "PVIEW2 IS", @pview
+    #console.log "PVIEW2 IS", @pview, @noteform, @therebenotes
     if @noteform and @memberable.adsid!='anonymouse'
         @hv= new w.HideableView({state:0, widget:w.postalnote_form("make note",2, @pview), theclass: ".postalnote"})
         @$el.append(@hv.render("<strong>Notes</strong>: ").$el)
@@ -213,6 +213,7 @@ class ItemView extends Backbone.View
   update_note_ajax: (data) =>
     fqin=@item.basic.fqin
     [stags, notes]=get_taggings(data)
+    console.log "NOTES", notes, "DATA", data
     @stags=stags[fqin]
     @notes=notes[fqin]
     if @notes.length > 0
@@ -225,20 +226,23 @@ class ItemView extends Backbone.View
     itemname=@item.basic.name
     notetext= @.$('.txt').val()
     notemode = '1'
-    if @.$('.cb').is(':checked')
-        if @pview is 'pub'
-            #additionally, item must be made public. should public also mean all groups item is in
-            #as now. YES.
-            notemode = '0'
-        else if @pview is 'udg' or @pview is 'none'
-            notemode = '0'
-        else
-            notemode = @pview
+    if @pview is 'udg'
+      notemode='0'
+    else
+      if @.$('.cb').is(':checked')
+          if @pview is 'pub'
+              #additionally, item must be made public. should public also mean all groups item is in
+              #as now. YES.
+              notemode = '0'
+          else if @pview is 'none'
+              notemode = '0'
+          else
+              notemode = @pview
     ctxt = @pview
-    #console.log "NOTESPEC",notetext, notemode, ctxt
+    console.log "NOTESPEC",notetext, notemode, ctxt
     loc=window.location
     cback = (data) =>
-        #console.log "return data", data, loc
+        console.log "return data", data, loc
         #window.location=loc
         @update_note_ajax(data)
         format_item(@$('.searchresultl'),@e)
@@ -247,7 +251,7 @@ class ItemView extends Backbone.View
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
-        #console.log "in ajax submit"
+        console.log "in ajax submit"
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback)
     else
         #console.log "NO AJAX IN NOTES", @therebenotes
