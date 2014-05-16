@@ -322,9 +322,9 @@ function plot_citshist()
 	
 	//then I extract the 4 lists of data 
 	var from_all_to_all = data[0];
-	var from_all_to_ref = data[1];
-	var from_ref_to_ref = data[2];
-	var from_ref_to_all = data[3];
+	var from_ref_to_all = data[1];
+	var from_all_to_ref = data[2];
+	var from_ref_to_ref = data[3];
 	//then I define the array to compute what I need
 	var from_all_to_notref = new Array(),
 		from_ref_to_notref = new Array(),
