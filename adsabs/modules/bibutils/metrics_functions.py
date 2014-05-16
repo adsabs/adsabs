@@ -86,7 +86,7 @@ def get_attributes(args):
     bibcodes = filter(lambda a: a not in bibcodes_without_authnums, bibcodes)
     # Get the number of citing papers
     Nciting = len(list(set(itertools.chain(*map(lambda a: a['citations'], metrics_data.values())))))
-    Nciting_ref = len(list(set(itertools.chain(*map(lambda a: a['refereed_citations'], metrics_data.values())))))
+    Nciting_ref = len(list(set(itertools.chain(*map(lambda b: b['citations'], filter(lambda a: a['refereed']==True,metrics_data.values()))))))
     # The attribute vectors will be used to calculate the metrics
     attr_list = make_vectors(bibcodes,metrics_data)
     # We sort the entries in the attribute list on citation count, which
