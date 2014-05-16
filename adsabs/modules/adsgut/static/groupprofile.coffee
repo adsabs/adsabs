@@ -9,7 +9,7 @@ w = widgets
 class PostableView extends Backbone.View
 
   tagName: "tr"
-     
+
   events:
     "click .yesbtn" : "clickedToggle"
 
@@ -62,7 +62,7 @@ make_editable_description = ($infodiv, fqpn) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.fn.editable.defaults.mode = 'inline'
     $infodiv.find('.edtext').editable(
       type:'textarea'
@@ -75,11 +75,12 @@ make_editable_description = ($infodiv, fqpn) ->
       e.preventDefault()
       $infodiv.find('.edtext').editable('toggle')
 
+# {{ inviteform.changerw }} <label class="checkbox">Can Post?</label>
 get_info = (sections, config) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.get config.infoURL, (data) ->
         content=views.group_info config.owner, data, templates.group_info
         ownerfqin=data.group.owner
@@ -93,9 +94,9 @@ get_info = (sections, config) ->
             plinv.render()
             sections.$membersdiv.show()
             if config.owner
-                view=new views.InviteUser({postable: config.fqpn, withcb:false})
-                sections.$invitedform.append(view.render().$el)
-                sections.$invitedform.show()
+                #view=new views.InviteUser({postable: config.fqpn, withcb:false})
+                #sections.$invitedform.append(view.render().$el)
+                #sections.$invitedform.show()
                 $.get config.invitedsURL, (data) ->
                     content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, true
                     sections.$invitedsdiv.append(content)

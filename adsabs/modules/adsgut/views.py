@@ -392,6 +392,11 @@ class InviteForm(Form):
     changerw = BooleanField("Can Post?")
     recaptcha = RecaptchaField()
 
+class InviteFormGroup(Form):
+    memberable = TextField('username', validators=[DataRequired()])
+    op = HiddenField(default="invite")
+    recaptcha = RecaptchaField()
+
 #x
 @adsgut.route('/user/<nick>/profile/html')
 def userProfileHtml(nick):
@@ -573,19 +578,25 @@ from adsabs.modules.user.user import send_email_to_user
 def makeInvitations(po, pt, pn):
   fqpn=po+"/"+pt+":"+pn
   if request.method == 'POST':
-      form = InviteForm()
+      if pt=="library":
+        form = InviteForm()
+      else:
+        form = InviteFormGroup()
       if form.validate():
         #specify your own nick for accept or decline
         #print "LALALALALLA", form.memberable.data, form.changerw.data
         # jsonpost=dict(request.form)
         memberable=form.memberable.data
-        changerw=form.changerw.data
+        changerw=False
+        if pt=="library":
+          changerw=form.changerw.data
         # changerw=_dictp('changerw', jsonpost)
         # if changerw==None:
         #     changerw=False
         if not memberable:
              doabort("BAD_REQ", "No User Specified")
         #print "memberable", memberable, changerw
+        potentialuserstring=""
         try:
             user=g.db.getUserForAdsid(g.currentuser, memberable)
         except:
@@ -601,16 +612,35 @@ def makeInvitations(po, pt, pn):
               #print "q2"
               potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET-'+str(uuid.uuid4())})
               user=potentialuser
+              potentialuserstring="""
+              <p>
+              The SAO/NASA Astrophysics Data System (ADS) is a Digital Library portal for researchers in Astronomy and
+              Physics, operated by the Smithsonian Astrophysical Observatory (SAO) under a NASA grant. The ADS maintains
+              three bibliographic databases containing more than 10.8 million records: Astronomy and Astrophysics, Physics,
+              and arXiv e-prints. The main body of data in the ADS consists of bibliographic records, which are searchable
+              through highly customizable query forms, and full-text scans of much of the astronomical literature which
+              can be browsed or searched via our full-text search interface at <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a>."
+              </p>
+              """
             else:#already in giovanni db, add to ours
               #print "r"
               cookieid = adsuser.get_id()
               adsid = adsuser.get_username()
               user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
               user, adspubapp = g.db.addUserToPostable(adsappuser, 'ads/app:publications', user.nick)
+              potentialuserstring=""
+        potentialuserstring2="""
+        <p>
+        You can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a> and click the %s link there to accept.
+        </p>
+        """
         #ok got user, now invite
         utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, user, changerw)
         emailtitle="Invitation to ADS Library %s" % pn
-        emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
+        ptmap={'group':'Group (and associated library)', 'library':"Library"}
+        ptmap2={'group':'My Groups', 'library':"Libraries"}
+        emailtext="%s has invited you to ADS %s %s." % (g.currentuser.adsid, ptmap[pt], pn)
+        emailtext = emailtext+potentialuserstring+potentialuserstring2%ptmap2[pt]
         send_email_to_user(emailtitle, emailtext,[user.adsid])
         passdict={}
         passdict[pt+'owner']=po
@@ -882,7 +912,10 @@ def libraryProfileHtml(libraryowner, libraryname):
 def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
     p, owner, on, cn=postable(powner, pname, ptype)
     if not inviteform:
-      inviteform = InviteForm()
+      if ptype=="library":
+        inviteform = InviteForm()
+      else:
+        inviteform = InviteFormGroup()
     return render_template(ptype+'profile.html', thepostable=p, owner=owner, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
 @adsgut.route('/postable/<nick>/group:default/filter/html')

@@ -137,7 +137,7 @@
       }
       sections.$infodiv.show();
       return $.get(config.membersURL, function(data) {
-        var plinv, view;
+        var plinv;
         plinv = new PostableListView({
           users: data.users,
           fqpn: config.fqpn,
@@ -148,12 +148,6 @@
         plinv.render();
         sections.$membersdiv.show();
         if (config.owner) {
-          view = new views.InviteUser({
-            postable: config.fqpn,
-            withcb: false
-          });
-          sections.$invitedform.append(view.render().$el);
-          sections.$invitedform.show();
           return $.get(config.invitedsURL, function(data) {
             content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, true);
             sections.$invitedsdiv.append(content);

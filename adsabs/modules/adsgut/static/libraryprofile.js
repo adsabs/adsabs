@@ -172,7 +172,7 @@
       sections.$infodiv.show();
       if (config.useras_nick !== 'anonymouse') {
         return $.get(config.membersURL, function(data) {
-          var plinv, viewp, viewu;
+          var plinv, viewp;
           plinv = new PostableListView({
             users: data.users,
             fqpn: config.fqpn,
@@ -183,10 +183,6 @@
           plinv.render();
           sections.$membersdiv.show();
           if (config.owner) {
-            viewu = new views.InviteUser({
-              postable: config.fqpn,
-              withcb: true
-            });
             viewp = new views.MakePublic({
               postable: config.fqpn,
               users: data.users
@@ -205,7 +201,6 @@
               sections.$invitedform.show();
               return $.get(config.invitedsURL, function(data) {
                 content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, false);
-                sections.$invitedsdiv.prepend(viewu.render().el);
                 sections.$invitedsdiv.append(content);
                 return sections.$invitedsdiv.show();
               });

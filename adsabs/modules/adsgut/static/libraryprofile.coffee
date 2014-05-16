@@ -14,7 +14,7 @@ rwmap = (boolrw) ->
 class PostableView extends Backbone.View
 
   tagName: "tr"
-     
+
   events:
     "click .yesbtn" : "clickedToggle"
 
@@ -29,7 +29,7 @@ class PostableView extends Backbone.View
         uname = @username
         if @username == 'group:public'
             uname = "All ADS Users"
-        if @username == 'anonymouse'    
+        if @username == 'anonymouse'
             uname = "General Public"
         content = w.table_from_dict_partial(uname, "Only owner can see this.")
     else
@@ -45,7 +45,7 @@ class PostableView extends Backbone.View
             else
                 uname = "General Public"
                 content = w.table_from_dict_partial(uname, rwmap(@rwmode))
-    
+
     @$el.html(content)
     return this
 
@@ -89,7 +89,7 @@ make_editable_description = ($infodiv, fqpn) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.fn.editable.defaults.mode = 'inline'
     $infodiv.find('.edtext').editable(
       type:'textarea'
@@ -106,7 +106,7 @@ get_info = (sections, config) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.get config.infoURL, (data) ->
         content=views.library_info config.owner, data, templates.library_info
         ownerfqin=data.library.owner
@@ -134,7 +134,7 @@ get_info = (sections, config) ->
                 sections.$membersdiv.show()
                 if config.owner
                     #console.log "gaga", config.owner
-                    viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
+                    #viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
                     viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
                     sections.$makepublicform.append(viewp.render().$el)
                     sections.$makepublicform.show()
@@ -145,7 +145,7 @@ get_info = (sections, config) ->
                         sections.$invitedform.show()
                         $.get config.invitedsURL, (data) ->
                             content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
-                            sections.$invitedsdiv.prepend(viewu.render().el)
+                            #sections.$invitedsdiv.prepend(viewu.render().el)
                             sections.$invitedsdiv.append(content)
                             sections.$invitedsdiv.show()
         else
