@@ -576,7 +576,7 @@ def makeInvitations(po, pt, pn):
       form = InviteForm()
       if form.validate():
         #specify your own nick for accept or decline
-        print "LALALALALLA", form.memberable.data, form.changerw.data
+        #print "LALALALALLA", form.memberable.data, form.changerw.data
         # jsonpost=dict(request.form)
         memberable=form.memberable.data
         changerw=form.changerw.data
@@ -585,19 +585,24 @@ def makeInvitations(po, pt, pn):
         #     changerw=False
         if not memberable:
              doabort("BAD_REQ", "No User Specified")
-        # print "memberable", memberable, changerw
+        #print "memberable", memberable, changerw
         try:
             user=g.db.getUserForAdsid(g.currentuser, memberable)
         except:
+            #print "no such user", memberable
             adsuser = AdsUser.from_email(memberable)
+            #print "here", adsuser
             adsgutuser=g.db.getUserForNick(None, 'adsgut')
             adsappuser=g.db.getUserForNick(adsgutuser, 'ads')
             if adsuser==None:#not in giovanni db, just add to ours
               #doabort("BAD_REQ", "No such User")
+              #print "q"
               adsgutuser=g.db.getUserForNick(None, 'adsgut')
-              potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET'})
+              #print "q2"
+              potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET-'+str(uuid.uuid4())})
               user=potentialuser
             else:#already in giovanni db, add to ours
+              #print "r"
               cookieid = adsuser.get_id()
               adsid = adsuser.get_username()
               user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
@@ -612,8 +617,9 @@ def makeInvitations(po, pt, pn):
         passdict[pt+'name']=pn
         return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
       else:
-        print "ERROES", form.errors
-        print "NOVAL", request.form
+        junk=1
+        #print "ERROES", form.errors
+        #print "NOVAL", request.form
       return profileHtmlNotRouted(po, pn, pt, inviteform=form)
 
 @adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
