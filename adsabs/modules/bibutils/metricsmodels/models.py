@@ -83,13 +83,25 @@ class Statistics():
         # get refereed normalized value
         cls.refereed_normalized_value = float('%.1f' % round(vector_product(refereed_values,refereed_weights), 1))
         # get mean value of values
-        cls.mean_value = float('%.1f' % round(mean(values), 1))
+        if len(values) != 0:
+            cls.mean_value = float('%.1f' % round(mean(values), 1))
+        else:
+            cls.mean_value = 0
         # get mean value of refereed values
-        cls.refereed_mean_value = float('%.1f' % round(mean(refereed_values), 1))
+        if len(refereed_values) != 0:
+            cls.refereed_mean_value = float('%.1f' % round(mean(refereed_values), 1))
+        else:
+            cls.refereed_mean_value = 0.0
         # get median value of values
-        cls.median_value = float('%.1f' % round(median(values), 1))
+        if len(values) != 0:
+            cls.median_value = float('%.1f' % round(median(values), 1))
+        else:
+            cls.median_value = 0.0
         # get median value of refereed values
-        cls.refereed_median_value = float('%.1f' % round(median(refereed_values), 1))
+        if len(refereed_values) != 0:
+            cls.refereed_median_value = float('%.1f' % round(median(refereed_values), 1))
+        else:
+            cls.refereed_median_value = 0.0
         # get total of values
         cls.total_value = sum(values)
         # get total of refereed values
