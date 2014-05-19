@@ -384,16 +384,16 @@ def userInfo(nick):
 
 from flask.ext.wtf import Form, RecaptchaField
 from wtforms import TextField, BooleanField, HiddenField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email
 
 class InviteForm(Form):
-    memberable = TextField('username', validators=[DataRequired()])
+    memberable = TextField('username', validators=[DataRequired(), Email()])
     op = HiddenField(default="invite")
     changerw = BooleanField("Can Post?")
     recaptcha = RecaptchaField()
 
 class InviteFormGroup(Form):
-    memberable = TextField('username', validators=[DataRequired()])
+    memberable = TextField('username', validators=[DataRequired(), Email()])
     op = HiddenField(default="invite")
     recaptcha = RecaptchaField()
 
@@ -631,7 +631,10 @@ def makeInvitations(po, pt, pn):
               potentialuserstring=""
         potentialuserstring2="""
         <p>
-        You can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a> and click the %s link there to accept.
+        If you already have an account at ADS, you can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a>, sign in, and click the %s link there to accept.
+        </p>
+        <p>
+        If you do not already have an ADS account, please <a href="http://labs.adsabs.harvard.edu/adsabs/user/signup">Sign up</a>! You will then be able to accept the invite from your account's Groups page.
         </p>
         """
         #ok got user, now invite
@@ -645,6 +648,7 @@ def makeInvitations(po, pt, pn):
         passdict={}
         passdict[pt+'owner']=po
         passdict[pt+'name']=pn
+        flash("Invite sent", 'success')
         return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
       else:
         junk=1

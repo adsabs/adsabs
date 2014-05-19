@@ -80,7 +80,9 @@
 					    		<li class="nav-header">Options</li>
 					            <li><a href="{{ url_for('user.index') }}"><i class="icon-wrench"></i> Your Account</a></li>
 					            <li class="divider"></li>
+					            {% block logout_link %}
 					            <li><a href="{{ url_for('user.logout') }}?next={{ current_url }}"><i class="icon-off"></i> Sign off</a></li>
+					            {% endblock %}
 				            </ul>
 						</li>
 						{% else %}
