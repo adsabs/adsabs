@@ -50,5 +50,8 @@
 <script type="text/coffeescript">
 {% block coffeescript %}{% endblock %}
 </script>
+{% endblock %} 
+{% block logout_link %}
+<li><a href="{{ url_for('user.logout') }}?next={{ url_for('index.index') }}"><i class="icon-off"></i> Sign off</a></li>
 {% endblock %}
 
