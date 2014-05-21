@@ -4,13 +4,15 @@
     <div class="row-fluid">
         <div class="span3">
           <div class="well sidebar-nav">
+              {% if useras.adsid != 'anonymouse' %}
                 <ul class="nav nav-list" id="header">
                   <li class="nav-header">Links</li>
                   <li><span><a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a></span></li>
-                  <li><span><a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=current_user.adsid) }}">Groups</a></span></li>
+                  <li><span><a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=useras.adsid) }}">Groups</a></span></li>
                   <li><span><a href="{{ url_for('adsgut.udgHtml', nick=useras.nick) }}">My Saved Items</a></span></li>
                   <li><span><a href="{{ url_for('user.index') }}">My Account</a></span></li>
                 </ul>
+              {% endif %}
                 {% block sidebar %}
 
                 {% endblock %}            
@@ -48,5 +50,8 @@
 <script type="text/coffeescript">
 {% block coffeescript %}{% endblock %}
 </script>
+{% endblock %} 
+{% block logout_link %}
+<li><a href="{{ url_for('user.logout') }}?next={{ url_for('index.index') }}"><i class="icon-off"></i> Sign off</a></li>
 {% endblock %}
 

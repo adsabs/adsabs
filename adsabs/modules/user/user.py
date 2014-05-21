@@ -182,7 +182,7 @@ def send_email_to_user(title, message_html, recipients, sender=None):
     Generic function to send an email to users
     """
     if not sender:
-        sender = 'noReplay-ADS@cfa.harvard.edu'
+        sender = 'noReply-ADS@cfa.harvard.edu'
     msg = Message(title,
                   html=message_html,
                   sender=sender,

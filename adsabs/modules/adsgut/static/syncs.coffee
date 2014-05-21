@@ -8,16 +8,16 @@ method – the CRUD method ("create", "read", "update", or "delete")
 model – the model to be saved (or collection to be read)
 options – success and error callbacks, and all other jQuery request options
 
-With the default implementation, when Backbone.sync sends up a request to save a model, 
-its attributes will be passed, serialized as JSON, and sent in the HTTP body with content-type application/json. 
-When returning a JSON response, send down the attributes of the model that have been changed by the server, 
-and need to be updated on the client. When responding to a "read" request from a collection (Collection#fetch), 
+With the default implementation, when Backbone.sync sends up a request to save a model,
+its attributes will be passed, serialized as JSON, and sent in the HTTP body with content-type application/json.
+When returning a JSON response, send down the attributes of the model that have been changed by the server,
+and need to be updated on the client. When responding to a "read" request from a collection (Collection#fetch),
 send down an array of model attribute objects.
 
-Whenever a model or collection begins a sync with the server, a "request" event is emitted. 
+Whenever a model or collection begins a sync with the server, a "request" event is emitted.
 If the request completes successfully you'll get a "sync" event, and an "error" event if not.
 
-The sync function may be overriden globally as Backbone.sync, or at a finer-grained level, 
+The sync function may be overriden globally as Backbone.sync, or at a finer-grained level,
 by adding a sync function to a Backbone collection or to an individual model.
 
 #but we shall first start slow, by building in direct jquery functions here, instead of Backbone.sync.
@@ -66,7 +66,7 @@ send_params = (url, data, cback, eback) ->
 send_bibcodes = (url, items, cback, eback) ->
     #bibcodes = (encodeURIComponent(i.basic.name) for i in items)
     bibcodes = (i.basic.name for i in items)
-    data = 
+    data =
         bibcode : bibcodes
     #console.log "SBDATA", data
     send_params(url, data, cback, eback)
@@ -165,7 +165,7 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     url= prefix+"/tags/"+item
     ts={}
     ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
-    #console.log "whee", ts
+    console.log "whee", ts, notetuple
     data=
         tagspecs: ts
         itemtype:itemtype
@@ -174,12 +174,21 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     if notetuple[0] != ""
         send_params(url, data, cback, eback)
 
-submit_tag = (item, itemname, tag, cback, eback) ->
+submit_tag = (item, itemname, tag, pview, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
+    tagmode='1'
+    if pview is 'pub'
+        #additionally, item must be made public. should public also mean all groups item is in
+        #as now. YES.
+        tagmode = '0'
+    else if pview is 'udg' or pview is 'none'
+        tagmode = '0'
+    else
+        tagmode = pview
     ts={}
-    ts[itemname] = [{name: tag, tagtype:tagtype}]
+    ts[itemname] = [{name: tag, tagtype:tagtype, tagmode:tagmode}]
     data=
         tagspecs: ts
         itemtype:itemtype
@@ -192,31 +201,40 @@ remove_note = (item, tagname, ctxt, cback, eback) ->
     data=
         tagtype: tagtype
         tagname: tagname
-    if ctxt not in ['udg', 'none', 'public']
+    if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
+    if ctxt=='public'
+        data.fqpn = "adsgut/group:public"
     send_params(url, data, cback, eback)
 
-remove_tagging = (item, tagname, cback, eback) ->
+remove_tagging = (item, tagname, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     url= prefix+"/tagsremove/"+item
     data=
         tagtype: tagtype
         tagname: tagname
+    #console.log "ctxt is", ctxt
+    if ctxt not in ['udg', 'none']
+        data.fqpn = ctxt
+    if ctxt=='public'
+        data.fqpn = "adsgut/group:public"
     send_params(url, data, cback, eback)
 
 remove_items_from_postable = (items, ctxt, cback, eback) ->
     url= prefix+"/itemsremove"
     data=
         items: items
-    if ctxt not in ['udg', 'none', 'public']
+    if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
+    if ctxt=='public'
+        data.fqpn = "adsgut/group:public"
     send_params(url, data, cback, eback)
 
-submit_tags = (items, tags, cback, eback) ->
+submit_tags = (items, tags, postables, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/items/taggings"
-    #console.log "TAGS ARE", tags
+    #console.log "TAGS ARE", tags,"EFFIN POSTS",postables
     ts={}
     inames=[]
     for i in items
@@ -224,7 +242,13 @@ submit_tags = (items, tags, cback, eback) ->
         name=i.basic.name
         if tags[fqin].length > 0
             inames.push(name)
-            ts[name] = ({name:t, tagtype:tagtype} for t in tags[fqin])
+            ts[name]=[]
+            for t in tags[fqin]
+              if postables.length > 0
+                for p in postables
+                  ts[name].push({name:t, tagtype:tagtype, tagmode:p})
+              else
+                  ts[name].push({name:t, tagtype:tagtype})
     if inames.length >0
         data=
             tagspecs: ts
@@ -286,6 +310,7 @@ taggings_postings_post_get = (items, pview, cback) ->
         alert "Error Occurred"
     data=
         items:items
+    #console.log "PVIEW", pview
     if pview not in ['udg', 'none', 'public']
         data.fqpn = pview
     send_params(url, data, cback, eback)
@@ -320,4 +345,3 @@ root.syncs=
     remove_tagging: remove_tagging
     remove_note: remove_note
     remove_items_from_postable: remove_items_from_postable
-

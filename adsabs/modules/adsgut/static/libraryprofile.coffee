@@ -14,7 +14,7 @@ rwmap = (boolrw) ->
 class PostableView extends Backbone.View
 
   tagName: "tr"
-     
+
   events:
     "click .yesbtn" : "clickedToggle"
 
@@ -29,7 +29,7 @@ class PostableView extends Backbone.View
         uname = @username
         if @username == 'group:public'
             uname = "All ADS Users"
-        if @username == 'anonymouse'    
+        if @username == 'anonymouse'
             uname = "General Public"
         content = w.table_from_dict_partial(uname, "Only owner can see this.")
     else
@@ -45,7 +45,7 @@ class PostableView extends Backbone.View
             else
                 uname = "General Public"
                 content = w.table_from_dict_partial(uname, rwmap(@rwmode))
-    
+
     @$el.html(content)
     return this
 
@@ -85,49 +85,72 @@ class PostableListView extends Backbone.View
     #     @$el.html(w.inline_list userlist)
     return this
 
+make_editable_description = ($infodiv, fqpn) ->
+    cback = () ->
+        #console.log "cback"
+    eback = () ->
+        #console.log "eback"
+    $.fn.editable.defaults.mode = 'inline'
+    $infodiv.find('.edtext').editable(
+      type:'textarea'
+      rows: 2
+      url: (params) ->
+        syncs.change_description(params.value,fqpn, cback, eback)
+    )
+    $infodiv.find('.edclick').click (e) ->
+      e.stopPropagation()
+      e.preventDefault()
+      $infodiv.find('.edtext').editable('toggle')
+
 get_info = (sections, config) ->
     cback = () ->
         #console.log "cback"
     eback = () ->
-        #console.log "eback" 
+        #console.log "eback"
     $.get config.infoURL, (data) ->
-        content=views.library_info data, templates.library_info
+        content=views.library_info config.owner, data, templates.library_info
         ownerfqin=data.library.owner
         sections.$infodiv.append(content)
-        $.fn.editable.defaults.mode = 'inline'
-        sections.$infodiv.find('.edtext').editable(
-          type:'textarea'
-          rows: 2
-          url: (params) ->
-            syncs.change_description(params.value,config.fqpn, cback, eback)
-        )
-        sections.$infodiv.find('.edclick').click (e) ->
-          e.stopPropagation()
-          e.preventDefault()
-          sections.$infodiv.find('.edtext').editable('toggle')
+        # $.fn.editable.defaults.mode = 'inline'
+        # sections.$infodiv.find('.edtext').editable(
+        #   type:'textarea'
+        #   rows: 2
+        #   url: (params) ->
+        #     syncs.change_description(params.value,config.fqpn, cback, eback)
+        # )
+        # sections.$infodiv.find('.edclick').click (e) ->
+        #   e.stopPropagation()
+        #   e.preventDefault()
+        #   sections.$infodiv.find('.edtext').editable('toggle')
+        if config.owner
+            make_editable_description(sections.$infodiv, config.fqpn)
         sections.$infodiv.show()
-
-        $.get config.membersURL, (data) ->
-            #console.log "DATA", data
-            plinv=new PostableListView(users:data.users, fqpn:config.fqpn, owner:config.owner, ownerfqin: ownerfqin, $e_el: sections.$membersdiv)
-            plinv.render()
+        #console.log "USER:", config.useras_nick
+        if config.useras_nick != 'anonymouse'
+            $.get config.membersURL, (data) ->
+                #console.log "DATA", data
+                plinv=new PostableListView(users:data.users, fqpn:config.fqpn, owner:config.owner, ownerfqin: ownerfqin, $e_el: sections.$membersdiv)
+                plinv.render()
+                sections.$membersdiv.show()
+                if config.owner
+                    #console.log "gaga", config.owner
+                    #viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
+                    viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
+                    sections.$makepublicform.append(viewp.render().$el)
+                    sections.$makepublicform.show()
+                    $.get config.guiURL, (data) ->
+                        groups=data.groups
+                        view=new views.AddGroup({postable: config.fqpn, groups:groups, withcb:true} )
+                        sections.$invitedform.append(view.render().$el)
+                        sections.$invitedform.show()
+                        $.get config.invitedsURL, (data) ->
+                            content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
+                            #sections.$invitedsdiv.prepend(viewu.render().el)
+                            sections.$invitedsdiv.append(content)
+                            sections.$invitedsdiv.show()
+        else
+            sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>")
             sections.$membersdiv.show()
-            if config.owner
-                #console.log "gaga", config.owner
-                viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
-                viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
-                sections.$makepublicform.append(viewp.render().$el)
-                sections.$makepublicform.show()
-                $.get config.guiURL, (data) ->
-                    groups=data.groups
-                    view=new views.AddGroup({postable: config.fqpn, groups:groups, withcb:true} )
-                    sections.$invitedform.append(view.render().$el)
-                    sections.$invitedform.show()
-                    $.get config.invitedsURL, (data) ->
-                        content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, false
-                        sections.$invitedsdiv.prepend(viewu.render().el)
-                        sections.$invitedsdiv.append(content)
-                        sections.$invitedsdiv.show()
 
 root.libraryprofile=
     PostableView: PostableView

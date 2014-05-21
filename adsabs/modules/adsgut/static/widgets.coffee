@@ -9,9 +9,9 @@ editable_text =  (text) ->
             h.span ".edtext", text
             h.a ".edclick", href:'#', ->
                 h.i ".icon-pencil", style:"padding-left: 5px;"
-        
 
-parse_fqin = (fqin) -> 
+
+parse_fqin = (fqin) ->
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
@@ -186,7 +186,7 @@ info_layout = h.renderable (dict, keysdict) ->
         h.dd ->
             h.raw dict[k]
 
-#<button class="btn btn-small" type="button">Small button</button> 
+#<button class="btn btn-small" type="button">Small button</button>
 single_button = h.renderable (btext) ->
     h.button '.btn.btn-mini.btn-primary.yesbtn', type:'button', btext
 
@@ -247,10 +247,10 @@ class HideableView extends Backbone.View
         return this
 
 #widget most be a div widget implementing the hoverhelp class
-#using delegation, hovering anywhere inside that div will pop up a help text 
+#using delegation, hovering anywhere inside that div will pop up a help text
 $.fn.andFind = (expr) ->
   return this.find(expr).add(this.filter(expr))
- 
+
 class HoverHelpDecoratorView extends Backbone.View
 
     initialize: (options) ->
@@ -276,7 +276,7 @@ decohelp  = (el, helptext, htype, position, trigtype="hover") ->
         $(el).append('&nbsp;[<a href="#" class="hoverhelp" onclick="return false;">?</a>]')
     else if trigtype == 'hover'
         $(el).append('&nbsp;<i class="hoverhelp icon-question-sign"></i>')
-    opt = 
+    opt =
         titletext: ""
         helptext: helptext
         position: position
@@ -292,18 +292,21 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
     #h.raw additional
     #<a class="btn" href="#"><i class="icon-align-justify"></i></a>
     #console.log "PVIEW3 IS", pview
-    if pview is 'udg' or pview is 'none'
+    if pview is 'none'
         notetext = 'Make note visible to members of all libraries this item is in (notes are private by default)'
     else if pview is 'pub'
         notetext = 'Make note visible to members of the public (notes are private by default)'
     else
         notetext = 'Make note visible to members of this library (notes are private by default)'
-    h.div ".postalnote", ->    
+    h.div ".postalnote", ->
         h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
-        h.label ".control-label", ->
-            h.input ".control.cb", type:'checkbox'
-            h.text notetext
-            h.raw "&nbsp;&nbsp;"
+        if pview != 'udg'
+          h.label ".control-label", ->
+              h.input ".control.cb", type:'checkbox'
+              h.text notetext
+              h.raw "&nbsp;&nbsp;"
+        else
+          h.label ".control-label", ""
         h.button '.btn.btn-primary.btn-mini.notebtn', type:'button', btext
 
 #     <legend>Tagging and Posting</legend>
@@ -332,7 +335,7 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
 #     </div>
 #     <button type="submit" class="btn">Submit</button>
 
-multiselect = h.renderable (daclass, choices, choicedict) -> 
+multiselect = h.renderable (daclass, choices, choicedict) ->
     #console.log "IN MULTISELECT"
     h.select ".multi#{daclass}", multiple:"multiple", ->
         #h.option value:'new', "Create New Library"
@@ -340,7 +343,7 @@ multiselect = h.renderable (daclass, choices, choicedict) ->
             h.option  value: c, choicedict[c]
 
 addchoices = h.renderable (choices, choicedict) ->
-    h.raw -> 
+    h.raw ->
         for c in choices
             h.option  value: c, choicedict[c]
 
@@ -354,7 +357,7 @@ postcontrol = h.renderable (librarychoices, librarychoicedict) ->
         multiselect("library", librarychoices, librarychoicedict)
         h.raw "&nbsp;&nbsp;"
         h.button ".btn.btn-primary.post", type:'button', "Apply"
-        
+
 
 postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
     #console.log "librarych"
@@ -393,7 +396,7 @@ postalall_form = h.renderable (nameable, itemtype, librarychoices) ->
 link = h.renderable (url, txt) ->
     h.raw "<a href=\"#{url}\">#{txt}</a>"
 
-root.widgets = 
+root.widgets =
     postalall_form: postalall_form
     postalnote_form: postalnote_form
     single_button: single_button

@@ -6,10 +6,12 @@
 <ul class="nav nav-list" id="stags">
 </ul>
 {% if pflavor!='udg' %}
+{% if useras.adsid != 'anonymouse' %}
 <ul class="nav nav-list" id="users">
   <li class="nav-header">Posted by</li>
   <li> <a href="" id="useradder" data="off">you</a> </li>
 </ul>
+{% endif %}
 {% endif %}
 {% endblock %}
 
@@ -19,8 +21,10 @@
 <span>
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
+  <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 </span>
@@ -30,8 +34,10 @@
 <span>
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
+  <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 </span>
@@ -47,8 +53,10 @@
 <span>
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
+  <button class="btn" id="asjson">As JSON</button>
+  <button class="btn" id="ascsv">As CSV</button>
   <button class="btn" type="submit">View in search page</button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;"> 
+  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
 </span></label>
 </form>
 </span>
@@ -67,30 +75,33 @@
 $=jQuery
 #console.log "In PostableFilter"
 
+#tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars_pageless}"
 
 $ ->
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   ptype = "{{p.classname}}"
   vars="{{ querystring | safe }}"
 
-  config = 
+  config =
     fqpn : "{{p.basic.fqin}}"
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
-    tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
+    itURL : "{{ url_for('adsgut.itemsTaggings') }}"
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
     bq2url : GlobalVariables.ADS_PREFIX+"/search/bigquery/"
-    memberable: 
+    memberable:
       nick: "{{useras.nick}}"
       adsid: "{{useras.adsid}}"
     loc : document.location
     tqtype : "{{ tqtype }}"
     querystring: "{{ querystring | safe }}"
     pview: "{{pflavor}}"
+    owner : if '{{owner}}' == 'True' then true else false
 
-  sections = 
+  sections =
     $info : $('div#info')
     $items : $('#items')
     $ua : $('#useradder')
@@ -99,6 +110,8 @@ $ ->
     $bigqueryform : $('#bigqueryform')
     $breadcrumb: $('#breadcrumb')
     $count: $('#count')
+    $asjson: $('#asjson')
+    $ascsv: $('#ascsv')
 
   redo_tags = _.partial(postablefilter.do_tags, config.tagsPURL, sections.$tagssec, config.tqtype)
 

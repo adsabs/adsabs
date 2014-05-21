@@ -2,6 +2,13 @@ root = exports ? this
 $=jQuery
 #console.log "In Funcs"
 h = teacup
+
+csvstringify = (tdict) ->
+  start="#paper, tag\n"
+  for bibcode of tdict
+    for tag in tdict[bibcode]
+      start=start+bibcode+","+tag+"\n"
+  return start
 #redo this to use url parsing library, handle other types of queries besides tags
 parse_querystring= (qstr) ->
     #console.log "QQQ", qstr
@@ -13,15 +20,32 @@ parse_querystring= (qstr) ->
     #console.log "QLIST", qlist
     return qlist
 
+make_editable_description = ($infodiv, fqpn) ->
+    cback = () ->
+        #console.log "cback"
+    eback = () ->
+        #console.log "eback"
+    $.fn.editable.defaults.mode = 'inline'
+    $infodiv.find('.edtext').editable(
+      type:'textarea'
+      rows: 2
+      url: (params) ->
+        syncs.change_description(params.value,fqpn, cback, eback)
+    )
+    $infodiv.find('.edclick').click (e) ->
+      e.stopPropagation()
+      e.preventDefault()
+      $infodiv.find('.edtext').editable('toggle')
 
 do_postable_info = (sections, config, ptype) ->
     $.get config.infoURL, (data) ->
         if ptype=='library'
-            content=views.library_info data, templates.library_itemsinfo
+            content=views.library_info config.owner, data, templates.library_itemsinfo
         else if ptype=='group'
-            content=views.group_info data, templates.group_itemsinfo
-        
+            content=views.group_info config.owner, data, templates.group_itemsinfo
         sections.$info.append(content+'<hr/>')
+        if config.owner
+            make_editable_description(sections.$info, config.fqpn)
         sections.$info.show()
 
 do_tags = (url, $sel, tqtype) ->
@@ -67,7 +91,28 @@ do_postable_filter = (sections, config, tagfunc) ->
             #console.log "POSTINGS", data.postings, config.fqpn
             #console.log "TG", data.taggings
             [stags, notes]=get_taggings(data)
-            #console.log "===", stags, notes
+            tagoutput = {}
+            for prop of stags
+                clist = stags[prop]
+                if clist.length==0
+                    tagoutput[prop]=[]
+                else
+                    tagoutput[prop] = (e[0] for e in clist)
+
+            #console.log JSON.stringify(tagoutput)
+            sections.$asjson.click (e)->
+                data = JSON.stringify(tagoutput)
+                window.document.write(data)
+                #window.location.href = "data:application/json;base64," + data
+                e.preventDefault()
+            sections.$ascsv.click (e)->
+                data = csvstringify(tagoutput)
+                #window.document.write()
+                #console.log "data", data
+                #window.location.href = "data:text/csv;base64," + data
+                #towrite = "Content-Type: text/csv\n" + data
+                window.document.write("<pre>"+data+"</pre>")
+                e.preventDefault()
             postings={}
             times={}
             for own k,v of data.postings
@@ -88,7 +133,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                 i.whenposted = times[i.basic.fqin]
             #console.log "SORTEDITEMS"
             #for i in sorteditems
-            #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs 
+            #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs
             ido=
                 stags:stags
                 postings:postings
@@ -134,7 +179,7 @@ do_postable_filter = (sections, config, tagfunc) ->
         sections.$ua.attr('href', urla)
         sections.$ua.attr('data', 'on')
 
-root.postablefilter = 
+root.postablefilter =
     do_postable_info: do_postable_info
     do_postable_filter: do_postable_filter
     do_tags: do_tags

@@ -44,8 +44,8 @@ if not BLUEPRINT_MODE:
     adsgut_app=flask.Flask(__name__)
     adsgut=adsgut_app
 else:
-    adsgut_blueprint = Blueprint('adsgut', __name__, 
-                                template_folder="templates", 
+    adsgut_blueprint = Blueprint('adsgut', __name__,
+                                template_folder="templates",
                                 static_folder='static',
                                 url_prefix='/adsgut',
 
@@ -56,6 +56,7 @@ else:
     from adsabs.extensions import mongoengine
     from adsabs.extensions import solr
     #adsgut_app.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
+
 
 ##print dir(adsgut), type(adsgut)
 #print "HELLO"
@@ -111,7 +112,7 @@ class MongoEngineJsonEncoder(json.JSONEncoder):
         else:
             return list(iterable)
         return json.JSONEncoder.default(self, obj)
- 
+
 def jsonify(*args, **kwargs):
     """ jsonify with support for MongoDB ObjectId
     """
@@ -287,7 +288,7 @@ def before_request():
         user=g.db.getUserForAdsid(None, adsid)
     else:
         try:
-            user=w.getUserForCookieid(None, cookieid)
+            user=g.db.getUserForCookieid(None, cookieid)
             if user.adsid != adsid:#user changed their email
                 #print "email changed"
                 user.adsid = adsid
@@ -295,15 +296,23 @@ def before_request():
             #print "---------->IN HERE", adsid
         except:
             #print "<----------OR HERE", adsid, sys.exc_info()
-            adsgutuser=w.getUserForNick(None, 'adsgut')
-            adsuser=w.getUserForNick(adsgutuser, 'ads')
-            #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
-            #this removes the possibility of the user adding a custom nick, for now
-            #cookieid=current_user.get_id()
-            #user=w.addUser(adsgutuser,{'adsid':adsid})
-            user=w.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-            #add the user to the flagship ads app, at the very least
-            user, adspubapp = w.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
+            adsgutuser=g.db.getUserForNick(None, 'adsgut')
+            adsuser=g.db.getUserForNick(adsgutuser, 'ads')
+            #we dont have the cookie, but we might have the adsid, because he was invited earlier
+            try:#partially in our database
+              user=g.db.getUserForAdsid(None, adsid)
+              user.cookieid=cookieid
+              user.save(safe=True)
+            except:#not at all in our database
+              #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
+              #this removes the possibility of the user adding a custom nick, for now
+              #cookieid=current_user.get_id()
+              #user=w.addUser(adsgutuser,{'adsid':adsid})
+              #Make sure this one is done on invite
+              user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+            #add the user to the flagship ads app, at the very least, to complete user
+            #being in our database
+            user, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
 
 
     #superuser if no login BUG: use only for testing
@@ -369,9 +378,24 @@ def userInfo(nick):
         else:
             d['reason'] = ",".join([e[1] for e in names[d['fqpn']]])
         ds.append(d)
-    
+
     ujson = jsonify(user=user, postablelibs=ds)
     return ujson
+
+from flask.ext.wtf import Form, RecaptchaField
+from wtforms import TextField, BooleanField, HiddenField
+from wtforms.validators import DataRequired, Email
+
+class InviteForm(Form):
+    memberable = TextField('username', validators=[DataRequired(), Email()])
+    op = HiddenField(default="invite")
+    changerw = BooleanField("Can Post?")
+    recaptcha = RecaptchaField()
+
+class InviteFormGroup(Form):
+    memberable = TextField('username', validators=[DataRequired(), Email()])
+    op = HiddenField(default="invite")
+    recaptcha = RecaptchaField()
 
 #x
 @adsgut.route('/user/<nick>/profile/html')
@@ -548,6 +572,90 @@ def createLibrary():
         doabort("BAD_REQ", "GET not supported")
 
 from adsabs.modules.user.user import AdsUser
+from adsabs.modules.user.user import send_email_to_user
+
+@adsgut.route('/postable/<po>/<pt>:<pn>/makeinvitations', methods=['POST'])#user/op
+def makeInvitations(po, pt, pn):
+  fqpn=po+"/"+pt+":"+pn
+  if request.method == 'POST':
+      if pt=="library":
+        form = InviteForm()
+      else:
+        form = InviteFormGroup()
+      if form.validate():
+        #specify your own nick for accept or decline
+        #print "LALALALALLA", form.memberable.data, form.changerw.data
+        # jsonpost=dict(request.form)
+        memberable=form.memberable.data
+        changerw=False
+        if pt=="library":
+          changerw=form.changerw.data
+        # changerw=_dictp('changerw', jsonpost)
+        # if changerw==None:
+        #     changerw=False
+        if not memberable:
+             doabort("BAD_REQ", "No User Specified")
+        #print "memberable", memberable, changerw
+        potentialuserstring=""
+        try:
+            user=g.db.getUserForAdsid(g.currentuser, memberable)
+        except:
+            #print "no such user", memberable
+            adsuser = AdsUser.from_email(memberable)
+            #print "here", adsuser
+            adsgutuser=g.db.getUserForNick(None, 'adsgut')
+            adsappuser=g.db.getUserForNick(adsgutuser, 'ads')
+            if adsuser==None:#not in giovanni db, just add to ours
+              #doabort("BAD_REQ", "No such User")
+              #print "q"
+              adsgutuser=g.db.getUserForNick(None, 'adsgut')
+              #print "q2"
+              potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET-'+str(uuid.uuid4())})
+              user=potentialuser
+              potentialuserstring="""
+              <p>
+              The SAO/NASA Astrophysics Data System (ADS) is a Digital Library portal for researchers in Astronomy and
+              Physics, operated by the Smithsonian Astrophysical Observatory (SAO) under a NASA grant. The ADS maintains
+              three bibliographic databases containing more than 10.8 million records: Astronomy and Astrophysics, Physics,
+              and arXiv e-prints. The main body of data in the ADS consists of bibliographic records, which are searchable
+              through highly customizable query forms, and full-text scans of much of the astronomical literature which
+              can be browsed or searched via our full-text search interface at <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a>."
+              </p>
+              """
+            else:#already in giovanni db, add to ours
+              #print "r"
+              cookieid = adsuser.get_id()
+              adsid = adsuser.get_username()
+              user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+              user, adspubapp = g.db.addUserToPostable(adsappuser, 'ads/app:publications', user.nick)
+              potentialuserstring=""
+        potentialuserstring2="""
+        <p>
+        If you already have an account at ADS, you can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a>, sign in, and click the %s link there to accept.
+        </p>
+        <p>
+        If you do not already have an ADS account, please <a href="http://labs.adsabs.harvard.edu/adsabs/user/signup">Sign up</a>! You will then be able to accept the invite from your account's Groups page.
+        </p>
+        """
+        #ok got user, now invite
+        utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, user, changerw)
+        emailtitle="Invitation to ADS Library %s" % pn
+        ptmap={'group':'Group (and associated library)', 'library':"Library"}
+        ptmap2={'group':'My Groups', 'library':"Libraries"}
+        emailtext="%s has invited you to ADS %s %s." % (g.currentuser.adsid, ptmap[pt], pn)
+        emailtext = emailtext+potentialuserstring+potentialuserstring2%ptmap2[pt]
+        send_email_to_user(emailtitle, emailtext,[user.adsid])
+        passdict={}
+        passdict[pt+'owner']=po
+        passdict[pt+'name']=pn
+        flash("Invite sent", 'success')
+        return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
+      else:
+        junk=1
+        #print "ERROES", form.errors
+        #print "NOVAL", request.form
+      return profileHtmlNotRouted(po, pn, pt, inviteform=form)
+
 @adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
 def doPostableChanges(po, pt, pn):
     #add permit to match user with groupowner
@@ -560,7 +668,7 @@ def doPostableChanges(po, pt, pn):
         changerw=_dictp('changerw', jsonpost)
         if changerw==None:
             changerw=False
-        #for inviting this is nick of user invited. 
+        #for inviting this is nick of user invited.
         #for accepting this is your own nick
         if not memberable:
             doabort("BAD_REQ", "No User Specified")
@@ -581,7 +689,12 @@ def doPostableChanges(po, pt, pn):
                 adsuser=g.db.getUserForNick(adsgutuser, 'ads')
                 memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
                 memberable, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', memberable.nick)
+
             utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
+            emailtitle="Invitation to ADS Library %s" % pn
+            emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
+            send_email_to_user(emailtitle, emailtext,[memberable.adsid])
+
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
         elif op=='accept':
             memberable=g.db.getUserForAdsid(g.currentuser, memberable)
@@ -623,7 +736,7 @@ def doInviteToGroup(groupowner, groupname):
         #specify your own nick for accept or decline
         jsonpost=dict(request.json)
         nick=_dictp('userthere', jsonpost)
-        #for inviting this is nick of user invited. 
+        #for inviting this is nick of user invited.
         #for accepting this is your own nick
         if not nick:
             doabort("BAD_REQ", "No User Specified")
@@ -763,8 +876,7 @@ def groupInfo(groupowner, groupname):
 #x
 @adsgut.route('/postable/<groupowner>/group:<groupname>/profile/html')
 def groupProfileHtml(groupowner, groupname):
-    group, owner, on, cn=postable(groupowner, groupname, "group")
-    return render_template('groupprofile.html', thegroup=group, owner=owner,  useras=g.currentuser)
+    return profileHtmlNotRouted(groupowner, groupname, "group", inviteform=None)
 
 
 #POST/GET in a lightbox?
@@ -781,8 +893,7 @@ def appInfo(appowner, appname):
 #x
 @adsgut.route('/postable/<appowner>/app:<appname>/profile/html')
 def appProfileHtml(appowner, appname):
-    app, owner, on, cn=postable(appowner, appname, "app")
-    return render_template('appprofile.html', theapp=app, owner=owner, useras=g.currentuser)
+    return profileHtmlNotRouted(appowner, appname, "app", inviteform=None)
 
 
 #POST/GET in a lightbox?
@@ -800,9 +911,16 @@ def libraryInfo(libraryowner, libraryname):
 #x
 @adsgut.route('/postable/<libraryowner>/library:<libraryname>/profile/html')
 def libraryProfileHtml(libraryowner, libraryname):
-    library, owner, on, cn=postable(libraryowner, libraryname, "library")
-    return render_template('libraryprofile.html', thelibrary=library, owner=owner, useras=g.currentuser)
+    return profileHtmlNotRouted(libraryowner, libraryname, "library", inviteform=None)
 
+def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
+    p, owner, on, cn=postable(powner, pname, ptype)
+    if not inviteform:
+      if ptype=="library":
+        inviteform = InviteForm()
+      else:
+        inviteform = InviteFormGroup()
+    return render_template(ptype+'profile.html', thepostable=p, owner=owner, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
 @adsgut.route('/postable/<nick>/group:default/filter/html')
 def udgHtml(nick):
@@ -932,6 +1050,7 @@ def itemsForPostable(po, pt, pn):
         #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         pagtuple = _pagtupleget(query)
+        #pagtuple=(2,1)
         criteria= _criteriaget(query)
         postable= po+"/"+pt+":"+pn
         q=_queryget(query)
@@ -1035,7 +1154,7 @@ def itemsremove():
         for itemfqin in items:
             g.dbp.removeItemFromPostable(g.currentuser, useras, fqpn, itemfqin)
         return jsonify({'status':'OK', 'info':items})
-  
+
 #post saveItems(s), get could get various things such as stags, postings, and taggings
 #get could take a bunch of items as arguments, or a query
 @adsgut.route('/items', methods=['POST', 'GET'])
@@ -1159,11 +1278,11 @@ def tagsForItem(ns, itemname):
         # taggingsdict={}
         # taggingsdict[i.basic.fqin]=(newtaggings.length, newtaggings)
         # return jsonify(taggings=taggingsdict)
-        taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
+        taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable)
+        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
         #print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
@@ -1179,11 +1298,11 @@ def tagsForItem(ns, itemname):
         # count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
         #     query, usernick, criteria, sort)
         #count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
-        taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort, fqpn)
+        taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable)
+        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 ####These are the fromSpec family of functions for GET
 
 @adsgut.route('/tagsremove/<ns>/<itemname>', methods=['POST'])
@@ -1201,13 +1320,18 @@ def tagsRemoveForItem(ns, itemname):
         fqtn = useras.nick+'/'+tagtype+":"+tagname
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
-        val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
-        taggingsdict, taggingsthispostable= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
+        #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context
+        #print "FQPN is", fqpn
+        if fqpn==None:#nuke it
+          val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
+        else:#remove tag from postable (should only affect pinpostables)
+          val=g.dbp.removeTaggingFromPostable(g.currentuser, useras, fqpn, ifqin, fqtn)
+        taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable)
-    
+        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
+
 
 #BUG: havent put in fqpn here yet
 #multi item multi tag tagging on POST and get taggings
@@ -1233,7 +1357,7 @@ def itemsTaggings():
                 newtaggings.append(td)
         # itemtaggings={'status':'OK', 'taggings':newtaggings}
         # return jsonify(taggings=newtaggings)
-        taggingsdict,_=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict,_,junk=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None)
         return jsonify(taggings=taggingsdict)
     else:
@@ -1244,7 +1368,7 @@ def itemsTaggings():
         sort = _sortget(query)
         items = _itemsget(query)
         #By this time query is popped down
-        taggingsdict,_=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict,_,junk=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         return jsonify(taggings=taggingsdict)
 
@@ -1264,7 +1388,7 @@ def itemsPostings():
         for name in items:
             itemspec={'name':name, 'itemtype':itemtype}
             i=g.dbp.saveItem(g.currentuser, useras, itemspec)
-            for fqpn in fqpo:                
+            for fqpn in fqpo:
                 i,pd=g.dbp.postItemIntoPostable(g.currentuser, useras, fqpn, i)
                 pds.append(pd)
         #itempostings={'status':'OK', 'postings':pds}
@@ -1296,16 +1420,17 @@ def itemsTaggingsAndPostings():
         items = _itemspostget(jsonpost)
         fqpn = _dictp('fqpn',jsonpost)
         #print "ITEMS", items
+        #print "FQPN", fqpn
         #print "SORT", sort, "useras", useras
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None, sort)
-        taggingsdict, taggingsthispostable=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort, fqpn)
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
-        #print "MEEP", taggingsdict, taggingsthispostable
-        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
+        #print "MEEP",taggingsthispostable
+        return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
@@ -1317,10 +1442,10 @@ def itemsTaggingsAndPostings():
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None, sort)
-        taggingsdict, taggingsthispostable=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
+        taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort, fqpn)
         #print "MEEP",taggingsthispostable
-        return jsonify(postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable)
+        return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 
 @adsgut.route('/itemtypes', methods=['POST', 'GET'])
 def itemtypes():
@@ -1406,7 +1531,7 @@ def postForm(itemtypens, itemtypename):
     #print "NS,NAME", itemtypens, itemtypename
     itemtype=itemtypens+"/"+itemtypename
     if request.method=='POST':
-        if itemtype=="ads/pub": 
+        if itemtype=="ads/pub":
             #print "RVALS", request.values
             current_page=request.referrer
             if request.values.has_key('numRecs'):
@@ -1489,8 +1614,8 @@ def postForm(itemtypens, itemtypename):
         nameable=True
     #print "QSTRING", qstring, current_page
     if request.method=="POST":
-        return render_template('postform_fancy.html', items=theitems, 
-            querystring=qstring, 
+        return render_template('postform_fancy.html', items=theitems,
+            querystring=qstring,
             singlemode=singlemode,
             nameable=nameable,
             itemtype=itemtypename,
@@ -1500,8 +1625,8 @@ def postForm(itemtypens, itemtypename):
         return render_template('errors/generic_error.html', error_message='Only POST supported for this for now.')
         #return error instead
         #print "Rendering in postform2"
-        return render_template('postform2.html', items=theitems, 
-            querystring=qstring, 
+        return render_template('postform2.html', items=theitems,
+            querystring=qstring,
             singlemode=singlemode,
             nameable=nameable,
             itemtype=itemtypename,
@@ -1527,7 +1652,7 @@ def perform_classic_library_query(parameters, headers, service_url):
     except Exception, e:
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
-    
+
     try:
         user_json = r.json()
     except Exception, e:
@@ -1563,7 +1688,7 @@ def perform_solr_bigquery(bibcodes):
         #print "1"
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
-    
+
     try:
         d = r.json()
         #print "2"

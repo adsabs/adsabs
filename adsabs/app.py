@@ -17,7 +17,7 @@ __all__ = ['create_app']
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning, module="pymongo")
-
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="mongoengine")
 
 def create_app(config=config, app_name=None):
     """Create a Flask app."""

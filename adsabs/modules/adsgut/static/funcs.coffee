@@ -5,7 +5,7 @@ $=jQuery
 w = widgets
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
 
-monthNamesShort = 
+monthNamesShort =
   '00': ""
   '01':  "Jan"
   '02':  "Feb"
@@ -19,7 +19,7 @@ monthNamesShort =
   '10':  "Oct"
   '11':  "Nov"
   '12':  "Dec"
-  
+
 # {% for auth in doc.author %}
 #   {% if loop.index0 < 4 %}{{ auth }}{% endif %}{% if loop.index0 < 3 %};{% endif %}
 # {% endfor %}
@@ -35,7 +35,7 @@ short_authors = (authors) ->
     return authors[0..3].join('; ')+" <em>and #{n} coauthors</em>"
 
 
-parse_fqin = (fqin) -> 
+parse_fqin = (fqin) ->
     vals=fqin.split(':')
     return vals[-1+vals.length]
 
@@ -75,7 +75,7 @@ format_tags = (tagtype, $sel, tags, tagqkey)->
       urla=document.location+"&query=#{tagqkey}:#{t}"
       if nonqloc is document.location.href
         urla=document.location+"?query=#{tagqkey}:#{t}"
-    
+
     htmlstring = htmlstring+"<li><span><a href=\"#{url}\">#{k}</a>&nbsp;<a href=\"#{urla}\">(+)</a></span></li>"
     ##{v.join(',')}
   $sel.html(htmlstring)
@@ -121,11 +121,11 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
   start = '<table class="table-condensed table-striped">'
   end = "</table>"
   lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
-  
+
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[4], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
-  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[4], pview) for t in notes[fqin])
+  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview) for t in notes[fqin])
   if t3list.length >0
     return start+t3list.join("")+end
   else
@@ -146,7 +146,7 @@ format_tags_for_item = (fqin, stags, memberable, tagajax=true) ->
   else
     return []
 
-parse_fortype = (fqin) -> 
+parse_fortype = (fqin) ->
     vals = fqin.split(':')
     vals2 = vals[-2+vals.length].split('/')
     return vals2[-1+vals2.length]
@@ -189,7 +189,7 @@ format_postings_for_item = (fqin, postings, nick) ->
 #     htmlstring = htmlstring + "<#{formatter}><a href=\"#{url}\">#{i.basic.name}</a><br/>"
 #     htmlstring=htmlstring+format_tags_for_item(fqin, stags, nick)
 #     htmlstring=htmlstring+format_postings_for_item(fqin, postings, nick)
-#     htmlstring=htmlstring+format_notes_for_item(fqin, notes, nick)  
+#     htmlstring=htmlstring+format_notes_for_item(fqin, notes, nick)
 #     htmlstring=htmlstring+"</#{formatter}>"
 #     if asform
 #       htmlstring=htmlstring+w.postalnote_form("make note")
@@ -213,16 +213,23 @@ get_tags = (tags, tqtype) ->
 get_taggings = (data) ->
   stags={}
   notes={}
-  #console.log "DATA", data
+  #console.log "DATA[", data.fqpn,"]", data
   for own k,v of data.taggings
     tp = data.taggingtp[k]
+    td = data.taggingsdefault[k]
     tg = v[1]
-    #console.log "TGTP", tg, tp, v
-    combi = _.zip(tg, tp)
+    #console.log "TGTP", tp.length, td.length
+    tp2 = (e[0] or e[1] for e in _.zip(tp,td))
+    combi = _.zip(tg, tp2, tp)
     #console.log "1>>>", k,combi
     if v[0] > 0
-      stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
-      notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
+      if data.fqpn is null or data.fqpn is undefined
+        #console.log "here"
+        stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
+      else
+        stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag" and e[1] is true)
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note"  and e[1] is true)
     else
       stags[k]=[]
       notes[k]=[]
@@ -290,11 +297,16 @@ postable_inviteds = (fqpn, data, template, scmode=false) ->
 
 
 
-postable_info_layout = renderable ({basic, owner, nick}, oname, cname, mode="filter") ->
-  description=basic.description
-  dtext = w.editable_text(description)
+postable_info_layout = renderable (isowner, {basic, owner, nick}, oname, cname, mode="filter") ->
+  #console.log isowner, basic, owner, nick, oname, cname
+  description = basic.description
   if description is ""
     description = "not provided"
+  if isowner
+    dtext = w.editable_text(description)
+  else
+    dtext = description
+
   if mode is "filter"
     modetext = "Link"
   else if mode is "profile"
@@ -331,21 +343,21 @@ postable_info_layout2 = renderable ({basic, owner, nick}, oname, cname, mode="pr
     dd ->
       raw a
 
-library_info_template = renderable (data) ->
-  postable_info_layout data.library, data.oname, data.cname
+library_info_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.library, data.oname, data.cname
 
-group_info_template = renderable (data) ->
-  postable_info_layout data.group, data.oname, data.cname
-  
-library_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.library, data.oname, data.cname
+group_info_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.group, data.oname, data.cname
 
-group_itemsinfo_template = renderable (data) ->
-  postable_info_layout2 data.group, data.oname, data.cname
+library_itemsinfo_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.library, data.oname, data.cname, "profile"
+
+group_itemsinfo_template = renderable (isowner, data) ->
+  postable_info_layout isowner, data.group, data.oname, data.cname, "profile"
 
 #controller style stuff should be added here.
-postable_info = (data, template) ->
-  template(data)
+postable_info = (isowner, data, template) ->
+  template(isowner, data)
 
 #content=widgets.one_submit_with_cb("invite_user","Invite a user using their email:", "Invite", "Can Post?")
 #$('div#invitedform').append(content)
@@ -425,7 +437,7 @@ class MakePublic extends Backbone.View
     cback = (data) =>
             #console.log "return data cback", data, loc, @postable
             syncs.add_group('adsgut/group:public', @postable, false, cback2, eback)
-    
+
     eback = (xhr, etext) ->
         #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -523,7 +535,7 @@ root.format_row = format_row
 root.format_postings_for_item = format_postings_for_item
 root.format_notes_for_item = format_notes_for_item
 root.format_tags_for_item = format_tags_for_item
-root.views = 
+root.views =
   library_info: postable_info
   group_info: postable_info
   postable_inviteds: postable_inviteds
