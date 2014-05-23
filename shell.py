@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+'''
+
+flask-script tasks
+
+registering sub-managers
+========================
+
+submanager modules should be placed in the adsabs.managers package and
+imported into that package via __init__. The module should contain a Flask-Script Manager
+object and include a 'name' attribute which will appear in the shell.py usage 
+output and is what will # be used when executing subtasks in that manager
+e.g.
+%> python shell.py <submanager.name> <task> [args]
+
+'''
 
 import os
 import sys
@@ -26,7 +41,15 @@ if not getattr(config, 'SECRET_KEY', None):
 app = create_app(config)    
 manager = Manager(app)#, with_default_commands=False)
 
-tools_manager = Manager("Tools commands")#, with_default_commands=False)
+from adsabs import managers
+for thing in dir(managers):
+    if thing.startswith('__'):
+        continue
+    try:
+        sub_manager = __import__('adsabs.managers.%s' % thing, globals(), locals(), [thing], -1)
+        manager.add_command(sub_manager.name, sub_manager.manager)
+    except ImportError, e:
+        print e
 
 @manager.command
 def run(port=5000):
@@ -58,145 +81,5 @@ def generate_secret_key():
     app.logger.info("SECRET_KEY = '%s'" % os.urandom(24).encode('hex'))
     app.logger.info("ACCOUNT_VERIFICATION_SECRET = '%s'" % os.urandom(24).encode('hex'))
     
-@manager.command
-def start_beaver():
-    """
-    starts a beaver daemon for transmitting log files to the redis/logstash
-    """
-    pid_path = os.path.join(app.root_path, '../.beaver.pid')
-    if os.path.exists(pid_path):
-        with open(pid_path, 'r') as pid:
-            raise Exception("looks like another beaver process is running: %s" % pid.read())
-            
-    config_path = os.path.join(app.root_path, '../config/beaver.conf')
-    if not os.path.exists(config_path):
-        raise Exception("no config file found at %s" % config_path)
-    
-    beaver_log = os.path.join(app.root_path, '../logs/beaver.log')
-    p = subprocess.Popen(["beaver",
-                          "-D", # daemonize
-                          "-c", config_path,
-                          "-P", pid_path,
-                          "-l", beaver_log
-                          ])
-    sleep(1)
-    with open(pid_path, 'r') as pid:
-        app.logger.info("beaver daemon started with pid %s" % pid.read())
-
-@manager.command
-def stop_beaver():
-    """
-    stops a running beaver daemon identified by the pid in app.root_path/.beaver.pid
-    """
-    import signal
-    pid_path = os.path.join(app.root_path, '../.beaver.pid')
-    if not os.path.exists(pid_path):
-        raise Exception("There doesn't appear to be a pid file for a running beaver instance")
-    pid = int(open(pid_path,'r').read())
-    os.kill(pid, signal.SIGTERM)
-    sleep(1)
-    # Check that we really killed it
-    try: 
-        os.kill(pid, 0)
-        raise Exception("""wasn't able to kill the process 
-                        HINT:use signal.SIGKILL or signal.SIGABORT""")
-    except OSError:
-        app.logger.info("killed beaver process with pid %d" % pid)
-
-@tools_manager.command
-def tools():
-    """
-    download and setup of extras in the ./tools directory
-    TODO: we should really move this kind of stuff into a deployment/config-management
-    tool, like fabric or maybe hudson
-    """
-    
-    tools_dir = app.root_path + '/../tools'
-    if os.environ.has_key('VIRTUAL_ENV'):
-        activate = ". %s/bin/activate" % os.environ['VIRTUAL_ENV']
-    else:
-        activate = ""
-        
-    temp = tempfile.NamedTemporaryFile(delete=False)
-    print >>temp, """#!/bin/bash
-    
-    %s
-    cd %s
-    pip install django
-    git clone https://github.com/adsabs/mongoadmin.git
-    cd mongoadmin
-    cp mongoadmin_project/settings.py.dist mongoadmin_project/settings.py
-    perl -p -i -e 's/django\.db\.backends\.mysql/django.db.backends.sqlite3/' mongoadmin_project/settings.py
-    %s manage.py syncdb --noinput
-    
-    """ % (activate, tools_dir, sys.executable)
-    
-    temp.close()
-    subprocess.call(["chmod", "755", temp.name])
-    subprocess.call(["bash", temp.name])
-    temp.unlink(temp.name)
-    
-    print """
-    mongoadmin install is complete.
-    Run by typing...
-    
-    cd tools/mongoadmin
-    python manage.py runserver
-    """
-
-mongo_manager = Manager("Mongo operations", with_default_commands=False)
-
-@mongo_manager.command
-def init():
-    pass
-
-@mongo_manager.command
-def dump(outdir=None):
-    if outdir is None:
-        from datetime import datetime
-        outdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dumps', datetime.today().isoformat())
-        outdir = prompt("Output directory", outdir)
-    app.logger.info("Dumping %s database to %s" % (config.MONGOALCHEMY_DATABASE, outdir))
-    subprocess.call(["mongodump", 
-                     "-d", config.MONGOALCHEMY_DATABASE, 
-                     "-u", config.MONGOALCHEMY_USER, 
-                     "-p", config.MONGOALCHEMY_PASSWORD, 
-                     "-o", outdir])
-
-@mongo_manager.command
-def restore(indir=None):
-    if indir is None:
-        indir = prompt("Input database directory")
-    app.logger.info("Restoring %s database from %s" % (config.MONGOALCHEMY_DATABASE, indir))
-    subprocess.call(["mongorestore", 
-                     "-d", config.MONGOALCHEMY_DATABASE, 
-                     "-u", config.MONGOALCHEMY_USER, 
-                     "-p", config.MONGOALCHEMY_PASSWORD, 
-                     os.path.join(indir, config.MONGOALCHEMY_DATABASE)])
-    
-@mongo_manager.command
-def migrate(migration_id):
-
-    def import_migration():
-        package_path = 'migrations.migrate_%s' % migration_id
-        m = __import__(package_path)
-        # traverse the package path
-        for n in package_path.split(".")[1:]:
-            m = getattr(m, n)
-        return m
-    
-    m = import_migration()
-    m.migrate()
-
-manager.add_command('mongo', mongo_manager)
-
-# register sub-managers
-from adsabs.modules.api import manager as api_manager
-manager.add_command('api', api_manager)
-manager.add_command('tools', tools_manager)
-
-from adsabs.modules.pages import manager as pages_manager
-manager.add_command('pages', pages_manager)
-
 if __name__ == "__main__":
     manager.run()

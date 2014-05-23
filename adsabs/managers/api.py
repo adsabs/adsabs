@@ -4,6 +4,7 @@ Created on Jan 4, 2013
 @author: jluker
 '''
 
+import re
 import sys
 import gspread
 import simplejson
@@ -12,13 +13,14 @@ from flask import current_app as app
 from flask.ext.script import Manager, prompt, prompt_choices, prompt_bool 
 from config import config
 
+name = 'api'
 manager = Manager("Perform api user operations", with_default_commands=False)
 
 @manager.command
 def useradd(email=None, level=None):
     """add an api user"""
 
-    import api_user
+    from adsabs.modules.api import api_user
     from adsabs.modules.user import AdsUser
     
     if not email:
@@ -57,7 +59,7 @@ def useradd(email=None, level=None):
 @manager.command
 def userinfo(email=None, dev_key=None):
     """dump the api-related parts of the mongo user record"""
-    import api_user
+    from adsabs.modules.api import api_user
     
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -81,7 +83,7 @@ def userinfo(email=None, dev_key=None):
 @manager.command
 def userdel(email=None, dev_key=None):
     """remove a user's developer api status"""
-    import api_user
+    from adsabs.modules.api import api_user
     
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -104,7 +106,7 @@ def setperms(email=None, dev_key=None, perms="{}"):
     new permissions should be a string that evals to a dictionary
     e.g., "python shell.py api setperms -d <dev_key> -p '{"max_rows": 1000}'
     """ 
-    import api_user
+    from adsabs.modules.api import api_user
         
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -126,7 +128,7 @@ def setperms(email=None, dev_key=None, perms="{}"):
 @manager.command
 def sendwelcome(email=None, dev_key=None, no_prompt=False):
     """send the welcome message to an api user"""
-    import api_user
+    from adsabs.modules.api import api_user
     
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -149,7 +151,7 @@ def update_spreadsheet(email=None, user=None):
     update the google signup spreadsheet with the user's dev_key value
     so that we know access has been granted
     """
-    import api_user
+    from adsabs.modules.api import api_user
 
     if email:
         user = api_user.AdsApiUser.from_email(email)
@@ -185,7 +187,7 @@ def signups(all=False):
     print out the current api access signups
     by default, will only show the ones with missing BEER logins and/or un-issued dev_keys
     """
-    import api_user
+    from adsabs.modules.api import api_user
     import string
     sheet = SignupSheet()
     print '%-50s %6s %20s' % ('email/username', 'login?', 'dev_key?')
