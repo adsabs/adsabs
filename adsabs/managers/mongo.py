@@ -22,7 +22,7 @@ dbs = {
     }
 
 @manager.command
-def backup(target, which_db=None):
+def backup(target, which_db=None, yes=False):
     """
     use mongodump to create backup dumps of all or individual databases
     """
@@ -31,11 +31,12 @@ def backup(target, which_db=None):
             app.logger.info("skipping %s", db)
             continue
         if not os.path.exists(target):
-            if prompt_bool("Target path does not exist. Create it?"):
+            if yes or prompt_bool("Target path does not exist. Create it?"):
                 app.logger.info("creating target path %s", target)
                 os.makedirs(target)
             else:
                 app.logger.info("aborting backup of %s", db)
+                return
         app.logger.info("backing up %s to %s", db, target)
         subprocess.call(["mongodump",
                          "-u", db,
