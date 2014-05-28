@@ -207,6 +207,20 @@
 				</tr>
 				{% if results['mode'] == 'normal' %}
 					<tr>
+						<td>Number of self-citations</td>
+						<td class="helptip">
+                        <i class="icon-question-sign helptip_mark" id="NUMBER_OF_SELF_CITATIONS"></i>
+						</td>
+						<td>
+							{{results['all stats']['self-citations']}}
+						</td>
+						<td>
+							{{results['refereed stats']['self-citations']}}
+						</td>
+					</tr>
+				{% endif %}
+				{% if results['mode'] == 'normal' %}
+					<tr>
 						<td>Average citations</td>
 						<td class="helptip">
                         <i class="icon-question-sign helptip_mark" id="AVERAGE_CITATIONS"></i>

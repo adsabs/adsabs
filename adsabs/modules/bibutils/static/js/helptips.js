@@ -11,6 +11,7 @@ HelpTipManager.help_text['NUMBER_OF_PAPERS'] = {'title':'Number of papers', 'hel
 HelpTipManager.help_text['NORMALIZED_PAPER_COUNT'] = {'title':'Normalized paper count', 'help': 'For a list of N papers (i=1,...N), where N<sub>auth</sub><sup>i</sup> is the number of authors for publication i, the normalized paper count is the sum over 1/N<sub>auth</sub><sup>i</sup>'};
 HelpTipManager.help_text['NUMBER_OF_CITING_PAPERS'] = {'title':'Number of citing papers', 'help': 'Number of unique papers citing the papers in the submitted list.'};
 HelpTipManager.help_text['TOTAL_CITATIONS'] = {'title':'Total citations', 'help': 'The total number of times all papers in the list were cited.'};
+HelpTipManager.help_text['NUMBER_OF_SELF_CITATIONS'] = {'title':'Self citations', 'help': 'The number of citing papers that were also in the list from which the metrics were computed'};
 HelpTipManager.help_text['AVERAGE_CITATIONS'] = {'title':'Average citations', 'help': 'The total number of citations divided by the number of papers.'};
 HelpTipManager.help_text['MEDIAN_CITATIONS'] = {'title':'Median citations', 'help': 'The median of the citation distribution.'};
 HelpTipManager.help_text['NORMALIZED_CITATIONS'] = {'title':'Normalized citations', 'help': 'For a list of N papers (i=1,...N), where N<sub>auth</sub><sup>i</sup> is the number of authors for publication i and C<sub>i</sub> the number of citations that this paper received, the normalized citation count for each article is \
