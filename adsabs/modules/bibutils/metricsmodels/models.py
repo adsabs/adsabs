@@ -156,6 +156,11 @@ class Metrics():
             e = sqrt(sum(citations[:h]) - h*h)
         except:
             e = 'NA'
+        # Get the number of self-citations
+        try:
+            number_of_self_citations = sum(map(lambda a: a['number_of_self_citations'], cls.metrics_data))
+        except:
+            number_of_self_citations = 0
         # get the Tori index
         rn_citations = map(lambda a: a['rn_citations'], cls.metrics_data)
         auth_nums    = map(lambda a: 1.0/float(a['author_num']), cls.metrics_data)
@@ -179,6 +184,7 @@ class Metrics():
         cls.tori = float('%.1f' % round(tori,1))
         cls.riq  = float('%.1f' % round(riq,1))
         cls.read10 = int(round(read10))
+        cls.number_of_self_citations = number_of_self_citations
 
         cls.post_process()
 
@@ -497,6 +503,7 @@ class TotalMetrics(Metrics):
         cls.results['tori index (Total)'] = cls.tori
         cls.results['roq index (Total)'] = cls.riq
         cls.results['read10 index (Total)'] = cls.read10
+        cls.results['self-citations (Total)'] = cls.number_of_self_citations
 
 class RefereedMetrics(Metrics):
     config_data_name = 'refereed_metrics'
@@ -526,6 +533,7 @@ class RefereedMetrics(Metrics):
         cls.results['tori index (Refereed)'] = cls.tori
         cls.results['roq index (Refereed)'] = cls.riq
         cls.results['read10 index (Refereed)'] = cls.read10
+        cls.results['self-citations (Refereed)'] = cls.number_of_self_citations
 
 class PublicationHistogram(Histogram):
     config_data_name = 'publication_histogram'
