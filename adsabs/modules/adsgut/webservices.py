@@ -11,13 +11,13 @@ import flask
 import simplejson as json
 #from simplejson import JSONDecodeError
 from random import choice
-from mongogut.commondefs import gettype
+from mongogut.utilities import gettype
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.mongoengine.wtf import model_form
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import current_user
 
-from mongogut import itemsandtags
+from mongogut import ptassets as itemsandtags
 
 from mongogut.errors import doabort, MongoGutError
 
@@ -312,7 +312,7 @@ def before_request():
               user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
             #add the user to the flagship ads app, at the very least, to complete user
             #being in our database
-            user, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', user.nick)
+            user, adspubapp = g.db.addUserToMembable(adsuser, 'ads/app:publications', user.nick)
 
 
     #superuser if no login BUG: use only for testing
@@ -365,7 +365,7 @@ import simplejson as json
 @adsgut.route('/user/<nick>')
 def userInfo(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
-    postablesother, names = user.postablesother_blame()
+    postablesother, names = user.membableslibrary(pathinclude_p=True)
     #crikey stupid hack to have to do this bcoz of jsonify introspecting
     #mongoengine objects only
     jsons = [e.to_json() for e in postablesother]
@@ -373,7 +373,7 @@ def userInfo(nick):
     for i, j in enumerate(jsons):
         d = json.loads(j)
         #print "D", d
-        if names[d['fqpn']]=='':
+        if names[d['fqpn']][0][2]==d['fqpn']:#direct membership
             d['reason'] = ''
         else:
             d['reason'] = ",".join([e[1] for e in names[d['fqpn']]])
@@ -422,7 +422,7 @@ def userProfileGroupsFromAdsidHtml(adsid):
 @adsgut.route('/user/<nick>/postablesuserisin')
 def postablesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    allpostables=g.db.postablesForUser(g.currentuser, useras)
+    allpostables=g.db.membablesForUser(g.currentuser, useras)
     groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
     apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
@@ -433,7 +433,7 @@ def postablesUserIsIn(nick):
 @adsgut.route('/user/<nick>/postablesusercanwriteto')
 def postablesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    allpostables=g.db.postablesUserCanWriteTo(g.currentuser, useras)
+    allpostables=g.db.membablesUserCanWriteTo(g.currentuser, useras)
     groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
     apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
@@ -445,7 +445,7 @@ def postablesUserCanWriteTo(nick):
 @adsgut.route('/user/<nick>/groupsuserisin')
 def groupsUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    groups=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "group")]
+    groups=[e['fqpn'] for e in g.db.membablesForUser(g.currentuser, useras, "group")]
     groups.remove("adsgut/group:public")
     groups.remove(useras.nick+"/group:default")
     return jsonify(groups=groups)
@@ -454,21 +454,21 @@ def groupsUserIsIn(nick):
 @adsgut.route('/user/<nick>/groupsuserowns')
 def groupsUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    groups=[e['fqpn'] for e in g.db.ownerOfPostables(g.currentuser, useras, "group")]
+    groups=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "group")]
     return jsonify(groups=groups)
 
 #x
 @adsgut.route('/user/<nick>/groupsuserisinvitedto')
 def groupsUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    groups=[e['fqpn'] for e in g.db.postableInvitesForUser(g.currentuser, useras, "group")]
+    groups=[e['fqpn'] for e in g.db.membableInvitesForUser(g.currentuser, useras, "group")]
     return jsonify(groups=groups)
 
 #x
 @adsgut.route('/user/<nick>/appsuserisin')
 def appsUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    apps=[e['fqpn'] for e in g.db.postablesForUser(g.currentuser, useras, "app")]
+    apps=[e['fqpn'] for e in g.db.membablesForUser(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
 #removed apps-user can write to. apps are not modeleld as libraries, but rather as groups.
@@ -477,7 +477,7 @@ def appsUserIsIn(nick):
 @adsgut.route('/user/<nick>/appsuserowns')
 def appsUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    apps=[e['fqpn'] for e in g.db.ownerOfPostables(g.currentuser, useras, "app")]
+    apps=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
 #use this for the email invitation?
@@ -485,7 +485,7 @@ def appsUserOwns(nick):
 @adsgut.route('/user/<nick>/appsuserisinvitedto')
 def appsUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    apps=[e['fqpn'] for e in g.db.postableInvitesForUser(g.currentuser, useras, "app")]
+    apps=[e['fqpn'] for e in g.db.membableInvitesForUser(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
 
@@ -493,21 +493,21 @@ def appsUserIsInvitedTo(nick):
 @adsgut.route('/user/<nick>/librariesuserisin')
 def librariesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.postablesUserCanAccess(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.membablesUserCanAccess(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #BUG: not right
 @adsgut.route('/user/<nick>/librariesusercanwriteto')
 def librariesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.postablesUserCanWriteTo(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.membablesUserCanWriteTo(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #x
 @adsgut.route('/user/<nick>/librariesuserowns')
 def librariesUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.ownerOfPostables(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #use this for the email invitation?
@@ -515,7 +515,7 @@ def librariesUserOwns(nick):
 @adsgut.route('/user/<nick>/librariesuserisinvitedto')
 def librariesUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    libs=[e['fqpn'] for e in g.db.postableInvitesForUser(g.currentuser, useras, "library")]
+    libs=[e['fqpn'] for e in g.db.membableInvitesForUser(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
 #BUG currentuser useras here?
@@ -533,7 +533,7 @@ def userItems(nick):
 
 #BUG: check currentuser useras stuff here
 #BUG: postable really a tuple. change to reflect that
-def createPostable(g, request, ptstr):
+def createMembable(g, request, ptstr):
     spec={}
     jsonpost=dict(request.json)
     useras=_userpostget(g,jsonpost)
@@ -544,13 +544,13 @@ def createPostable(g, request, ptstr):
     spec['creator']=useras.basic.fqin
     spec['name']=name
     spec['description']=description
-    postable=g.db.addPostable(g.currentuser, useras, ptstr, spec)
+    postable=g.db.addMembable(g.currentuser, useras, ptstr, spec)
     return postable
 
 @adsgut.route('/group', methods=['POST'])#groupname/description
 def createGroup():
     if request.method == 'POST':
-        newgroup=createPostable(g, request, "group")
+        newgroup=createMembable(g, request, "group")
         return jsonify(postable=newgroup)
     else:
         doabort("BAD_REQ", "GET not supported")
@@ -558,7 +558,7 @@ def createGroup():
 @adsgut.route('/app', methods=['POST'])#name/description
 def createApp():
     if request.method == 'POST':
-        newapp=createPostable(g, request, "app")
+        newapp=createMembable(g, request, "app")
         return jsonify(postable=newapp)
     else:
         doabort("BAD_REQ", "GET not supported")
@@ -566,7 +566,7 @@ def createApp():
 @adsgut.route('/library', methods=['POST'])#name/description
 def createLibrary():
     if request.method == 'POST':
-        newlibrary=createPostable(g, request, "library")
+        newlibrary=createMembable(g, request, "library")
         return jsonify(postable=newlibrary)
     else:
         doabort("BAD_REQ", "GET not supported")
@@ -627,7 +627,7 @@ def makeInvitations(po, pt, pn):
               cookieid = adsuser.get_id()
               adsid = adsuser.get_username()
               user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-              user, adspubapp = g.db.addUserToPostable(adsappuser, 'ads/app:publications', user.nick)
+              user, adspubapp = g.db.addUserToMembable(adsappuser, 'ads/app:publications', user.nick)
               potentialuserstring=""
         potentialuserstring2="""
         <p>
@@ -638,7 +638,7 @@ def makeInvitations(po, pt, pn):
         </p>
         """
         #ok got user, now invite
-        utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, user, changerw)
+        utba, p=g.db.inviteUserToMembable(g.currentuser, g.currentuser, fqpn, user, changerw)
         emailtitle="Invitation to ADS Library %s" % pn
         ptmap={'group':'Group (and associated library)', 'library':"Library"}
         ptmap2={'group':'My Groups', 'library':"Libraries"}
@@ -688,9 +688,9 @@ def doPostableChanges(po, pt, pn):
                 adsgutuser=g.db._getUserForNick(None, 'adsgut')
                 adsuser=g.db._getUserForNick(adsgutuser, 'ads')
                 memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-                memberable, adspubapp = g.db.addUserToPostable(adsuser, 'ads/app:publications', memberable.nick)
+                memberable, adspubapp = g.db.addUserToMembable(adsuser, 'ads/app:publications', memberable.nick)
 
-            utba, p=g.db.inviteUserToPostable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
+            utba, p=g.db.inviteUserToMembable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
             emailtitle="Invitation to ADS Library %s" % pn
             emailtext="%s has invited you to ADS Library %s. Go to your libraries page to accept." % (g.currentuser.adsid, pn)
             send_email_to_user(emailtitle, emailtext,[memberable.adsid])
@@ -698,7 +698,7 @@ def doPostableChanges(po, pt, pn):
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqpn}})
         elif op=='accept':
             memberable=g.db._getUserForAdsid(g.currentuser, memberable)
-            me, p=g.db.acceptInviteToPostable(g.currentuser, fqpn, memberable)
+            me, p=g.db.acceptInviteToMembable(g.currentuser, fqpn, memberable)
             return jsonify({'status':'OK', 'info': {'invited':me.nick, 'to': fqpn, 'accepted':True}})
         elif op=='decline':
             memberable=g.db._getUserForAdsid(g.currentuser, memberable)
@@ -707,7 +707,7 @@ def doPostableChanges(po, pt, pn):
         elif op=='changeowner':
             #you must be the current owner
             memberable=g.db._getUserForAdsid(g.currentuser, memberable)
-            newo, p=g.db.changeOwnershipOfPostable(g.currentuser, g.currentuser, fqpn, memberable)
+            newo, p=g.db.changeOwnershipOfMembable(g.currentuser, g.currentuser, fqpn, memberable)
             return jsonify({'status': 'OK', 'info': {'changedto':memberable, 'for': fqpn}})
         elif op=='togglerw':
             #here memberable could be a user or a group (whose membership to library you are toggling)
@@ -718,7 +718,7 @@ def doPostableChanges(po, pt, pn):
             return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
         elif op=='description':
             description=_dictp('description', jsonpost,'')
-            mem, p = g.db.changeDescriptionOfPostable(g.currentuser, g.currentuser, fqpn, description)
+            mem, p = g.db.changeDescriptionOfMembable(g.currentuser, g.currentuser, fqpn, description)
             return jsonify({'status': 'OK', 'info': {'user':memberable, 'for': fqpn}})
         else:
             doabort("BAD_REQ", "No Op Specified")
@@ -744,10 +744,10 @@ def doInviteToGroup(groupowner, groupname):
         if not op:
             doabort("BAD_REQ", "No Op Specified")
         if op=="invite":
-            utba, p=g.db.inviteUserToPostableUsingNick(g.currentuser, fqgn, nick)
+            utba, p=g.db.inviteUserToMembableUsingNick(g.currentuser, fqgn, nick)
             return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqgn}})
         elif op=='accept':
-            me, p=g.db.acceptInviteToPostable(g.currentuser, fqgn, nick)
+            me, p=g.db.acceptInviteToMembable(g.currentuser, fqgn, nick)
             return jsonify({'status':'OK', 'info': {'invited':me.nick, 'to': fqgn, 'accepted':True}})
         elif op=='decline':
             #BUG add something to invitations to mark declines.
@@ -775,32 +775,32 @@ def addMemberToPostable(g, request, fqpn):
         changerw=False
     # if not g.currentuser.nick:
     #     doabort("BAD_REQ", "No User Specified")
-    user, postable=g.db.addMemberableToPostable(g.currentuser, g.currentuser, fqpn, fqmn, changerw)
+    user, postable=g.db.addMemberableToMembable(g.currentuser, g.currentuser, fqpn, fqmn, changerw)
     #print "here"
     return user, postable
 
-def getMembersOfPostable(g, request, fqpn):
+def getMembersOfMembable(g, request, fqpn):
     useras=g.currentuser
-    users=g.db.membersOfPostableFromFqin(g.currentuser,useras,fqpn)
+    users=g.db.membersOfMembableFromFqin(g.currentuser,useras,fqpn)
     userdict={'users':users}
     return userdict
 
-def getInvitedsForPostable(g, request, fqpn):
+def getInvitedsForMembable(g, request, fqpn):
     useras=g.currentuser
-    users=g.db.invitedsForPostableFromFqin(g.currentuser,useras,fqpn)
+    users=g.db.invitedsForMembableFromFqin(g.currentuser,useras,fqpn)
     userdict={'users':users}
     return userdict
 
 @adsgut.route('/group/<groupowner>/group:<groupname>/inviteds')
 def groupInviteds(groupowner, groupname):
     fqgn=groupowner+"/group:"+groupname
-    userdict=getInvitedsForPostable(g, request, fqgn)
+    userdict=getInvitedsForMembable(g, request, fqgn)
     return jsonify(userdict)
 
 @adsgut.route('/library/<libraryowner>/library:<libraryname>/inviteds')
 def libraryInviteds(libraryowner, libraryname):
     fqln=libraryowner+"/library:"+libraryname
-    userdict=getInvitedsForPostable(g, request, fqln)
+    userdict=getInvitedsForMembable(g, request, fqln)
     return jsonify(userdict)
 
 @adsgut.route('/group/<groupowner>/group:<groupname>/members', methods=['GET', 'POST'])#user
@@ -811,7 +811,7 @@ def addMembertoGroup_or_groupMembers(groupowner, groupname):
         member, group=addMemberToPostable(g, request, fqgn)
         return jsonify({'status':'OK', 'info': {'member':member.basic.fqin, 'type':'group', 'postable':group.basic.fqin}})
     else:
-        userdict=getMembersOfPostable(g, request, fqgn)
+        userdict=getMembersOfMembable(g, request, fqgn)
         return jsonify(userdict)
 
 @adsgut.route('/app/<appowner>/app:<appname>/members', methods=['GET', 'POST'])#user
@@ -822,7 +822,7 @@ def addMemberToApp_or_appMembers(appowner, appname):
         member, app=addMemberToPostable(g, request, fqan)
         return jsonify({'status':'OK', 'info': {'member':member.basic.fqin, 'type':'app', 'postable':app.basic.fqin}})
     else:
-        userdict=getMembersOfPostable(g, request, fqan)
+        userdict=getMembersOfMembable(g, request, fqan)
         return jsonify(userdict)
 
 
@@ -835,7 +835,7 @@ def addMemberToLibrary_or_libraryMembers(libraryowner, libraryname):
         member, library=addMemberToPostable(g, request, fqln)
         return jsonify({'status':'OK', 'info': {'member':member.basic.fqin, 'type':'library', 'postable':library.basic.fqin}})
     else:
-        userdict=getMembersOfPostable(g, request, fqln)
+        userdict=getMembersOfMembable(g, request, fqln)
         return jsonify(userdict)
 
 @adsgut.route('/postable/<po>/<pt>:<pn>/members', methods=['GET', 'POST'])#user
@@ -847,14 +847,14 @@ def addMemberToPostable_or_postableMembers(po, pt, pn):
         #print "DICTIS", dictis
         return jsonify(dictis)
     else:
-        userdict=getMembersOfPostable(g, request, fqpn)
+        userdict=getMembersOfMembable(g, request, fqpn)
         return jsonify(userdict)
 
 #######################################################################################################################
 #######################################################################################################################
 def postable(ownernick, name, ptstr):
     fqpn=ownernick+"/"+ptstr+":"+name
-    postable, owner, creator=g.db.getPostableInfo(g.currentuser, g.currentuser, fqpn)
+    postable, owner, creator=g.db.getMembableInfo(g.currentuser, g.currentuser, fqpn)
     isowner=False
     if g.db.isOwnerOfPostable(g.currentuser, g.currentuser, postable):
         isowner=True
