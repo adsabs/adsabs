@@ -249,5 +249,6 @@ def metrics(**args):
         if format == 'json':
             return jsonify(metrics=results)
         else:
+            app.logger.info('ID %s. Number of self-citations: %s.'%(g.user_cookie_id,results['all stats']['self-citations'])) 
             return render_template('metrics_results.html', results=results, include_layout=layout, excel_report=excel_ready, pdf_report=pdf_ready)
     return render_template('metrics.html', form=form)
