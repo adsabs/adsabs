@@ -193,19 +193,19 @@ def metrics(**args):
         list_type = request.values.get('list_type', None)
         if len(bibcodes) == 0:
             try:
-                query_par = str(form.current_search_parameters.data.strip())
-                query = json.loads(query_par)['q']
+                query = ''
                 title = "Metrics report for query: %s" % query
                 pdf_title = title
-                sort  = json.loads(query_par).get('sort', None)
+                query_components = json.loads(request.values.get('current_search_parameters'))
+                sort = []
                 bigquery_id = form.bigquery.data
-                if sort is None:
-                    # this might be an abstract citation/reference list view so get the sort from config
-                    if list_type is not None and list_type in config.ABS_SORT_OPTIONS_MAP:
-                        sort = [config.ABS_SORT_OPTIONS_MAP[list_type]]
-                    else:
-                        sort = []
-                bibcodes = get_publications_from_query(query, sort, list_type, bigquery_id)[:number_of_records]
+                query_components.update({
+                    'rows': number_of_records,
+                    'facets': [],
+                    'fields': ['bibcode'],
+                    'highlights': [],
+                })
+                bibcodes = get_publications_from_query(query_components, list_type, bigquery_id)
             except:
                 bibcodes = []
 #        if len(query_bibcodes) == 0:
@@ -249,6 +249,5 @@ def metrics(**args):
         if format == 'json':
             return jsonify(metrics=results)
         else:
-            app.logger.info('ID %s. Number of self-citations: %s.'%(g.user_cookie_id,results['all stats']['self-citations'])) 
             return render_template('metrics_results.html', results=results, include_layout=layout, excel_report=excel_ready, pdf_report=pdf_ready)
     return render_template('metrics.html', form=form)
