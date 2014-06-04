@@ -192,10 +192,9 @@ def metrics(**args):
         list_type = request.values.get('list_type', None)
         if len(bibcodes) == 0:
             try:
-                query = ''
-                title = "Metrics report for query: %s" % query
-                pdf_title = title
                 query_components = json.loads(request.values.get('current_search_parameters'))
+                title = "Metrics report for query: %s" % query_components.get('q','')
+                pdf_title = title
                 sort = []
                 bigquery_id = form.bigquery.data
                 query_components.update({
