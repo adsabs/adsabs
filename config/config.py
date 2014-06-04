@@ -332,6 +332,8 @@ class AppConfig(object):
     STATSD_PORT = 8125
     STATSD_PREFIX = APP_NAME
     
+    DATA_BACKUP_TMP_DIR = os.path.join(_basedir, "tmp")
+    
     
 try:
     from local_config import LocalConfig
