@@ -221,13 +221,13 @@ def get_references(**args):
                 papers += doc['reference']
     return papers
 
-def get_publications_from_query(q,sort_order, list_type=None, bigquery_id=None):
+def get_publications_from_query(query_components, list_type=None, bigquery_id=None):
     try:
         # Get the information from Solr
         if list_type and list_type == 'similar':
-            resp = get_document_similar(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+            resp = get_document_similar(**query_components)
         else:
-            req = solr.create_request(q, rows=config.BIBUTILS_MAX_HITS, fields=['bibcode'], sort=sort_order)
+            req = solr.create_request(**query_components)
             if bigquery_id:
                 from adsabs.core.solr import bigquery
                 bigquery.prepare_bigquery_request(req, bigquery_id)
