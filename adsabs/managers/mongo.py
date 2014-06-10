@@ -18,11 +18,11 @@ from config import config
 name = 'mongo'
 manager = Manager("Mongo Operations", with_default_commands=False)
 
-dbs = {
-       'adsabs': config.MONGOALCHEMY_PASSWORD,
-       'adsdata': config.ADSDATA_MONGO_PASSWORD,
-       'adsgut': re.search(':(?P<password>\w+)@', config.MONGODB_SETTINGS['HOST']).groupdict()['password']
-    }
+dbs = [
+      { 'name': 'adsabs', 'passwd': config.MONGOALCHEMY_PASSWORD },
+      { 'name': 'adsgut', 'passwd': re.search(':(?P<password>\w+)@', config.MONGODB_SETTINGS['HOST']).groupdict()['password'] },
+      { 'name': 'adsdata', 'passwd': config.ADSDATA_MONGO_PASSWORD },
+    ]
 
 @manager.command
 def backup(target, backup_dir=None, which_db=None, yes=False):
@@ -40,9 +40,11 @@ def backup(target, backup_dir=None, which_db=None, yes=False):
         
     """
     dumps = 0
-    for db, passwd in dbs.items():
-        if which_db is not None and which_db != db:
-            app.logger.info("skipping %s", db)
+    for db in dbs:
+        db_name = db['name']
+        db_passwd = db['passwd']
+        if which_db is not None and which_db != db_name:
+            app.logger.info("skipping %s", db_name)
             continue
         target_path = os.path.join(config.DATA_BACKUP_TMP_DIR, target)
         if not os.path.exists(target_path):
@@ -52,23 +54,23 @@ def backup(target, backup_dir=None, which_db=None, yes=False):
             else:
                 app.logger.info("aborting backup")
                 return
-        app.logger.info("backing up %s to %s", db, target_path)
+        app.logger.info("backing up %s to %s", db_name, target_path)
         
         # execute the dump
         dumps += 1
-        cmd = "mongodump -u %s -o %s -d %s -p" % (db, target_path, db)
-        child = pexpect.spawn(cmd)
+        cmd = "mongodump -u %s -o %s -d %s -p" % (db_name, target_path, db_name)
+        child = pexpect.spawn(cmd, timeout=500000)
         idx = child.expect('password: ')
         if idx != 0:
-            app.loggger.error("mongodump execution failed for db %s: %s" % (db, str(child)))
+            app.loggger.error("mongodump execution failed for db %s: %s" % (db_name, str(child)))
             dumps -= 1
             continue
-        child.sendline(passwd)
+        child.sendline(db_passwd)
         child.wait()
         child.close()
         
         if child.exitstatus is not 0:
-            app.logger.error("mongodump returned non-zero exit status for db %s: %d" % (db, child.exitstatus))
+            app.logger.error("mongodump returned non-zero exit status for db %s: %d" % (db_name, child.exitstatus))
             dumps -= 1
             continue
             
@@ -114,14 +116,14 @@ def restore(source, db):
     """
     use mongorestore to restore a previously dumped database
     """
-    if db not in dbs:
+    if db not in [x['name'] for x in dbs]:
         app.logger.error("I don't know anything about a database called %s", db)
         return
     if not os.path.exists(source):
         app.logger.error("Source path %s doesn't exist", source)
         return
     drop = prompt_bool("Drop existing collections before restoring?") and '--drop' or ''
-    passwd = dbs[db]
+    passwd = filter(lambda x: x['name'] == db, dbs)[0]['passwd']
     app.logger.info("Restoring %s database from %s" % (db, source))
     subprocess.call(["mongorestore", 
                      "-d", db,
