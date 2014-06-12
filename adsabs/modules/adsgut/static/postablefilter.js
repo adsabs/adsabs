@@ -214,6 +214,7 @@
           i = sorteditems[_i];
           i.whenposted = times[i.basic.fqin];
         }
+        sorteditems = theitems;
         ido = {
           stags: stags,
           postings: postings,

@@ -427,7 +427,8 @@ def postablesUserIsIn(nick):
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
     apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
     groups.remove("adsgut/group:public")
-    groups.remove(useras.nick+"/group:default")
+    libraries.remove("adsgut/library:public")
+    libraries.remove(useras.nick+"/library:default")
     return jsonify(groups=groups, libraries=libraries, apps=apps)
 
 @adsgut.route('/user/<nick>/postablesusercanwriteto')
@@ -438,7 +439,8 @@ def postablesUserCanWriteTo(nick):
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
     apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
     groups.remove("adsgut/group:public")
-    groups.remove(useras.nick+"/group:default")
+    libraries.remove("adsgut/library:public")
+    libraries.remove(useras.nick+"/library:default")
     return jsonify(groups=groups, libraries=libraries, apps=apps)
 
 #x
@@ -447,7 +449,6 @@ def groupsUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     groups=[e['fqpn'] for e in g.db.membablesForUser(g.currentuser, useras, "group")]
     groups.remove("adsgut/group:public")
-    groups.remove(useras.nick+"/group:default")
     return jsonify(groups=groups)
 
 #x

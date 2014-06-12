@@ -134,6 +134,7 @@ do_postable_filter = (sections, config, tagfunc) ->
             #console.log "SORTEDITEMS"
             #for i in sorteditems
             #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs
+            sorteditems=theitems
             ido=
                 stags:stags
                 postings:postings
