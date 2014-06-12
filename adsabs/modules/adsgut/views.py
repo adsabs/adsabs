@@ -166,7 +166,7 @@ def _sortget(qdict):
     sort={}
     sort['field'], sort['ascending'] = sortstring.split(':')
     sort['ascending']=(sort['ascending']=='True')
-    print "SORT IS", sort
+    #print "SORT IS", sort
     return sort
 
 def _sortpostget(qdict):
@@ -1441,7 +1441,7 @@ def itemsTaggingsAndPostings():
         items = _itemsget(query)
         fqpn = _dictg('fqpn',query)
         #By this time query is popped down
-        print "sortees", sort
+        #print "sortees", sort
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None, sort)
         taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
