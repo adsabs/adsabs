@@ -94,7 +94,7 @@
   do_postable_filter = function(sections, config, tagfunc) {
     var loc, nonqloc, urla;
     tagfunc();
-    $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
+    $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag&fqpn=" + config.fqpn, function(data) {
       var e, qtxtlist, suggestions, _i, _len;
       suggestions = data.simpletags;
       qtxtlist = parse_querystring(config.querystring);
@@ -107,164 +107,164 @@
           }
           sections.$breadcrumb.append("<span class='badge'>" + e + "</span>&nbsp;");
         }
-        return sections.$breadcrumb.show();
+        sections.$breadcrumb.show();
       }
-    });
-    $.get(config.itemsPURL, function(data) {
-      var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
-      theitems = data.items;
-      sections.$count.text("" + theitems.length + " papers. ");
-      sections.$count.show();
-      thecount = data.count;
-      itemlist = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-          i = theitems[_i];
-          _results.push(i.basic.fqin);
-        }
-        return _results;
-      })();
-      biblist = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-          i = theitems[_i];
-          _results.push(i.basic.name);
-        }
-        return _results;
-      })();
-      bibstring = biblist.join("\n");
-      sections.$bigquery.val(bibstring);
-      sections.$bigqueryform.attr("action", config.bq2url);
-      itemsq = itemlist.join("&");
-      return syncs.taggings_postings_post_get(itemlist, config.pview, function(data) {
-        var cb, clist, e, eb, ido, k, notes, plinv, postings, prop, ptimes, sorteditems, stags, tagoutput, times, v, _ref, _ref1;
-        _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
-        tagoutput = {};
-        for (prop in stags) {
-          clist = stags[prop];
-          if (clist.length === 0) {
-            tagoutput[prop] = [];
-          } else {
-            tagoutput[prop] = (function() {
-              var _i, _len, _results;
-              _results = [];
-              for (_i = 0, _len = clist.length; _i < _len; _i++) {
-                e = clist[_i];
-                _results.push(e[0]);
-              }
-              return _results;
-            })();
-          }
-        }
-        sections.$asjson.click(function(e) {
-          data = JSON.stringify(tagoutput);
-          window.document.write(data);
-          return e.preventDefault();
-        });
-        sections.$ascsv.click(function(e) {
-          data = csvstringify(tagoutput);
-          window.document.write("<pre>" + data + "</pre>");
-          return e.preventDefault();
-        });
-        postings = {};
-        times = {};
-        _ref1 = data.postings;
-        for (k in _ref1) {
-          if (!__hasProp.call(_ref1, k)) continue;
-          v = _ref1[k];
-          if (v[0] > 0) {
-            postings[k] = (function() {
-              var _i, _len, _ref2, _results;
-              _ref2 = v[1];
-              _results = [];
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                e = _ref2[_i];
-                _results.push([e.posting.postfqin, e.posting.postedby]);
-              }
-              return _results;
-            })();
-            ptimes = (function() {
-              var _i, _len, _ref2, _results;
-              _ref2 = v[1];
-              _results = [];
-              for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-                e = _ref2[_i];
-                if (e.posting.postfqin === config.fqpn) {
-                  _results.push(e.posting.whenposted);
-                }
-              }
-              return _results;
-            })();
-            if (ptimes.length > 0) {
-              times[k] = ptimes[0];
-            } else {
-              times[k] = 0;
-            }
-          } else {
-            postings[k] = [];
-            times[k] = 0;
-          }
-        }
-        sorteditems = theitems;
-        ido = {
-          stags: stags,
-          postings: postings,
-          notes: notes,
-          $el: sections.$items,
-          items: sorteditems,
-          noteform: true,
-          nameable: false,
-          itemtype: 'ads/pub',
-          memberable: config.memberable,
-          suggestions: [],
-          pview: config.pview,
-          tagfunc: tagfunc
-        };
-        plinv = new itemsdo.ItemsFilterView(ido);
-        plinv.render();
-        eb = function(err) {
-          var d, _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = theitems.length; _i < _len; _i++) {
-            d = theitems[_i];
-            _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
-          }
-          return _results;
-        };
-        cb = function(data) {
-          var d, docnames, thedocs, _i, _j, _len, _len1, _ref2, _ref3, _results;
-          thedocs = {};
-          _ref2 = data.response.docs;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            d = _ref2[_i];
-            thedocs[d.bibcode] = d;
-          }
-          docnames = (function() {
-            var _j, _len1, _ref3, _results;
-            _ref3 = data.response.docs;
-            _results = [];
-            for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-              d = _ref3[_j];
-              _results.push(d.bibcode);
-            }
-            return _results;
-          })();
+      return $.get(config.itemsPURL, function(data) {
+        var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
+        theitems = data.items;
+        sections.$count.text("" + theitems.length + " papers. ");
+        sections.$count.show();
+        thecount = data.count;
+        itemlist = (function() {
+          var _j, _len1, _results;
           _results = [];
           for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
-            d = theitems[_j];
-            if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
-              e = thedocs[d.basic.name];
-            } else {
-              e = {};
-            }
-            plinv.itemviews[d.basic.fqin].e = e;
-            _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));
+            i = theitems[_j];
+            _results.push(i.basic.fqin);
           }
           return _results;
-        };
-        return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
+        })();
+        biblist = (function() {
+          var _j, _len1, _results;
+          _results = [];
+          for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
+            i = theitems[_j];
+            _results.push(i.basic.name);
+          }
+          return _results;
+        })();
+        bibstring = biblist.join("\n");
+        sections.$bigquery.val(bibstring);
+        sections.$bigqueryform.attr("action", config.bq2url);
+        itemsq = itemlist.join("&");
+        return syncs.taggings_postings_post_get(itemlist, config.pview, function(data) {
+          var cb, clist, eb, ido, k, notes, plinv, postings, prop, ptimes, sorteditems, stags, tagoutput, times, v, _ref, _ref1;
+          _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
+          tagoutput = {};
+          for (prop in stags) {
+            clist = stags[prop];
+            if (clist.length === 0) {
+              tagoutput[prop] = [];
+            } else {
+              tagoutput[prop] = (function() {
+                var _j, _len1, _results;
+                _results = [];
+                for (_j = 0, _len1 = clist.length; _j < _len1; _j++) {
+                  e = clist[_j];
+                  _results.push(e[0]);
+                }
+                return _results;
+              })();
+            }
+          }
+          sections.$asjson.click(function(e) {
+            data = JSON.stringify(tagoutput);
+            window.document.write(data);
+            return e.preventDefault();
+          });
+          sections.$ascsv.click(function(e) {
+            data = csvstringify(tagoutput);
+            window.document.write("<pre>" + data + "</pre>");
+            return e.preventDefault();
+          });
+          postings = {};
+          times = {};
+          _ref1 = data.postings;
+          for (k in _ref1) {
+            if (!__hasProp.call(_ref1, k)) continue;
+            v = _ref1[k];
+            if (v[0] > 0) {
+              postings[k] = (function() {
+                var _j, _len1, _ref2, _results;
+                _ref2 = v[1];
+                _results = [];
+                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                  e = _ref2[_j];
+                  _results.push([e.posting.postfqin, e.posting.postedby]);
+                }
+                return _results;
+              })();
+              ptimes = (function() {
+                var _j, _len1, _ref2, _results;
+                _ref2 = v[1];
+                _results = [];
+                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                  e = _ref2[_j];
+                  if (e.posting.postfqin === config.fqpn) {
+                    _results.push(e.posting.whenposted);
+                  }
+                }
+                return _results;
+              })();
+              if (ptimes.length > 0) {
+                times[k] = ptimes[0];
+              } else {
+                times[k] = 0;
+              }
+            } else {
+              postings[k] = [];
+              times[k] = 0;
+            }
+          }
+          sorteditems = theitems;
+          ido = {
+            stags: stags,
+            postings: postings,
+            notes: notes,
+            $el: sections.$items,
+            items: sorteditems,
+            noteform: true,
+            nameable: false,
+            itemtype: 'ads/pub',
+            memberable: config.memberable,
+            suggestions: suggestions,
+            pview: config.pview,
+            tagfunc: tagfunc
+          };
+          plinv = new itemsdo.ItemsFilterView(ido);
+          plinv.render();
+          eb = function(err) {
+            var d, _j, _len1, _results;
+            _results = [];
+            for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
+              d = theitems[_j];
+              _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
+            }
+            return _results;
+          };
+          cb = function(data) {
+            var d, docnames, thedocs, _j, _k, _len1, _len2, _ref2, _ref3, _results;
+            thedocs = {};
+            _ref2 = data.response.docs;
+            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+              d = _ref2[_j];
+              thedocs[d.bibcode] = d;
+            }
+            docnames = (function() {
+              var _k, _len2, _ref3, _results;
+              _ref3 = data.response.docs;
+              _results = [];
+              for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+                d = _ref3[_k];
+                _results.push(d.bibcode);
+              }
+              return _results;
+            })();
+            _results = [];
+            for (_k = 0, _len2 = theitems.length; _k < _len2; _k++) {
+              d = theitems[_k];
+              if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
+                e = thedocs[d.basic.name];
+              } else {
+                e = {};
+              }
+              plinv.itemviews[d.basic.fqin].e = e;
+              _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));
+            }
+            return _results;
+          };
+          return syncs.send_bibcodes(config.bq1url, theitems, cb, eb);
+        });
       });
     });
     loc = config.loc;

@@ -997,8 +997,10 @@ def tagsUserCanWriteTo(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
-    #print "TAGGER", tagtype
-    stags=g.dbp.getAllTagsForUser(g.currentuser, useras, tagtype)
+    fqpn = _dictg('fqpn',query)
+    #print "TAGGER", tagtype, fqpn
+    #TODO:prevent null fqpn
+    stags=g.dbp.getAllTagsForUser(g.currentuser, useras, tagtype, False, fqpn)
     #print "STAGS", stags
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
@@ -1008,7 +1010,9 @@ def tagsUserAsMember(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
-    stags=g.dbp.getTagsAsMemberOnly(g.currentuser, useras, tagtype)
+    fqpn = _dictg('fqpn',query)
+    #TODO:prevent null fqpn
+    stags=g.dbp.getTagsAsMemberOnly(g.currentuser, useras, tagtype, False, fqpn)
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
