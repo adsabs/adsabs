@@ -14,17 +14,17 @@
       <div class="iv"></div>
     </div>
 
-  
+
 
 {% endblock %}
 {% block coffeescript %}
 $=jQuery
 
 
-$ -> 
-  config = 
+$ ->
+  config =
     userInfoURL: "{{ url_for('adsgut.userInfo', nick=useras.nick) }}"
-    udgHtmlURL: "{{ url_for('adsgut.udgHtml', nick=useras.nick) }}"
+    udgHtmlURL: "{{ url_for('adsgut.udlHtml', nick=useras.nick) }}"
   sections =
     $create: $('div#creategroups')
     $info: $('#userinfo')
@@ -34,9 +34,9 @@ $ ->
 
   userprofile.layout_userprofile(sections, config, "group")
 
-  
 
-  awopt = 
+
+  awopt =
     el: document.getElementById('groupsh3')
     position: 'right'
     titletext: "Lorem Ipsum ate a potato"

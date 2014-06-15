@@ -33,7 +33,7 @@
     var ename, title, _ref;
     ename = encodeURIComponent(tag.text);
     if (!tag.url) {
-      tag.url = "" + prefix + "/postable/" + this.memberable.nick + "/group:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
+      tag.url = "" + prefix + "/postable/" + this.memberable.nick + "/library:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
       title = (_ref = tag.title) != null ? _ref : ' data-toggle="tooltip" title="' + tag.title + {
         '"': ''
       };
@@ -313,7 +313,6 @@
       var fqin, notes, stags, _ref;
       fqin = this.item.basic.fqin;
       _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
-      console.log("NOTES", notes, "DATA", data);
       this.stags = stags[fqin];
       this.notes = notes[fqin];
       if (this.notes.length > 0) {
@@ -323,30 +322,24 @@
     };
 
     ItemView.prototype.submitNote = function() {
-      var cback, ctxt, d, eback, item, itemname, loc, notemode, notetext, notetime;
+      var cback, ctxt, d, eback, item, itemname, loc, notemode, notetext, notetime, _ref;
       item = this.item.basic.fqin;
       itemname = this.item.basic.name;
       notetext = this.$('.txt').val();
       notemode = '1';
-      if (this.pview === 'udg') {
-        notemode = '0';
-      } else {
-        if (this.$('.cb').is(':checked')) {
-          if (this.pview === 'pub') {
-            notemode = '0';
-          } else if (this.pview === 'none') {
-            notemode = '0';
-          } else {
-            notemode = this.pview;
-          }
+      if (this.$('.cb').is(':checked')) {
+        if (this.pview === 'pub') {
+          notemode = '0';
+        } else if ((_ref = this.pview) === 'udg' || _ref === 'none') {
+          notemode = '0';
+        } else {
+          notemode = this.pview;
         }
       }
       ctxt = this.pview;
-      console.log("NOTESPEC", notetext, notemode, ctxt);
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
-          console.log("return data", data, loc);
           _this.update_note_ajax(data);
           return format_item(_this.$('.searchresultl'), _this.e);
         };
@@ -357,7 +350,6 @@
         };
       })(this);
       if (this.tagajaxsubmit) {
-        console.log("in ajax submit");
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback);
       } else {
         this.update_notes([notetext, notemode]);

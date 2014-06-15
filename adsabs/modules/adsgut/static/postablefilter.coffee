@@ -117,6 +117,7 @@ do_postable_filter = (sections, config, tagfunc) ->
             times={}
             for own k,v of data.postings
                 if v[0] > 0
+                    #console.log ">>>", (e.posting for e in v[1])
                     postings[k]=([e.posting.postfqin, e.posting.postedby] for e in v[1])
                     ptimes = (e.posting.whenposted for e in v[1] when e.posting.postfqin==config.fqpn)
                     #console.log "PTIMES", ptimes
@@ -128,9 +129,9 @@ do_postable_filter = (sections, config, tagfunc) ->
                     postings[k]=[]
                     times[k] = 0
             #console.log "TIMES ARE ROCKING", stags, notes, times
-            sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
-            for i in sorteditems
-                i.whenposted = times[i.basic.fqin]
+            # sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
+            # for i in sorteditems
+            #     i.whenposted = times[i.basic.fqin]
             #console.log "SORTEDITEMS"
             #for i in sorteditems
             #console.log i.basic.fqin, i.whenposted, i.whenpostedsecs

@@ -133,7 +133,11 @@
     nt = this_postable(truthiness, pview);
     outstr = "<tr><td style='white-space: nowrap;'>" + tf + "</td><td style='text-align: right;'>" + uf + "&nbsp;&nbsp;</td><td>" + nmf + nt + "</td><td class='notetext'>" + notetext + "</td>";
     if (uf === 'me') {
-      outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="' + noteid + '"><i class="icon-remove-circle"></i></btn></td></tr>';
+      if (pview !== 'udg' && notemode === '1') {
+        outstr = outstr + "<td></td></tr>";
+      } else {
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="' + noteid + '"><i class="icon-remove-circle"></i></btn></td></tr>';
+      }
     } else {
       outstr = outstr + "<td></td></tr>";
     }
@@ -174,7 +178,7 @@
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
         _results.push({
-          url: "" + prefix + "/postable/" + memberable.nick + "/group:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1],
+          url: "" + prefix + "/postable/" + memberable.nick + "/library:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1],
           text: "" + t[0],
           id: "" + t[0],
           by: tagajax ? memberable.adsid === t[2] : false
@@ -199,8 +203,8 @@
   format_postings_for_item = function(fqin, postings, nick) {
     var p, p2list, postingslist, priv, publ;
     postingslist = _.uniq(postings[fqin]);
-    publ = "adsgut/group:public";
-    priv = "" + nick + "/group:default";
+    publ = "adsgut/library:public";
+    priv = "" + nick + "/library:default";
     p2list = (function() {
       var _i, _len, _results;
       _results = [];
@@ -285,8 +289,8 @@
             _results = [];
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
-              if (e[0].posting.tagtype === "ads/tagtype:tag") {
-                _results.push([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby]);
+              if (e[0].posting.posttype === "ads/tagtype:tag") {
+                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby]);
               }
             }
             return _results;
@@ -296,7 +300,7 @@
             _results = [];
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
-              if (e[0].posting.tagtype === "ads/tagtype:note") {
+              if (e[0].posting.posttype === "ads/tagtype:note") {
                 _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
               }
             }
@@ -308,8 +312,8 @@
             _results = [];
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
-              if (e[0].posting.tagtype === "ads/tagtype:tag" && e[1] === true) {
-                _results.push([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby]);
+              if (e[0].posting.posttype === "ads/tagtype:tag" && e[2] === true) {
+                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby]);
               }
             }
             return _results;
@@ -319,7 +323,7 @@
             _results = [];
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
-              if (e[0].posting.tagtype === "ads/tagtype:note" && e[1] === true) {
+              if (e[0].posting.posttype === "ads/tagtype:note" && (e[2] === true || e[0].posting.tagmode === '1')) {
                 _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
               }
             }

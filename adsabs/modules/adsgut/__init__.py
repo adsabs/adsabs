@@ -1,1 +1,1 @@
-from views import adsgut_blueprint as blueprint
+from webservices import adsgut_blueprint as blueprint

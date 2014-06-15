@@ -18,7 +18,7 @@ parse_fqin = (fqin) ->
 enval = (tag) ->
     ename = encodeURIComponent(tag.text)
     if not tag.url
-        tag.url = "#{prefix}/postable/#{@memberable.nick}/group:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
+        tag.url = "#{prefix}/postable/#{@memberable.nick}/library:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
         title = tag.title ? ' data-toggle="tooltip" title="' + tag.title + '"' : '';
         #tag.text = '<a class="tag-link" ' + title + ' target="' + tagger.options.tag_link_target + '" href="' + tag.url + '">' + tag.text + '</a>';
         tag.id = tag.text
@@ -135,6 +135,7 @@ class ItemView extends Backbone.View
     @$el.empty()
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
+    #console.log ">>", @item.basic.name, @pview, didupost(@postings, @memberable, @pview)
     if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview)
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'
     else
@@ -213,7 +214,7 @@ class ItemView extends Backbone.View
   update_note_ajax: (data) =>
     fqin=@item.basic.fqin
     [stags, notes]=get_taggings(data)
-    console.log "NOTES", notes, "DATA", data
+    #console.log "NOTES", notes, "DATA", data
     @stags=stags[fqin]
     @notes=notes[fqin]
     if @notes.length > 0
@@ -226,23 +227,32 @@ class ItemView extends Backbone.View
     itemname=@item.basic.name
     notetext= @.$('.txt').val()
     notemode = '1'
-    if @pview is 'udg'
-      notemode='0'
-    else
-      if @.$('.cb').is(':checked')
-          if @pview is 'pub'
-              #additionally, item must be made public. should public also mean all groups item is in
-              #as now. YES.
-              notemode = '0'
-          else if @pview is 'none'
-              notemode = '0'
-          else
-              notemode = @pview
+    # if @pview is 'udg'
+    #   notemode='0'
+    # else
+    #   if @.$('.cb').is(':checked')
+    #       if @pview is 'pub'
+    #           #additionally, item must be made public. should public also mean all groups item is in
+    #           #as now. YES.
+    #           notemode = '0'
+    #       else if @pview is 'none'
+    #           notemode = '0'
+    #       else
+    #           notemode = @pview
+    if @.$('.cb').is(':checked')
+        if @pview is 'pub'
+            #additionally, item must be made public. should public also mean all groups item is in
+            #as now. YES.
+            notemode = '0'
+        else if @pview in ['udg','none']
+            notemode = '0'
+        else
+            notemode = @pview
     ctxt = @pview
-    console.log "NOTESPEC",notetext, notemode, ctxt
+    #console.log "NOTESPEC",notetext, notemode, ctxt
     loc=window.location
     cback = (data) =>
-        console.log "return data", data, loc
+        #console.log "return data", data, loc
         #window.location=loc
         @update_note_ajax(data)
         format_item(@$('.searchresultl'),@e)
@@ -251,7 +261,7 @@ class ItemView extends Backbone.View
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
-        console.log "in ajax submit"
+        #console.log "in ajax submit"
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback)
     else
         #console.log "NO AJAX IN NOTES", @therebenotes
@@ -277,12 +287,12 @@ class ItemView extends Backbone.View
     itemname=@item.basic.name
     $target =  $(e.currentTarget)
     cback = (data) =>
-        #console.log "return data", data, loc
+        #console.log "return data", data
         #window.location=loc
         @update_note_ajax(data)
         format_item(@$('.searchresultl'),@e)
     eback = (xhr, etext) =>
-        #console.log "ERROR", etext, loc
+        #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
@@ -615,7 +625,7 @@ class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
     {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
-    #console.log "PVIEW", @pview
+    #console.log "PVIEW", @pview, @postings
     #console.log "ITEMS", @items, @suggestions
     @submittable =
         state: true

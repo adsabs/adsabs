@@ -198,7 +198,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
         tagmode: notetuple[1]
       }
     ];
-    console.log("whee", ts, notetuple);
     data = {
       tagspecs: ts,
       itemtype: itemtype
@@ -253,7 +252,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };
@@ -270,7 +269,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };
@@ -285,7 +284,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };

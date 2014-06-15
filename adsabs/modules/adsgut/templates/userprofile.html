@@ -7,7 +7,7 @@
   <p> Libraries are used to store information about papers that may be of interest later. For example, you could store your publications, or a set of references for a paper, interesting papers on a topic, etc. You can share your library with other ADS 2.0 users or groups, and even let them post items to your library. This allows for short-term collaboration.
   </p>
   {% if not useras.classicimported %}
-  <p>You can import your existing libraries (with notes) from from ADS Classic here into ADS 2.0. This import, accesible through the blue import button on the left, performs a copy of your existing ADS Classic libraries. 
+  <p>You can import your existing libraries (with notes) from from ADS Classic here into ADS 2.0. This import, accesible through the blue import button on the left, performs a copy of your existing ADS Classic libraries.
   </p>
   {% endif %}
   <p>
@@ -15,7 +15,7 @@
   </p>
 
   <br/>
- 
+
   <p><strong>New Library:</strong> The letters : and / are NOT allowed in library names. </p>
     <div id="createlibraries"></div>
     <div id="libraries">
@@ -27,7 +27,7 @@
   <br/>
 
 
-  
+
 
 {% endblock %}
 {% block sidebar %}
@@ -36,7 +36,7 @@
 <li class="nav-header">From Classic</li>
 {% if useras.classicimported %}
     <li><a style="margin-left: 0px; margin-right: 20px;" id="importbutton" class="btn btn-info" href="{{ url_for('adsgut.get_classic_libraries', cookieid=theuser.cookieid)}}">Re-import Libraries</a></li>
-{% else %} 
+{% else %}
     <li><a style="margin-left: 0px; margin-right: 20px;" id="importbutton" class="btn btn-info" href="{{ url_for('adsgut.get_classic_libraries', cookieid=theuser.cookieid)}}">Import Libraries</a></li>
 {% endif %}
 </ul>
@@ -45,10 +45,10 @@
 $=jQuery
 
 
-$ -> 
-  config = 
+$ ->
+  config =
     userInfoURL: "{{ url_for('adsgut.userInfo', nick=useras.nick) }}"
-    udgHtmlURL: "{{ url_for('adsgut.udgHtml', nick=useras.nick) }}"
+    udgHtmlURL: "{{ url_for('adsgut.udlHtml', nick=useras.nick) }}"
   sections =
     $create: $('div#createlibraries')
     $info: $('#userinfo')

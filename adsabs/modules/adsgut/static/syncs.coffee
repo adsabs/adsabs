@@ -165,7 +165,7 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     url= prefix+"/tags/"+item
     ts={}
     ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
-    console.log "whee", ts, notetuple
+    #console.log "whee", ts, notetuple
     data=
         tagspecs: ts
         itemtype:itemtype
@@ -204,7 +204,7 @@ remove_note = (item, tagname, ctxt, cback, eback) ->
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
 remove_tagging = (item, tagname, ctxt, cback, eback) ->
@@ -217,7 +217,7 @@ remove_tagging = (item, tagname, ctxt, cback, eback) ->
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
 remove_items_from_postable = (items, ctxt, cback, eback) ->
@@ -227,7 +227,7 @@ remove_items_from_postable = (items, ctxt, cback, eback) ->
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
 submit_tags = (items, tags, postables, cback, eback) ->

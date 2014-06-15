@@ -12,8 +12,10 @@ parse_fqin = (fqin) ->
 
 parse_userinfo = (data) ->
     #console.log "DATA", data
-    publ= "adsgut/group:public"
-    priv= data.user.nick+"/group:default"
+    publicgroup= "adsgut/group:public"
+    #privategroup= data.user.nick+"/group:default"
+    publiclib= "adsgut/library:public"
+    privatelib= data.user.nick+"/library:default"
     postablesin=[]
     postablesowned=data.user.postablesowned
     powfqin=(p.fqpn for p in postablesowned)
@@ -23,8 +25,8 @@ parse_userinfo = (data) ->
         if p.fqpn in pinfqin
             postablesin.push(p)
     postablesinvitedto=data.user.postablesinvitedto
-    groupsin = (e for e in postablesin when e.ptype is 'group' and e.fqpn not in [publ, priv])
-    groupsowned = (e for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publ, priv])
+    groupsin = (e for e in postablesin when e.ptype is 'group' and e.fqpn not in [publicgroup])
+    groupsowned = (e for e in postablesowned when e.ptype is 'group' and e.fqpn not in [publicgroup])
     groupsinvitedto = (e for e in postablesinvitedto when e.ptype is 'group')
     userdict=
         groupsin: groupsin
@@ -36,9 +38,9 @@ parse_userinfo = (data) ->
             whenjoined: data.user.basic.whencreated
             name: data.user.basic.name
 
-    librariesin = _.union((e for e in postablesin when e.ptype is 'library'), groupsin)
-    librariesowned =  _.union((e for e in postablesowned when e.ptype is 'library'), groupsowned)
-    librariesinvitedto = _.union((e for e in postablesinvitedto when e.ptype is 'library'), groupsinvitedto)
+    librariesin = (e for e in postablesin when e.ptype is 'library'  and e.fqpn not in [publiclib, privatelib])
+    librariesowned =  (e for e in postablesowned when e.ptype is 'library'  and e.fqpn not in [publiclib, privatelib])
+    librariesinvitedto = (e for e in postablesinvitedto when e.ptype is 'library'  and e.fqpn not in [publiclib, privatelib])
     for ele in librariesin
         ele.reason = ''
     for ele in groupsin
@@ -51,22 +53,28 @@ parse_userinfo = (data) ->
     userdict.librariesowned =  librariesowned
     userdict.librariesinvitedto = librariesinvitedto
     userdict.librariesin = []
+    #console.log "powfqin", powfqin
     for ele in data.postablelibs
         if ele.reason != ''
             ele.reason = " (through #{ele.reason})"
-        if ele.reason!="group:public" and ele.fqpn not in powfqin
+        #remove those that our public. if they are not eliminate those owned by me
+        if ele.reason!=" (through group:public)" and ele.fqpn not in powfqin
             userdict.librariesin.push(ele)
-    userdict.librariesin = _.union(userdict.librariesin, groupsin)
+    #userdict.librariesin = _.union(userdict.librariesin, groupsin)
     #console.log "USERDICT", userdict
     return userdict
 
+getlib = (fqin) ->
+    vals=fqin.split(':')
+    pre=vals[0].split('/')
+    return pre[0]+"/library:"+vals[vals.length-1]
 
 make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
     if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
             h.text parse_fqin(fqpn)
     else if  libmode is "group"
-        h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
+        h.a href:prefix+"/postable/#{getlib(fqpn)}/filter/html", ->
             #h.i ".icon-cog"
             #h.raw "&nbsp;"
             h.text parse_fqin(fqpn)

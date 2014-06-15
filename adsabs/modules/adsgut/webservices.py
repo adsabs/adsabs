@@ -435,13 +435,14 @@ def postablesUserIsIn(nick):
 def postablesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     allpostables=g.db.membablesUserCanWriteTo(g.currentuser, useras)
-    groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
+    #groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
-    apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
-    groups.remove("adsgut/group:public")
+    #apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
+    #print "GLA", groups, libraries, apps
+    #groups.remove("adsgut/group:public")
     libraries.remove("adsgut/library:public")
     libraries.remove(useras.nick+"/library:default")
-    return jsonify(groups=groups, libraries=libraries, apps=apps)
+    return jsonify(groups=[], libraries=libraries, apps=[])
 
 #x
 @adsgut.route('/user/<nick>/groupsuserisin')
@@ -843,6 +844,7 @@ def addMemberToLibrary_or_libraryMembers(libraryowner, libraryname):
 def addMemberToPostable_or_postableMembers(po, pt, pn):
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
+        #print "rf", request, fqpn
         member, postable=addMemberToPostable(g, request, fqpn)
         dictis = {'status':'OK', 'info': {'member':member.basic.fqin, 'type':pt, 'postable':postable.basic.fqin}}
         #print "DICTIS", dictis
@@ -923,27 +925,27 @@ def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
         inviteform = InviteFormGroup()
     return render_template(ptype+'profile.html', thepostable=p, owner=owner, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
-@adsgut.route('/postable/<nick>/group:default/filter/html')
-def udgHtml(nick):
-    return postableFilterHtml(nick, "group", "default")
+@adsgut.route('/postable/<nick>/library:default/filter/html')
+def udlHtml(nick):
+    return postableFilterHtml(nick, "library", "default")
 
-@adsgut.route('/postablefromadsid/<adsid>/group:default/filter/html')
-def udgHtmlFromAdsid(adsid):
+@adsgut.route('/postablefromadsid/<adsid>/library:default/filter/html')
+def udlHtmlFromAdsid(adsid):
     user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
-    return postableFilterHtml(user.nick, "group", "default")
+    return postableFilterHtml(user.nick, "library", "default")
 
-@adsgut.route('/postable/adsgut/group:public/filter/html')
+@adsgut.route('/postable/adsgut/library:public/filter/html')
 def publicHtml():
-    return postableFilterHtml("adsgut", "group", "public")
+    return postableFilterHtml("adsgut", "library", "public")
 
 @adsgut.route('/postable/<po>/<pt>:<pn>/filter/html')
 def postableFilterHtml(po, pt, pn):
     querystring=request.query_string
     p, owner, on, cn=postable(po, pn, pt)
     pflavor='pos'
-    if pn=='public' and po=='adsgut' and pt=='group':
+    if pn=='public' and po=='adsgut' and pt=='library':
         pflavor='pub'
-    if pn=='default' and pt=='group':
+    if pn=='default' and pt=='library':
         tqtype='stags'
         pflavor='udg'
     else:
@@ -1135,7 +1137,9 @@ def tagsForPostable(po, pt, pn):
         q['postables']=[]
     q['postables'].append(postable)
     #By this time query is popped down
-    count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
+    #count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
+    #    q, usernick, criteria)
+    count, tags=g.dbp.getTagsForQueryFromPostingDocs(g.currentuser, useras,
         q, usernick, criteria)
     return jsonify({'tags':tags, 'count':count})
 
@@ -1283,7 +1287,7 @@ def tagsForItem(ns, itemname):
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
+        return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
         #print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
@@ -1303,7 +1307,7 @@ def tagsForItem(ns, itemname):
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
+        return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 ####These are the fromSpec family of functions for GET
 
 @adsgut.route('/tagsremove/<ns>/<itemname>', methods=['POST'])
@@ -1331,11 +1335,12 @@ def tagsRemoveForItem(ns, itemname):
         # taggingsdict={}
         # taggingsdict[ifqin]=(count, taggings)
         #return jsonify({'tags':tags, 'count':count})
-        return jsonify(taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
+        return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 
 
 #BUG: havent put in fqpn here yet
 #multi item multi tag tagging on POST and get taggings
+#TODO: make this consistent with the rest of the stuff returning taggings
 @adsgut.route('/items/taggings', methods=['POST', 'GET'])
 def itemsTaggings():
     ##name/itemtype/uri/
@@ -1424,10 +1429,8 @@ def itemsTaggingsAndPostings():
         #print "FQPN", fqpn
         #print "SORT", sort, "useras", useras
         #By this time query is popped down
-        postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, None, sort)
-        taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, sort, fqpn)
+        postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras, items, sort)
+        taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, items, sort, fqpn)
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
         #print "MEEP",taggingsthispostable
@@ -1442,7 +1445,7 @@ def itemsTaggingsAndPostings():
         fqpn = _dictg('fqpn',query)
         #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
-            items, None, sort)
+            items, sort)
         taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort, fqpn)
         #print "MEEP",taggingsthispostable

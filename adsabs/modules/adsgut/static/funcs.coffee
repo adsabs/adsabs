@@ -108,10 +108,13 @@ format_row = (noteid, notetext, notemode, notetime, user, currentuser, truthines
   lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
   nmf = if notemode is '1' then lock else ''
   nt = this_postable(truthiness, pview)
-  #console.log "noteid is", noteid
+  #console.log "noteid is", noteid, pview, notemode
   outstr = "<tr><td style='white-space: nowrap;'>#{tf}</td><td style='text-align: right;'>#{uf}&nbsp;&nbsp;</td><td>#{nmf}#{nt}</td><td class='notetext'>#{notetext}</td>"
   if uf=='me'
-    outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
+    if pview != 'udg' and notemode =='1'
+        outstr = outstr + "<td></td></tr>"
+    else
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
   else
     outstr = outstr + "<td></td></tr>"
   return outstr
@@ -139,7 +142,7 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
 #     return ""
 
 format_tags_for_item = (fqin, stags, memberable, tagajax=true) ->
-  t2list=({url:"#{prefix}/postable/#{memberable.nick}/group:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
+  t2list=({url:"#{prefix}/postable/#{memberable.nick}/library:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
   #console.log("T@LIST", t2list)
   if t2list.length >0
     return t2list
@@ -162,8 +165,8 @@ parse_fortype = (fqin) ->
 
 format_postings_for_item = (fqin, postings, nick) ->
   postingslist = _.uniq(postings[fqin])
-  publ= "adsgut/group:public"
-  priv= "#{nick}/group:default"
+  publ= "adsgut/library:public"
+  priv= "#{nick}/library:default"
   p2list=("<a href=\"#{prefix}/postable/#{p}/filter/html\">#{parse_fqin(p)}</a>" for p in postingslist when p isnt publ and p isnt priv and parse_fortype(p) isnt "app")
   if p2list.length >0
     return p2list
@@ -221,20 +224,21 @@ get_taggings = (data) ->
     #console.log "TGTP", tp.length, td.length
     tp2 = (e[0] or e[1] for e in _.zip(tp,td))
     combi = _.zip(tg, tp2, tp)
-    #console.log "1>>>", k,combi
+    #console.log "1>>>", k,tg
     if v[0] > 0
       if data.fqpn is null or data.fqpn is undefined
         #console.log "here"
-        stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag")
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note")
+        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby] for e in combi when e[0].posting.posttype is "ads/tagtype:tag")
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.posttype is "ads/tagtype:note")
       else
-        stags[k]=([e[0].posting.tagname, e[0].posting.tagtype, e[0].posting.postedby] for e in combi when e[0].posting.tagtype is "ads/tagtype:tag" and e[1] is true)
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.tagtype is "ads/tagtype:note"  and e[1] is true)
+        #console.log "there"
+        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby] for e in combi when e[0].posting.posttype is "ads/tagtype:tag" and e[2] is true)
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.posttype is "ads/tagtype:note"  and (e[2] is true or e[0].posting.tagmode is '1'))
     else
       stags[k]=[]
       notes[k]=[]
     #console.log "HHHHH", k, notes[k]
-  #console.log "HH", notes
+  #console.log "HH", stags, data.taggings
   return [stags, notes]
 
 get_groups = (nick, cback) ->

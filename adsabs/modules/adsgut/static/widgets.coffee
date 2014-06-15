@@ -292,7 +292,7 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
     #h.raw additional
     #<a class="btn" href="#"><i class="icon-align-justify"></i></a>
     #console.log "PVIEW3 IS", pview
-    if pview is 'none'
+    if pview in ['udg','none']
         notetext = 'Make note visible to members of all libraries this item is in (notes are private by default)'
     else if pview is 'pub'
         notetext = 'Make note visible to members of the public (notes are private by default)'
@@ -300,13 +300,17 @@ postalnote_form = h.renderable (btext, nrows=2, pview) ->
         notetext = 'Make note visible to members of this library (notes are private by default)'
     h.div ".postalnote", ->
         h.textarea ".controls.input-xlarge.txt", type:"text", rows:'#{nrows}', placeholder:"Type a note"
-        if pview != 'udg'
-          h.label ".control-label", ->
-              h.input ".control.cb", type:'checkbox'
-              h.text notetext
-              h.raw "&nbsp;&nbsp;"
-        else
-          h.label ".control-label", ""
+        # if pview != 'udg'
+        #   h.label ".control-label", ->
+        #       h.input ".control.cb", type:'checkbox'
+        #       h.text notetext
+        #       h.raw "&nbsp;&nbsp;"
+        # else
+        #   h.label ".control-label", ""
+        h.label ".control-label", ->
+            h.input ".control.cb", type:'checkbox'
+            h.text notetext
+            h.raw "&nbsp;&nbsp;"
         h.button '.btn.btn-primary.btn-mini.notebtn', type:'button', btext
 
 #     <legend>Tagging and Posting</legend>
