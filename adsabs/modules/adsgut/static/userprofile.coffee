@@ -69,6 +69,11 @@ getlib = (fqin) ->
     pre=vals[0].split('/')
     return pre[0]+"/library:"+vals[vals.length-1]
 
+getgroup = (fqin) ->
+    vals=fqin.split(':')
+    pre=vals[0].split('/')
+    return pre[0]+"/group:"+vals[vals.length-1]
+
 make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
     if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/filter/html", ->
@@ -83,23 +88,29 @@ make_postable_link = h.renderable (fqpn, libmode=false, ownermode=false) ->
             h.text parse_fqin(fqpn)
 
 
-make_postable_link_secondary = h.renderable (fqpn, libmode=false, ownermode=false) ->
+make_postable_link_secondary = h.renderable (fqpn, libmode=false, ownermode=false, text=false) ->
     if libmode is "lib"
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
-            h.i ".icon-cog"
-            h.raw "&nbsp;"
-            if ownermode
-                h.text "admin"
+            if text
+                h.text text
             else
-                h.text "info"
-    else if  libmode is "group"
+                h.i ".icon-cog"
+                h.raw "&nbsp;"
+                if ownermode
+                    h.text "admin"
+                else
+                    h.text "info"
+    else if libmode is "group"
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
-            h.i ".icon-cog"
-            h.raw "&nbsp;"
-            if ownermode
-                h.text "admin"
+            if text
+                h.text text
             else
-                h.text "info"
+                h.i ".icon-cog"
+                h.raw "&nbsp;"
+                if ownermode
+                    h.text "admin"
+                else
+                    h.text "info"
     else
         h.a href:prefix+"/postable/#{fqpn}/profile/html", ->
             h.text parse_fqin(fqpn)
@@ -123,17 +134,23 @@ class PostableView extends Backbone.View
         @ownermode=options.ownermode
 
     render: =>
-
+        more=""
+        if @model.get('librarykind')=='group'
+            more=@model.get('librarykind')
+            if not @model.get('invite')
+                more=make_postable_link_secondary(getgroup(@model.get('fqpn')), libmode=@libmode, ownermode=@ownermode, more)
+        if @model.get('islibrarypublic')==true
+            more=more+'(Public)'
         if @model.get('invite')
             if @libmode=="lib"
-                @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('owner'), @model.get('description'), @model.get('readwrite'), w.single_button('Yes')]))
+                @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('owner'), @model.get('description'), more, @model.get('readwrite'), w.single_button('Yes')]))
             else
                  @$el.html(w.table_from_dict_partial_many(parse_fqin(@model.get('fqpn')), [@model.get('owner'), @model.get('description'), w.single_button('Yes')]))
 
         else
             #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
             if @libmode=="lib"
-                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), more, @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
             else
                 content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('owner'), @model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
 
@@ -184,20 +201,20 @@ class PostableListView extends Backbone.View
         #console.log "RENDER1", rendered
         if @collection.invite
             if views.length == 0
-                rendered = ["<td colspan=5>No Invitations</td>"]
+                rendered = ["<td colspan=6>No Invitations</td>"]
             if @libmode=='group'
                 $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Accept?"], rendered)
             else if @libmode=='lib'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Access","Accept?"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "More", "Access","Accept?"], rendered)
 
         else
             #$widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
             if views.length == 0
-                rendered = ["<td colspan=5>None</td>"]
+                rendered = ["<td colspan=6>None</td>"]
             if @libmode=='group'
                 $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Manage"], rendered)
             else if @libmode=='lib'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Access", "Manage"], rendered)
+                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "More", "Access", "Manage"], rendered)
         @$el.append($widget)
         #widgets.decohelp('#useradder', 'help me', 'popover', 'left')
         return this
@@ -211,7 +228,7 @@ rwmap = (boolrw) ->
 render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
   plin=new PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
   if libmode=="lib"
-    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, reason: p.reason, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, reason: p.reason, islibrarypublic: p.islibrarypublic, librarykind:p.librarykind, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
   else
     plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
   plinv=new PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)

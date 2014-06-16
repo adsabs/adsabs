@@ -366,17 +366,27 @@ import simplejson as json
 def userInfo(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
     postablesother, names = user.membableslibrary(pathinclude_p=True)
+    #print "PN", postablesother, names
     #crikey stupid hack to have to do this bcoz of jsonify introspecting
     #mongoengine objects only
     jsons = [e.to_json() for e in postablesother]
     ds=[]
     for i, j in enumerate(jsons):
         d = json.loads(j)
-        #print "D", d
-        if names[d['fqpn']][0][2]==d['fqpn']:#direct membership
+        #print "D", d['fqpn']
+        if names[d['fqpn']][0][2]==d['fqpn']:#direct membership overrides all else
             d['reason'] = ''
         else:
-            d['reason'] = ",".join([e[1] for e in names[d['fqpn']]])
+            reasons=[e[1] for e in names[d['fqpn']]]
+            #print "R1", reasons
+            elim=[]
+            for j,r in enumerate(reasons):
+                if r=='group:public' and len(reasons) > 1:
+                    elim.append(j)
+            for j in elim:
+                del reasons[j]
+            #print "R2", reasons
+            d['reason'] = ",".join(reasons)
         ds.append(d)
 
     ujson = jsonify(user=user, postablelibs=ds)
@@ -1139,7 +1149,13 @@ def tagsForPostable(po, pt, pn):
     q=_queryget(query)
     if not q.has_key('postables'):
         q['postables']=[]
-    q['postables'].append(postable)
+    if pt=='library' and pn=='default':#in saved items get from all postables(libraries) we are in
+        # libs=[e['fqpn'] for e in g.db.membablesUserCanWriteTo(g.currentuser, useras, "library")]
+        # print "LIBS ARE", libs
+        # q['postables']=libs
+        q['postables'].append(postable)
+    else:
+        q['postables'].append(postable)
     #By this time query is popped down
     #count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
     #    q, usernick, criteria)
