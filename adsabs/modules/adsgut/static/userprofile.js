@@ -279,6 +279,7 @@
     __extends(PostableView, _super);
 
     function PostableView() {
+      this.removeMember = __bind(this.removeMember, this);
       this.clickedYes = __bind(this.clickedYes, this);
       this.render = __bind(this.render, this);
       return PostableView.__super__.constructor.apply(this, arguments);
@@ -287,12 +288,14 @@
     PostableView.prototype.tagName = "tr";
 
     PostableView.prototype.events = {
-      "click .yesbtn": "clickedYes"
+      "click .yesbtn": "clickedYes",
+      "click .removemember": "removeMember"
     };
 
     PostableView.prototype.initialize = function(options) {
       this.libmode = options.libmode;
-      return this.ownermode = options.ownermode;
+      this.ownermode = options.ownermode;
+      return this.listtype = options.listtype;
     };
 
     PostableView.prototype.render = function() {
@@ -315,9 +318,17 @@
         }
       } else {
         if (this.libmode === "lib") {
-          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode) + this.model.get('reason'), [this.model.get('owner'), this.model.get('description'), more, this.model.get('readwrite'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          if (this.listtype === 'in') {
+            content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode) + this.model.get('reason'), [this.model.get('owner'), this.model.get('description'), more, this.model.get('readwrite'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>']);
+          } else {
+            content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode) + this.model.get('reason'), [this.model.get('owner'), this.model.get('description'), more, this.model.get('readwrite'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          }
         } else {
-          content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('owner'), this.model.get('description'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          if (this.listtype === 'in') {
+            content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('owner'), this.model.get('description'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>']);
+          } else {
+            content = w.table_from_dict_partial_many(make_postable_link(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode), [this.model.get('owner'), this.model.get('description'), make_postable_link_secondary(this.model.get('fqpn'), libmode = this.libmode, ownermode = this.ownermode)]);
+          }
         }
         this.$el.html(content);
       }
@@ -337,6 +348,26 @@
       return syncs.accept_invitation(useremail, this.model.get('fqpn'), cback, eback);
     };
 
+    PostableView.prototype.removeMember = function() {
+      var cback, eback, loc, membable, memberable;
+      membable = this.model.get('fqpn');
+      memberable = this.model.get('fqin');
+      loc = window.location;
+      cback = (function(_this) {
+        return function(data) {
+          console.log(loc);
+          return window.location = loc;
+        };
+      })(this);
+      eback = (function(_this) {
+        return function(xhr, etext) {
+          return alert('Did not succeed');
+        };
+      })(this);
+      syncs.remove_memberable_from_membable(memberable, membable, cback, eback);
+      return false;
+    };
+
     return PostableView;
 
   })(Backbone.View);
@@ -354,7 +385,8 @@
       this.listtype = options.listtype;
       this.invite = options.invite;
       this.nick = options.nick;
-      return this.email = options.email;
+      this.email = options.email;
+      return this.fqin = options.fqin;
     };
 
     return PostableList;
@@ -392,7 +424,8 @@
           _results.push(new PostableView({
             model: m,
             libmode: this.libmode,
-            ownermode: this.ownermode
+            ownermode: this.ownermode,
+            listtype: this.collection.listtype
           }));
         }
         return _results;
@@ -417,12 +450,24 @@
         }
       } else {
         if (views.length === 0) {
-          rendered = ["<td colspan=6>None</td>"];
+          if (this.collection.listtype !== 'in') {
+            rendered = ["<td colspan=6>None</td>"];
+          } else {
+            rendered = ["<td colspan=7>None</td>"];
+          }
         }
         if (this.libmode === 'group') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Manage"], rendered);
+          if (this.collection.listtype !== 'in') {
+            $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Manage"], rendered);
+          } else {
+            $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "Manage", "Leave"], rendered);
+          }
         } else if (this.libmode === 'lib') {
-          $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "More", "Access", "Manage"], rendered);
+          if (this.collection.listtype !== 'in') {
+            $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "More", "Access", "Manage"], rendered);
+          } else {
+            $widget = w.$table_from_dict_many(lmap[this.libmode] + ' ' + this.tmap[this.collection.listtype], ["Owner", "Description", "More", "Access", "Manage", "Leave"], rendered);
+          }
         }
       }
       this.$el.append($widget);
@@ -447,7 +492,8 @@
       listtype: ptype,
       invite: invite,
       nick: userdict.nick,
-      email: userdict.email
+      email: userdict.email,
+      fqin: "adsgut/user:" + userdict.name
     });
     if (libmode === "lib") {
       plin.add((function() {
@@ -465,7 +511,8 @@
             readwrite: rwmap(p.readwrite),
             invite: plin.invite,
             nick: plin.nick,
-            email: plin.email
+            email: plin.email,
+            fqin: plin.fqin
           }));
         }
         return _results;
@@ -483,7 +530,8 @@
             readwrite: rwmap(p.readwrite),
             invite: plin.invite,
             nick: plin.nick,
-            email: plin.email
+            email: plin.email,
+            fqin: plin.fqin
           }));
         }
         return _results;

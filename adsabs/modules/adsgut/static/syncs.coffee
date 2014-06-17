@@ -322,6 +322,13 @@ post_for_itemsinfo = (url, itemstring, cback) ->
         items:itemstring
     send_params(url, data, cback, eback)
 
+remove_memberable_from_membable = (memberable, membable, cback, eback) ->
+    url= prefix+"/memberremove"
+    data=
+        fqpn: membable
+        member: memberable
+    send_params(url, data, cback, eback)
+
 root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
@@ -345,3 +352,4 @@ root.syncs=
     remove_tagging: remove_tagging
     remove_note: remove_note
     remove_items_from_postable: remove_items_from_postable
+    remove_memberable_from_membable: remove_memberable_from_membable

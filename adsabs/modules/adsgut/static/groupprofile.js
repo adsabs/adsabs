@@ -17,6 +17,7 @@
     __extends(PostableView, _super);
 
     function PostableView() {
+      this.removeMember = __bind(this.removeMember, this);
       this.clickedToggle = __bind(this.clickedToggle, this);
       this.render = __bind(this.render, this);
       return PostableView.__super__.constructor.apply(this, arguments);
@@ -25,16 +26,25 @@
     PostableView.prototype.tagName = "tr";
 
     PostableView.prototype.events = {
-      "click .yesbtn": "clickedToggle"
+      "click .yesbtn": "clickedToggle",
+      "click .removemember": "removeMember"
     };
 
     PostableView.prototype.initialize = function(options) {
-      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username, options;
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username, this.owner = options.owner, this.ownerfqin = options.ownerfqin, options;
     };
 
     PostableView.prototype.render = function() {
       var content;
-      content = w.one_col_table_partial(this.username);
+      if (!this.owner) {
+        content = w.one_col_table_partial(this.username);
+      } else {
+        if (this.ownerfqin === this.memberable) {
+          content = w.table_from_dict_partial(this.username, '');
+        } else {
+          content = w.table_from_dict_partial(this.username, '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>');
+        }
+      }
       this.$el.html(content);
       return this;
     };
@@ -49,6 +59,26 @@
         return alert('Did not succeed');
       };
       return syncs.toggle_rw(this.memberable, this.fqpn, cback, eback);
+    };
+
+    PostableView.prototype.removeMember = function() {
+      var cback, eback, loc, membable, memberable;
+      membable = this.fqpn;
+      memberable = this.memberable;
+      loc = window.location;
+      cback = (function(_this) {
+        return function(data) {
+          console.log(loc);
+          return window.location = loc;
+        };
+      })(this);
+      eback = (function(_this) {
+        return function(xhr, etext) {
+          return alert('Did not succeed');
+        };
+      })(this);
+      syncs.remove_memberable_from_membable(memberable, membable, cback, eback);
+      return false;
     };
 
     return PostableView;
@@ -73,6 +103,7 @@
 
     PostableListView.prototype.render = function() {
       var $widget, rendered, u, v, views;
+      console.log(this.owner, this.ownerfqin, this.fqpn);
       views = (function() {
         var _results;
         _results = [];
@@ -81,6 +112,8 @@
             rwmode: this.users[u][1],
             fqpn: this.fqpn,
             memberable: u,
+            owner: this.owner,
+            ownerfqin: this.ownerfqin,
             username: this.users[u][0]
           }));
         }
@@ -95,7 +128,11 @@
         }
         return _results;
       })();
-      $widget = w.$one_col_table("User", rendered);
+      if (!this.owner) {
+        $widget = w.$one_col_table("User", rendered);
+      } else {
+        $widget = w.$table_from_dict("User", "Remove", rendered);
+      }
       this.$el.append($widget);
       return this;
     };

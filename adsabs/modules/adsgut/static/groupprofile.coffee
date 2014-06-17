@@ -8,34 +8,56 @@ w = widgets
 
 class PostableView extends Backbone.View
 
-  tagName: "tr"
+    tagName: "tr"
 
-  events:
-    "click .yesbtn" : "clickedToggle"
+    events:
+      "click .yesbtn" : "clickedToggle"
+      "click .removemember" : "removeMember"
 
-  initialize: (options) ->
-    {@rwmode, @memberable, @fqpn, @username} = options
-    #console.log "PVIN", @rwmode, @memberable, @fqpn
+    initialize: (options) ->
+        {@rwmode, @memberable, @fqpn, @username, @owner, @ownerfqin} = options
+        #console.log "PVIN", @rwmode, @memberable, @fqpn
 
-  render: =>
-    content = w.one_col_table_partial(@username)
-    #content = w.table_from_dict_partial(@memberable, w.single_button_label(@rwmode, "Toggle"))
-    #dahtml= "<td>a</td><td>b</td>"
-    #console.log "CONTENT", content, @rwmode, @memberable, @fqpn
-    @$el.html(content)
-    return this
+    render: =>
+        if not @owner
+            content = w.one_col_table_partial(@username)
+        else
+            if @ownerfqin==@memberable
+                content = w.table_from_dict_partial(@username, '')
+            else
+                content = w.table_from_dict_partial(@username, '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>')
+        #dahtml= "<td>a</td><td>b</td>"
+        #console.log "CONTENT", content, @rwmode, @memberable, @fqpn
+        @$el.html(content)
+        return this
 
-  clickedToggle: =>
-    loc=window.location
-    cback = (data) ->
-        #console.log "return data", data, loc
-        window.location=location
-    eback = (xhr, etext) ->
-        #console.log "ERROR", etext, loc
-        #replace by a div alert from bootstrap
-        alert 'Did not succeed'
-    #console.log("GGG",@model, @$el)
-    syncs.toggle_rw(@memberable, @fqpn, cback, eback)
+    clickedToggle: =>
+        loc=window.location
+        cback = (data) ->
+            #console.log "return data", data, loc
+            window.location=location
+        eback = (xhr, etext) ->
+            #console.log "ERROR", etext, loc
+            #replace by a div alert from bootstrap
+            alert 'Did not succeed'
+        #console.log("GGG",@model, @$el)
+        syncs.toggle_rw(@memberable, @fqpn, cback, eback)
+
+    removeMember: =>
+        #console.log "IN REMOVE NOTE", @pview
+        membable=@fqpn
+        memberable=@memberable
+        loc=window.location
+        cback = (data) =>
+            #console.log loc
+            window.location=loc
+        eback = (xhr, etext) =>
+            #console.log "ERROR", etext, loc
+            #replace by a div alert from bootstrap
+            alert 'Did not succeed'
+
+        syncs.remove_memberable_from_membable(memberable, membable, cback, eback)
+        return false
 
 class PostableListView extends Backbone.View
 
@@ -48,10 +70,13 @@ class PostableListView extends Backbone.View
 
   render: =>
     #if @owner is true
-    views=(new PostableView({rwmode:@users[u][1], fqpn:@fqpn, memberable:u, username:@users[u][0]}) for u of @users)
+    #console.log @owner, @ownerfqin, @fqpn
+    views=(new PostableView({rwmode:@users[u][1], fqpn:@fqpn, memberable:u, owner: @owner, ownerfqin: @ownerfqin, username:@users[u][0]}) for u of @users)
     rendered = (v.render().el for v in views)
-    $widget=w.$one_col_table("User", rendered)
-    #$widget=w.$table_from_dict("User", "Can User/Group Post?", rendered)
+    if not @owner
+        $widget=w.$one_col_table("User", rendered)
+    else
+        $widget=w.$table_from_dict("User", "Remove", rendered)
     @$el.append($widget)
     # else
     #     userlist= (v[0] for k,v of @users)

@@ -33,7 +33,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
  */
 
 (function() {
-  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, make_public, post_for_itemsinfo, prefix, remove_items_from_postable, remove_note, remove_tagging, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, make_public, post_for_itemsinfo, prefix, remove_items_from_postable, remove_memberable_from_membable, remove_note, remove_tagging, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -448,6 +448,16 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
+  remove_memberable_from_membable = function(memberable, membable, cback, eback) {
+    var data, url;
+    url = prefix + "/memberremove";
+    data = {
+      fqpn: membable,
+      member: memberable
+    };
+    return send_params(url, data, cback, eback);
+  };
+
   root.syncs = {
     accept_invitation: accept_invitation,
     invite_user: invite_user,
@@ -470,7 +480,8 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     post_for_itemsinfo: post_for_itemsinfo,
     remove_tagging: remove_tagging,
     remove_note: remove_note,
-    remove_items_from_postable: remove_items_from_postable
+    remove_items_from_postable: remove_items_from_postable,
+    remove_memberable_from_membable: remove_memberable_from_membable
   };
 
 }).call(this);

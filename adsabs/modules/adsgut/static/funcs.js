@@ -561,7 +561,7 @@
       var url;
       this.postable = options.postable, this.users = options.users;
       this.ispublic = false;
-      if (this.users['adsgut/group:public'] != null) {
+      if (this.users['adsgut/user:anonymouse'] != null) {
         this.ispublic = true;
       }
       if (this.ispublic) {

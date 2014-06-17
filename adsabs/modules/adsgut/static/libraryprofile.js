@@ -25,6 +25,7 @@
     __extends(PostableView, _super);
 
     function PostableView() {
+      this.removeMember = __bind(this.removeMember, this);
       this.clickedToggle = __bind(this.clickedToggle, this);
       this.render = __bind(this.render, this);
       return PostableView.__super__.constructor.apply(this, arguments);
@@ -33,11 +34,13 @@
     PostableView.prototype.tagName = "tr";
 
     PostableView.prototype.events = {
-      "click .yesbtn": "clickedToggle"
+      "click .yesbtn": "clickedToggle",
+      "click .removemember": "removeMember"
     };
 
     PostableView.prototype.initialize = function(options) {
-      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin, options;
+      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin;
+      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn, this.username);
     };
 
     PostableView.prototype.render = function() {
@@ -53,17 +56,17 @@
         content = w.table_from_dict_partial(uname, "Only owner can see this.");
       } else {
         if (this.ownerfqin === this.memberable) {
-          content = w.table_from_dict_partial(this.username + " (owner)", rwmap(this.rwmode));
+          content = w.table_from_dict_partial_many(this.username + " (owner)", [rwmap(this.rwmode), ""]);
         } else {
           uname = this.username;
           if (this.username === 'group:public') {
             uname = "All ADS Users";
           }
           if (this.username !== 'anonymouse') {
-            content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(this.rwmode), "Toggle"));
+            content = w.table_from_dict_partial_many(uname, [w.single_button_label(rwmap(this.rwmode), "Toggle"), '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>']);
           } else {
             uname = "General Public";
-            content = w.table_from_dict_partial(uname, rwmap(this.rwmode));
+            content = w.table_from_dict_partial_many(uname, [rwmap(this.rwmode), '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>']);
           }
         }
       }
@@ -81,6 +84,26 @@
         return alert('Did not succeed');
       };
       return syncs.toggle_rw(this.memberable, this.fqpn, cback, eback);
+    };
+
+    PostableView.prototype.removeMember = function() {
+      var cback, eback, loc, membable, memberable;
+      membable = this.fqpn;
+      memberable = this.memberable;
+      loc = window.location;
+      cback = (function(_this) {
+        return function(data) {
+          console.log(loc);
+          return window.location = loc;
+        };
+      })(this);
+      eback = (function(_this) {
+        return function(xhr, etext) {
+          return alert('Did not succeed');
+        };
+      })(this);
+      syncs.remove_memberable_from_membable(memberable, membable, cback, eback);
+      return false;
     };
 
     return PostableView;
@@ -129,7 +152,11 @@
         }
         return _results;
       })();
-      $widget = w.$table_from_dict("User", "Access", rendered);
+      if (!this.owner) {
+        $widget = w.$table_from_dict("User", "Access", rendered);
+      } else {
+        $widget = w.$table_from_dict_many("User", ["Access", "Remove"], rendered);
+      }
       this.$el.append($widget);
       return this;
     };

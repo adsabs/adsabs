@@ -418,7 +418,7 @@ class MakePublic extends Backbone.View
   initialize: (options) ->
     {@postable, @users} = options
     @ispublic=false
-    if @users['adsgut/group:public']?
+    if @users['adsgut/user:anonymouse']?
       @ispublic=true
 
     if @ispublic

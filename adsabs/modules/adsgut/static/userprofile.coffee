@@ -128,10 +128,12 @@ class PostableView extends Backbone.View
 
     events:
         "click .yesbtn" : "clickedYes"
+        "click .removemember" : "removeMember"
 
     initialize: (options) ->
         @libmode=options.libmode
         @ownermode=options.ownermode
+        @listtype=options.listtype
 
     render: =>
         more=""
@@ -150,9 +152,15 @@ class PostableView extends Backbone.View
         else
             #content = w.one_col_table_partial(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode))
             if @libmode=="lib"
-                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), more, @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+                if @listtype=='in'
+                    content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), more, @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),'<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'])
+                else
+                    content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)+@model.get('reason'),[@model.get('owner'), @model.get('description'), more, @model.get('readwrite'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
             else
-                content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('owner'), @model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
+                if @listtype=='in'
+                    content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('owner'), @model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode), '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'])
+                else
+                    content = w.table_from_dict_partial_many(make_postable_link(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode),[@model.get('owner'), @model.get('description'), make_postable_link_secondary(@model.get('fqpn'), libmode=@libmode, ownermode=@ownermode)])
 
             @$el.html(content)
         return this
@@ -170,6 +178,23 @@ class PostableView extends Backbone.View
         useremail=@model.get('email')
         syncs.accept_invitation(useremail, @model.get('fqpn'), cback, eback)
 
+    removeMember: =>
+        #console.log "IN REMOVE NOTE", @model
+        membable=@model.get('fqpn')
+        memberable=@model.get('fqin')
+        #console.log "<<>>", membable, memberable
+        loc=window.location
+        cback = (data) =>
+            #console.log loc
+            window.location=loc
+        eback = (xhr, etext) =>
+            #console.log "ERROR", etext, loc
+            #replace by a div alert from bootstrap
+            alert 'Did not succeed'
+
+        syncs.remove_memberable_from_membable(memberable, membable, cback, eback)
+        return false
+
 
 
 class PostableList extends Backbone.Collection
@@ -181,6 +206,7 @@ class PostableList extends Backbone.Collection
         @invite=options.invite
         @nick=options.nick
         @email=options.email
+        @fqin=options.fqin
 
 #BUG: do we not need to destroy when we move things around?
 #also invite isnt enough to have the event based interplay between 2 lists
@@ -196,9 +222,9 @@ class PostableListView extends Backbone.View
         @ownermode=options.ownermode
 
     render: =>
-        views = (new PostableView(model:m, libmode:@libmode, ownermode:@ownermode) for m in @collection.models)
+        views = (new PostableView(model:m, libmode:@libmode, ownermode:@ownermode, listtype:@collection.listtype) for m in @collection.models)
         rendered = (v.render().el for v in views)
-        #console.log "RENDER1", rendered
+        #console.log "RENDER1", @collection.listtype, @collection.invite
         if @collection.invite
             if views.length == 0
                 rendered = ["<td colspan=6>No Invitations</td>"]
@@ -210,11 +236,22 @@ class PostableListView extends Backbone.View
         else
             #$widget=w.$one_col_table(@tmap[@collection.listtype], rendered)
             if views.length == 0
-                rendered = ["<td colspan=6>None</td>"]
+                #rendered = ["<td colspan=6>None</td>"]
+                if @collection.listtype!='in'
+                    rendered = ["<td colspan=6>None</td>"]
+                else
+                    rendered = ["<td colspan=7>None</td>"]
             if @libmode=='group'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Manage"], rendered)
+                if @collection.listtype!='in'
+                    $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Manage"], rendered)
+                else
+                    $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "Manage", "Leave"], rendered)
             else if @libmode=='lib'
-                $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "More", "Access", "Manage"], rendered)
+                if @collection.listtype!='in'
+                    $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "More", "Access", "Manage"], rendered)
+                else
+                    $widget=w.$table_from_dict_many(lmap[@libmode]+' '+@tmap[@collection.listtype], ["Owner", "Description", "More", "Access", "Manage", "Leave"], rendered)
+
         @$el.append($widget)
         #widgets.decohelp('#useradder', 'help me', 'popover', 'left')
         return this
@@ -226,11 +263,12 @@ rwmap = (boolrw) ->
         return "read only"
 
 render_postable = (userdict, plist, $pel, ptype, invite, libmode, ownermode) ->
-  plin=new PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email)
+  #console.log "userdict", userdict, "adsgut/user:"+userdict.name
+  plin=new PostableList([],listtype:ptype, invite:invite, nick:userdict.nick, email:userdict.email, fqin:"adsgut/user:"+userdict.name)
   if libmode=="lib"
-    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, reason: p.reason, islibrarypublic: p.islibrarypublic, librarykind:p.librarykind, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, reason: p.reason, islibrarypublic: p.islibrarypublic, librarykind:p.librarykind, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email, fqin:plin.fqin) for p in plist))
   else
-    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email) for p in plist))
+    plin.add((new Postable(fqpn:p.fqpn, owner: p.owner, description: p.description, readwrite: rwmap(p.readwrite), invite:plin.invite, nick:plin.nick, email:plin.email, fqin:plin.fqin) for p in plist))
   plinv=new PostableListView(collection:plin, $e_el:$pel, libmode:libmode, ownermode:ownermode)
   plinv.render()
 

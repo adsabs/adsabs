@@ -13,53 +13,70 @@ rwmap = (boolrw) ->
 
 class PostableView extends Backbone.View
 
-  tagName: "tr"
+    tagName: "tr"
 
-  events:
-    "click .yesbtn" : "clickedToggle"
+    events:
+        "click .yesbtn" : "clickedToggle"
+        "click .removemember" : "removeMember"
 
-  initialize: (options) ->
-    {@rwmode, @memberable, @fqpn, @owner, @username, @ownerfqin} = options
-    #console.log "PVIN", @rwmode, @memberable, @fqpn, @username
+    initialize: (options) ->
+        {@rwmode, @memberable, @fqpn, @owner, @username, @ownerfqin} = options
+        #console.log "PVIN", @rwmode, @memberable, @fqpn, @username
 
-  render: =>
-    #content = w.one_col_table_partial(@memberable)
-    #console.log "RWMODE", @rwmode
-    if not @owner
-        uname = @username
-        if @username == 'group:public'
-            uname = "All ADS Users"
-        if @username == 'anonymouse'
-            uname = "General Public"
-        content = w.table_from_dict_partial(uname, "Only owner can see this.")
-    else
-        if @ownerfqin==@memberable
-            content = w.table_from_dict_partial(@username+" (owner)", rwmap(@rwmode))
-        else
+    render: =>
+        #content = w.one_col_table_partial(@memberable)
+        #console.log "RWMODE", @rwmode
+        if not @owner
             uname = @username
             if @username == 'group:public'
                 uname = "All ADS Users"
-
-            if @username != 'anonymouse'
-                content = w.table_from_dict_partial(uname, w.single_button_label(rwmap(@rwmode), "Toggle"))
-            else
+            if @username == 'anonymouse'
                 uname = "General Public"
-                content = w.table_from_dict_partial(uname, rwmap(@rwmode))
+            content = w.table_from_dict_partial(uname, "Only owner can see this.")
+        else
+            if @ownerfqin==@memberable
+                content = w.table_from_dict_partial_many(@username+" (owner)", [rwmap(@rwmode),""])
+            else
+                uname = @username
+                if @username == 'group:public'
+                    uname = "All ADS Users"
 
-    @$el.html(content)
-    return this
+                if @username != 'anonymouse'
+                    content = w.table_from_dict_partial_many(uname, [w.single_button_label(rwmap(@rwmode), "Toggle"),'<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'])
+                else
+                    uname = "General Public"
+                    content = w.table_from_dict_partial_many(uname, [rwmap(@rwmode),'<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'])
 
-  clickedToggle: =>
-    loc=window.location
-    cback = (data) ->
-        #console.log "return data", data, loc
-        window.location=location
-    eback = (xhr, etext) ->
-        #console.log "ERROR", etext, loc
-        #replace by a div alert from bootstrap
-        alert 'Did not succeed'
-    #console.log("GGG",@model, @$el)
-    syncs.toggle_rw(@memberable, @fqpn, cback, eback)
+        @$el.html(content)
+        return this
+
+    clickedToggle: =>
+        loc=window.location
+        cback = (data) ->
+            #console.log "return data", data, loc
+            window.location=location
+        eback = (xhr, etext) ->
+            #console.log "ERROR", etext, loc
+            #replace by a div alert from bootstrap
+            alert 'Did not succeed'
+        #console.log("GGG",@model, @$el)
+        syncs.toggle_rw(@memberable, @fqpn, cback, eback)
+
+    removeMember: =>
+        #console.log "IN REMOVE NOTE", @pview
+        membable=@fqpn
+        memberable=@memberable
+        loc=window.location
+        cback = (data) =>
+            #console.log loc
+            window.location=loc
+        eback = (xhr, etext) =>
+            #console.log "ERROR", etext, loc
+            #replace by a div alert from bootstrap
+            alert 'Did not succeed'
+
+        syncs.remove_memberable_from_membable(memberable, membable, cback, eback)
+        return false
 
 class PostableListView extends Backbone.View
 
@@ -78,7 +95,10 @@ class PostableListView extends Backbone.View
     #console.log "RENDER1", rendered
     #console.log "RENDER2"
     #$widget=w.$one_col_table("User", rendered)
-    $widget=w.$table_from_dict("User", "Access", rendered)
+    if not @owner
+        $widget=w.$table_from_dict("User", "Access", rendered)
+    else
+        $widget=w.$table_from_dict_many("User", ["Access", "Remove"], rendered)
     @$el.append($widget)
     # else
     #     userlist= (v[0] for k,v of @users)
