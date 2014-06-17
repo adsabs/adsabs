@@ -329,6 +329,12 @@ remove_memberable_from_membable = (memberable, membable, cback, eback) ->
         member: memberable
     send_params(url, data, cback, eback)
 
+delete_membable = (membable, cback, eback) ->
+    url= prefix+"/membableremove"
+    data=
+        fqpn: membable
+    send_params(url, data, cback, eback)
+
 root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
@@ -353,3 +359,4 @@ root.syncs=
     remove_note: remove_note
     remove_items_from_postable: remove_items_from_postable
     remove_memberable_from_membable: remove_memberable_from_membable
+    delete_membable: delete_membable

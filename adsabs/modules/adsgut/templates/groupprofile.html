@@ -35,6 +35,11 @@
   </form>
   <p>The user's invitation will show on the user's "Groups" page. If the user accepts the invitation, they will be able to read the group library's items. They will also be able to post items into the group's library.</p>
   <div id="inviteds" style="display:none"></div>
+  <div>
+      <h4> Delete this Group </h4>
+      <p> This is the point of no-return. All your users will lose access to any of the libraries this group may be in. </p>
+      <p><a class='btn btn-danger' id="postabledeleter">DELETE</a></p>
+  </div>
   {% endif %}
 {% endblock %}
 {% block coffeescript %}
@@ -45,6 +50,7 @@ $ ->
   config =
     fqpn : '{{ thepostable.basic.fqin}}'
     infoURL : "#{prefix}/group/{{ thepostable.basic.fqin}}"
+    postablesURL: "#{prefix}/email/{{ useras.adsid}}/profilegroups/html"
     membersURL : "#{prefix}/group/{{ thepostable.basic.fqin}}/members"
     invitedsURL : "#{prefix}/group/{{ thepostable.basic.fqin}}/inviteds"
     owner : if '{{owner}}' == 'True' then true else false
@@ -54,7 +60,6 @@ $ ->
     $membersdiv : $('div#members')
     $invitedform : $('div#invitedform')
     $invitedsdiv : $('div#inviteds')
-
 
   groupprofile.get_info(sections, config)
 

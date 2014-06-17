@@ -3,6 +3,52 @@ $=jQuery
 #console.log "In Funcs"
 h = teacup
 
+flip_sorter = (qstr) ->
+    console.log "qstring", qstr
+    qlist=qstr.split('&')
+    console.log "qlist", qlist
+    sortstring=""
+    otherqlist=[]
+    for q in qlist
+        n = q.search("sort")
+        if n==0
+            sortstring=q.split('=')[1]
+        else
+            otherqlist.push(q)
+    if sortstring!=''
+        [f,a]=sortstring.split(':')
+        if f=='posting__thingtopostname'
+            ftext='Sort By Post'
+            fout='posting__whenposted'
+        if f=='posting__whenposted'
+            ftext='Sort By Year'
+            fout='posting__thingtopostname'
+        if a=='True'
+            atext='<i class="icon-arrow-down"></i>'
+            aout='False'
+        if a=='False'
+            atext='<i class="icon-arrow-up"></i>'
+            aout='True'
+    else
+        f='posting__whenposted'
+        a='False'
+        ftext='Sort By Year'
+        atext='<i class="icon-arrow-up"></i>'
+        fout='posting__thingtopostname'
+        aout='True'
+    odict=
+        fnow:f
+        anow:a
+        ftext:ftext
+        atext:atext
+        fout:fout
+        aout:aout
+        oqs:otherqlist.join('&')
+    return odict
+
+
+
+
 csvstringify = (tdict) ->
   start="#paper, tag\n"
   for bibcode of tdict
@@ -13,6 +59,7 @@ csvstringify = (tdict) ->
 parse_querystring= (qstr) ->
     #console.log "QQQ", qstr
     qlist=qstr.split('&')
+    #TODO: remove sorting and userthere from here
     qlist = _.difference(qlist,['query=tagtype:ads/tagtype:tag'])
     qlist = (q.replace('query=tagname:','') for q in qlist)
     if qlist.length==1 and qlist[0]==""
@@ -181,6 +228,17 @@ do_postable_filter = (sections, config, tagfunc) ->
             urla=loc+"&userthere=true"
         sections.$ua.attr('href', urla)
         sections.$ua.attr('data', 'on')
+    sortdict=flip_sorter(config.querystring)
+    console.log sortdict
+    #sortstring=sortdict.fout+":"+sortdict.aout
+    $('#sortby').text(sortdict.ftext)
+    $('#sortasc').html(sortdict.atext)
+    $('#sortasc').click (e)->
+        e.preventDefault()
+        window.location=nonqloc+"?"+sortdict.oqs+"&"+'sort='+sortdict.fnow+':'+sortdict.aout
+    $('#sortby').click (e)->
+        e.preventDefault()
+        window.location=nonqloc+"?"+sortdict.oqs+"&"+'sort='+sortdict.fout+':'+sortdict.anow
 
 root.postablefilter =
     do_postable_info: do_postable_info

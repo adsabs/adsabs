@@ -317,7 +317,7 @@
             });
         }
         //one more case remains when we dont want to ajax submit but add to tags array for item
-        return true;   
+        return true;
     }
 
     Tags.prototype.removeTag = function(tag) {

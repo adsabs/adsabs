@@ -68,7 +68,6 @@
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
-          console.log(loc);
           return window.location = loc;
         };
       })(this);
@@ -103,7 +102,6 @@
 
     PostableListView.prototype.render = function() {
       var $widget, rendered, u, v, views;
-      console.log(this.owner, this.ownerfqin, this.fqpn);
       views = (function() {
         var _results;
         _results = [];
@@ -162,9 +160,7 @@
 
   get_info = function(sections, config) {
     var cback, eback;
-    cback = function() {};
-    eback = function() {};
-    return $.get(config.infoURL, function(data) {
+    $.get(config.infoURL, function(data) {
       var content, ownerfqin;
       content = views.group_info(config.owner, data, templates.group_info);
       ownerfqin = data.group.owner;
@@ -192,6 +188,16 @@
           });
         }
       });
+    });
+    cback = function() {
+      return window.location = config.postablesURL;
+    };
+    eback = function() {
+      return alert("An error occurred in deletion");
+    };
+    return $('#postabledeleter').click(function(e) {
+      e.preventDefault();
+      return syncs.delete_membable(config.fqpn, cback, eback);
     });
   };
 

@@ -877,6 +877,19 @@ def memberremove():
         g.db.removeMemberableFromMembable(g.currentuser, useras, fqpn, member)
         return jsonify({'status':'OK'})
 
+@adsgut.route('/membableremove', methods=['POST'])
+def membableremove():
+    ##useras?/name/itemtype
+    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
+    if request.method=='POST':
+        jsonpost=dict(request.json)
+        fqpn = _dictp('fqpn', jsonpost)
+        useras = _userpostget(g, jsonpost)
+        if fqpn is None:
+            doabort("BAD_REQ", "No membable specified for  removal")
+        g.db.removeMembable(g.currentuser, useras, fqpn)
+        return jsonify({'status':'OK'})
+
 #######################################################################################################################
 #######################################################################################################################
 def postable(ownernick, name, ptstr):
@@ -1373,7 +1386,6 @@ def tagsForItem(ns, itemname):
             #print "TAGSPEC IS", tagspec
             i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
             newtaggings.append(td)
-
         #returning the taggings requires a commit at this point
         # taggings={'status':'OK', 'info':{'item': i.basic.fqin, 'tagging':newtaggings}}
         # taggingsdict={}

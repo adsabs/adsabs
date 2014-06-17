@@ -123,10 +123,7 @@ make_editable_description = ($infodiv, fqpn) ->
       $infodiv.find('.edtext').editable('toggle')
 
 get_info = (sections, config) ->
-    cback = () ->
-        #console.log "cback"
-    eback = () ->
-        #console.log "eback"
+
     $.get config.infoURL, (data) ->
         content=views.library_info config.owner, data, templates.library_info
         ownerfqin=data.library.owner
@@ -171,6 +168,14 @@ get_info = (sections, config) ->
         else
             sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>")
             sections.$membersdiv.show()
+    #deletion
+    cback = () ->
+        window.location=config.postablesURL
+    eback = () ->
+        alert "An error occurred in deletion"
+    $('#postabledeleter').click (e)->
+        e.preventDefault()
+        syncs.delete_membable(config.fqpn, cback, eback)
 
 root.libraryprofile=
     PostableView: PostableView

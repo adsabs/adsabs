@@ -42,6 +42,11 @@
   <p>The user's invitation will show on the user's "Libraries" page (this action will NOT be sending email to them). If the user accepts the invitation, they will be able to read the library's items. Additionally, if you clicked the "Can Post" checkbox, they will also be able to post items into the library.</p>
   </div>
   <div id="inviteds" style="display:none"></div>
+  <div>
+      <h4> Delete this library </h4>
+      <p> This is the point of no-return. You will loose everything you have saved in this library, and so will its other users. Things saved in the library are copied into your saved items, however, so the items themselves wont be lost, while the context is. </p>
+      <p><a class='btn btn-danger' id="postabledeleter">DELETE</a></p>
+  </div>
   {% endif %}
 {% endblock %}
 {% block coffeescript %}
@@ -51,6 +56,7 @@ $ ->
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   config =
     fqpn : '{{ thepostable.basic.fqin}}'
+    postablesURL: "#{prefix}/user/{{ useras.nick }}/profile/html"
     infoURL : "#{prefix}/library/{{ thepostable.basic.fqin}}"
     membersURL : "#{prefix}/library/{{ thepostable.basic.fqin}}/members"
     invitedsURL : "#{prefix}/library/{{ thepostable.basic.fqin}}/inviteds"

@@ -39,8 +39,7 @@
     };
 
     PostableView.prototype.initialize = function(options) {
-      this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin;
-      return console.log("PVIN", this.rwmode, this.memberable, this.fqpn, this.username);
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.owner = options.owner, this.username = options.username, this.ownerfqin = options.ownerfqin, options;
     };
 
     PostableView.prototype.render = function() {
@@ -93,7 +92,6 @@
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
-          console.log(loc);
           return window.location = loc;
         };
       })(this);
@@ -186,9 +184,7 @@
 
   get_info = function(sections, config) {
     var cback, eback;
-    cback = function() {};
-    eback = function() {};
-    return $.get(config.infoURL, function(data) {
+    $.get(config.infoURL, function(data) {
       var content, ownerfqin;
       content = views.library_info(config.owner, data, templates.library_info);
       ownerfqin = data.library.owner;
@@ -238,6 +234,16 @@
         sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>");
         return sections.$membersdiv.show();
       }
+    });
+    cback = function() {
+      return window.location = config.postablesURL;
+    };
+    eback = function() {
+      return alert("An error occurred in deletion");
+    };
+    return $('#postabledeleter').click(function(e) {
+      e.preventDefault();
+      return syncs.delete_membable(config.fqpn, cback, eback);
     });
   };
 

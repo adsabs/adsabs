@@ -355,7 +355,6 @@
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
-          console.log(loc);
           return window.location = loc;
         };
       })(this);

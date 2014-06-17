@@ -102,10 +102,7 @@ make_editable_description = ($infodiv, fqpn) ->
 
 # {{ inviteform.changerw }} <label class="checkbox">Can Post?</label>
 get_info = (sections, config) ->
-    cback = () ->
-        #console.log "cback"
-    eback = () ->
-        #console.log "eback"
+
     $.get config.infoURL, (data) ->
         content=views.group_info config.owner, data, templates.group_info
         ownerfqin=data.group.owner
@@ -126,6 +123,14 @@ get_info = (sections, config) ->
                     content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, true
                     sections.$invitedsdiv.append(content)
                     sections.$invitedsdiv.show()
+
+    cback = () ->
+        window.location=config.postablesURL
+    eback = () ->
+        alert "An error occurred in deletion"
+    $('#postabledeleter').click (e)->
+        e.preventDefault()
+        syncs.delete_membable(config.fqpn, cback, eback)
 
 root.groupprofile=
     PostableView: PostableView
