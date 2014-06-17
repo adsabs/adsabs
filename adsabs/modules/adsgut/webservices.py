@@ -1139,6 +1139,8 @@ def csvItemsForPostable(po, pt, pn):
         for t in i['tags']:
             l=s+","+t
             csvstring=csvstring+l+"\n"
+        if len(i['tags'])==0:
+            csvstring=csvstring+s+",\n"
     return Response(csvstring, mimetype='text/csv')
 
 @adsgut.route('/library/<libraryowner>/library:<libraryname>/items')
