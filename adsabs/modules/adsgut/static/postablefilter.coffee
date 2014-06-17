@@ -101,17 +101,18 @@ do_postable_filter = (sections, config, tagfunc) ->
 
                 #console.log JSON.stringify(tagoutput)
                 sections.$asjson.click (e)->
-                    data = JSON.stringify(tagoutput)
-                    window.document.write(data)
-                    #window.location.href = "data:application/json;base64," + data
+                    #data = JSON.stringify(tagoutput)
+                    #window.document.write(data)
+                    #alert(config.jsonPURL)
+                    window.location.href = config.jsonPURL
                     e.preventDefault()
                 sections.$ascsv.click (e)->
-                    data = csvstringify(tagoutput)
+                    #data = csvstringify(tagoutput)
                     #window.document.write()
                     #console.log "data", data
                     #window.location.href = "data:text/csv;base64," + data
                     #towrite = "Content-Type: text/csv\n" + data
-                    window.document.write("<pre>"+data+"</pre>")
+                    window.location.href = config.csvPURL
                     e.preventDefault()
                 postings={}
                 times={}

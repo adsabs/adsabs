@@ -166,11 +166,12 @@
     }
   };
 
-  format_tags_for_item = function(fqin, stags, memberable, tagajax) {
-    var t, t2list;
+  format_tags_for_item = function(pview, fqin, stags, memberable, tagajax) {
+    var pviewbool, t, t2list;
     if (tagajax == null) {
       tagajax = true;
     }
+    pviewbool = pview === 'none';
     t2list = (function() {
       var _i, _len, _ref, _results;
       _ref = stags[fqin];

@@ -1081,6 +1081,66 @@ def itemsForPostable(po, pt, pn):
             q, usernick, criteria, sort, pagtuple)
         return jsonify({'items':items, 'count':count, 'postable':postable})
 
+@adsgut.route('/postable/<po>/<pt>:<pn>/json', methods=['GET'])
+def jsonItemsForPostable(po, pt, pn):
+    #userthere/[fqins]
+    #q={sort?, pagtuple?, criteria?, postable}
+    query=dict(request.args)
+    useras, usernick=_userget(g, query)
+    #BUG find a way of having the usernick in this context be from elsewhere
+    #the elsewhere would come from postings and taggings, and confine to this group
+    #perhaps all the query funcs would need some re-org
+    #print "QQQ",query, request.args
+    #need to pop the other things like pagetuples etc. Helper funcs needed
+    sort = _sortget(query)
+    pagtuple = _pagtupleget(query)
+    #pagtuple=(2,1)
+    criteria= _criteriaget(query)
+    postable= po+"/"+pt+":"+pn
+    q=_queryget(query)
+    #print "Q is", q
+    if not q.has_key('postables'):
+        q['postables']=[]
+    q['postables'].append(postable)
+    #print "Q is", q, query, useras, usernick
+    #By this time query is popped down
+    count, items=g.dbp.getItemsForQueryWithTags(g.currentuser, useras,
+        q, usernick, criteria, sort, pagtuple)
+    return jsonify({'items':items, 'count':count, 'postable':postable})
+
+@adsgut.route('/postable/<po>/<pt>:<pn>/csv', methods=['GET'])
+def csvItemsForPostable(po, pt, pn):
+    #userthere/[fqins]
+    #q={sort?, pagtuple?, criteria?, postable}
+    query=dict(request.args)
+    useras, usernick=_userget(g, query)
+    #BUG find a way of having the usernick in this context be from elsewhere
+    #the elsewhere would come from postings and taggings, and confine to this group
+    #perhaps all the query funcs would need some re-org
+    #print "QQQ",query, request.args
+    #need to pop the other things like pagetuples etc. Helper funcs needed
+    sort = _sortget(query)
+    pagtuple = _pagtupleget(query)
+    #pagtuple=(2,1)
+    criteria= _criteriaget(query)
+    postable= po+"/"+pt+":"+pn
+    q=_queryget(query)
+    #print "Q is", q
+    if not q.has_key('postables'):
+        q['postables']=[]
+    q['postables'].append(postable)
+    #print "Q is", q, query, useras, usernick
+    #By this time query is popped down
+    count, items=g.dbp.getItemsForQueryWithTags(g.currentuser, useras,
+        q, usernick, criteria, sort, pagtuple)
+    csvstring="#count="+str(count)+",postable="+postable+"\n"
+    for i in items:
+        s=i['basic']['name']
+        for t in i['tags']:
+            l=s+","+t
+            csvstring=csvstring+l+"\n"
+    return Response(csvstring, mimetype='text/csv')
+
 @adsgut.route('/library/<libraryowner>/library:<libraryname>/items')
 def libraryItems(libraryowner, libraryname):
     return itemsForPostable(libraryowner, "library", libraryname)

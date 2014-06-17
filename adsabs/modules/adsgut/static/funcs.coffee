@@ -141,7 +141,9 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
 #   else
 #     return ""
 
-format_tags_for_item = (fqin, stags, memberable, tagajax=true) ->
+format_tags_for_item = (pview, fqin, stags, memberable, tagajax=true) ->
+  #console.log(pview, ">>>",memberable.adsid, stags[fqin])
+  pviewbool = (pview == 'none')
   t2list=({url:"#{prefix}/postable/#{memberable.nick}/library:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
   #console.log("T@LIST", t2list)
   if t2list.length >0

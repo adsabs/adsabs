@@ -158,13 +158,11 @@
             }
           }
           sections.$asjson.click(function(e) {
-            data = JSON.stringify(tagoutput);
-            window.document.write(data);
+            window.location.href = config.jsonPURL;
             return e.preventDefault();
           });
           sections.$ascsv.click(function(e) {
-            data = csvstringify(tagoutput);
-            window.document.write("<pre>" + data + "</pre>");
+            window.location.href = config.csvPURL;
             return e.preventDefault();
           });
           postings = {};

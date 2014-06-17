@@ -149,7 +149,7 @@ class ItemView extends Backbone.View
     content = ''
     content = content + htmlstring
     #additional = format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
-    thetags = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable, @tagajaxsubmit)
+    thetags = format_tags_for_item(@pview, fqin, cdict(fqin,@stags), @memberable, @tagajaxsubmit)
     additional = "<span class='tagls'></span><br/>"
     thepostings = format_postings_for_item(fqin, cdict(fqin, (p[0] for p in @postings)), @memberable.nick)
     additionalpostings = "<strong>In Libraries</strong>: <span class='postls'>#{thepostings.join(', ')}</span><br/>"

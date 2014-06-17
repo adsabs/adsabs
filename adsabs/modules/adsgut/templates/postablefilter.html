@@ -86,6 +86,8 @@ $ ->
     fqpn : "{{p.basic.fqin}}"
     infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    jsonPURL : "{{ url_for('adsgut.jsonItemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
+    csvPURL : "{{ url_for('adsgut.csvItemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     itPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
     itURL : "{{ url_for('adsgut.itemsTaggings') }}"

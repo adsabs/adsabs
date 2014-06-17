@@ -203,7 +203,7 @@
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
-      thetags = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable, this.tagajaxsubmit);
+      thetags = format_tags_for_item(this.pview, fqin, cdict(fqin, this.stags), this.memberable, this.tagajaxsubmit);
       additional = "<span class='tagls'></span><br/>";
       thepostings = format_postings_for_item(fqin, cdict(fqin, (function() {
         var _i, _len, _ref1, _results;

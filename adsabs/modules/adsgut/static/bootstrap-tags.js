@@ -292,7 +292,9 @@
                 "overflow": "hidden",
                 "white-space": "nowrap"
             });
-
+        if (value.by == true){
+            tag.attr("class", "badge badge-success tag-badge");
+        }
         tag = $self.options.onBeforeAdd(tag, value);
         if ($self.values_done===false) {
             pills_list.append(tag);
