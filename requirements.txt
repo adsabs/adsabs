@@ -49,4 +49,4 @@ ordereddict
 -e git+https://github.com/adsabs/adsdata.git#egg=adsdata
 -e git+https://github.com/MongoEngine/mongoengine.git@0.8#egg=mongoengine
 -e git+https://github.com/rahuldave/flask-mongoengine.git#egg=flask-mongoengine
--e git+https://github.com/rahuldave/mongogut.git@newworld3#egg=mongogut
+-e git+https://github.com/rahuldave/mongogut.git@newworld4#egg=mongogut
