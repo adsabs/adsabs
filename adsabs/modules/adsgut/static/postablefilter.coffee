@@ -4,9 +4,9 @@ $=jQuery
 h = teacup
 
 flip_sorter = (qstr) ->
-    console.log "qstring", qstr
+    #console.log "qstring", qstr
     qlist=qstr.split('&')
-    console.log "qlist", qlist
+    #console.log "qlist", qlist
     sortstring=""
     otherqlist=[]
     for q in qlist
@@ -122,7 +122,10 @@ do_postable_filter = (sections, config, tagfunc) ->
         $.get config.itemsPURL, (data) ->
             theitems=data.items
             #console.log("THEITEMS", theitems)
-            sections.$count.text("#{theitems.length} papers. ")
+            if theitems.length ==1
+                sections.$count.text("#{theitems.length} paper. ")
+            else
+                sections.$count.text("#{theitems.length} papers. ")
             sections.$count.show()
             thecount=data.count
             #itemlist=("items=#{encodeURIComponent(i.basic.fqin)}" for i in theitems)
@@ -196,6 +199,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                     memberable:config.memberable
                     suggestions : suggestions
                     pview: config.pview
+                    pviewowner: config.owner
                     tagfunc: tagfunc
                 plinv=new itemsdo.ItemsFilterView(ido)
                 plinv.render()
@@ -229,7 +233,7 @@ do_postable_filter = (sections, config, tagfunc) ->
         sections.$ua.attr('href', urla)
         sections.$ua.attr('data', 'on')
     sortdict=flip_sorter(config.querystring)
-    console.log sortdict
+    #console.log sortdict
     #sortstring=sortdict.fout+":"+sortdict.aout
     $('#sortby').text(sortdict.ftext)
     $('#sortasc').html(sortdict.atext)

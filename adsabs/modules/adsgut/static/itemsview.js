@@ -61,8 +61,9 @@
   };
 
   remIndiv = function(pill) {
-    var cback, eback, tag;
+    var cback, eback, fqtn, tag;
     tag = $(pill).attr('data-tag-id');
+    fqtn = $(pill).attr('data-tag-fqtn');
     if (!this.tagajaxsubmit) {
       return this.remove_from_tags(tag);
     } else {
@@ -74,7 +75,7 @@
       cback = (function(_this) {
         return function(data) {};
       })(this);
-      return syncs.remove_tagging(this.item.basic.fqin, tag, this.pview, cback, eback);
+      return syncs.remove_tagging(this.item.basic.fqin, tag, fqtn, this.pview, cback, eback);
     }
   };
 
@@ -135,7 +136,7 @@
 
     ItemView.prototype.initialize = function(options) {
       var _ref;
-      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner;
       this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
@@ -186,7 +187,7 @@
     };
 
     ItemView.prototype.render = function() {
-      var additional, additionalpostings, adslocation, content, deleter, fqin, htmlstring, jslist, p, tagdict, thepostings, thetags, url, _ref;
+      var additional, additionalpostings, adslocation, can_delete, content, deleter, fqin, htmlstring, jslist, p, tagdict, thepostings, thetags, url, _ref;
       this.$el.empty();
       adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
@@ -219,8 +220,14 @@
       additional = additional + additionalpostings;
       content = content + additional;
       this.$el.append(content);
+      if (this.pviewowner === 'none') {
+        can_delete = false;
+      } else {
+        can_delete = this.pviewowner;
+      }
       tagdict = {
         values: thetags,
+        can_delete: can_delete,
         enhanceValue: _.bind(enval, this),
         addWithAjax: _.bind(addwa, this),
         addWithoutAjax: _.bind(addwoa, this),
@@ -474,7 +481,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner;
       this.newposts = [];
       this.tagajaxsubmit = false;
       return this.submittable = {
@@ -579,6 +586,7 @@
           tagajaxsubmit: this.tagajaxsubmit,
           suggestions: this.suggestions,
           pview: this.pview,
+          pviewowner: 'none',
           counter: counter,
           submittable: this.submittable
         };
@@ -856,7 +864,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.tagfunc = options.tagfunc;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.tagfunc = options.tagfunc;
       return this.submittable = {
         state: true
       };
@@ -880,6 +888,7 @@
           tagajaxsubmit: true,
           suggestions: this.suggestions,
           pview: this.pview,
+          pviewowner: this.pviewowner,
           tagfunc: this.tagfunc,
           counter: counter,
           submittable: this.submittable

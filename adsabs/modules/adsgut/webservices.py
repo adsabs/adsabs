@@ -1429,8 +1429,12 @@ def tagsRemoveForItem(ns, itemname):
         tagname=_dictp('tagname', jsonpost)
         tagtype=_dictp('tagtype', jsonpost)
         fqpn = _dictp('fqpn',jsonpost)
+        fqtn = _dictp('fqtn',jsonpost)
         #will use useras for the namespace as u should only be removing your own stuff
-        fqtn = useras.nick+'/'+tagtype+":"+tagname
+        #BUG:does not work if not your tag
+        print "FQTN is", fqtn, useras.nick+'/'+tagtype+":"+tagname
+        if fqtn==None:#nothing was sent over the wire
+            fqtn = useras.nick+'/'+tagtype+":"+tagname
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
         #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context

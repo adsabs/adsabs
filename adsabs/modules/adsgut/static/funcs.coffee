@@ -144,7 +144,7 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
 format_tags_for_item = (pview, fqin, stags, memberable, tagajax=true) ->
   #console.log(pview, ">>>",memberable.adsid, stags[fqin])
   pviewbool = (pview == 'none')
-  t2list=({url:"#{prefix}/postable/#{memberable.nick}/library:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
+  t2list=({url:"#{prefix}/postable/#{memberable.nick}/library:default/filter/html?query=tagname:#{t[0]}&query=tagtype:#{t[1]}", text:"#{t[0]}", id:"#{t[0]}", fqtn: t[3], by: if tagajax then (memberable.adsid==t[2]) else false} for t in stags[fqin])
   #console.log("T@LIST", t2list)
   if t2list.length >0
     return t2list
@@ -230,12 +230,12 @@ get_taggings = (data) ->
     if v[0] > 0
       if data.fqpn is null or data.fqpn is undefined
         #console.log "here"
-        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby] for e in combi when e[0].posting.posttype is "ads/tagtype:tag")
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.posttype is "ads/tagtype:note")
+        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby, e[0].posting.postfqin] for e in combi when e[0].posting.posttype is "ads/tagtype:tag")
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2], e[0].posting.postfqin] for e in combi when e[0].posting.posttype is "ads/tagtype:note")
       else
         #console.log "there"
-        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby] for e in combi when e[0].posting.posttype is "ads/tagtype:tag" and e[2] is true)
-        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]] for e in combi when e[0].posting.posttype is "ads/tagtype:note"  and (e[2] is true or e[0].posting.tagmode is '1'))
+        stags[k]=([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby, e[0].posting.postfqin] for e in combi when e[0].posting.posttype is "ads/tagtype:tag" and e[2] is true)
+        notes[k]=([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2], e[0].posting.postfqin] for e in combi when e[0].posting.posttype is "ads/tagtype:note"  and (e[2] is true or e[0].posting.tagmode is '1'))
     else
       stags[k]=[]
       notes[k]=[]

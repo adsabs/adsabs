@@ -47,6 +47,7 @@ addwoa = (tag, cback) ->
 
 remIndiv = (pill) ->
     tag = $(pill).attr('data-tag-id')
+    fqtn = $(pill).attr('data-tag-fqtn')
     #console.log "TAGALOG", @pview, @tagajaxsubmit
     if not @tagajaxsubmit
         #console.log "OLDNEWTAGS1", @tagajaxsubmit, @newtags
@@ -56,7 +57,8 @@ remIndiv = (pill) ->
         eback = (xhr, etext) =>
             alert 'Did not succeed'
         cback = (data) =>
-        syncs.remove_tagging(@item.basic.fqin, tag, @pview, cback, eback)
+        
+        syncs.remove_tagging(@item.basic.fqin, tag, fqtn, @pview, cback, eback)
 
 time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
@@ -88,7 +90,7 @@ class ItemView extends Backbone.View
     "click .removeitem" : "removeItem"
 
   initialize: (options) ->
-    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
+    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview, @pviewowner} = options
     @tagsfunc = options.tagfunc ? () ->
     #console.log "PVIN",  @memberable, @postings
     @hv=undefined
@@ -132,6 +134,7 @@ class ItemView extends Backbone.View
     #console.log "NN2", @newnotes
 
   render: =>
+    #console.log "STAGS", @stags
     @$el.empty()
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
@@ -157,8 +160,14 @@ class ItemView extends Backbone.View
     content = content + additional
     @$el.append(content)
     #console.log "THETAGS", thetags, @memberable
+    #console.log @pview, @pviewowner
+    if @pviewowner=='none'
+        can_delete = false
+    else
+        can_delete = @pviewowner
     tagdict =
         values: thetags
+        can_delete: can_delete
         enhanceValue: _.bind(enval, this)
         addWithAjax: _.bind(addwa, this)
         addWithoutAjax: _.bind(addwoa, this)
@@ -359,7 +368,7 @@ class ItemsView extends Backbone.View
     "click .libsub" : "subNewLib"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview, @pviewowner} = options
     @newposts=[]
     #console.log "PVIEW", @pview
     @tagajaxsubmit = false
@@ -420,6 +429,7 @@ class ItemsView extends Backbone.View
             tagajaxsubmit: @tagajaxsubmit
             suggestions: @suggestions
             pview: @pview
+            pviewowner: 'none'
             counter: counter
             submittable: @submittable
         v=new ItemView(ins)
@@ -624,7 +634,7 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @pviewowner, @tagfunc} = options
     #console.log "PVIEW", @pview, @postings
     #console.log "ITEMS", @items, @suggestions
     @submittable =
@@ -646,6 +656,7 @@ class ItemsFilterView extends Backbone.View
             tagajaxsubmit: true
             suggestions: @suggestions
             pview: @pview
+            pviewowner: @pviewowner
             tagfunc: @tagfunc
             counter: counter
             submittable: @submittable

@@ -257,7 +257,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
-  remove_tagging = function(item, tagname, ctxt, cback, eback) {
+  remove_tagging = function(item, tagname, fqtn, ctxt, cback, eback) {
     var data, tagtype, url;
     tagtype = "ads/tagtype:tag";
     url = prefix + "/tagsremove/" + item;
@@ -265,6 +265,10 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
+    if (fqtn !== void 0) {
+      console.log("FQTN IS", fqtn);
+      data.fqtn = fqtn;
+    }
     if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
     }

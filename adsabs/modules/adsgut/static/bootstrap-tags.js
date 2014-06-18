@@ -75,7 +75,7 @@
     function Tags(context, params) {
 
         this.options = $.extend(true, {}, defaults, params);
-
+        //console.log(this.options);
         var $self = this;
         $self.values_done = false;
         if($self.options.values_url) {
@@ -263,7 +263,7 @@
         value = $self.options.enhanceValue(value);
 
         var icon = '';
-        if(value.by==true && $self.options.can_delete) {
+        if(value.by==true || $self.options.can_delete) {
             icon = $(document.createElement('a'))
                 .attr({
                     "href": "javascript:void(0)",
@@ -280,6 +280,7 @@
 
         var tag = $($self.options.templates.pill.format(value.text))
             .attr('data-tag-id', value.id)
+            .attr('data-tag-fqtn', value.fqtn)
             .append(num, icon, $(document.createElement('input'))
                 .attr({
                     "data-tag-hidden": value.id,

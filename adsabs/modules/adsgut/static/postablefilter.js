@@ -12,9 +12,7 @@
 
   flip_sorter = function(qstr) {
     var a, aout, atext, f, fout, ftext, n, odict, otherqlist, q, qlist, sortstring, _i, _len, _ref;
-    console.log("qstring", qstr);
     qlist = qstr.split('&');
-    console.log("qlist", qlist);
     sortstring = "";
     otherqlist = [];
     for (_i = 0, _len = qlist.length; _i < _len; _i++) {
@@ -166,7 +164,11 @@
       return $.get(config.itemsPURL, function(data) {
         var biblist, bibstring, i, itemlist, itemsq, thecount, theitems;
         theitems = data.items;
-        sections.$count.text("" + theitems.length + " papers. ");
+        if (theitems.length === 1) {
+          sections.$count.text("" + theitems.length + " paper. ");
+        } else {
+          sections.$count.text("" + theitems.length + " papers. ");
+        }
         sections.$count.show();
         thecount = data.count;
         itemlist = (function() {
@@ -271,6 +273,7 @@
             memberable: config.memberable,
             suggestions: suggestions,
             pview: config.pview,
+            pviewowner: config.owner,
             tagfunc: tagfunc
           };
           plinv = new itemsdo.ItemsFilterView(ido);
@@ -331,7 +334,6 @@
       sections.$ua.attr('data', 'on');
     }
     sortdict = flip_sorter(config.querystring);
-    console.log(sortdict);
     $('#sortby').text(sortdict.ftext);
     $('#sortasc').html(sortdict.atext);
     $('#sortasc').click(function(e) {

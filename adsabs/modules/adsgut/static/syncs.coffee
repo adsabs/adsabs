@@ -207,12 +207,15 @@ remove_note = (item, tagname, ctxt, cback, eback) ->
         data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
-remove_tagging = (item, tagname, ctxt, cback, eback) ->
+remove_tagging = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     url= prefix+"/tagsremove/"+item
     data=
         tagtype: tagtype
         tagname: tagname
+    if fqtn!=undefined
+        console.log "FQTN IS", fqtn
+        data.fqtn = fqtn
     #console.log "ctxt is", ctxt
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt

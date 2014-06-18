@@ -182,6 +182,7 @@
           url: "" + prefix + "/postable/" + memberable.nick + "/library:default/filter/html?query=tagname:" + t[0] + "&query=tagtype:" + t[1],
           text: "" + t[0],
           id: "" + t[0],
+          fqtn: t[3],
           by: tagajax ? memberable.adsid === t[2] : false
         });
       }
@@ -291,7 +292,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.posttype === "ads/tagtype:tag") {
-                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby]);
+                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby, e[0].posting.postfqin]);
               }
             }
             return _results;
@@ -302,7 +303,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.posttype === "ads/tagtype:note") {
-                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2], e[0].posting.postfqin]);
               }
             }
             return _results;
@@ -314,7 +315,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.posttype === "ads/tagtype:tag" && e[2] === true) {
-                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby]);
+                _results.push([e[0].posting.tagname, e[0].posting.posttype, e[0].posting.postedby, e[0].posting.postfqin]);
               }
             }
             return _results;
@@ -325,7 +326,7 @@
             for (_i = 0, _len = combi.length; _i < _len; _i++) {
               e = combi[_i];
               if (e[0].posting.posttype === "ads/tagtype:note" && (e[2] === true || e[0].posting.tagmode === '1')) {
-                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2]]);
+                _results.push([e[0].posting.tagdescription, e[0].posting.whenposted, e[0].posting.postedby, e[0].posting.tagmode, e[1], e[0].posting.tagname, e[2], e[0].posting.postfqin]);
               }
             }
             return _results;
