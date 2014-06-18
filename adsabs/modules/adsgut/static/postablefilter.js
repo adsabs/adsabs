@@ -162,7 +162,7 @@
   do_postable_filter = function(sections, config, tagfunc) {
     var loc, nonqloc, sortdict, urla;
     tagfunc();
-    $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag&fqpn=" + config.fqpn, function(data) {
+    $.get("" + config.tagsucwtURL + "?tagtype=ads/tagtype:tag", function(data) {
       var e, qtxtlist, suggestions, _i, _len;
       suggestions = data.simpletags;
       qtxtlist = parse_querystring(config.querystring);

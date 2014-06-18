@@ -120,8 +120,9 @@ do_postable_filter = (sections, config, tagfunc) ->
     #     for own k,v of data.tags
     #         format_tags(k, sections.$tagssec, get_tags(v, config.tqtype), config.tqtype)
     #do_tags(config.tagsPURL, sections.$tagssec, config.tqtype)
+    #$.get "#{config.tagsucwtURL}?tagtype=ads/tagtype:tag&fqpn=#{config.fqpn}", (data) ->
     tagfunc()
-    $.get "#{config.tagsucwtURL}?tagtype=ads/tagtype:tag&fqpn=#{config.fqpn}", (data) ->
+    $.get "#{config.tagsucwtURL}?tagtype=ads/tagtype:tag", (data) ->
         suggestions=data.simpletags
         #console.log "SUGG", suggestions, config.fqpn
         qtxtlist = parse_querystring(config.querystring)
