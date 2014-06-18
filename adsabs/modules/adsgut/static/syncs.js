@@ -240,7 +240,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     }
   };
 
-  remove_note = function(item, tagname, ctxt, cback, eback) {
+  remove_note = function(item, tagname, fqtn, ctxt, cback, eback) {
     var data, tagtype, url;
     tagtype = "ads/tagtype:note";
     url = prefix + "/tagsremove/" + item;
@@ -248,6 +248,9 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
+    if (fqtn !== void 0) {
+      data.fqtn = fqtn;
+    }
     if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
     }
@@ -266,7 +269,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagname: tagname
     };
     if (fqtn !== void 0) {
-      console.log("FQTN IS", fqtn);
       data.fqtn = fqtn;
     }
     if (ctxt !== 'udg' && ctxt !== 'none') {

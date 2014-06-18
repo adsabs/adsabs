@@ -124,19 +124,32 @@
     }
   };
 
-  format_row = function(noteid, notetext, notemode, notetime, user, currentuser, truthiness, pview) {
+  format_row = function(noteid, notetext, notemode, notetime, user, currentuser, truthiness, pview, fqtn, can_delete) {
     var lock, nmf, nt, outstr, tf, uf;
     tf = time_format(notetime);
     uf = user === currentuser ? 'me' : email_split(user);
     lock = "<i class='icon-lock'></i>&nbsp;&nbsp;";
     nmf = notemode === '1' ? lock : '';
     nt = this_postable(truthiness, pview);
+    if ((pview === 'udg' || pview === 'none') && uf !== 'me') {
+      return "";
+    }
     outstr = "<tr><td style='white-space: nowrap;'>" + tf + "</td><td style='text-align: right;'>" + uf + "&nbsp;&nbsp;</td><td>" + nmf + nt + "</td><td class='notetext'>" + notetext + "</td>";
+    if (pview === 'none') {
+      outstr = outstr + "<td></td></tr>";
+      return outstr;
+    }
     if (uf === 'me') {
       if (pview !== 'udg' && notemode === '1') {
         outstr = outstr + "<td></td></tr>";
       } else {
-        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="' + noteid + '"><i class="icon-remove-circle"></i></btn></td></tr>';
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" data-fqtn="' + fqtn + '" id="' + noteid + '"><i class="icon-remove-circle"></i></btn></td></tr>';
+      }
+    } else if (can_delete === true) {
+      if (pview !== 'udg' && notemode === '1') {
+        outstr = outstr + "<td></td></tr>";
+      } else {
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" data-fqtn="' + fqtn + '" id="' + noteid + '"><i class="icon-remove-circle"></i></btn></td></tr>';
       }
     } else {
       outstr = outstr + "<td></td></tr>";
@@ -144,7 +157,7 @@
     return outstr;
   };
 
-  format_notes_for_item = function(fqin, notes, currentuser, pview) {
+  format_notes_for_item = function(fqin, notes, currentuser, pview, can_delete) {
     var end, lock, start, t, t3list;
     start = '<table class="table-condensed table-striped">';
     end = "</table>";
@@ -155,7 +168,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         t = _ref[_i];
-        _results.push(format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview));
+        _results.push(format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview, t[7], can_delete));
       }
       return _results;
     })();

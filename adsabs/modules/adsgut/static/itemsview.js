@@ -268,7 +268,7 @@
         } else {
           this.$el.append("<p class='notes'></p>");
         }
-        this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable.adsid, this.pview));
+        this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable.adsid, this.pview, can_delete));
       }
       this.$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>');
       return this;
@@ -376,7 +376,7 @@
     };
 
     ItemView.prototype.removeNote = function(e) {
-      var $target, cback, eback, item, itemname, notetext, tagname;
+      var $target, cback, eback, fqtn, item, itemname, notetext, tagname;
       item = this.item.basic.fqin;
       itemname = this.item.basic.name;
       $target = $(e.currentTarget);
@@ -393,7 +393,8 @@
       })(this);
       if (this.tagajaxsubmit) {
         tagname = $target.attr('id');
-        syncs.remove_note(item, tagname, this.pview, cback, eback);
+        fqtn = $target.attr('data-fqtn');
+        syncs.remove_note(item, tagname, fqtn, this.pview, cback, eback);
       } else {
         notetext = $target.parents("tr").find("td.notetext").text();
         this.remove_notes(notetext);

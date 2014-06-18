@@ -195,12 +195,15 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
     if tag != ""
         send_params(url, data, cback, eback)
 
-remove_note = (item, tagname, ctxt, cback, eback) ->
+remove_note = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:note"
     url= prefix+"/tagsremove/"+item
     data=
         tagtype: tagtype
         tagname: tagname
+    if fqtn!=undefined
+        #console.log "FQTN IS", fqtn
+        data.fqtn = fqtn
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
@@ -214,7 +217,7 @@ remove_tagging = (item, tagname, fqtn, ctxt, cback, eback) ->
         tagtype: tagtype
         tagname: tagname
     if fqtn!=undefined
-        console.log "FQTN IS", fqtn
+        #console.log "FQTN IS", fqtn
         data.fqtn = fqtn
     #console.log "ctxt is", ctxt
     if ctxt not in ['udg', 'none']

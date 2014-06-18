@@ -102,24 +102,34 @@ this_postable = (pval, pview) ->
     pble = ''
     return pble
 
-format_row = (noteid, notetext, notemode, notetime, user, currentuser, truthiness, pview) ->
+format_row = (noteid, notetext, notemode, notetime, user, currentuser, truthiness, pview, fqtn, can_delete) ->
   tf = time_format(notetime)
   uf = if user==currentuser then 'me' else email_split(user)
   lock  =  "<i class='icon-lock'></i>&nbsp;&nbsp;"
   nmf = if notemode is '1' then lock else ''
   nt = this_postable(truthiness, pview)
-  #console.log "noteid is", noteid, pview, notemode
+  #console.log "noteid is", noteid, pview, notemode, user, currentuser, notetext
+  if pview in ['udg','none'] and uf!='me'
+      return ""
   outstr = "<tr><td style='white-space: nowrap;'>#{tf}</td><td style='text-align: right;'>#{uf}&nbsp;&nbsp;</td><td>#{nmf}#{nt}</td><td class='notetext'>#{notetext}</td>"
+  if pview=='none'
+      outstr=outstr+ "<td></td></tr>"
+      return outstr
   if uf=='me'
     if pview != 'udg' and notemode =='1'
         outstr = outstr + "<td></td></tr>"
     else
-        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" data-fqtn="'+fqtn+'" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
+  else if can_delete==true
+    if pview != 'udg' and notemode =='1'
+        outstr = outstr + "<td></td></tr>"
+    else
+        outstr = outstr + '<td><btn style="cursor:pointer;" class="removenote" data-fqtn="'+fqtn+'" id="'+noteid+'"><i class="icon-remove-circle"></i></btn></td></tr>'
   else
     outstr = outstr + "<td></td></tr>"
   return outstr
 
-format_notes_for_item = (fqin, notes, currentuser, pview) ->
+format_notes_for_item = (fqin, notes, currentuser, pview, can_delete) ->
   #console.log "current user is", currentuser, notes
   start = '<table class="table-condensed table-striped">'
   end = "</table>"
@@ -128,7 +138,7 @@ format_notes_for_item = (fqin, notes, currentuser, pview) ->
   #t3list=("<span>#{t[2]}:  #{t[0]}</span><br/>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{this_postable(t[4], pview)}#{t[0]}</td></tr>" for t in notes[fqin])
   #t3list=("<tr><td style='white-space: nowrap;'>#{time_format(t[1])}</td><td style='text-align: right;'>#{if t[2]==currentuser then 'me' else email_split(t[2])}&nbsp;&nbsp;</td><td>#{if t[3] is '1' then lock else ''}#{t[0]}</td></tr>" for t in notes[fqin])
-  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview) for t in notes[fqin])
+  t3list = ( format_row(t[5], t[0], t[3], t[1], t[2], currentuser, t[6], pview, t[7], can_delete) for t in notes[fqin])
   if t3list.length >0
     return start+t3list.join("")+end
   else

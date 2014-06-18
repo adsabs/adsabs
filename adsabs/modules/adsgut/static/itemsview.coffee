@@ -57,7 +57,7 @@ remIndiv = (pill) ->
         eback = (xhr, etext) =>
             alert 'Did not succeed'
         cback = (data) =>
-        
+
         syncs.remove_tagging(@item.basic.fqin, tag, fqtn, @pview, cback, eback)
 
 time_format_iv = (timestring) ->
@@ -201,7 +201,7 @@ class ItemView extends Backbone.View
         else
             @$el.append("<p class='notes'></p>")
         #console.log "NOTES", @notes
-        @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview))
+        @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview, can_delete))
     @$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>')
     return this
 
@@ -306,7 +306,8 @@ class ItemView extends Backbone.View
         alert 'Did not succeed'
     if @tagajaxsubmit
         tagname = $target.attr('id')
-        syncs.remove_note(item, tagname, @pview, cback, eback)
+        fqtn = $target.attr('data-fqtn')
+        syncs.remove_note(item, tagname, fqtn, @pview, cback, eback)
     else
         #console.log "NO AJAX IN NOTES", @therebenotes
         notetext = $target.parents("tr").find("td.notetext").text()
