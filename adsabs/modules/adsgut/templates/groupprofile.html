@@ -1,9 +1,10 @@
 {% extends "layout_local.html" %}
 {% block localbody %}
 <h3>Group {{thepostable.presentable_name(withoutclass=True)}}</h3>
+<hr/>
   <!--iframe width="100%" src="/group/{{ thepostable.basic.fqin}}"></iframe-->
   <div id="info" style="display:none"></div>
-  <br/><hr/>
+  <hr/>
   <h4>Members</h4><br/>
   <!--iframe width="100%" src="/group/{{ thepostable.basic.fqin}}/members"></iframe-->
   <p> Members of this group can post items into the group's library. </p>

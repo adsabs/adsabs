@@ -11,7 +11,7 @@
   h = teacup;
 
   flip_sorter = function(qstr) {
-    var a, aout, atext, f, fout, ftext, n, odict, otherqlist, q, qlist, sortstring, _i, _len, _ref;
+    var a, anowtext, aout, atext, f, fnowtext, fout, ftext, n, odict, otherqlist, q, qlist, sortstring, _i, _len, _ref;
     qlist = qstr.split('&');
     sortstring = "";
     otherqlist = [];
@@ -27,24 +27,30 @@
     if (sortstring !== '') {
       _ref = sortstring.split(':'), f = _ref[0], a = _ref[1];
       if (f === 'posting__thingtopostname') {
+        fnowtext = "by paper year";
         ftext = 'Sort By Post';
         fout = 'posting__whenposted';
       }
       if (f === 'posting__whenposted') {
+        fnowtext = "by posting time";
         ftext = 'Sort By Year';
         fout = 'posting__thingtopostname';
       }
       if (a === 'True') {
+        anowtext = "earliest first";
         atext = '<i class="icon-arrow-down"></i>';
         aout = 'False';
       }
       if (a === 'False') {
+        anowtext = "latest first";
         atext = '<i class="icon-arrow-up"></i>';
         aout = 'True';
       }
     } else {
       f = 'posting__whenposted';
       a = 'False';
+      fnowtext = "by posting time";
+      anowtext = "latest first";
       ftext = 'Sort By Year';
       atext = '<i class="icon-arrow-up"></i>';
       fout = 'posting__thingtopostname';
@@ -53,6 +59,8 @@
     odict = {
       fnow: f,
       anow: a,
+      fnowtext: fnowtext,
+      anowtext: anowtext,
       ftext: ftext,
       atext: atext,
       fout: fout,
@@ -76,7 +84,7 @@
   };
 
   parse_querystring = function(qstr) {
-    var q, qlist;
+    var n, q, q2list, qlist, _i, _len;
     qlist = qstr.split('&');
     qlist = _.difference(qlist, ['query=tagtype:ads/tagtype:tag']);
     qlist = (function() {
@@ -88,10 +96,18 @@
       }
       return _results;
     })();
-    if (qlist.length === 1 && qlist[0] === "") {
-      qlist = [];
+    q2list = [];
+    for (_i = 0, _len = qlist.length; _i < _len; _i++) {
+      q = qlist[_i];
+      n = q.search("sort");
+      if (n !== 0) {
+        q2list.push(q);
+      }
     }
-    return qlist;
+    if (q2list.length === 1 && q2list[0] === "") {
+      q2list = [];
+    }
+    return q2list;
   };
 
   make_editable_description = function($infodiv, fqpn) {
@@ -336,6 +352,7 @@
     sortdict = flip_sorter(config.querystring);
     $('#sortby').text(sortdict.ftext);
     $('#sortasc').html(sortdict.atext);
+    $('#sortednow').attr("class", "text-info pull-right").text("Sorted by " + sortdict.fnowtext + ", " + sortdict.anowtext + ".");
     $('#sortasc').click(function(e) {
       e.preventDefault();
       return window.location = nonqloc + "?" + sortdict.oqs + "&" + 'sort=' + sortdict.fnow + ':' + sortdict.aout;

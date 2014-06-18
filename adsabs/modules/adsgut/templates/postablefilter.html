@@ -18,43 +18,22 @@
 {% block localbody %}
 {% if pflavor=='udg' %}
 <h4>Items saved by {{useras.adsid}}</h4>
-<span>
-  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
-  <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
-  <button class="btn" id="asjson">As JSON</button>
-  <button class="btn" id="ascsv">As CSV</button>
-  <button class="btn" type="submit">View in search page</button>
-  <button class="btn btn-info pull-right" id="sortasc"></button>
-  <button class="btn btn-info pull-right" id="sortby"></button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
-</span></label>
-</form>
-</span>
 <hr/>
 {% elif pflavor=='pub' %}
 <h4>Public Feed</h4>
-<span>
-  <form id="bigqueryform" class="form-search form-search-cust" method="POST">
-  <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
-  <button class="btn" id="asjson">As JSON</button>
-  <button class="btn" id="ascsv">As CSV</button>
-  <button class="btn" type="submit">View in search page</button>
-  <button class="btn btn-info pull-right" id="sortasc"></button>
-  <button class="btn btn-info pull-right" id="sortby"></button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
-</span></label>
-</form>
-</span>
 <hr/>
 {% else %}
-{% if p.librarykind=="library" %}
+    {% if p.librarykind=="library" %}
 <h4>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
-{% elif p.librarykind=="group" %}
+    {% elif p.librarykind=="group" %}
 <h4>Items saved in library for group <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
- {% endif %}
+     {% endif %}
 <!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
+<hr/>
 <div id="info" style="display:none"></div>
-<span>
+{% endif %}
+
+<div>
   <form id="bigqueryform" class="form-search form-search-cust" method="POST">
   <input id="bigquerydata" name="bigquerydata" type="hidden" value="">
   <button class="btn" id="asjson">As JSON</button>
@@ -62,13 +41,17 @@
   <button class="btn" type="submit">View in search page</button>
   <button class="btn btn-info pull-right" id="sortasc"></button>
   <button class="btn btn-info pull-right" id="sortby"></button>
-  <label>&nbsp; <span id="count" style="display:none;"></span><span id="breadcrumb" style="display:none;">
-</span></label>
-</form>
-</span>
-<hr/>
-{% endif %}
+  </form>
+</div>
+<div>
+  <p>&nbsp; <span id="count" style="display:none;"></span>&nbsp; <span id="breadcrumb" style="display:none;">
+</span>&nbsp; <span id="sortednow"></span>
+</p>
 
+</div>
+<p></p>
+
+<hr/>
 
 
 <!--ul id="items">

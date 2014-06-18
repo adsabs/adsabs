@@ -18,20 +18,26 @@ flip_sorter = (qstr) ->
     if sortstring!=''
         [f,a]=sortstring.split(':')
         if f=='posting__thingtopostname'
+            fnowtext="by paper year"
             ftext='Sort By Post'
             fout='posting__whenposted'
         if f=='posting__whenposted'
+            fnowtext="by posting time"
             ftext='Sort By Year'
             fout='posting__thingtopostname'
         if a=='True'
+            anowtext="earliest first"
             atext='<i class="icon-arrow-down"></i>'
             aout='False'
         if a=='False'
+            anowtext="latest first"
             atext='<i class="icon-arrow-up"></i>'
             aout='True'
     else
         f='posting__whenposted'
         a='False'
+        fnowtext="by posting time"
+        anowtext="latest first"
         ftext='Sort By Year'
         atext='<i class="icon-arrow-up"></i>'
         fout='posting__thingtopostname'
@@ -39,6 +45,8 @@ flip_sorter = (qstr) ->
     odict=
         fnow:f
         anow:a
+        fnowtext:fnowtext
+        anowtext:anowtext
         ftext:ftext
         atext:atext
         fout:fout
@@ -62,10 +70,15 @@ parse_querystring= (qstr) ->
     #TODO: remove sorting and userthere from here
     qlist = _.difference(qlist,['query=tagtype:ads/tagtype:tag'])
     qlist = (q.replace('query=tagname:','') for q in qlist)
-    if qlist.length==1 and qlist[0]==""
-        qlist=[]
+    q2list=[]
+    for q in qlist
+        n = q.search("sort")
+        if n!=0
+            q2list.push(q)
+    if q2list.length==1 and q2list[0]==""
+        q2list=[]
     #console.log "QLIST", qlist
-    return qlist
+    return q2list
 
 make_editable_description = ($infodiv, fqpn) ->
     cback = () ->
@@ -237,6 +250,7 @@ do_postable_filter = (sections, config, tagfunc) ->
     #sortstring=sortdict.fout+":"+sortdict.aout
     $('#sortby').text(sortdict.ftext)
     $('#sortasc').html(sortdict.atext)
+    $('#sortednow').attr("class","text-info pull-right").text("Sorted by #{sortdict.fnowtext}, #{sortdict.anowtext}.")
     $('#sortasc').click (e)->
         e.preventDefault()
         window.location=nonqloc+"?"+sortdict.oqs+"&"+'sort='+sortdict.fnow+':'+sortdict.aout
