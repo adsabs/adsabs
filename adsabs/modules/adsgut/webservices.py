@@ -887,7 +887,7 @@ def membableremove():
         useras = _userpostget(g, jsonpost)
         if fqpn is None:
             doabort("BAD_REQ", "No membable specified for  removal")
-        g.db.removeMembable(g.currentuser, useras, fqpn)
+        g.dbp.removeMembable(g.currentuser, useras, fqpn)
         return jsonify({'status':'OK'})
 
 #######################################################################################################################
@@ -1435,7 +1435,7 @@ def tagsRemoveForItem(ns, itemname):
         #i=g.dbp._getItem(g.currentuser, ifqin)
         #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context
         #print "FQPN is", fqpn
-        if fqpn==None:#nuke it
+        if fqpn==None:#nuke it, this happens for saved items (for private notes too)
           val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
         else:#remove tag from postable (should only affect pinpostables)
           val=g.dbp.removeTaggingFromPostable(g.currentuser, useras, fqpn, ifqin, fqtn)

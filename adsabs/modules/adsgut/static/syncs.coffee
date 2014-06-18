@@ -178,7 +178,7 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
-    tagmode='1'
+    tagmode = '1'
     if pview is 'pub'
         #additionally, item must be made public. should public also mean all groups item is in
         #as now. YES.
