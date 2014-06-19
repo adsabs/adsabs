@@ -1432,7 +1432,7 @@ def tagsRemoveForItem(ns, itemname):
         fqtn = _dictp('fqtn',jsonpost)
         #will use useras for the namespace as u should only be removing your own stuff
         #BUG:does not work if not your tag
-        print "FQTN is", fqtn, useras.nick+'/'+tagtype+":"+tagname
+        #print "FQTN is", fqtn, useras.nick+'/'+tagtype+":"+tagname
         if fqtn==None:#nothing was sent over the wire
             fqtn = useras.nick+'/'+tagtype+":"+tagname
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there

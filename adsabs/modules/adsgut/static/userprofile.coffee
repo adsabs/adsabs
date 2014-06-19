@@ -136,11 +136,18 @@ class PostableView extends Backbone.View
         @listtype=options.listtype
 
     render: =>
+
         more=""
         if @model.get('librarykind')=='group'
             more=@model.get('librarykind')
+            morelist=@model.get('fqpn').split(':')
+            liblist=@model.get('reason').split(':')
+            morename=morelist[morelist.length-1]
+            libname=liblist[liblist.length-1].slice(0,-1)
+            #console.log ">>>", more, morename, libname, "<<:", @model.get("reason"),'||', @model
             if not @model.get('invite')
-                more=make_postable_link_secondary(getgroup(@model.get('fqpn')), libmode=@libmode, ownermode=@ownermode, more)
+                if (morename==libname or libname=="")
+                    more=make_postable_link_secondary(getgroup(@model.get('fqpn')), libmode=@libmode, ownermode=@ownermode, more)
         if @model.get('islibrarypublic')==true
             more=more+'(Public)'
         if @model.get('invite')

@@ -55,8 +55,10 @@ format_item = ($sel, iteminfo) ->
 
 format_tags = (tagtype, $sel, tags, tagqkey)->
   $sel.empty()
+  #console.log "TAGS", tags
   typestring = tagtype.split(':')[1]
   htmlstring="<li class=\"nav-header\">Filter by: #{typestring}</li>"
+  tags=_.sortBy(tags, (i)->i[1])
   for [k,v] in tags
     if tagqkey is 'stags'
       t=v[0]

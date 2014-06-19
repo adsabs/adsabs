@@ -299,12 +299,18 @@
     };
 
     PostableView.prototype.render = function() {
-      var content, libmode, more, ownermode;
+      var content, liblist, libmode, libname, more, morelist, morename, ownermode;
       more = "";
       if (this.model.get('librarykind') === 'group') {
         more = this.model.get('librarykind');
+        morelist = this.model.get('fqpn').split(':');
+        liblist = this.model.get('reason').split(':');
+        morename = morelist[morelist.length - 1];
+        libname = liblist[liblist.length - 1].slice(0, -1);
         if (!this.model.get('invite')) {
-          more = make_postable_link_secondary(getgroup(this.model.get('fqpn')), libmode = this.libmode, ownermode = this.ownermode, more);
+          if (morename === libname || libname === "") {
+            more = make_postable_link_secondary(getgroup(this.model.get('fqpn')), libmode = this.libmode, ownermode = this.ownermode, more);
+          }
         }
       }
       if (this.model.get('islibrarypublic') === true) {

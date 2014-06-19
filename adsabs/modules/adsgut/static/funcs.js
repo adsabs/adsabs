@@ -67,6 +67,9 @@
     $sel.empty();
     typestring = tagtype.split(':')[1];
     htmlstring = "<li class=\"nav-header\">Filter by: " + typestring + "</li>";
+    tags = _.sortBy(tags, function(i) {
+      return i[1];
+    });
     for (_i = 0, _len = tags.length; _i < _len; _i++) {
       _ref = tags[_i], k = _ref[0], v = _ref[1];
       if (tagqkey === 'stags') {
