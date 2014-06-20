@@ -3,7 +3,9 @@
   <h3>Groups for user {{theuser.adsid}}</h3>
   <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
   <!--div id="userinfo" style="display:none"></div-->
-  <p> Groups are used for long-term collaboration. For example, you could store your research group's or a journal club's reading material, or papers relevant to your research activities, in the group's library. All members of the group can post items to the group's library.
+  <p> Groups are used for long-term collaboration. A library is automatically created for each group you create, with the same name as the group. See the <a href="{{ url_for('adsgut.userProfileHtml', nick=useras.nick) }}">Libraries</a> page, which may also be accessed from the menu at left. </p>
+
+  <p>For example, you could create groups for your research collabotations, your graduate students and post-docs, your journal clubs, etc. You can then store your research group's or a journal club's reading material, or papers relevant to your research activities, in the group's library. All members of the group can post items to the group's library.
   </p>
 <br/>
 <p><strong>New Group:</strong> The letters : and / are NOT allowed in group names. </p>

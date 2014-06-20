@@ -170,7 +170,7 @@
       }
       sections.$infodiv.show();
       return $.get(config.membersURL, function(data) {
-        var plinv;
+        var helptext, plinv;
         plinv = new PostableListView({
           users: data.users,
           fqpn: config.fqpn,
@@ -181,6 +181,8 @@
         plinv.render();
         sections.$membersdiv.show();
         if (config.owner) {
+          helptext = "Remove user from group.";
+          w.decohelp('.Remove', helptext, 'popover', 'left');
           return $.get(config.invitedsURL, function(data) {
             content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, true);
             sections.$invitedsdiv.append(content);

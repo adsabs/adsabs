@@ -17,16 +17,19 @@
 
 {% block localbody %}
 {% if pflavor=='udg' %}
-<h4>Items saved by {{useras.adsid}}</h4>
+<h4>Items saved by {{useras.adsid}}<span class="help"></span></h4>
+<hr/>
+<p> Here you will find any item you have ever touched in the libraries system. You may have tagged an item in a library, made a note on it, or posted it into a library. In all of these cases, the item is copied here. Thus, you can use this page as a history of how you have interacted with the libraries system.
+</p>
 <hr/>
 {% elif pflavor=='pub' %}
-<h4>Public Feed</h4>
+<h4>Public Feed<span class="help"></span></h4>
 <hr/>
 {% else %}
     {% if p.librarykind=="library" %}
-<h4>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
+<h4>Items saved in library <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a><span class="help"></span></h4>
     {% elif p.librarykind=="group" %}
-<h4>Items saved in library for group <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a></h4>
+<h4>Items saved in library for group <a href="{{ url_for('adsgut.postableFilterHtml', po=po, pt=pt, pn=pn) }}">{{p.basic.name}}</a><span class="help"></span></h4>
      {% endif %}
 <!--p><b>owned by</b>: {{p.owner}}. <b>created by</b>: {{p.basic.creator}}. <b>UUID</b> {{ p.nick }}.</p-->
 <hr/>
@@ -108,7 +111,12 @@ $ ->
   redo_tags = _.partial(postablefilter.do_tags, config.tagsPURL, sections.$tagssec, config.tqtype)
 
   {% if pflavor!= 'udg' and pflavor!='pub' %}
+  helptext = "You can tag items, and make notes on them. Tags are visible to all members of the library, while the notes are private, unless you make them visible to all members of the library"
+  widgets.decohelp('.help', helptext, 'popover', 'bottom')
   postablefilter.do_postable_info(sections, config, ptype)
+  {% else %}
+  helptext = "You can tag items, and make notes on them. Tags are visible to all members of ALL libraries you are in, while the notes are private, unless you make them visible to all members of all libraries you are in"
+  widgets.decohelp('.help', helptext, 'popover', 'bottom')
   {% endif %}
   postablefilter.do_postable_filter(sections, config, redo_tags)
 {% endblock %}

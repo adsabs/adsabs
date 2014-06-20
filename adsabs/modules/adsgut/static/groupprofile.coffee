@@ -119,6 +119,8 @@ get_info = (sections, config) ->
                 #view=new views.InviteUser({postable: config.fqpn, withcb:false})
                 #sections.$invitedform.append(view.render().$el)
                 #sections.$invitedform.show()
+                helptext = "Remove user from group."
+                w.decohelp('.Remove', helptext, 'popover', 'left')
                 $.get config.invitedsURL, (data) ->
                     content=views.postable_inviteds config.fqpn, data, templates.postable_inviteds, true
                     sections.$invitedsdiv.append(content)

@@ -12,13 +12,17 @@
 
   {% if owner %}
   <div id="makepublicform" style="display:none"></div>
+  <p>Making a library public does two things: its opens up the library to all ADS users, as well as the general public. The link may then be shared over email or otherwise with strangers. If you choose to allow all ADS users to "read and post" using the "toggle", any ADS user will be able to post into your library with knowledge of your link (you must share the link with them). This allows for ad hoc collaboration and community. We will soon provide a place to advertise such libraries.
+  </p>
+<hr/>
+  <h4>Add a group to the library</h4>
   <div id="invitedform" style="display:none"></div>
 
   <p>
     Members of this group will be able to read items posted into the library. Additionally, if you enable the checkbox above, they will also be able to post items into this library.
   </p>
   <br/><hr/>
-  <h4>Invitations</h4><br/>
+  <h4>Invitations to Users</h4><br/>
   <!--div id="inviteds" style="display:none"><hr/-->
   <form class="form-inline" method="POST" action="{{url_for('adsgut.makeInvitations', po=po, pt=pt, pn=pn)}}">
       {{ inviteform.csrf_token }}
@@ -73,4 +77,5 @@ $ ->
     $invitedsdiv : $('div#inviteds')
 
   libraryprofile.get_info(sections, config)
+
 {% endblock %}

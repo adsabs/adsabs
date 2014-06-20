@@ -4,7 +4,10 @@
   <!--iframe width="100%" src="/user/{{ theuser.nick}}"></iframe width="100%"-->
   <!--div id="userinfo" style="display:none"></div-->
 
-  <p> Libraries are used to store information about papers that may be of interest later. For example, you could store your publications, or a set of references for a paper, interesting papers on a topic, etc. You can share your library with other ADS 2.0 users or groups, and even let them post items to your library. This allows for short-term collaboration.
+  <p> Libraries are used to store information about papers that may be of interest later. For example, you could store your publications, or a set of references for a paper, interesting papers on a topic, etc. You can add other ADS 2.0 users or groups as members of your library, and even let them optionally post items to your library. This allows for short-term collaboration.
+  </p>
+
+  <p> When you create a group from the <a href="{{ url_for('adsgut.userProfileGroupsFromAdsidHtml', adsid=useras.adsid) }}">Groups</a> interface, also available on the menu at the left, a library is automatically created for the group, and it will be visible in this interface with its "group" link in the "More" column below. This library is not special in any way: it just gets the same name as the group, and the group is automatically added to the library as a member. You are free to add other users and groups to the library. Group libraries are useful for research groups, journal clubs, etc.
   </p>
   {% if not useras.classicimported %}
   <p>You can import your existing libraries (with notes) from from ADS Classic here into ADS 2.0. This import, accesible through the blue import button on the left, performs a copy of your existing ADS Classic libraries.

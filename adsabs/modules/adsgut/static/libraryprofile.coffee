@@ -152,6 +152,8 @@ get_info = (sections, config) ->
                 if config.owner
                     #console.log "gaga", config.owner
                     #viewu=new views.InviteUser({postable: config.fqpn, withcb:true})
+                    helptext = "Remove user or group from library. If you have made the library public, you will see two users: 'General Public' and 'All ADS users'. Removing the former will revert the library link to being visible only by ADS users. Removing the latter will stop other ADS users from being able to post to this library (in the event that you allowed that) even while the library is visible to the general public."
+                    w.decohelp('.Remove', helptext, 'popover', 'left')
                     viewp=new views.MakePublic({postable: config.fqpn, users: data.users})
                     sections.$makepublicform.append(viewp.render().$el)
                     sections.$makepublicform.show()
@@ -168,6 +170,7 @@ get_info = (sections, config) ->
         else
             sections.$membersdiv.empty().append("<p>Only logged in users can see members!</p>")
             sections.$membersdiv.show()
+
     #deletion
     cback = () ->
         window.location=config.postablesURL

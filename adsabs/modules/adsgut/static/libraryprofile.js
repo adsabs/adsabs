@@ -195,7 +195,7 @@
       sections.$infodiv.show();
       if (config.useras_nick !== 'anonymouse') {
         return $.get(config.membersURL, function(data) {
-          var plinv, viewp;
+          var helptext, plinv, viewp;
           plinv = new PostableListView({
             users: data.users,
             fqpn: config.fqpn,
@@ -206,6 +206,8 @@
           plinv.render();
           sections.$membersdiv.show();
           if (config.owner) {
+            helptext = "Remove user or group from library. If you have made the library public, you will see two users: 'General Public' and 'All ADS users'. Removing the former will revert the library link to being visible only by ADS users. Removing the latter will stop other ADS users from being able to post to this library (in the event that you allowed that) even while the library is visible to the general public.";
+            w.decohelp('.Remove', helptext, 'popover', 'left');
             viewp = new views.MakePublic({
               postable: config.fqpn,
               users: data.users

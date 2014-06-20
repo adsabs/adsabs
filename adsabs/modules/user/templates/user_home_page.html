@@ -42,7 +42,7 @@
             <div class="listbox">
                 <ul class="unstyled">
                     <li>
-                        <a href="{{ url_for('adsgut.udlHtmlFromAdsid', adsid=current_user.get_username()) }}">Saved Items</a><span class="listbox-inline-help">all items you ever saved, in any library</span>
+                        <a href="{{ url_for('adsgut.udlHtmlFromAdsid', adsid=current_user.get_username()) }}">Saved Items</a><span class="listbox-inline-help">all items you ever saved or tagged, in any library. This acts like a history.</span>
                     </li>
                     <li>
                         <a href="{{ url_for('adsgut.userProfileFromAdsidHtml', adsid=current_user.get_username()) }}">Libraries</a><span class="listbox-inline-help">your individual libraries, such as paper citation lists, papers to read, etc</span>

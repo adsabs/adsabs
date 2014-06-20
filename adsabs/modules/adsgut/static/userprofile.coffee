@@ -323,10 +323,13 @@ layout_userprofile = (sections, config, ptype) ->
         w.decohelp('.LibrariesIown', 'Libraries I have created', 'popover', 'left')
         w.decohelp('.LibrariesIaminvitedto', "Outstanding invitations to join other ADS users' libraries", 'popover', 'left')
         w.decohelp('.Access', '"read and post" if i can post items to the library, "read only" if I can only view items in the library', 'popover', 'top')
+        w.decohelp('.More', "More information about the library, like whether its public, or whether its from a group (the link on the group takes you to the admin interface for the group.)", 'popover', 'top')
+        w.decohelp('.Leave', "Leave a library by clicking the x", 'popover', 'left')
     else if ptype=='group'
         w.decohelp('.GroupsIamin', 'Groups owned by others that I am a member of', 'popover', 'left')
         w.decohelp('.GroupsIown', 'Groups I have created', 'popover', 'left')
         w.decohelp('.GroupsIaminvitedto', "Outstanding invitations to join other ADS users' groups", 'popover', 'left')
+        w.decohelp('.Leave', "Leave a group by clicking the x", 'popover', 'left')
 # viewg=new views.CreatePostable({postabletype: "group"})
 #   $('div#creategroups').append(viewg.render().$el)
 #   $.get "{{ url_for('adsgut.userInfo', nick=useras.nick) }}", (data) ->

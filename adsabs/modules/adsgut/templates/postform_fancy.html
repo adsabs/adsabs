@@ -16,8 +16,8 @@
 <div class="container-fluid">
 
   <div id="items" class="row">
-      <div class="span6 items"><legend>Selected Items</legend></div>
-      <div class="span6 ctrls"></div>
+      <div class="span6 items"><legend id="selitems">Selected Items</legend></div>
+      <div class="span6 ctrls"><span id="sele" style="font-size:small"></span></div>
   </div>
 </div><!--/.fluid-container-->
 <script type="text/javascript">
@@ -34,25 +34,26 @@
 $=jQuery
 #currently below only works for pubs, but ought to work otherwise too
 $ ->
-  config = 
+  config =
     itemstring :  "{{ querystring | safe }}"
-    loc : "{{curpage | safe }}" 
+    loc : "{{curpage | safe }}"
     itemsInfoURL :  "{{ url_for('adsgut.itemsinfo') }}"
     itemsTPURL : "{{ url_for('adsgut.itemsTaggingsAndPostings') }}"
     tagsucwtURL: "{{ url_for('adsgut.tagsUserCanWriteTo', nick=useras.nick) }}"
     bq1url : "{{ url_for('adsgut.get_bigquery_solr') }}"
     itemtype : '{{itemtype}}'
-    memberable : 
+    memberable :
       nick: '{{useras.nick}}'
       adsid: '{{useras.adsid}}'
     nam: false
   {% if nameable %}
   config.nam=true
   {% endif %}
-
-  sections = 
+  helptext = "You can tag items, and post them into libraries from this interface. Tags are visible to all members of the libraries you post them to. Nothing actually takes effect until you hit the Save button below, and Cancel will back out any changes you made."
+  sections =
     $itemssec : $('#items')
 
   postform.do_postform(sections, config)
+  $('#sele').text(helptext)
 
 </script>
