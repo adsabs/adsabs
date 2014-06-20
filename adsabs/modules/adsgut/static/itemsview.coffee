@@ -64,17 +64,17 @@ time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
 
 didupost = (postings, you, fqpn, areyouowner) ->
-    counter=0
-    youposted=false
+    #console.log postings
+    #console.log you, fqpn
     if areyouowner
-        console.log "yes"
+        #console.log "yes"
         return true
     # for p in postings
     #     if p[0]==fqpn
     #         counter = counter + 1
     #     if p[1]==you.adsid
     #         youposted = true
-    #console.log postings, you, fqpn, counter, youposted
+
     for p in postings
         if p[0]==fqpn and p[1]==you.adsid
             return true
@@ -331,13 +331,19 @@ class ItemView extends Backbone.View
     cback = (data) =>
         #console.log "return data", data, loc
         #window.location=loc
-        @remove()
         #BUG:Also need to bubble it upstairs to collection dictionary
         #best reimplement this in proper backbone soon.
-        nump = $('#count').text()
-        ix = nump.search('papers')
-        nump=Number(nump[0...ix]) - 1
-        $('#count').text("#{nump} papers. ")
+        if @item.hist.length < 2 or @pviewowner==true
+            #console.log "rem", @item
+            @remove()
+            nump = $('#count').text()
+            ix = nump.search('papers')
+            nump=Number(nump[0...ix]) - 1
+            $('#count').text("#{nump} papers. ")
+        else
+            #you could remove but someone else also had it
+            #console.log "partialrem", @item
+            @.$('.removeitem').empty()
     eback = (xhr, etext) =>
         #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap

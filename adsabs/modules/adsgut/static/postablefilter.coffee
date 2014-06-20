@@ -98,7 +98,7 @@ make_editable_description = ($infodiv, fqpn) ->
       $infodiv.find('.edtext').editable('toggle')
 
 do_postable_info = (sections, config, ptype) ->
-    $.get config.infoURL, (data) ->        
+    $.get config.infoURL, (data) ->
         if ptype=='library'
             content=views.library_info config.owner, data, templates.library_itemsinfo
         else if ptype=='group'
@@ -135,7 +135,7 @@ do_postable_filter = (sections, config, tagfunc) ->
             sections.$breadcrumb.show()
         $.get config.itemsPURL, (data) ->
             theitems=data.items
-            #console.log("THEITEMS", theitems)
+            #console.log("THEITEMS", theitems, data)
             if theitems.length ==1
                 sections.$count.text("#{theitems.length} paper. ")
             else
@@ -183,16 +183,16 @@ do_postable_filter = (sections, config, tagfunc) ->
                 for own k,v of data.postings
                     if v[0] > 0
                         #console.log ">>>", (e.posting for e in v[1])
-                        postings[k]=([e.posting.postfqin, e.posting.postedby] for e in v[1])
-                        ptimes = (e.posting.whenposted for e in v[1] when e.posting.postfqin==config.fqpn)
-                        #console.log "PTIMES", ptimes
-                        if ptimes.length > 0
-                            times[k]=ptimes[0]#currently ignore others if there are more than one post
-                        else
-                            times[k]=0#earliest :-)
+                        postings[k]=[]
+                        for e in v[1]
+                            if e.hist.length > 1
+                                for h in e.hist
+                                    postings[k].push([e.posting.postfqin, h.postedby])
+                            else
+                                postings[k].push([e.posting.postfqin, e.posting.postedby])
+                        #postings[k]=([e.posting.postfqin, e.posting.postedby] for e in v[1])
                     else
                         postings[k]=[]
-                        times[k] = 0
                 #console.log "TIMES ARE ROCKING", stags, notes, times
                 # sorteditems = _.sortBy(theitems, (i) -> return -Date.parse(times[i.basic.fqin]))
                 # for i in sorteditems

@@ -84,11 +84,8 @@
   };
 
   didupost = function(postings, you, fqpn, areyouowner) {
-    var counter, p, youposted, _i, _len;
-    counter = 0;
-    youposted = false;
+    var p, _i, _len;
     if (areyouowner) {
-      console.log("yes");
       return true;
     }
     for (_i = 0, _len = postings.length; _i < _len; _i++) {
@@ -406,11 +403,15 @@
       cback = (function(_this) {
         return function(data) {
           var ix, nump;
-          _this.remove();
-          nump = $('#count').text();
-          ix = nump.search('papers');
-          nump = Number(nump.slice(0, ix)) - 1;
-          return $('#count').text("" + nump + " papers. ");
+          if (_this.item.hist.length < 2 || _this.pviewowner === true) {
+            _this.remove();
+            nump = $('#count').text();
+            ix = nump.search('papers');
+            nump = Number(nump.slice(0, ix)) - 1;
+            return $('#count').text("" + nump + " papers. ");
+          } else {
+            return _this.$('.removeitem').empty();
+          }
         };
       })(this);
       eback = (function(_this) {

@@ -210,7 +210,7 @@
         sections.$bigqueryform.attr("action", config.bq2url);
         itemsq = itemlist.join("&");
         return syncs.taggings_postings_post_get(itemlist, config.pview, function(data) {
-          var cb, clist, eb, ido, k, notes, plinv, postings, prop, ptimes, sorteditems, stags, tagoutput, times, v, _ref, _ref1;
+          var cb, clist, eb, ido, k, notes, plinv, postings, prop, sorteditems, stags, tagoutput, times, v, _j, _k, _len1, _len2, _ref, _ref1, _ref2, _ref3;
           _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
           tagoutput = {};
           for (prop in stags) {
@@ -244,36 +244,22 @@
             if (!__hasProp.call(_ref1, k)) continue;
             v = _ref1[k];
             if (v[0] > 0) {
-              postings[k] = (function() {
-                var _j, _len1, _ref2, _results;
-                _ref2 = v[1];
-                _results = [];
-                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-                  e = _ref2[_j];
-                  _results.push([e.posting.postfqin, e.posting.postedby]);
-                }
-                return _results;
-              })();
-              ptimes = (function() {
-                var _j, _len1, _ref2, _results;
-                _ref2 = v[1];
-                _results = [];
-                for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-                  e = _ref2[_j];
-                  if (e.posting.postfqin === config.fqpn) {
-                    _results.push(e.posting.whenposted);
+              postings[k] = [];
+              _ref2 = v[1];
+              for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                e = _ref2[_j];
+                if (e.hist.length > 1) {
+                  _ref3 = e.hist;
+                  for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+                    h = _ref3[_k];
+                    postings[k].push([e.posting.postfqin, h.postedby]);
                   }
+                } else {
+                  postings[k].push([e.posting.postfqin, e.posting.postedby]);
                 }
-                return _results;
-              })();
-              if (ptimes.length > 0) {
-                times[k] = ptimes[0];
-              } else {
-                times[k] = 0;
               }
             } else {
               postings[k] = [];
-              times[k] = 0;
             }
           }
           sorteditems = theitems;
@@ -296,36 +282,36 @@
           plinv = new itemsdo.ItemsFilterView(ido);
           plinv.render();
           eb = function(err) {
-            var d, _j, _len1, _results;
+            var d, _l, _len3, _results;
             _results = [];
-            for (_j = 0, _len1 = theitems.length; _j < _len1; _j++) {
-              d = theitems[_j];
+            for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
+              d = theitems[_l];
               _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), d));
             }
             return _results;
           };
           cb = function(data) {
-            var d, docnames, thedocs, _j, _k, _len1, _len2, _ref2, _ref3, _results;
+            var d, docnames, thedocs, _l, _len3, _len4, _m, _ref4, _ref5, _results;
             thedocs = {};
-            _ref2 = data.response.docs;
-            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-              d = _ref2[_j];
+            _ref4 = data.response.docs;
+            for (_l = 0, _len3 = _ref4.length; _l < _len3; _l++) {
+              d = _ref4[_l];
               thedocs[d.bibcode] = d;
             }
             docnames = (function() {
-              var _k, _len2, _ref3, _results;
-              _ref3 = data.response.docs;
+              var _len4, _m, _ref5, _results;
+              _ref5 = data.response.docs;
               _results = [];
-              for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-                d = _ref3[_k];
+              for (_m = 0, _len4 = _ref5.length; _m < _len4; _m++) {
+                d = _ref5[_m];
                 _results.push(d.bibcode);
               }
               return _results;
             })();
             _results = [];
-            for (_k = 0, _len2 = theitems.length; _k < _len2; _k++) {
-              d = theitems[_k];
-              if (_ref3 = d.basic.name, __indexOf.call(docnames, _ref3) >= 0) {
+            for (_m = 0, _len4 = theitems.length; _m < _len4; _m++) {
+              d = theitems[_m];
+              if (_ref5 = d.basic.name, __indexOf.call(docnames, _ref5) >= 0) {
                 e = thedocs[d.basic.name];
               } else {
                 e = {};
