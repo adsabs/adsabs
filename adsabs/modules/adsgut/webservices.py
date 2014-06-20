@@ -1546,6 +1546,7 @@ def itemsTaggingsAndPostings():
         #print "MEEP",taggingsdict, postingsdict
         #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
         #print "MEEP",taggingsthispostable
+        #print "POSTINGS", json.dumps(dict(p=postingsdict), cls=MongoEngineJsonEncoder)
         return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
         query=dict(request.args)

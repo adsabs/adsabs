@@ -67,19 +67,24 @@ didupost = (postings, you, fqpn, areyouowner) ->
     counter=0
     youposted=false
     if areyouowner
+        console.log "yes"
         return true
+    # for p in postings
+    #     if p[0]==fqpn
+    #         counter = counter + 1
+    #     if p[1]==you.adsid
+    #         youposted = true
+    console.log postings, you, fqpn, counter, youposted
     for p in postings
-        if p[0]==fqpn
-            counter = counter + 1
-        if p[1]==you.adsid
-            youposted=true
-    #console.log postings, you, fqpn, counter, youposted
-    if youposted==true and counter > 1
-        return false
-    else if youposted==true and counter <= 1
-        return true
-    else if youposted==false
-        return false
+        if p[0]==fqpn and p[1]==you.adsid
+            return true
+    # if youposted==true and counter > 1
+    #     return false
+    # else if youposted==true and counter <= 1
+    #     return true
+    # else if youposted==false
+    #     return false
+    return false
 
 class ItemView extends Backbone.View
 
@@ -140,7 +145,7 @@ class ItemView extends Backbone.View
     @$el.empty()
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
-    #console.log ">>", @item.basic.name, @pview, didupost(@postings, @memberable, @pview)
+    console.log ">>", @item.basic.name, @pview#, didupost(@postings, @memberable, @pview)
     if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview, @pviewowner)
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'
     else

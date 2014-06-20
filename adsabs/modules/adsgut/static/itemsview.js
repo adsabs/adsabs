@@ -88,24 +88,17 @@
     counter = 0;
     youposted = false;
     if (areyouowner) {
+      console.log("yes");
       return true;
     }
+    console.log(postings, you, fqpn, counter, youposted);
     for (_i = 0, _len = postings.length; _i < _len; _i++) {
       p = postings[_i];
-      if (p[0] === fqpn) {
-        counter = counter + 1;
-      }
-      if (p[1] === you.adsid) {
-        youposted = true;
+      if (p[0] === fqpn && p[1] === you.adsid) {
+        return true;
       }
     }
-    if (youposted === true && counter > 1) {
-      return false;
-    } else if (youposted === true && counter <= 1) {
-      return true;
-    } else if (youposted === false) {
-      return false;
-    }
+    return false;
   };
 
   ItemView = (function(_super) {
@@ -194,6 +187,7 @@
       this.$el.empty();
       adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
+      console.log(">>", this.item.basic.name, this.pview);
       if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview, this.pviewowner)) {
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>';
       } else {
