@@ -83,10 +83,13 @@
     return timestring.split('.')[0].split('T').join(" at ");
   };
 
-  didupost = function(postings, you, fqpn) {
+  didupost = function(postings, you, fqpn, areyouowner) {
     var counter, p, youposted, _i, _len;
     counter = 0;
     youposted = false;
+    if (areyouowner) {
+      return true;
+    }
     for (_i = 0, _len = postings.length; _i < _len; _i++) {
       p = postings[_i];
       if (p[0] === fqpn) {
@@ -191,7 +194,7 @@
       this.$el.empty();
       adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
-      if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview)) {
+      if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview, this.pviewowner)) {
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>';
       } else {
         deleter = '';

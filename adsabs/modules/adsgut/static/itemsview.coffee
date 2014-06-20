@@ -63,9 +63,11 @@ remIndiv = (pill) ->
 time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
 
-didupost = (postings, you, fqpn) ->
+didupost = (postings, you, fqpn, areyouowner) ->
     counter=0
     youposted=false
+    if areyouowner
+        return true
     for p in postings
         if p[0]==fqpn
             counter = counter + 1
@@ -92,7 +94,7 @@ class ItemView extends Backbone.View
   initialize: (options) ->
     {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview, @pviewowner} = options
     @tagsfunc = options.tagfunc ? () ->
-    #console.log "PVIN",  @memberable, @postings
+    #console.log "PVIN",  @memberable, @pview, @pviewowner
     @hv=undefined
     @newtags = []
     @newnotes = []
@@ -139,7 +141,7 @@ class ItemView extends Backbone.View
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
     #console.log ">>", @item.basic.name, @pview, didupost(@postings, @memberable, @pview)
-    if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview)
+    if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview, @pviewowner)
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'
     else
         deleter = ''
