@@ -168,6 +168,12 @@ parse_fortype = (fqin) ->
     vals2 = vals[-2+vals.length].split('/')
     return vals2[-1+vals2.length]
 
+flip_type = (fqin, totype) ->
+    vals = fqin.split(':')
+    end = vals[-1+vals.length]
+    vals2 = vals[-2+vals.length].split('/')
+    front = vals2[0]
+    return front+"/"+totype+":"+end
 # format_postings_for_item = (fqin, postings, nick) ->
 #   publ= "adsgut/group:public"
 #   priv= "#{nick}/group:default"
@@ -328,8 +334,12 @@ postable_info_layout = renderable (isowner, {basic, owner, nick}, oname, cname, 
   if mode is "filter"
     modetext = "Link"
   else if mode is "profile"
-    modetext = "Info"
-  url= "#{prefix}/postable/#{basic.fqin}/#{mode}/html"
+    if isowner
+      modetext = "Admin"
+    else
+      modetext = "Info"
+  libfqin = flip_type(basic.fqin, "library")
+  url= "#{prefix}/postable/#{libfqin}/#{mode}/html"
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.name}</a>"
   dl '.dl-horizontal', ->
     dt "Description"

@@ -91,7 +91,6 @@
       console.log("yes");
       return true;
     }
-    console.log(postings, you, fqpn, counter, youposted);
     for (_i = 0, _len = postings.length; _i < _len; _i++) {
       p = postings[_i];
       if (p[0] === fqpn && p[1] === you.adsid) {
@@ -132,7 +131,7 @@
 
     ItemView.prototype.initialize = function(options) {
       var _ref;
-      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner;
+      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.pviewrw = options.pviewrw;
       this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
@@ -187,7 +186,6 @@
       this.$el.empty();
       adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
-      console.log(">>", this.item.basic.name, this.pview);
       if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview, this.pviewowner)) {
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>';
       } else {
@@ -224,6 +222,7 @@
       }
       tagdict = {
         values: thetags,
+        can_add: this.pviewrw,
         can_delete: can_delete,
         enhanceValue: _.bind(enval, this),
         addWithAjax: _.bind(addwa, this),
@@ -585,6 +584,7 @@
           suggestions: this.suggestions,
           pview: this.pview,
           pviewowner: 'none',
+          pviewrw: 'none',
           counter: counter,
           submittable: this.submittable
         };
@@ -862,7 +862,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.tagfunc = options.tagfunc;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.tagfunc = options.tagfunc, this.pviewrw = options.pviewrw;
       return this.submittable = {
         state: true
       };
@@ -887,6 +887,7 @@
           suggestions: this.suggestions,
           pview: this.pview,
           pviewowner: this.pviewowner,
+          pviewrw: this.pviewrw,
           tagfunc: this.tagfunc,
           counter: counter,
           submittable: this.submittable

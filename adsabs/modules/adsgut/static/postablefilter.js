@@ -290,6 +290,7 @@
             suggestions: suggestions,
             pview: config.pview,
             pviewowner: config.owner,
+            pviewrw: config.rw,
             tagfunc: tagfunc
           };
           plinv = new itemsdo.ItemsFilterView(ido);

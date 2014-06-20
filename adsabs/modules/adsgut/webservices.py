@@ -898,7 +898,12 @@ def postable(ownernick, name, ptstr):
     isowner=False
     if g.db.isOwnerOfPostable(g.currentuser, g.currentuser, postable):
         isowner=True
-    return postable, isowner, owner.presentable_name(), creator.presentable_name()
+    postablesin=g.currentuser.postablesin
+    rw=False
+    for p in postablesin:
+        if p.fqpn==postable.basic.fqin:
+            rw=p.readwrite
+    return postable, isowner, rw, owner.presentable_name(), creator.presentable_name()
 
 
 #POST/GET in a lightbox?
@@ -910,8 +915,8 @@ def creategrouphtml():
 #x
 @adsgut.route('/group/<groupowner>/group:<groupname>')
 def groupInfo(groupowner, groupname):
-    g, io, on, cn = postable(groupowner, groupname, "group")
-    return jsonify(group=g, oname = on, cname = cn)
+    g, io, rw, on, cn = postable(groupowner, groupname, "group")
+    return jsonify(group=g, oname = on, cname = cn, io=io, rw=rw)
 
 #x
 @adsgut.route('/postable/<groupowner>/group:<groupname>/profile/html')
@@ -927,8 +932,8 @@ def createapphtml():
 #x
 @adsgut.route('/app/<appowner>/app:<appname>')
 def appInfo(appowner, appname):
-    a, io, on, cn = postable(appowner, appname, "app")
-    return jsonify(app=a, oname = on, cname = cn)
+    a, io, rw, on, cn = postable(appowner, appname, "app")
+    return jsonify(app=a, oname = on, cname = cn, io=io, rw=rw)
 
 #x
 @adsgut.route('/postable/<appowner>/app:<appname>/profile/html')
@@ -945,8 +950,8 @@ def createlibraryhtml():
 #x
 @adsgut.route('/library/<libraryowner>/library:<libraryname>')
 def libraryInfo(libraryowner, libraryname):
-    l, io, on, cn = postable(libraryowner, libraryname, "library")
-    return jsonify(library=l, oname=on, cname=cn)
+    l, io, rw, on, cn = postable(libraryowner, libraryname, "library")
+    return jsonify(library=l, oname=on, cname=cn, io=io, rw=rw)
 
 #x
 @adsgut.route('/postable/<libraryowner>/library:<libraryname>/profile/html')
@@ -954,13 +959,13 @@ def libraryProfileHtml(libraryowner, libraryname):
     return profileHtmlNotRouted(libraryowner, libraryname, "library", inviteform=None)
 
 def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
-    p, owner, on, cn=postable(powner, pname, ptype)
+    p, owner, rw, on, cn=postable(powner, pname, ptype)
     if not inviteform:
       if ptype=="library":
         inviteform = InviteForm()
       else:
         inviteform = InviteFormGroup()
-    return render_template(ptype+'profile.html', thepostable=p, owner=owner, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
+    return render_template(ptype+'profile.html', thepostable=p, owner=owner, rw=rw, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
 @adsgut.route('/postable/<nick>/library:default/filter/html')
 def udlHtml(nick):
@@ -978,7 +983,7 @@ def publicHtml():
 @adsgut.route('/postable/<po>/<pt>:<pn>/filter/html')
 def postableFilterHtml(po, pt, pn):
     querystring=request.query_string
-    p, owner, on, cn=postable(po, pn, pt)
+    p, owner, rw, on, cn=postable(po, pn, pt)
     pflavor='pos'
     if pn=='public' and po=='adsgut' and pt=='library':
         pflavor='pub'
@@ -990,7 +995,7 @@ def postableFilterHtml(po, pt, pn):
         tqtype='tagname'
     tqtype='tagname'
     #BUG using currentuser right now. need to support a notion of useras
-    return render_template('postablefilter.html', p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner)
+    return render_template('postablefilter.html', p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner, rw=rw)
 
 
 #######################################################################################################################

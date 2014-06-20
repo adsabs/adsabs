@@ -7,7 +7,7 @@ flip_sorter = (qstr) ->
     #console.log "qstring", qstr
     qlist=qstr.split('&')
     #console.log "qlist", qlist
-    sortstring=""
+    sortstring = ""
     otherqlist=[]
     for q in qlist
         n = q.search("sort")
@@ -18,30 +18,30 @@ flip_sorter = (qstr) ->
     if sortstring!=''
         [f,a]=sortstring.split(':')
         if f=='posting__thingtopostname'
-            fnowtext="by paper year"
-            ftext='Sort By Post'
-            fout='posting__whenposted'
+            fnowtext = "by paper year"
+            ftext = 'Sort By Post'
+            fout = 'posting__whenposted'
         if f=='posting__whenposted'
-            fnowtext="by posting time"
-            ftext='Sort By Year'
-            fout='posting__thingtopostname'
+            fnowtext = "by posting time"
+            ftext = 'Sort By Year'
+            fout = 'posting__thingtopostname'
         if a=='True'
-            anowtext="earliest first"
-            atext='<i class="icon-arrow-down"></i>'
-            aout='False'
+            anowtext = "earliest first"
+            atext = '<i class="icon-arrow-down"></i>'
+            aout = 'False'
         if a=='False'
-            anowtext="latest first"
-            atext='<i class="icon-arrow-up"></i>'
-            aout='True'
+            anowtext = "latest first"
+            atext = '<i class="icon-arrow-up"></i>'
+            aout = 'True'
     else
-        f='posting__whenposted'
-        a='False'
-        fnowtext="by posting time"
-        anowtext="latest first"
-        ftext='Sort By Year'
-        atext='<i class="icon-arrow-up"></i>'
-        fout='posting__thingtopostname'
-        aout='True'
+        f = 'posting__whenposted'
+        a = 'False'
+        fnowtext = "by posting time"
+        anowtext = "latest first"
+        ftext = 'Sort By Year'
+        atext = '<i class="icon-arrow-up"></i>'
+        fout = 'posting__thingtopostname'
+        aout = 'True'
     odict=
         fnow:f
         anow:a
@@ -98,7 +98,7 @@ make_editable_description = ($infodiv, fqpn) ->
       $infodiv.find('.edtext').editable('toggle')
 
 do_postable_info = (sections, config, ptype) ->
-    $.get config.infoURL, (data) ->
+    $.get config.infoURL, (data) ->        
         if ptype=='library'
             content=views.library_info config.owner, data, templates.library_itemsinfo
         else if ptype=='group'
@@ -214,6 +214,7 @@ do_postable_filter = (sections, config, tagfunc) ->
                     suggestions : suggestions
                     pview: config.pview
                     pviewowner: config.owner
+                    pviewrw: config.rw
                     tagfunc: tagfunc
                 plinv=new itemsdo.ItemsFilterView(ido)
                 plinv.render()

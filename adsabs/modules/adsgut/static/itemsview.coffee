@@ -74,7 +74,7 @@ didupost = (postings, you, fqpn, areyouowner) ->
     #         counter = counter + 1
     #     if p[1]==you.adsid
     #         youposted = true
-    console.log postings, you, fqpn, counter, youposted
+    #console.log postings, you, fqpn, counter, youposted
     for p in postings
         if p[0]==fqpn and p[1]==you.adsid
             return true
@@ -97,7 +97,7 @@ class ItemView extends Backbone.View
     "click .removeitem" : "removeItem"
 
   initialize: (options) ->
-    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview, @pviewowner} = options
+    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview, @pviewowner, @pviewrw} = options
     @tagsfunc = options.tagfunc ? () ->
     #console.log "PVIN",  @memberable, @pview, @pviewowner
     @hv=undefined
@@ -145,7 +145,7 @@ class ItemView extends Backbone.View
     @$el.empty()
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
-    console.log ">>", @item.basic.name, @pview#, didupost(@postings, @memberable, @pview)
+    #console.log ">>", @item.basic.name, @pview#, didupost(@postings, @memberable, @pview)
     if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview, @pviewowner)
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'
     else
@@ -174,6 +174,7 @@ class ItemView extends Backbone.View
         can_delete = @pviewowner
     tagdict =
         values: thetags
+        can_add: @pviewrw
         can_delete: can_delete
         enhanceValue: _.bind(enval, this)
         addWithAjax: _.bind(addwa, this)
@@ -438,6 +439,7 @@ class ItemsView extends Backbone.View
             suggestions: @suggestions
             pview: @pview
             pviewowner: 'none'
+            pviewrw: 'none'
             counter: counter
             submittable: @submittable
         v=new ItemView(ins)
@@ -642,7 +644,7 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @pviewowner, @tagfunc} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @pviewowner, @tagfunc, @pviewrw} = options
     #console.log "PVIEW", @pview, @postings
     #console.log "ITEMS", @items, @suggestions
     @submittable =
@@ -665,6 +667,7 @@ class ItemsFilterView extends Backbone.View
             suggestions: @suggestions
             pview: @pview
             pviewowner: @pviewowner
+            pviewrw: @pviewrw
             tagfunc: @tagfunc
             counter: counter
             submittable: @submittable
