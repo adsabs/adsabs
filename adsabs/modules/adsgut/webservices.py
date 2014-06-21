@@ -1774,7 +1774,7 @@ def perform_classic_library_query(parameters, headers, service_url):
     except Exception, e:
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
-
+        doabort("SRV_ERR", "Somewhing went wrong in contacting classic server")
     try:
         user_json = r.json()
     except Exception, e:
@@ -1829,7 +1829,12 @@ def get_classic_libraries(cookieid, password=None):
     #should also check that we have appropriate cookie somehow?
     headers = {'User-Agent':'ADS Script Request Agent'}
     parameters = {'cookie':cookieid}
-    libjson=perform_classic_library_query(parameters, headers, ADS_CLASSIC_LIBRARIES_URL)
+    try:
+        libjson=perform_classic_library_query(parameters, headers, ADS_CLASSIC_LIBRARIES_URL)
+    except:
+        import sys
+        #print ">>>", sys.exc_info()
+        doabort("SRV_ERR", "Somewhing went wrong in contacting classic server")
     useras=g.db._getUserForCookieid(g.currentuser, cookieid)
     useras.classicimported=True
     useras.save()
