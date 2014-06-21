@@ -1,91 +1,59 @@
 from __future__ import with_statement
 
 import sys, os
-#sys.path
-#sys.path.append('/home/rahul/Projects')
-
 import mongogut
 import traceback
 from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify)
+from flask import  session, g, redirect, flash, escape, make_response
 import flask
 import simplejson as json
-#from simplejson import JSONDecodeError
 from random import choice
 from mongogut.utilities import gettype
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.mongoengine.wtf import model_form
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.login import current_user
-
 from mongogut import ptassets as itemsandtags
-
 from mongogut.errors import doabort, MongoGutError
-
-#had to move this to global errors.py
-# @app.errorhandler(MongoGutError)
-# def handle_error(error):
-#     response = jsonify(error.to_dict())
-#     response.status_code = error.status_code
-#     return response
-
-
-from flask import request, session, g, redirect, url_for, \
-     abort, render_template, flash, escape, make_response,  Blueprint
-
 import datetime
 from werkzeug import Response
 from mongoengine import Document
 from bson.objectid import ObjectId
-BLUEPRINT_MODE=os.environ.get('BLUEPRINT_MODE', True)
-BLUEPRINT_MODE=bool(BLUEPRINT_MODE)
-#print "BLUEPRINT MODE", BLUEPRINT_MODE
-
-if not BLUEPRINT_MODE:
-    adsgut_app=flask.Flask(__name__)
-    adsgut=adsgut_app
-else:
-    adsgut_blueprint = Blueprint('adsgut', __name__,
-                                template_folder="templates",
-                                static_folder='static',
-                                url_prefix='/adsgut',
-
-    )
-
-    adsgut_app=app
-    adsgut=adsgut_blueprint
-    from adsabs.extensions import mongoengine
-    from adsabs.extensions import solr
-    #adsgut_app.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
 
 
-##print dir(adsgut), type(adsgut)
-#print "HELLO"
-#adsgut.config.from_object(__name__)
-if not BLUEPRINT_MODE:
-    adsgut.config['TESTING'] = True
-    adsgut.config['SECRET_KEY'] = 'flask+mongoengine=<3'
-    adsgut.debug = True
-    adsgut.config['DEBUG_TB_PANELS'] = (
-                 'flask.ext.debugtoolbar.panels.versions.VersionDebugPanel',
-                 'flask.ext.debugtoolbar.panels.timer.TimerDebugPanel',
-                 'flask.ext.debugtoolbar.panels.headers.HeaderDebugPanel',
-                 'flask.ext.debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
-                 'flask.ext.debugtoolbar.panels.template.TemplateDebugPanel',
-                 'flask.ext.debugtoolbar.panels.logger.LoggingPanel',
-                 'flask.ext.mongoengine.panels.MongoDebugPanel'
-                 )
+POTENTIALUSERSTRING="""
+<p>
+The SAO/NASA Astrophysics Data System (ADS) is a Digital Library portal for researchers in Astronomy and
+Physics, operated by the Smithsonian Astrophysical Observatory (SAO) under a NASA grant. The ADS maintains
+three bibliographic databases containing more than 10.8 million records: Astronomy and Astrophysics, Physics,
+and arXiv e-prints. The main body of data in the ADS consists of bibliographic records, which are searchable
+through highly customizable query forms, and full-text scans of much of the astronomical literature which
+can be browsed or searched via our full-text search interface at <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a>."
+</p>
+"""
 
-    adsgut.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-    DebugToolbarExtension(adsgut)
-    adsgut.config['MONGODB_SETTINGS'] = {'DB': 'adsgut'}
-    mongoengine = MongoEngine()
-    mongoengine.init_app(adsgut_app)
+POTENTIALUSERSTRING2="""
+<p>
+If you already have an account at ADS, you can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a>, sign in, and click the %s link there to accept.
+</p>
+<p>
+If you do not already have an ADS account, please <a href="http://labs.adsabs.harvard.edu/adsabs/user/signup">Sign up</a>! You will then be able to accept the invite from your account's Groups page.
+</p>
+"""
 
-#App should be set up by now. We'll use the mongo-engine flask extension.
-#db = MongoEngine()
-#db.init_app(adsgut_app)
-#
+adsgut_blueprint = Blueprint('adsgut', __name__,
+                            template_folder="templates",
+                            static_folder='static',
+                            url_prefix='/adsgut',
 
+)
+
+adsgut_app=app
+adsgut=adsgut_blueprint
+from adsabs.extensions import mongoengine
+from adsabs.extensions import solr
+
+#tech to allow creating json from MomgoEngine Objects
 def todfo(ci):
     cijson=ci.to_json()
     cidict=json.loads(cijson)
@@ -117,8 +85,11 @@ def jsonify(*args, **kwargs):
     """ jsonify with support for MongoDB ObjectId
     """
     return Response(json.dumps(dict(*args, **kwargs), cls=MongoEngineJsonEncoder), mimetype='application/json')
-#BUG; these currently dont have doAborts
-#do we need a dictpop? CHECK
+
+
+
+#This next set of functions is used to obtain various quantities
+#from http request GET and POST dictionaries in flask.
 
 #FOR GET
 def _dictg(k,d, listmode=False):
@@ -137,6 +108,7 @@ def _dictp(k,d, default=None):
         d.pop(k)
     return val
 
+#gets a user from key useras in a POST request
 def _userpostget(g, postdict):
     nick=_dictp('useras', postdict)
     if nick:
@@ -145,6 +117,8 @@ def _userpostget(g, postdict):
         useras=g.currentuser
     return useras
 
+#gets a user from key useras in a GET request
+#userthere is used incase you want items just pertinent to the user
 def _userget(g, qdict):
     nick=_dictg('useras', qdict)
     userthere=_dictg('userthere', qdict)
@@ -158,6 +132,10 @@ def _userget(g, qdict):
         usernick=False
     return useras, usernick
 
+#gets a sortspec. This looks like posting__whenposted:True
+#which corresponds to and ascending sort. notee that i am currently
+#exposing the inners of the database. it would be better to use a table
+#to map this to user friendly names. TODO.
 def _sortget(qdict):
     #a serialixed dict of ascending and field
     sortstring=_dictg('sort', qdict)
@@ -168,6 +146,7 @@ def _sortget(qdict):
     sort['ascending']=(sort['ascending']=='True')
     return sort
 
+#sortspec from POST
 def _sortpostget(qdict):
     #a serialixed dict of ascending and field
     sortstring=_dictp('sort', qdict)
@@ -182,8 +161,6 @@ def _sortpostget(qdict):
 #eg criteria=basic__fqin:eq:something&criteria=
 #we create from it a criteria list of dicts
 def _criteriaget(qdict):
-    #a serialixed dict of arbitrary keys, with mongo style encoding
-    #later we will clamp down on it. BUG
     critlist=_dictg('criteria', qdict, True)
     if not critlist[0]:
         return False
@@ -194,9 +171,9 @@ def _criteriaget(qdict):
         crit.append(cr)
     return crit
 
+#a serialised dict of arbitrary keys, with mongo style encoding
+#operators are not represented here.(equality is assumed)
 def _queryget(qdict):
-    #a serialixed dict of arbitrary keys, with mongo style encoding
-    #later we will clamp down on it. BUG
     querylist=_dictg('query', qdict, True)
     if not querylist[0]:
         return {}
@@ -208,8 +185,9 @@ def _queryget(qdict):
         q[field].append(value)
     return q
 
+#this is for pagination in the form pagetuplle=15:30
+#the first is the item number to start from(offset), the second is the pagestyle.
 def _pagtupleget(qdict):
-    #a serialized tuple of offset, pagesize
     pagtuplestring=_dictg('pagtuple', qdict)
     if not pagtuplestring:
         return None
@@ -217,168 +195,137 @@ def _pagtupleget(qdict):
     pagtuple=[int(e) if e else -1 for e in pagtuplestring.split(':')]
     return pagtuple
 
-#currently force a new items each time.
+#gets a list of items using their fqins
 def _itemsget(qdict):
     itemlist=_dictg('items', qdict, True)
-    #print "itemlist", itemlist
     if not itemlist[0]:
         return []
-    #Possible security hole bug
     return itemlist
 
+#like above, but uses post
 def _itemspostget(qdict):
     itemlist=_dictp('items', qdict)
     if not itemlist:
         return []
-    #Possible security hole bug
     return itemlist
 
+#gets bibcodes from POST
 def _bibcodespostget(qdict):
     itemlist=_dictp('bibcode', qdict)
     if not itemlist:
         return []
-    #Possible security hole bug
     return itemlist
 
+#gets a list of libraries (using their fqpns)
 def _postablesget(qdict):
     plist=_dictp('postables', qdict)
     if not plist:
         return []
-    #Possible security hole bug
     return plist
 
-#used in POST, not in GET
-def _itemstagsget(qdict):
+#get items and tags from the POST
+#format is BLA
+def _itemstagspostget(qdict):
     itemstagslist=_dictp('itemsandtags', qdict)
     if not itemstagslist:
         return []
-    #Possible security hole bug
     return itemstagslist
 
-#used in POST, not in get
-def _tagspecsget(qdict):
+
+#get tag specs from the POST
+#format is BLA
+def _tagspecspostget(qdict):
     tagspecs=_dictp('tagspecs', qdict)
     if not tagspecs:
         return {}
-    #Possible security hole bug
     return tagspecs
 
-#x
+
+
 import uuid
+
+#a before_request is flask's place of letting you run code before 
+#the request is carried out. here is where we get info about the user
+#from the database and all that
+
+#current_user is obtained from the flask session
 @adsgut.before_request
 def before_request():
-    #username=session.get('username', None)
-    #BUG: currently get first part of email
     try:
-        #username=current_user.get_username().split('@')[0]
-        #print "getting user info"
+        #get the adsid which should be the email of the user
         adsid=current_user.get_username()
+        #try getting the cookie id as well
         cookieid=current_user.get_id()
     except:
+        #this fails if the user is not logged in. then set adsid to python None
         adsid=None
-    #print "USER", adsid, current_user.get_id()
-    ##print "POSTER", url_for('adsgut.postForm', itemtypens='ads', itemtypename='pub')
+    #set up the database, and attach the database to the global g object.
     p=itemsandtags.Postdb(mongoengine)
     w=p.whosdb
     g.db=w
     g.dbp=p
-    #BUG; this should change towards an anonymous user being sent back
     if not adsid:
+        #if user not logged in, set user to the 'anonymouse' user
         adsid='anonymouse'
         user=g.db._getUserForAdsid(None, adsid)
     else:
-        try:
+        try:#look up the user based on their cookieid
             user=g.db._getUserForCookieid(None, cookieid)
             if user.adsid != adsid:#user changed their email
-                #print "email changed"
                 user.adsid = adsid
                 user.save(safe=True)
-            #print "---------->IN HERE", adsid
         except:
-            #print "<----------OR HERE", adsid, sys.exc_info()
+            #if we couldnt look up the user based on their cookieid
+            #this situation can happen when a user is invited, has logged in
+            #on classic or main, but is not in our adsgut system as yet
             adsgutuser=g.db._getUserForNick(None, 'adsgut')
             adsuser=g.db._getUserForNick(adsgutuser, 'ads')
             #we dont have the cookie, but we might have the adsid, because he was invited earlier
             try:#partially in our database
               user=g.db._getUserForAdsid(None, adsid)
+              #take whatever cookieid the ads server allocated, and save it
               user.cookieid=cookieid
               user.save(safe=True)
             except:#not at all in our database
-              #BUG: IF the next two dont happen transactionally we run into issues. Later we make this transactional
-              #this removes the possibility of the user adding a custom nick, for now
-              #cookieid=current_user.get_id()
-              #user=w.addUser(adsgutuser,{'adsid':adsid})
-              #Make sure this one is done on invite
+              #TODO: IF the next two dont happen transactionally we run into issues. Later we make this transactional
+              #if the user was not invited, and not already there in adsgut database
+              #this will happen the first time a user clicks libraries in the
+              #profile page
               user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
             #add the user to the flagship ads app, at the very least, to complete user
-            #being in our database
+            #being in our database(addUser does not do this, bcoz the user
+            #may partially exist in our database thanks to invitation)
             user, adspubapp = g.db.addUserToMembable(adsuser, 'ads/app:publications', user.nick)
 
-
-    #superuser if no login BUG: use only for testing
-
-    #currently set to sysuser. Atherwise have user login and set.
-    #This should set a user into our mongodb table if needed. BUG
     g.currentuser=user
 
-
-# @adsgut.route('/login', methods=['GET', 'POST'])
-# def login():
-#     error=None
-#     if request.method == 'POST':
-#         session['username'] = request.form['username']
-#         session['logged_in'] = True
-#         flash('You were logged in')
-#         return redirect(url_for('index'))
-#     return render_template('login.html', error=error, useras=g.currentuser)
-
-# @adsgut.route('/logout')
-# def logout():
-#     # remove the username from the session if it's there
-#     session.pop('username', None)
-#     session.pop('logged_in', None)
-#     flash('You were logged out')
-#     return redirect(url_for('index'))
-
-
-# #x
-# @adsgut.route('/')
-# def index():
-#     return render_template('index.html', useras=g.currentuser)
-# #x
-# @adsgut.route('/all')
-# def all():
-#     groups=g.db.allGroups(g.currentuser)
-#     apps=g.db.allApps(g.currentuser)
-#     libraries=g.db.allLibraries(g.currentuser)
-#     users=g.db.allUsers(g.currentuser)
-#     return flask.render_template('index.html', groups=groups, apps=apps, users=users, libraries=libraries)
-
 #######################################################################################################################
-#######################################################################################################################
-
 #Information about users, groups, and apps
-#TODO: should we support a modicum of user information for others
-#like group and app owners?
-#x
+#######################################################################################################################
+
+
+
+#this url gets information about a user
 import simplejson as json
 @adsgut.route('/user/<nick>')
 def userInfo(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
+    #get additional info about user's libraries, including the reason
+    #why the user is in the library
     postablesother, names = user.membableslibrary(pathinclude_p=True)
-    #print "PN", postablesother, names
     #crikey stupid hack to have to do this bcoz of jsonify introspecting
     #mongoengine objects only
     jsons = [e.to_json() for e in postablesother]
     ds=[]
     for i, j in enumerate(jsons):
         d = json.loads(j)
-        #print "D", d['fqpn']
         if names[d['fqpn']][0][2]==d['fqpn']:#direct membership overrides all else
             d['reason'] = ''
         else:
             reasons=[e[1] for e in names[d['fqpn']]]
-            #print "R1", reasons
+            #eliminate all libraries (many!) the user is in because
+            #os being part of the public group
+            #(TODO: might be better done cleaner in membableslibrary)
             elim=[]
             for j,r in enumerate(reasons):
                 if r=='group:public' and len(reasons) > 1:
@@ -388,7 +335,7 @@ def userInfo(nick):
             #print "R2", reasons
             d['reason'] = ",".join(reasons)
         ds.append(d)
-
+    #return information about the user and their libraries
     ujson = jsonify(user=user, postablelibs=ds)
     return ujson
 
@@ -407,7 +354,8 @@ class InviteFormGroup(Form):
     op = HiddenField(default="invite")
     recaptcha = RecaptchaField()
 
-#x
+#The next two URL's get the user profile in terms of all the libraries the user is
+#in. See https://dl.dropboxusercontent.com/u/75194/userprofile.png
 @adsgut.route('/user/<nick>/profile/html')
 def userProfileHtml(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
@@ -418,6 +366,8 @@ def userProfileFromAdsidHtml(adsid):
     user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
     return render_template('userprofile.html', theuser=user, useras=g.currentuser)
 
+#Thes next two creates a profile for the groups the user has.
+#see https://dl.dropboxusercontent.com/u/75194/usergroupprofile.png
 @adsgut.route('/user/<nick>/profilegroups/html')
 def userProfileGroupsHtml(nick):
     user=g.db.getUserInfo(g.currentuser, nick)
@@ -428,7 +378,8 @@ def userProfileGroupsFromAdsidHtml(adsid):
     user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
     return render_template('userprofilegroups.html', theuser=user, useras=g.currentuser)
 
-#Direct
+#the libraries, apps and groups a user is directly in
+#it should be called membablesuserisin but we are going with the historical url
 @adsgut.route('/user/<nick>/postablesuserisin')
 def postablesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
@@ -441,6 +392,9 @@ def postablesUserIsIn(nick):
     libraries.remove(useras.nick+"/library:default")
     return jsonify(groups=groups, libraries=libraries, apps=apps)
 
+#this gets the libraries the user can access (write to is a not entirely
+#accurate term because we do include read-only libraries here). the critical
+#thing is that this includes libraires we are in due to membership in a group.
 @adsgut.route('/user/<nick>/postablesusercanwriteto')
 def postablesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
@@ -454,7 +408,7 @@ def postablesUserCanWriteTo(nick):
     libraries.remove(useras.nick+"/library:default")
     return jsonify(groups=[], libraries=libraries, apps=[])
 
-#x
+#groups user is in, minus the public grouo
 @adsgut.route('/user/<nick>/groupsuserisin')
 def groupsUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
@@ -462,38 +416,36 @@ def groupsUserIsIn(nick):
     groups.remove("adsgut/group:public")
     return jsonify(groups=groups)
 
-#x
+# groups user owns
 @adsgut.route('/user/<nick>/groupsuserowns')
 def groupsUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     groups=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "group")]
     return jsonify(groups=groups)
 
-#x
+# groups user is invited to
 @adsgut.route('/user/<nick>/groupsuserisinvitedto')
 def groupsUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     groups=[e['fqpn'] for e in g.db.membableInvitesForUser(g.currentuser, useras, "group")]
     return jsonify(groups=groups)
 
-#x
+# apps user is in
 @adsgut.route('/user/<nick>/appsuserisin')
 def appsUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     apps=[e['fqpn'] for e in g.db.membablesForUser(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
-#removed apps-user can write to. apps are not modeleld as libraries, but rather as groups.
-#we should figure some other way to do this
-#x
+
+#apps user owns. not used yet
 @adsgut.route('/user/<nick>/appsuserowns')
 def appsUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     apps=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "app")]
     return jsonify(apps=apps)
 
-#use this for the email invitation?
-#x
+#apps user is invited to: not used yet.
 @adsgut.route('/user/<nick>/appsuserisinvitedto')
 def appsUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
@@ -501,57 +453,60 @@ def appsUserIsInvitedTo(nick):
     return jsonify(apps=apps)
 
 
-#does not handle non-direct  inness
+#libraries user is in directly
 @adsgut.route('/user/<nick>/librariesuserisin')
 def librariesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     libs=[e['fqpn'] for e in g.db.membablesUserCanAccess(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
-#BUG: not right
+#all the libraries the user is in
 @adsgut.route('/user/<nick>/librariesusercanwriteto')
 def librariesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     libs=[e['fqpn'] for e in g.db.membablesUserCanWriteTo(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
-#x
+#the libraries a user owns
 @adsgut.route('/user/<nick>/librariesuserowns')
 def librariesUserOwns(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     libs=[e['fqpn'] for e in g.db.ownerOfMembables(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
-#use this for the email invitation?
-#x
+#libraries a user is invited to
 @adsgut.route('/user/<nick>/librariesuserisinvitedto')
 def librariesUserIsInvitedTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     libs=[e['fqpn'] for e in g.db.membableInvitesForUser(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
-#BUG currentuser useras here?
+#all the items saved in user's default library, currently not used
 @adsgut.route('/user/<nick>/items')
 def userItems(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     num, vals=g.dbp.getItemsForQuery(g.currentuser, useras,
-       {'group':[useras.nick+"/group:default"]} )
+       {'library':[useras.nick+"/library:default"]} )
     #userdict={'count':num, 'items':[json.loads(v.to_json()) for v in vals]}
     return jsonify(count=num, items=vals)
-#######################################################################################################################
-#creating groups and apps
-#accepting invites.
-#DELETION methods not there BUG
 
-#BUG: check currentuser useras stuff here
-#BUG: postable really a tuple. change to reflect that
+#######################################################################################################################
+#functions for creating groups and apps
+#and for accepting invites.
+
+#METHODS using POST have POST parameters on the right of the function
+#######################################################################################################################
+
+#create a group, app, or library, od type ptstr
 def createMembable(g, request, ptstr):
     spec={}
     jsonpost=dict(request.json)
+    #get user and name from POST json
     useras=_userpostget(g,jsonpost)
     name=_dictp('name', jsonpost)
     if not name:
         doabort("BAD_REQ", "No Name Specified")
+    #get description from POST
     description=_dictp('description', jsonpost, '')
     spec['creator']=useras.basic.fqin
     spec['name']=name
@@ -559,7 +514,11 @@ def createMembable(g, request, ptstr):
     postable=g.db.addMembable(g.currentuser, useras, ptstr, spec)
     return postable
 
-@adsgut.route('/group', methods=['POST'])#groupname/description
+#create group/app/library. In our code we tend to use
+#createMembable directly, rather than these endpoints.
+#the useras is optional, vurrentuser is used otherwise
+
+@adsgut.route('/group', methods=['POST'])#groupname/[description]/[useras]
 def createGroup():
     if request.method == 'POST':
         newgroup=createMembable(g, request, "group")
@@ -567,7 +526,7 @@ def createGroup():
     else:
         doabort("BAD_REQ", "GET not supported")
 
-@adsgut.route('/app', methods=['POST'])#name/description
+@adsgut.route('/app', methods=['POST'])#name/[description]/[useras]
 def createApp():
     if request.method == 'POST':
         newapp=createMembable(g, request, "app")
@@ -575,7 +534,7 @@ def createApp():
     else:
         doabort("BAD_REQ", "GET not supported")
 
-@adsgut.route('/library', methods=['POST'])#name/description
+@adsgut.route('/library', methods=['POST'])#name/[description]/[useras]
 def createLibrary():
     if request.method == 'POST':
         newlibrary=createMembable(g, request, "library")
@@ -586,106 +545,93 @@ def createLibrary():
 from adsabs.modules.user.user import AdsUser
 from adsabs.modules.user.user import send_email_to_user
 
-@adsgut.route('/postable/<po>/<pt>:<pn>/makeinvitations', methods=['POST'])#user/op
+#creating an invitation to a group or library (or app: not implemented yet, TODO)
+#this is a very different endpoint, only used from the per library or per group
+#web pages to make invitations. it is NOT part of the API.
+@adsgut.route('/postable/<po>/<pt>:<pn>/makeinvitations', methods=['POST'])
 def makeInvitations(po, pt, pn):
-  fqpn=po+"/"+pt+":"+pn
-  if request.method == 'POST':
-      if pt=="library":
-        form = InviteForm()
-      else:
-        form = InviteFormGroup()
-      if form.validate():
-        #specify your own nick for accept or decline
-        #print "LALALALALLA", form.memberable.data, form.changerw.data
-        # jsonpost=dict(request.form)
-        memberable=form.memberable.data
-        changerw=False
+    fqpn=po+"/"+pt+":"+pn
+    if request.method == 'POST':
         if pt=="library":
-          changerw=form.changerw.data
-        # changerw=_dictp('changerw', jsonpost)
-        # if changerw==None:
-        #     changerw=False
-        if not memberable:
-             doabort("BAD_REQ", "No User Specified")
-        #print "memberable", memberable, changerw
-        potentialuserstring=""
-        try:
-            user=g.db._getUserForAdsid(g.currentuser, memberable)
-        except:
-            #print "no such user", memberable
-            adsuser = AdsUser.from_email(memberable)
-            #print "here", adsuser
-            adsgutuser=g.db._getUserForNick(None, 'adsgut')
-            adsappuser=g.db._getUserForNick(adsgutuser, 'ads')
-            if adsuser==None:#not in giovanni db, just add to ours
-              #doabort("BAD_REQ", "No such User")
-              #print "q"
-              adsgutuser=g.db._getUserForNick(None, 'adsgut')
-              #print "q2"
-              potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET-'+str(uuid.uuid4())})
-              user=potentialuser
-              potentialuserstring="""
-              <p>
-              The SAO/NASA Astrophysics Data System (ADS) is a Digital Library portal for researchers in Astronomy and
-              Physics, operated by the Smithsonian Astrophysical Observatory (SAO) under a NASA grant. The ADS maintains
-              three bibliographic databases containing more than 10.8 million records: Astronomy and Astrophysics, Physics,
-              and arXiv e-prints. The main body of data in the ADS consists of bibliographic records, which are searchable
-              through highly customizable query forms, and full-text scans of much of the astronomical literature which
-              can be browsed or searched via our full-text search interface at <a href="http://labs.adsabs.harvard.edu/adsabs/">http://labs.adsabs.harvard.edu/adsabs/</a>."
-              </p>
-              """
-            else:#already in giovanni db, add to ours
-              #print "r"
-              cookieid = adsuser.get_id()
-              adsid = adsuser.get_username()
-              user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
-              user, adspubapp = g.db.addUserToMembable(adsappuser, 'ads/app:publications', user.nick)
-              potentialuserstring=""
-        potentialuserstring2="""
-        <p>
-        If you already have an account at ADS, you can go to <a href="http://labs.adsabs.harvard.edu/adsabs/user/">http://labs.adsabs.harvard.edu/adsabs/user/</a>, sign in, and click the %s link there to accept.
-        </p>
-        <p>
-        If you do not already have an ADS account, please <a href="http://labs.adsabs.harvard.edu/adsabs/user/signup">Sign up</a>! You will then be able to accept the invite from your account's Groups page.
-        </p>
-        """
-        #ok got user, now invite
-        utba, p=g.db.inviteUserToMembable(g.currentuser, g.currentuser, fqpn, user, changerw)
-        emailtitle="Invitation to ADS Library %s" % pn
-        ptmap={'group':'Group (and associated library)', 'library':"Library"}
-        ptmap2={'group':'My Groups', 'library':"Libraries"}
-        emailtext="%s has invited you to ADS %s %s." % (g.currentuser.adsid, ptmap[pt], pn)
-        emailtext = emailtext+potentialuserstring+potentialuserstring2%ptmap2[pt]
-        send_email_to_user(emailtitle, emailtext,[user.adsid])
-        passdict={}
-        passdict[pt+'owner']=po
-        passdict[pt+'name']=pn
-        flash("Invite sent", 'success')
-        return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
-      else:
-        junk=1
-        #print "ERROES", form.errors
-        #print "NOVAL", request.form
-      return profileHtmlNotRouted(po, pn, pt, inviteform=form)
+            form = InviteForm()
+        else:
+            form = InviteFormGroup()
+        if form.validate():
+            #email of user being invited
+            memberable=form.memberable.data
+            changerw=False
+            #for libraries, whether the read-write checkbox was checked
+            if pt=="library":
+              changerw=form.changerw.data
+            if not memberable:
+                 doabort("BAD_REQ", "No User Specified")
+            #print "memberable", memberable, changerw
+            potentialuserstring=""
+            try:
+                user=g.db._getUserForAdsid(g.currentuser, memberable)
+            except:
+                adsuser = AdsUser.from_email(memberable)
+                #get the system users so that we can create a partial user
+                adsgutuser=g.db._getUserForNick(None, 'adsgut')
+                adsappuser=g.db._getUserForNick(adsgutuser, 'ads')
+                if adsuser==None:#not in giovanni db, just add to ours
+                    #add a potential user with 'NOCOOKIEYET'to our db
+                    potentialuser=g.db.addUser(adsgutuser,{'adsid':memberable, 'cookieid':'NOCOOKIEYET-'+str(uuid.uuid4())})
+                    user=potentialuser
+                    potentialuserstring=POTENTIALUSERSTRING
+                else:#already in giovanni db, add to ours
+                    cookieid = adsuser.get_id()#get from giovanni db
+                    adsid = adsuser.get_username()
+                    user=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+                    #sice already there add to publications.
+                    user, adspubapp = g.db.addUserToMembable(adsappuser, 'ads/app:publications', user.nick)
+                    potentialuserstring=""
+            potentialuserstring2=POTENTIALUSERSTRING2
+            #ok got user, now invite by adding invitation into the database
+            utba, p=g.db.inviteUserToMembable(g.currentuser, g.currentuser, fqpn, user, changerw)
+            #queue up an invitation email
+            emailtitle="Invitation to ADS Library %s" % pn
+            ptmap={'group':'Group (and associated library)', 'library':"Library"}
+            ptmap2={'group':'My Groups', 'library':"Libraries"}
+            emailtext="%s has invited you to ADS %s %s." % (g.currentuser.adsid, ptmap[pt], pn)
+            emailtext = emailtext+potentialuserstring+potentialuserstring2%ptmap2[pt]
+            send_email_to_user(emailtitle, emailtext,[user.adsid])
+            passdict={}
+            passdict[pt+'owner']=po
+            passdict[pt+'name']=pn
+            flash("Invite sent", 'success')
+            #redirect to user or group profile
+            return redirect(url_for("adsgut."+pt+"ProfileHtml", **passdict))
+        else:
+            junk=1
+        return profileHtmlNotRouted(po, pn, pt, inviteform=form)
 
-@adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#user/op
+
+#a very omnibus url allows making changes to postables, such as inviting
+#(which we dont use because we use above for recaptcha purposes)
+#but we use this one to accept invitations, change read-write, change descriptions
+#you can also change ownership of a library/group, vut there is no UI for this
+#anywhere in the system currently
+
+
+#do NOT use invite, unless the user(and users email) is already in the system. This api function is NOT
+#for random emails, otherwise a spammer might abuse it.
+
+@adsgut.route('/postable/<po>/<pt>:<pn>/changes', methods=['POST'])#memberable/op/[description]
 def doPostableChanges(po, pt, pn):
     #add permit to match user with groupowner
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
-        #specify your own nick for accept or decline
-        #print "LALALALALLA", request.json
         jsonpost=dict(request.json)
         memberable=_dictp('memberable', jsonpost)
         changerw=_dictp('changerw', jsonpost)
         if changerw==None:
             changerw=False
-        #for inviting this is nick of user invited.
-        #for accepting this is your own nick
+        #for inviting this is adsid(email) of user invited.
+        #for accepting this is your own email(adsid)
         if not memberable:
             doabort("BAD_REQ", "No User Specified")
         op=_dictp('op', jsonpost)
-        #print "NICKOP", memberable, op
         if not op:
             doabort("BAD_REQ", "No Op Specified")
         if op=="invite":
@@ -700,6 +646,7 @@ def doPostableChanges(po, pt, pn):
                 adsgutuser=g.db._getUserForNick(None, 'adsgut')
                 adsuser=g.db._getUserForNick(adsgutuser, 'ads')
                 memberable=g.db.addUser(adsgutuser,{'adsid':adsid, 'cookieid':cookieid})
+                #per usual add to publications
                 memberable, adspubapp = g.db.addUserToMembable(adsuser, 'ads/app:publications', memberable.nick)
 
             utba, p=g.db.inviteUserToMembable(g.currentuser, g.currentuser, fqpn, memberable, changerw)
@@ -714,7 +661,7 @@ def doPostableChanges(po, pt, pn):
             return jsonify({'status':'OK', 'info': {'invited':me.nick, 'to': fqpn, 'accepted':True}})
         elif op=='decline':
             memberable=g.db._getUserForAdsid(g.currentuser, memberable)
-            #BUG add something to invitations to mark declines.
+            #TODO: not implemented yet add something to invitations to mark declines.
             return jsonify({'status': 'OK', 'info': {'invited':memberable, 'to': fqpn, 'accepted':False}})
         elif op=='changeowner':
             #you must be the current owner
@@ -738,55 +685,14 @@ def doPostableChanges(po, pt, pn):
         doabort("BAD_REQ", "GET not supported")
 
 
-
-#DEPRECATED: REMOVE
-@adsgut.route('/group/<groupowner>/group:<groupname>/doinvitation', methods=['POST'])#user/op
-def doInviteToGroup(groupowner, groupname):
-    #add permit to match user with groupowner
-    fqgn=groupowner+"/group:"+groupname
-    if request.method == 'POST':
-        #specify your own nick for accept or decline
-        jsonpost=dict(request.json)
-        nick=_dictp('userthere', jsonpost)
-        #for inviting this is nick of user invited.
-        #for accepting this is your own nick
-        if not nick:
-            doabort("BAD_REQ", "No User Specified")
-        op=_dictp('op', jsonpost)
-        if not op:
-            doabort("BAD_REQ", "No Op Specified")
-        if op=="invite":
-            utba, p=g.db.inviteUserToMembableUsingNick(g.currentuser, fqgn, nick)
-            return jsonify({'status':'OK', 'info': {'invited':utba.nick, 'to':fqgn}})
-        elif op=='accept':
-            me, p=g.db.acceptInviteToMembable(g.currentuser, fqgn, nick)
-            return jsonify({'status':'OK', 'info': {'invited':me.nick, 'to': fqgn, 'accepted':True}})
-        elif op=='decline':
-            #BUG add something to invitations to mark declines.
-            return jsonify({'status': 'OK', 'info': {'invited':nick, 'to': fqgn, 'accepted':False}})
-        elif op=='decline':
-            #BUG add something to invitations to mark declines.
-            return jsonify({'status': 'OK', 'info': {'invited':nick, 'to': fqgn, 'accepted':False}})
-        else:
-            doabort("BAD_REQ", "No Op Specified")
-    else:
-        doabort("BAD_REQ", "GET not supported")
-
-#BUG: user leakage as we do user info for all users in group. another users groups should not be obtainable
-#BUG: should this handle a general memberable? must use a SHOWNFIELDS
-
-#BUG: do we want a useras here? Also BUG:no existing version for tag, or POST to changer generable ownerable info yet
-def addMemberToPostable(g, request, fqpn):
+#function to add a user to a library.
+#TODO: do we want a useras here? 
+def addMemberToPostable(g, request, fqpn):#fqmn/[changerw]
     jsonpost=dict(request.json)
-    #BUG:need fqun right now. work with nicks later
-    #print jsonpost
     fqmn=_dictp('member', jsonpost)
     changerw=_dictp('changerw', jsonpost)
-    #print "for fqpmn", fqmn, changerw
     if not changerw:
         changerw=False
-    # if not g.currentuser.nick:
-    #     doabort("BAD_REQ", "No User Specified")
     user, postable=g.db.addMemberableToMembable(g.currentuser, g.currentuser, fqpn, fqmn, changerw)
     #print "here"
     return user, postable
@@ -815,7 +721,8 @@ def libraryInviteds(libraryowner, libraryname):
     userdict=getInvitedsForMembable(g, request, fqln)
     return jsonify(userdict)
 
-@adsgut.route('/group/<groupowner>/group:<groupname>/members', methods=['GET', 'POST'])#user
+#add user to group, or get members
+@adsgut.route('/group/<groupowner>/group:<groupname>/members', methods=['GET', 'POST'])#fqmn/[changerw]
 def addMembertoGroup_or_groupMembers(groupowner, groupname):
     #add permit to match user with groupowner
     fqgn=groupowner+"/group:"+groupname
@@ -826,7 +733,8 @@ def addMembertoGroup_or_groupMembers(groupowner, groupname):
         userdict=getMembersOfMembable(g, request, fqgn)
         return jsonify(userdict)
 
-@adsgut.route('/app/<appowner>/app:<appname>/members', methods=['GET', 'POST'])#user
+#add user to app, or get members
+@adsgut.route('/app/<appowner>/app:<appname>/members', methods=['GET', 'POST'])#fqmn/[changerw]
 def addMemberToApp_or_appMembers(appowner, appname):
     #add permit to match user with groupowner
     fqan=appowner+"/app:"+appname
@@ -838,8 +746,8 @@ def addMemberToApp_or_appMembers(appowner, appname):
         return jsonify(userdict)
 
 
-#deprecare library for postable
-@adsgut.route('/library/<libraryowner>/library:<libraryname>/members', methods=['GET', 'POST'])#user
+#add user or group to library, (but we use next one actually). we do use this for members
+@adsgut.route('/library/<libraryowner>/library:<libraryname>/members', methods=['GET', 'POST'])#fqmn/[changerw]
 def addMemberToLibrary_or_libraryMembers(libraryowner, libraryname):
     #add permit to match user with groupowner
     fqln=libraryowner+"/library:"+libraryname
@@ -850,23 +758,25 @@ def addMemberToLibrary_or_libraryMembers(libraryowner, libraryname):
         userdict=getMembersOfMembable(g, request, fqln)
         return jsonify(userdict)
 
-@adsgut.route('/postable/<po>/<pt>:<pn>/members', methods=['GET', 'POST'])#user
+
+#add memberable to postable(library)
+#Only currently used to add a group toa library, but could be used to add users. But we
+#always invite users. Bulk can use a script anyways.
+@adsgut.route('/postable/<po>/<pt>:<pn>/members', methods=['GET', 'POST'])#fqmn/[changerw]
 def addMemberToPostable_or_postableMembers(po, pt, pn):
     fqpn=po+"/"+pt+":"+pn
     if request.method == 'POST':
-        #print "rf", request, fqpn
         member, postable=addMemberToPostable(g, request, fqpn)
         dictis = {'status':'OK', 'info': {'member':member.basic.fqin, 'type':pt, 'postable':postable.basic.fqin}}
-        #print "DICTIS", dictis
         return jsonify(dictis)
     else:
         userdict=getMembersOfMembable(g, request, fqpn)
         return jsonify(userdict)
 
+#remove a member(user/group) from a group/app/library. The user doing it could be the member
+#or could be the owner of the membable
 @adsgut.route('/memberremove', methods=['POST'])
-def memberremove():
-    ##useras?/name/itemtype
-    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
+def memberremove():#useras/member/gqpn
     if request.method=='POST':
         jsonpost=dict(request.json)
         fqpn = _dictp('fqpn', jsonpost)
@@ -877,10 +787,9 @@ def memberremove():
         g.db.removeMemberableFromMembable(g.currentuser, useras, fqpn, member)
         return jsonify({'status':'OK'})
 
+#this will delete a group or a library. need owner user and fqpn of group/library.
 @adsgut.route('/membableremove', methods=['POST'])
-def membableremove():
-    ##useras?/name/itemtype
-    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
+def membableremove():#useras/fqpn
     if request.method=='POST':
         jsonpost=dict(request.json)
         fqpn = _dictp('fqpn', jsonpost)
@@ -891,7 +800,11 @@ def membableremove():
         return jsonify({'status':'OK'})
 
 #######################################################################################################################
+#The next few return individual group and library profiles. The Info functions are web services used in the profile page
 #######################################################################################################################
+
+#return information about the group or library. the world postable is a misnomer for now.
+#this is a common function used in the web services below
 def postable(ownernick, name, ptstr):
     fqpn=ownernick+"/"+ptstr+":"+name
     postable, owner, creator=g.db.getMembableInfo(g.currentuser, g.currentuser, fqpn)
@@ -906,58 +819,42 @@ def postable(ownernick, name, ptstr):
     return postable, isowner, rw, owner.presentable_name(), creator.presentable_name()
 
 
-#POST/GET in a lightbox?
-@adsgut.route('/group/html')
-def creategrouphtml():
-    pass
-
 #get group info
-#x
 @adsgut.route('/group/<groupowner>/group:<groupname>')
 def groupInfo(groupowner, groupname):
     g, io, rw, on, cn = postable(groupowner, groupname, "group")
     return jsonify(group=g, oname = on, cname = cn, io=io, rw=rw)
 
-#x
+#get group profile
 @adsgut.route('/postable/<groupowner>/group:<groupname>/profile/html')
 def groupProfileHtml(groupowner, groupname):
     return profileHtmlNotRouted(groupowner, groupname, "group", inviteform=None)
 
 
-#POST/GET in a lightbox?
-@adsgut.route('/app/html')
-def createapphtml():
-    pass
-
-#x
+#get app info
 @adsgut.route('/app/<appowner>/app:<appname>')
 def appInfo(appowner, appname):
     a, io, rw, on, cn = postable(appowner, appname, "app")
     return jsonify(app=a, oname = on, cname = cn, io=io, rw=rw)
 
-#x
+#get app profile, not used currently
 @adsgut.route('/postable/<appowner>/app:<appname>/profile/html')
 def appProfileHtml(appowner, appname):
     return profileHtmlNotRouted(appowner, appname, "app", inviteform=None)
 
 
-#POST/GET in a lightbox?
-@adsgut.route('/library/html')
-def createlibraryhtml():
-    pass
-
-#get group info
-#x
+#get library info
 @adsgut.route('/library/<libraryowner>/library:<libraryname>')
 def libraryInfo(libraryowner, libraryname):
     l, io, rw, on, cn = postable(libraryowner, libraryname, "library")
     return jsonify(library=l, oname=on, cname=cn, io=io, rw=rw)
 
-#x
+#get library profile
 @adsgut.route('/postable/<libraryowner>/library:<libraryname>/profile/html')
 def libraryProfileHtml(libraryowner, libraryname):
     return profileHtmlNotRouted(libraryowner, libraryname, "library", inviteform=None)
 
+#general function used above which gets the right flask-wtf form for recaptcha for invitations
 def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
     p, owner, rw, on, cn=postable(powner, pname, ptype)
     if not inviteform:
@@ -967,19 +864,8 @@ def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
         inviteform = InviteFormGroup()
     return render_template(ptype+'profile.html', thepostable=p, owner=owner, rw=rw, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
-@adsgut.route('/postable/<nick>/library:default/filter/html')
-def udlHtml(nick):
-    return postableFilterHtml(nick, "library", "default")
 
-@adsgut.route('/postablefromadsid/<adsid>/library:default/filter/html')
-def udlHtmlFromAdsid(adsid):
-    user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
-    return postableFilterHtml(user.nick, "library", "default")
-
-@adsgut.route('/postable/adsgut/library:public/filter/html')
-def publicHtml():
-    return postableFilterHtml("adsgut", "library", "public")
-
+#this is the workhorse for displaying items, for any library
 @adsgut.route('/postable/<po>/<pt>:<pn>/filter/html')
 def postableFilterHtml(po, pt, pn):
     querystring=request.query_string
@@ -989,71 +875,84 @@ def postableFilterHtml(po, pt, pn):
         pflavor='pub'
     if pn=='default' and pt=='library':
         tqtype='stags'
-        pflavor='udg'
+        pflavor='udg'#even though this is now a library, we still call it udg in js code
     else:
         pflavor=p.basic.fqin
         tqtype='tagname'
     tqtype='tagname'
-    #BUG using currentuser right now. need to support a notion of useras
     return render_template('postablefilter.html', p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner, rw=rw)
 
+#get the user defaukt library's items
+@adsgut.route('/postable/<nick>/library:default/filter/html')
+def udlHtml(nick):
+    return postableFilterHtml(nick, "library", "default")
+
+#get the user default library from email
+@adsgut.route('/postablefromadsid/<adsid>/library:default/filter/html')
+def udlHtmlFromAdsid(adsid):
+    user=g.db.getUserInfoFromAdsid(g.currentuser, adsid)
+    return postableFilterHtml(user.nick, "library", "default")
+
+#get the public library. The public group's library is not displayed at this moment
+@adsgut.route('/postable/adsgut/library:public/filter/html')
+def publicHtml():
+    return postableFilterHtml("adsgut", "library", "public")
+
 
 #######################################################################################################################
+#The next bunch are all for items and tags
 #######################################################################################################################
 
-def _getContext(q):
-    #BUG:user contexts will be hidden. So this will change
-    if not q.has_key('cuser'):
-        return None
-    context={}
-    if q['cuser']=="True":
-        context['user']=True
-    else:
-        context['user']=False
-    if not q.has_key('ctype'):
-        return None
-    context['type']=q['ctype']
-    if not q.has_key('cvalue'):
-        return None
-    context['value']=q['cvalue']
-    return context
+#contexts are not currently used, so this is greyed out
+# def _getContext(q):
+#     #BUG:user contexts will be hidden. So this will change
+#     if not q.has_key('cuser'):
+#         return None
+#     context={}
+#     if q['cuser']=="True":
+#         context['user']=True
+#     else:
+#         context['user']=False
+#     if not q.has_key('ctype'):
+#         return None
+#     context['type']=q['ctype']
+#     if not q.has_key('cvalue'):
+#         return None
+#     context['value']=q['cvalue']
+#     return context
 
 
 
-#these might be supersed by tagging based results to populate the left side
-
-#The users simple tags, not singletonmode (ie no notes), not libraries
+#The users simple tags, not singletonmode (ie no notes)
 @adsgut.route('/user/<nick>/tagsuserowns')
 def tagsUserOwns(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
-    #will not get notes
     stags=g.dbp.getTagsAsOwnerOnly(g.currentuser, useras, tagtype)
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
-#these are the simple tags user owns as well as can write to by dint of giving it to a group.
+#these are the simple tags user owns as well as can write to by dint of being in a library
+#or by being in a group which is a member of the tag. group membership of tags is not yet
+#implemented, but the idea is for groups to come up with their own vocabulary systems
 @adsgut.route('/user/<nick>/tagsusercanwriteto')
 def tagsUserCanWriteTo(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
     fqpn = _dictg('fqpn',query)
-    #print "TAGGER", tagtype, fqpn
-    #TODO:prevent null fqpn
     stags=g.dbp.getAllTagsForUser(g.currentuser, useras, tagtype, False, fqpn)
-    #print "STAGS", stags
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
 
+#this is only those tags obtained from membership in libs. Not currently used.
 @adsgut.route('/user/<nick>/tagsasmember')
 def tagsUserAsMember(nick):
     query=dict(request.args)
     useras, usernick=_userget(g, query)
     tagtype= _dictg('tagtype', query)
     fqpn = _dictg('fqpn',query)
-    #TODO:prevent null fqpn
     stags=g.dbp.getTagsAsMemberOnly(g.currentuser, useras, tagtype, False, fqpn)
     stagdict={'simpletags':set([e.basic.name for e in stags[1]])}
     return jsonify(stagdict)
@@ -1062,7 +961,7 @@ def tagsUserAsMember(nick):
 
 
 #################now going to tags and posts#################################
-
+#these are based on queries
 #above 3 stags will be superseded, rolled in
 #BUG: no multis are done for now.
 
@@ -1199,7 +1098,7 @@ def taggingsForPostable(po, pt, pn):
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
-        itemsandtags = _itemstagsget(jsonpost)
+        itemsandtags = _itemstagspostget(jsonpost)
 
         fqpn=po+"/"+pt+":"+pn
         tds=[]
@@ -1318,7 +1217,7 @@ def tags():
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
-        tagspecs=_tagspecsget(jsonpost)
+        tagspecs=_tagspecspostget(jsonpost)
         newtags=[]
         #SPEC: if u want to create new tags jusr create the dictionary with the key tags.
         for ti in tagspecs['tags']:
@@ -1382,7 +1281,7 @@ def tagsForItem(ns, itemname):
         #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
         #i=g.dbp._getItem(g.currentuser, ifqin)
         i=g.dbp.saveItem(g.currentuser, useras, itemspec)
-        tagspecs=_tagspecsget(jsonpost)
+        tagspecs=_tagspecspostget(jsonpost)
         newtaggings=[]
         if not tagspecs.has_key(itemname):
             doabort('BAD_REQ', "No itemname specified to tag")
@@ -1466,7 +1365,7 @@ def itemsTaggings():
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
         items = _itemspostget(jsonpost)
-        tagspecs=_tagspecsget(jsonpost)
+        tagspecs=_tagspecspostget(jsonpost)
         itemtype=_dictp('itemtype', jsonpost)
         newtaggings=[]
         for name in items:
