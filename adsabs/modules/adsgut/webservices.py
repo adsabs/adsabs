@@ -960,49 +960,47 @@ def tagsUserAsMember(nick):
 ########################
 
 
-#################now going to tags and posts#################################
-#these are based on queries
-#above 3 stags will be superseded, rolled in
-#BUG: no multis are done for now.
+#################now going to tags and item posts#################################
 
 
-#POST posts items into postable, get gets items for postable consistent with user.
-#ALL ITEMS in POST MUST BE OF SAME TYPE
-@adsgut.route('/postable/<po>/<pt>:<pn>/items', methods=['GET', 'POST'])
+#POST posts items into postable, GET gets items for postable consistent with user.
+#all items in post must be of same type
+#this is the workhorse function for the library items page
+#the tags areimplicitly obtained through the posting document
+@adsgut.route('/postable/<po>/<pt>:<pn>/items', methods=['GET', 'POST'])#user/items/itemtype
 def itemsForPostable(po, pt, pn):
-    #userthere/[fqins]
-    #q={sort?, pagtuple?, criteria?, postable}
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
-        #henceforth this will be names
+        #get a list of 'names'(bibcodes) for the itemtype (pubs)
         items = _itemspostget(jsonpost)
+        #also get the itemtypr
         itemtype=_dictp('itemtype', jsonpost)
         fqpn=po+"/"+pt+":"+pn
         pds=[]
+        #save the items and put them into the library
         for name in items:
-            #doing this for its idempotency
             itemspec={'name':name, 'itemtype':itemtype}
             i=g.dbp.saveItem(g.currentuser, useras, itemspec)
             i,pd=g.dbp.postItemIntoPostable(g.currentuser, useras, fqpn, i)
             pds.append(pd)
+        #if this works send the posting documents back. note this will include
+        #others posts in pd.hist but they are all in this library so there is no leakage
         itempostings={'status':'OK', 'postings':pds, 'postable':fqpn}
         return jsonify(itempostings)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-        #BUG find a way of having the usernick in this context be from elsewhere
-        #the elsewhere would come from postings and taggings, and confine to this group
-        #perhaps all the query funcs would need some re-org
-        #print "QQQ",query, request.args
-        #need to pop the other things like pagetuples etc. Helper funcs needed
+        #get user, sort, and pagetuple. with user, also get if u only want that user's posts
+        #otheerwise the useras is used to make sure the user has the righ permissions
         sort = _sortget(query)
         pagtuple = _pagtupleget(query)
-        #pagtuple=(2,1)
+        #criteria is used for further filtering (currently not used)
         criteria= _criteriaget(query)
         postable= po+"/"+pt+":"+pn
         q=_queryget(query)
-        #print "Q is", q
+        #Add the postable wanted to the query. The query q is used to get
+        #tagtypes and tagnames if wanted
         if not q.has_key('postables'):
             q['postables']=[]
         q['postables'].append(postable)
@@ -1012,58 +1010,42 @@ def itemsForPostable(po, pt, pn):
             q, usernick, criteria, sort, pagtuple)
         return jsonify({'items':items, 'count':count, 'postable':postable})
 
+#same as above but only GET and is used to get json
+#the one difference is that we get the tags along the way explicitly
 @adsgut.route('/postable/<po>/<pt>:<pn>/json', methods=['GET'])
 def jsonItemsForPostable(po, pt, pn):
-    #userthere/[fqins]
-    #q={sort?, pagtuple?, criteria?, postable}
     query=dict(request.args)
     useras, usernick=_userget(g, query)
-    #BUG find a way of having the usernick in this context be from elsewhere
-    #the elsewhere would come from postings and taggings, and confine to this group
-    #perhaps all the query funcs would need some re-org
-    #print "QQQ",query, request.args
-    #need to pop the other things like pagetuples etc. Helper funcs needed
+
     sort = _sortget(query)
     pagtuple = _pagtupleget(query)
-    #pagtuple=(2,1)
     criteria= _criteriaget(query)
     postable= po+"/"+pt+":"+pn
     q=_queryget(query)
-    #print "Q is", q
     if not q.has_key('postables'):
         q['postables']=[]
     q['postables'].append(postable)
-    #print "Q is", q, query, useras, usernick
-    #By this time query is popped down
     count, items=g.dbp.getItemsForQueryWithTags(g.currentuser, useras,
         q, usernick, criteria, sort, pagtuple)
     return jsonify({'items':items, 'count':count, 'postable':postable})
 
+#same as above but for csv
 @adsgut.route('/postable/<po>/<pt>:<pn>/csv', methods=['GET'])
 def csvItemsForPostable(po, pt, pn):
-    #userthere/[fqins]
-    #q={sort?, pagtuple?, criteria?, postable}
     query=dict(request.args)
     useras, usernick=_userget(g, query)
-    #BUG find a way of having the usernick in this context be from elsewhere
-    #the elsewhere would come from postings and taggings, and confine to this group
-    #perhaps all the query funcs would need some re-org
-    #print "QQQ",query, request.args
-    #need to pop the other things like pagetuples etc. Helper funcs needed
     sort = _sortget(query)
     pagtuple = _pagtupleget(query)
     #pagtuple=(2,1)
     criteria= _criteriaget(query)
     postable= po+"/"+pt+":"+pn
     q=_queryget(query)
-    #print "Q is", q
     if not q.has_key('postables'):
         q['postables']=[]
     q['postables'].append(postable)
-    #print "Q is", q, query, useras, usernick
-    #By this time query is popped down
     count, items=g.dbp.getItemsForQueryWithTags(g.currentuser, useras,
         q, usernick, criteria, sort, pagtuple)
+    #Take the result and convert it into a CSV format
     csvstring="#count="+str(count)+",postable="+postable+"\n"
     for i in items:
         s=i['basic']['name']
@@ -1074,32 +1056,23 @@ def csvItemsForPostable(po, pt, pn):
             csvstring=csvstring+s+",\n"
     return Response(csvstring, mimetype='text/csv')
 
+
+#just specialized to library
 @adsgut.route('/library/<libraryowner>/library:<libraryname>/items')
 def libraryItems(libraryowner, libraryname):
     return itemsForPostable(libraryowner, "library", libraryname)
 
-@adsgut.route('/app/<appowner>/app:<appname>/items')
-def appItems(appowner, appname):
-    return itemsForPostable(appowner, "app", appname)
 
-@adsgut.route('/group/<groupowner>/group:<groupname>/items')
-def groupItems(groupowner, groupname):
-    return itemsForPostable(groupowner, "group", groupname)
-
-#For the RHS, given a set of items. Should this even be exposed as such?
-#we need it for post, but goes the GET make any sense?
-#CHECK: and is it secure?
-#this is post tagging into postable for POST
+#the POST is used to post an item-tag pair into a postable
+#the GET gets the taggings for a query in a postable
+#TODO: more docs needed. Do not believe this is currently used
 
 @adsgut.route('/postable/<po>/<pt>:<pn>/taggings', methods=['GET', 'POST'])
 def taggingsForPostable(po, pt, pn):
-    #userthere/fqin/fqtn
-    #q={sort?, criteria?, postable}
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
         itemsandtags = _itemstagspostget(jsonpost)
-
         fqpn=po+"/"+pt+":"+pn
         tds=[]
         for d in itemsandtags:
@@ -1128,53 +1101,47 @@ def taggingsForPostable(po, pt, pn):
         return jsonify({'taggings':taggings, 'count':count, 'postable':postable})
 
 #GET all tags consistent with user for a particular postable and further query
-#Why is this useful? And why tags from taggingdocs?
+#this is a workhorse function which populates the lhs set of tags
 @adsgut.route('/postable/<po>/<pt>:<pn>/tags', methods=['GET'])
 def tagsForPostable(po, pt, pn):
-    #q={sort?, criteria?, postable}
     query=dict(request.args)
     useras, usernick=_userget(g, query)
-
-    #need to pop the other things like pagetuples etc. Helper funcs needed
-    #sort = _sortget(query)
+    #criteria currently unused
     criteria= _criteriaget(query)
     postable= po+"/"+pt+":"+pn
+    #tagnames and tagtypes used in query to get only those tags compatible with the tag used
+    #this is used for filtering in the user interface
     q=_queryget(query)
     if not q.has_key('postables'):
         q['postables']=[]
     if pt=='library' and pn=='default':#in saved items get from all postables(libraries) we are in
-        # libs=[e['fqpn'] for e in g.db.membablesUserCanWriteTo(g.currentuser, useras, "library")]
-        # print "LIBS ARE", libs
-        # q['postables']=libs
+        #i believe this is currently done in the downstream function
         q['postables'].append(postable)
     else:
         q['postables'].append(postable)
-    #By this time query is popped down
-    #count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
-    #    q, usernick, criteria)
+
     count, tags=g.dbp.getTagsForQueryFromPostingDocs(g.currentuser, useras,
         q, usernick, criteria)
     return jsonify({'tags':tags, 'count':count})
 
 
-
-@adsgut.route('/itemsremove', methods=['POST'])
+#remove items from library
+@adsgut.route('/itemsremove', methods=['POST'])#fqpn/itemsto remove/user
 def itemsremove():
-    ##useras?/name/itemtype
-    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
     if request.method=='POST':
         jsonpost=dict(request.json)
         fqpn = _dictp('fqpn', jsonpost)
         useras = _userpostget(g, jsonpost)
         items = _itemspostget(jsonpost)
         if fqpn is None:
-            doabort("BAD_REQ", "No ipostable specified for item removal")
+            doabort("BAD_REQ", "No postable specified for item removal")
         for itemfqin in items:
             g.dbp.removeItemFromPostable(g.currentuser, useras, fqpn, itemfqin)
         return jsonify({'status':'OK', 'info':items})
 
-#post saveItems(s), get could get various things such as stags, postings, and taggings
-#get could take a bunch of items as arguments, or a query
+#POST saveItems(s), this is used in the posting form under 'export'
+#GET could take a bunch of items as arguments, or a query
+#I dont believe GET is used. TODO: we should perhaps suppress the GET
 @adsgut.route('/items', methods=['POST', 'GET'])
 def items():
     ##useras?/name/itemtype
@@ -1194,8 +1161,7 @@ def items():
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-
-        #need to pop the other things like pagetuples etc. Helper funcs needed
+        #query stuff
         sort = _sortget(query)
         pagtuple = _pagtupleget(query)
         criteria= _criteriaget(query)
@@ -1204,22 +1170,18 @@ def items():
             query, usernick, criteria, sort, pagtuple)
         return jsonify({'items':items, 'count':count})
 
-#Get tags for a query. We can use post to just create a new tag. [NOT TO DO TAGGING]
-#This is as opposed to tagging an item and would be used in biblio apps and such.
-#CHECK: currently get coming from taggingdocs. Not sure about this
-#BUG: we should make sure it only allows name based tags
-#Will let you create multiple tags
-#GET again comes from taggingdocs. Why?
+#POST: create a new tag
+#GET get tags for query
+#currently unused. TODO: perhaps GET should be suppressed
+#this is currently unused as we dont allow for free form creation of tags
+#but this might be useful at some point in the future for vocabulary creation
 @adsgut.route('/tags', methods=['POST', 'GET'])
 def tags():
-    ##useras?/name/itemtype
-    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
         tagspecs=_tagspecspostget(jsonpost)
         newtags=[]
-        #SPEC: if u want to create new tags jusr create the dictionary with the key tags.
         for ti in tagspecs['tags']:
             if not ti.has_key('name'):
                 doabort('BAD_REQ', "No name specified for tag")
@@ -1233,23 +1195,19 @@ def tags():
             t=g.dbp.makeTag(g.currentuser, useras, tagspec)
             newtags.append(t)
 
-        #returning the taggings requires a commit at this point
         tags={'status':'OK', 'info':{'item': i.basic.fqin, 'tags':[td for td in newtags]}}
         return jsonify(tags)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
 
-        #need to pop the other things like pagetuples etc. Helper funcs needed
         criteria= _criteriaget(query)
-        #By this time query is popped down
         count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
             query, usernick, criteria)
         return jsonify({'tags':tags, 'count':count})
 
-#GET tags for an item or POST: tagItem
-#Currently GET coming from taggingdocs: BUG: not sure of this
 
+#sets up the tag spec to tag an item
 def _setupTagspec(ti, useras):
     #atleast one of name or content must be there (tag or note)
     if not (ti.has_key('name') or ti.has_key('content')):
@@ -1267,65 +1225,45 @@ def _setupTagspec(ti, useras):
     tagspec['tagtype'] = ti['tagtype']
     return tagspec
 
+#GET tags for an item 
+#or POST: tag an item
+
 @adsgut.route('/tags/<ns>/<itemname>', methods=['GET', 'POST'])
 def tagsForItem(ns, itemname):
-    #taginfos=[{tagname/tagtype/description}]
-    #q=fieldlist=[('tagname',''), ('tagtype',''), ('context', None), ('fqin', None)]
     ifqin=ns+"/"+itemname
     if request.method == 'POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
         itemtype=_dictp('itemtype', jsonpost)
         itemspec={'name':itemname, 'itemtype':itemtype}
+        #we use the fqpn to get the return to only get tags consistent with a certain library
         fqpn = _dictp('fqpn',jsonpost)
-        #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
-        #i=g.dbp._getItem(g.currentuser, ifqin)
+        #save the item if not saved already (we dont use this tho)
         i=g.dbp.saveItem(g.currentuser, useras, itemspec)
+        #get the tag specs
         tagspecs=_tagspecspostget(jsonpost)
         newtaggings=[]
         if not tagspecs.has_key(itemname):
             doabort('BAD_REQ', "No itemname specified to tag")
         for ti in tagspecs[itemname]:
             tagspec=_setupTagspec(ti, useras)
-            #print "TAGSPEC IS", tagspec
             i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
             newtaggings.append(td)
-        #returning the taggings requires a commit at this point
-        # taggings={'status':'OK', 'info':{'item': i.basic.fqin, 'tagging':newtaggings}}
-        # taggingsdict={}
-        # taggingsdict[i.basic.fqin]=(newtaggings.length, newtaggings)
-        # return jsonify(taggings=taggingsdict)
+        #get ALL the taggings consistent with this item and this user back
         taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
-        # taggingsdict={}
-        # taggingsdict[ifqin]=(count, taggings)
-        #return jsonify({'tags':tags, 'count':count})
         return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
-        #print "REQUEST.args", request.args, dict(request.args)
         query=dict(request.args)
         useras, usernick=_userget(g, query)
 
-        #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         fqpn = _dictg('fqpn',query)
-        #By this time query is popped down
-        #I am not convinced this is how to do this query
-        # criteria= _criteriaget(query)
-        # criteria.append(['field':'posting__thingtopostfqin', 'op':'eq', 'value':ifqin])
-        # count, tags=g.dbp.getTagsForQuery(g.currentuser, useras,
-        #     query, usernick, criteria, sort)
-        #count, tags= g.dbp.getTagsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort)
         taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], sort, fqpn)
-        # taggingsdict={}
-        # taggingsdict[ifqin]=(count, taggings)
-        #return jsonify({'tags':tags, 'count':count})
         return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
-####These are the fromSpec family of functions for GET
 
+#remove a tag from an item, for a particular library.
 @adsgut.route('/tagsremove/<ns>/<itemname>', methods=['POST'])
 def tagsRemoveForItem(ns, itemname):
-    #taginfos=[{tagname/tagtype/description}]
-    #q=fieldlist=[('tagname',''), ('tagtype',''), ('context', None), ('fqin', None)]
     ifqin=ns+"/"+itemname
     if request.method == 'POST':
         jsonpost=dict(request.json)
@@ -1334,33 +1272,25 @@ def tagsRemoveForItem(ns, itemname):
         tagtype=_dictp('tagtype', jsonpost)
         fqpn = _dictp('fqpn',jsonpost)
         fqtn = _dictp('fqtn',jsonpost)
-        #will use useras for the namespace as u should only be removing your own stuff
-        #BUG:does not work if not your tag
-        #print "FQTN is", fqtn, useras.nick+'/'+tagtype+":"+tagname
+        #will use useras for the namespace if it is removing your own stuff
+        #for a library owner removing a tag 'viagra' the full fqtn is needed
         if fqtn==None:#nothing was sent over the wire
             fqtn = useras.nick+'/'+tagtype+":"+tagname
-        #KEY:IF i have a item it must exist, so this one is NOT used for items not yet there
-        #i=g.dbp._getItem(g.currentuser, ifqin)
-        #BUGBUGBUG: what about fqpn in here: i only want to untag it in this context
-        #print "FQPN is", fqpn
+
         if fqpn==None:#nuke it, this happens for saved items (for private notes too)
           val=g.dbp.untagItem(g.currentuser, useras, fqtn, ifqin)
         else:#remove tag from postable (should only affect pinpostables)
           val=g.dbp.removeTaggingFromPostable(g.currentuser, useras, fqpn, ifqin, fqtn)
         taggingsdict, taggingsthispostable, taggingsdefault= g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, [ifqin], None, fqpn)
-        # taggingsdict={}
-        # taggingsdict[ifqin]=(count, taggings)
-        #return jsonify({'tags':tags, 'count':count})
         return jsonify(fqpn=fqpn, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 
 
-#BUG: havent put in fqpn here yet
-#multi item multi tag tagging on POST and get taggings
-#TODO: make this consistent with the rest of the stuff returning taggings
-@adsgut.route('/items/taggings', methods=['POST', 'GET'])
+#GET is used to get the taggings consistent with user for a set of items (unused currently)
+#POST used in postform to tag items without worrying about library (will go in default library)
+#notice no fqpn here, since we dont care for the library
+#this function is used in the postform interface
+@adsgut.route('/items/taggings', methods=['POST', 'GET'])#items/itemtype/tagspecs/user
 def itemsTaggings():
-    ##name/itemtype/uri/
-    #q={useras?, sort?, items}
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
@@ -1377,31 +1307,24 @@ def itemsTaggings():
                 tagspec=_setupTagspec(ti, useras)
                 i,t,it,td=g.dbp.tagItem(g.currentuser, useras, i, tagspec)
                 newtaggings.append(td)
-        # itemtaggings={'status':'OK', 'taggings':newtaggings}
-        # return jsonify(taggings=newtaggings)
         taggingsdict,_,junk=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None)
         return jsonify(taggings=taggingsdict)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-
-        #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
-        #By this time query is popped down
         taggingsdict,_,junk=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         return jsonify(taggings=taggingsdict)
 
-#multi item multi postable posting on POST and get posts
+#POST: usedin postform to post items into a postable
+#GET: just get the consistent postings
 @adsgut.route('/items/postings', methods=['POST', 'GET'])
 def itemsPostings():
-    ##name/itemtype/uri/
-    #q={useras?, sort?, items}
     if request.method=='POST':
         jsonpost=dict(request.json)
-        #print "JSONPOST", request.json
         useras = _userpostget(g, jsonpost)
         items = _itemspostget(jsonpost)
         fqpo = _postablesget(jsonpost)
@@ -1413,27 +1336,25 @@ def itemsPostings():
             for fqpn in fqpo:
                 i,pd=g.dbp.postItemIntoPostable(g.currentuser, useras, fqpn, i)
                 pds.append(pd)
-        #itempostings={'status':'OK', 'postings':pds}
-        # return jsonify(postings=pds)
+        #return consistent postings for the user
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, None)
         return jsonify(postings=postingsdict)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-        #print 'QUERY', query
-        #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
-        #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         return jsonify(postings=postingsdict)
 
-@adsgut.route('/items/taggingsandpostings', methods=['POST', 'GET'])
+#both POST and GET are used to get taggings and postings for a set of items
+#this is the one used in the filter interface
+#currently used for all items
+#to make faster we must put in pagination
+@adsgut.route('/items/taggingsandpostings', methods=['POST', 'GET'])#user/fqpn/items
 def itemsTaggingsAndPostings():
-    ##name/itemtype/uri/
-    #q={useras?, sort?, items}
     if request.method=='POST':
         #"THIS WILL NOT BE TO POST STUFF IN BUT TO GET RESULTS"
         jsonpost=dict(request.json)
@@ -1441,37 +1362,25 @@ def itemsTaggingsAndPostings():
         sort = _sortpostget(jsonpost)
         items = _itemspostget(jsonpost)
         fqpn = _dictp('fqpn',jsonpost)
-        #print "ITEMS", items
-        #print "FQPN", fqpn
-        #print "SORT", sort, "useras", useras
-        #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras, items, sort)
         taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras, items, sort, fqpn)
-        #print "MEEP",taggingsdict, postingsdict
-        #print "JEEP",[e.pinpostables for e in taggingsdict['ads/2014MNRAS.437.1698M'][1]]
-        #print "MEEP",taggingsthispostable
-        #print "POSTINGS", json.dumps(dict(p=postingsdict), cls=MongoEngineJsonEncoder)
         return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
     else:
         query=dict(request.args)
         useras, usernick=_userget(g, query)
-        ##print 'AAAQUERY', query, request.args
-        #need to pop the other things like pagetuples etc. Helper funcs needed
         sort = _sortget(query)
         items = _itemsget(query)
         fqpn = _dictg('fqpn',query)
-        #By this time query is popped down
         postingsdict=g.dbp.getPostingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort)
         taggingsdict, taggingsthispostable, taggingsdefault=g.dbp.getTaggingsConsistentWithUserAndItems(g.currentuser, useras,
             items, sort, fqpn)
-        #print "MEEP",taggingsthispostable
         return jsonify(fqpn=fqpn, postings=postingsdict, taggings=taggingsdict, taggingtp=taggingsthispostable, taggingsdefault=taggingsdefault)
 
+
+#add or get an itemtype. currently not used, we do this in python code
 @adsgut.route('/itemtypes', methods=['POST', 'GET'])
 def itemtypes():
-    ##useras?/name/itemtype
-    #q={useras?, userthere?, sort?, pagetuple?, criteria?, stags|tagnames ?, postables?}
     if request.method=='POST':
         jsonpost=dict(request.json)
         useras = _userpostget(g, jsonpost)
@@ -1493,7 +1402,7 @@ def itemtypes():
         count, thetypes=g.dbp.getTypesForQuery(g.currentuser, useras, criteria, usernick, isitemtype)
         return jsonify({'types':thetypes, 'count':count})
 
-#BUG: how to handle bools
+#add or get an tagtype. currently not used, we do this in python code
 @adsgut.route('/tagtypes', methods=['POST', 'GET'])
 def tagtypes():
     ##useras?/name/itemtype
@@ -1529,6 +1438,9 @@ def tagtypes():
         count, thetypes=g.dbp.getTypesForQuery(g.currentuser, useras, criteria, usernick, isitemtype)
         return jsonify({'types':thetypes, 'count':count})
 
+#this is just a function to split up an itemstring. used in postform
+#should be replaced by an internal function:this is kind of stupid
+#(atleast POST is used there)
 @adsgut.route('/itemsinfo', methods = ['POST', 'GET'])
 def itemsinfo():
     if request.method=='POST':
@@ -1546,28 +1458,25 @@ def itemsinfo():
 
 from config import config
 
+#A POST to set up the postform in html. It works from the export menu
+#gets the bibcodes, uses a bigquery solr request to populate the titles
 @adsgut.route('/postform/<itemtypens>/<itemtypename>/html', methods=['POST'])
 def postForm(itemtypens, itemtypename):
     qstring=""
-    #print "NS,NAME", itemtypens, itemtypename
     itemtype=itemtypens+"/"+itemtypename
     if request.method=='POST':
         if itemtype=="ads/pub":
-            #print "RVALS", request.values
             current_page=request.referrer
             if request.values.has_key('numRecs'):
                 numrecs = request.values.get('numRecs')
             else:
                 numrecs = config.SEARCH_DEFAULT_ROWS
-            #print "++++++++++++++++++++got bibcodes here", numrecs, config.SEARCH_DEFAULT_ROWS
             if request.values.has_key('bibcode'):
                 bibcodes = request.values.getlist('bibcode')
             else:
                 try:
                     query_components = json.loads(request.values.get('current_search_parameters'))
                 except:
-                    #except (TypeError, JSONDecodeError):
-                    #@todo: logging of the error
                     return render_template('errors/generic_error.html', error_message='Error. Please try later.')
 
                 #update the query parameters to return only what is necessary
@@ -1589,52 +1498,33 @@ def postForm(itemtypens, itemtypename):
                     bigquery.prepare_bigquery_request(req, request.values['bigquery'])
                 req = solr.set_defaults(req)
                 resp = solr.get_response(req)
-
+                #return error if solr messes up
                 if resp.is_error():
                     return render_template('errors/generic_error.html', error_message='Error while loading bibcodes for posting. Please try later.')
 
                 bibcodes = [x.bibcode for x in resp.get_docset_objects()]
-                #print "g2bc here", bibcodes
             items=["ads/"+i for i in bibcodes]
-            #print "ITTEMS", items
-        elif itemtype=="ads/search":
+        elif itemtype=="ads/search":#not implemented yet
             itemstring=query.get('items',[''])[0]
-    else:
-        #print "ITEMTYPE", itemtype
-        query=dict(request.args)
-        querystring=request.query_string
-        itemstring=query.get('items',[''])[0]
-        items=itemstring.split(':')
-        if query.get('currpage', ''):
-            current_page = query.get('currpage')[0]
-        else:
-            current_page = request.referrer
-            if current_page==None:
-                current_page=request.url
-    theitems=[]
-    if itemtype=="ads/pub":
-        theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
-    elif itemtype=="ads/search":
-        theitems=[{ 'basic':{'name':itemstring,'fqin':'ads/'+itemstring}}]
-    #print "THEITEMS", theitems
-    #How do we BUG get itemtype. we should redofqin to ads/pub:name as the itemtype
-    #always determines the namespace of the item. This would mean name had to be
-    #globally unique rather than locally for user usage, unless we have a dual name
-    #currently get from url
-    singlemode=False
-    if len(theitems) ==1:
-        singlemode=True
-    #this ought to be got from itemtype, currently BUG hack
-    nameable=False
-    if itemtype=="ads/pub":
-        qstring=":".join(items)
-    elif itemtype=="ads/search":
-        nameable=True
-        qstring=itemstring
-    if nameable and singlemode:
-        nameable=True
-    #print "QSTRING", qstring, current_page
-    if request.method=="POST":
+    
+        theitems=[]
+        if itemtype=="ads/pub":
+            theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
+        elif itemtype=="ads/search":#not implemented yet
+            theitems=[{ 'basic':{'name':itemstring,'fqin':'ads/'+itemstring}}]
+        #if only one item we allow notes as yet
+        singlemode=False
+        if len(theitems) ==1:
+            singlemode=True
+        nameable=False
+        if itemtype=="ads/pub":
+            qstring=":".join(items)
+        elif itemtype=="ads/search":
+            nameable=True
+            qstring=itemstring
+        if nameable and singlemode:
+            nameable=True
+
         return render_template('postform_fancy.html', items=theitems,
             querystring=qstring,
             singlemode=singlemode,
@@ -1642,21 +1532,11 @@ def postForm(itemtypens, itemtypename):
             itemtype=itemtypename,
             curpage=current_page,
             useras=g.currentuser)
-    else:
-        return render_template('errors/generic_error.html', error_message='Only POST supported for this for now.')
-        #return error instead
-        #print "Rendering in postform2"
-        return render_template('postform2.html', items=theitems,
-            querystring=qstring,
-            singlemode=singlemode,
-            nameable=nameable,
-            itemtype=itemtypename,
-            curpage=current_page,
-            useras=g.currentuser)
+
 
 
 #making the import:
-
+#TODO:make sure this gets into the config
 #ADS_CLASSIC_LIBRARIES_URL = config.ADS_CLASSIC_LIBRARIES_URL
 ADS_CLASSIC_LIBRARIES_URL = "http://adsabs.harvard.edu/cgi-bin/maint/export_privlib"
 import requests
@@ -1683,7 +1563,7 @@ def perform_classic_library_query(parameters, headers, service_url):
         user_json = {}
     return user_json
 
-#This should probably be done in flask.ext.solrquery but its easier to do it simpler
+#make a query to bigquery to the title, author, etc
 def perform_solr_bigquery(bibcodes):
     """
     function that performs a POST request and returns a json object
@@ -1699,58 +1579,50 @@ def perform_solr_bigquery(bibcodes):
     #Perform the request
     qdict['rows']=len(bibcodes)
     rstr = "bibcode\n"+"\n".join(bibcodes)
-    #print "RSTR", rstr
     r = requests.post(url, params=qdict, data=rstr, headers=headers)
     #Check for problems
-    #print '||||||||||||||||||||||||||||||||||||||||||||||||||||'
     try:
         r.raise_for_status()
     except Exception, e:
-        #print "1"
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
 
     try:
         d = r.json()
-        #print "2"
     except Exception, e:
-        #print "3"
         exc_info = sys.exc_info()
         app.logger.error("Author JSON decode error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
         r = None
         d = {}
-    #print "D is", d
     return d
 
+#Use GET to get the classic libraries. TODO: make this POST as its destructive BUG
 @adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
 def get_classic_libraries(cookieid, password=None):
-    #headers BUG add http auth headers here, user ads, password?
-    #should also check that we have appropriate cookie somehow?
+
     headers = {'User-Agent':'ADS Script Request Agent'}
     parameters = {'cookie':cookieid}
     try:
         libjson=perform_classic_library_query(parameters, headers, ADS_CLASSIC_LIBRARIES_URL)
     except:
-        import sys
+        #import sys
         #print ">>>", sys.exc_info()
         doabort("SRV_ERR", "Somewhing went wrong in contacting classic server")
     useras=g.db._getUserForCookieid(g.currentuser, cookieid)
     useras.classicimported=True
-    useras.save()
+    useras.save(safe=True)
     ret=g.dbp.populateLibraries(g.currentuser, useras, libjson)
     if ret:
         return redirect(url_for('adsgut.userProfileHtml', nick=useras.nick))
     else:
         return redirect('/')
 
+#for a list of bibcodes, get bibquery results
 @adsgut.route('/bigquery/bibcodes', methods=['POST'])
 def get_bigquery_solr():
     if request.method=='POST':
-        ##print request.json
         jsonpost=dict(request.json)
-        #henceforth this will be names
         bibcodes = _bibcodespostget(jsonpost)
-        #print "bcodes", bibcodes
         d=perform_solr_bigquery(bibcodes)
         return jsonify(d)
 
