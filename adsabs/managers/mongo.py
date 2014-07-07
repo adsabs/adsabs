@@ -58,7 +58,7 @@ def backup(target, backup_dir=None, which_db=None, yes=False):
         
         # execute the dump
         dumps += 1
-        cmd = "mongodump -u %s -o %s -d %s -p" % (db_name, target_path, db_name)
+        cmd = "mongodump --quiet -u %s -o %s -d %s -p" % (db_name, target_path, db_name)
         child = pexpect.spawn(cmd, timeout=500000)
         idx = child.expect('password: ')
         if idx != 0:
@@ -66,7 +66,7 @@ def backup(target, backup_dir=None, which_db=None, yes=False):
             dumps -= 1
             continue
         child.sendline(db_passwd)
-        child.wait()
+        child.expect(pexpect.EOF)
         child.close()
         
         if child.exitstatus is not 0:
