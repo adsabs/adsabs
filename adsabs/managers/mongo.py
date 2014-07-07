@@ -110,6 +110,22 @@ def backup(target, backup_dir=None, which_db=None, yes=False):
             app.logger.error("copy of compressed archive %s to %s failed: %s" % \
                                 (compressed_path, backup_dir, e))
         
+@manager.command
+def rotate_backups(backup_dir, force=False):
+    from tempfile import NamedTemporaryFile
+    assert os.path.exists(backup_dir)
+    with NamedTemporaryFile() as f:
+        print >>f, "%s/*.tgz {\nrotate 7\ndaily\nmissingok\nnocreate\n}" % os.path.abspath(backup_dir)
+        f.flush()
+        force = force and "-f" or ""
+        statefile = "%s/backup.state" % os.path.abspath(backup_dir)
+        try:
+            retcode = subprocess.call("logrotate %s -s %s -v %s" % (force, statefile, f.name), shell=True)
+            if retcode != 0:
+                app.logger.error("backup rotate command returned non-zero status: %d" % retcode)
+                return
+        except OSError, e:
+                app.logger.error("backup rotate execution failed: %s" % e)
         
 @manager.command
 def restore(source, db):
