@@ -120,7 +120,7 @@ def rotate_backups(backup_dir, force=False):
         force = force and "-f" or ""
         statefile = "%s/backup.state" % os.path.abspath(backup_dir)
         try:
-            retcode = subprocess.call("logrotate %s -s %s -v %s" % (force, statefile, f.name), shell=True)
+            retcode = subprocess.call("/usr/sbin/logrotate %s -s %s -v %s" % (force, statefile, f.name), shell=True)
             if retcode != 0:
                 app.logger.error("backup rotate command returned non-zero status: %d" % retcode)
                 return

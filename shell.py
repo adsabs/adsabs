@@ -14,6 +14,8 @@ e.g.
 %> python shell.py <submanager.name> <task> [args]
 
 '''
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="wtforms")
 
 import os
 import sys
