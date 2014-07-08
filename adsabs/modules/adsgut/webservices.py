@@ -1350,6 +1350,7 @@ def itemsPostings():
         return jsonify(postings=postingsdict)
 
 #both POST and GET are used to get taggings and postings for a set of items
+#this is as we might not want to put all items in a GET querystring
 #this is the one used in the filter interface
 #currently used for all items
 #to make faster we must put in pagination
@@ -1439,8 +1440,8 @@ def tagtypes():
         return jsonify({'types':thetypes, 'count':count})
 
 #this is just a function to split up an itemstring. used in postform
-#should be replaced by an internal function:this is kind of stupid
-#(atleast POST is used there)
+#TODO: should be replaced by an internal function:this is kind of stupid
+#(again both GET and POST)
 @adsgut.route('/itemsinfo', methods = ['POST', 'GET'])
 def itemsinfo():
     if request.method=='POST':
@@ -1596,7 +1597,10 @@ def perform_solr_bigquery(bibcodes):
         d = {}
     return d
 
-#Use GET to get the classic libraries. TODO: make this POST as its destructive BUG
+#Use GET to get the classic libraries. TODO: make this POST as its destructive 
+#on our database BUG This is used with the import/reimport classic button. The idea
+#will be to do it as post AJAX, with the database (user.classicimported) changed by a queue process once we have the
+#queue in place. This way the user can come back. This is a long running process.
 @adsgut.route('/classic/<cookieid>/libraries', methods=['GET'])
 def get_classic_libraries(cookieid, password=None):
 
