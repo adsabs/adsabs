@@ -33,7 +33,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
  */
 
 (function() {
-  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, make_public, post_for_itemsinfo, prefix, remove_items_from_postable, remove_note, remove_tagging, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
+  var $, accept_invitation, add_group, change_description, change_ownership, create_postable, delete_membable, do_get, doajax, get_postables, get_postables_writable, h, invite_user, make_public, post_for_itemsinfo, prefix, remove_items_from_postable, remove_memberable_from_membable, remove_note, remove_tagging, root, save_items, send_bibcodes, send_params, submit_note, submit_notes, submit_posts, submit_tag, submit_tags, taggings_postings_post_get, toggle_rw;
 
   root = typeof exports !== "undefined" && exports !== null ? exports : this;
 
@@ -198,7 +198,6 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
         tagmode: notetuple[1]
       }
     ];
-    console.log("whee", ts, notetuple);
     data = {
       tagspecs: ts,
       itemtype: itemtype
@@ -241,7 +240,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     }
   };
 
-  remove_note = function(item, tagname, ctxt, cback, eback) {
+  remove_note = function(item, tagname, fqtn, ctxt, cback, eback) {
     var data, tagtype, url;
     tagtype = "ads/tagtype:note";
     url = prefix + "/tagsremove/" + item;
@@ -249,16 +248,19 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
+    if (fqtn !== void 0) {
+      data.fqtn = fqtn;
+    }
     if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };
 
-  remove_tagging = function(item, tagname, ctxt, cback, eback) {
+  remove_tagging = function(item, tagname, fqtn, ctxt, cback, eback) {
     var data, tagtype, url;
     tagtype = "ads/tagtype:tag";
     url = prefix + "/tagsremove/" + item;
@@ -266,11 +268,14 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       tagtype: tagtype,
       tagname: tagname
     };
+    if (fqtn !== void 0) {
+      data.fqtn = fqtn;
+    }
     if (ctxt !== 'udg' && ctxt !== 'none') {
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };
@@ -285,7 +290,7 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
       data.fqpn = ctxt;
     }
     if (ctxt === 'public') {
-      data.fqpn = "adsgut/group:public";
+      data.fqpn = "adsgut/library:public";
     }
     return send_params(url, data, cback, eback);
   };
@@ -449,6 +454,25 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     return send_params(url, data, cback, eback);
   };
 
+  remove_memberable_from_membable = function(memberable, membable, cback, eback) {
+    var data, url;
+    url = prefix + "/memberremove";
+    data = {
+      fqpn: membable,
+      member: memberable
+    };
+    return send_params(url, data, cback, eback);
+  };
+
+  delete_membable = function(membable, cback, eback) {
+    var data, url;
+    url = prefix + "/membableremove";
+    data = {
+      fqpn: membable
+    };
+    return send_params(url, data, cback, eback);
+  };
+
   root.syncs = {
     accept_invitation: accept_invitation,
     invite_user: invite_user,
@@ -471,7 +495,9 @@ Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
     post_for_itemsinfo: post_for_itemsinfo,
     remove_tagging: remove_tagging,
     remove_note: remove_note,
-    remove_items_from_postable: remove_items_from_postable
+    remove_items_from_postable: remove_items_from_postable,
+    remove_memberable_from_membable: remove_memberable_from_membable,
+    delete_membable: delete_membable
   };
 
 }).call(this);

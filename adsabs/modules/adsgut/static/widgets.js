@@ -498,7 +498,7 @@
     if (nrows == null) {
       nrows = 2;
     }
-    if (pview === 'none') {
+    if (pview === 'udg' || pview === 'none') {
       notetext = 'Make note visible to members of all libraries this item is in (notes are private by default)';
     } else if (pview === 'pub') {
       notetext = 'Make note visible to members of the public (notes are private by default)';
@@ -511,17 +511,13 @@
         rows: '#{nrows}',
         placeholder: "Type a note"
       });
-      if (pview !== 'udg') {
-        h.label(".control-label", function() {
-          h.input(".control.cb", {
-            type: 'checkbox'
-          });
-          h.text(notetext);
-          return h.raw("&nbsp;&nbsp;");
+      h.label(".control-label", function() {
+        h.input(".control.cb", {
+          type: 'checkbox'
         });
-      } else {
-        h.label(".control-label", "");
-      }
+        h.text(notetext);
+        return h.raw("&nbsp;&nbsp;");
+      });
       return h.button('.btn.btn-primary.btn-mini.notebtn', {
         type: 'button'
       }, btext);

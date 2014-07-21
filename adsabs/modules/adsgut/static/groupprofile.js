@@ -17,6 +17,7 @@
     __extends(PostableView, _super);
 
     function PostableView() {
+      this.removeMember = __bind(this.removeMember, this);
       this.clickedToggle = __bind(this.clickedToggle, this);
       this.render = __bind(this.render, this);
       return PostableView.__super__.constructor.apply(this, arguments);
@@ -25,16 +26,25 @@
     PostableView.prototype.tagName = "tr";
 
     PostableView.prototype.events = {
-      "click .yesbtn": "clickedToggle"
+      "click .yesbtn": "clickedToggle",
+      "click .removemember": "removeMember"
     };
 
     PostableView.prototype.initialize = function(options) {
-      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username, options;
+      return this.rwmode = options.rwmode, this.memberable = options.memberable, this.fqpn = options.fqpn, this.username = options.username, this.owner = options.owner, this.ownerfqin = options.ownerfqin, options;
     };
 
     PostableView.prototype.render = function() {
       var content;
-      content = w.one_col_table_partial(this.username);
+      if (!this.owner) {
+        content = w.one_col_table_partial(this.username);
+      } else {
+        if (this.ownerfqin === this.memberable) {
+          content = w.table_from_dict_partial(this.username, '');
+        } else {
+          content = w.table_from_dict_partial(this.username, '<a class="removemember" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>');
+        }
+      }
       this.$el.html(content);
       return this;
     };
@@ -49,6 +59,25 @@
         return alert('Did not succeed');
       };
       return syncs.toggle_rw(this.memberable, this.fqpn, cback, eback);
+    };
+
+    PostableView.prototype.removeMember = function() {
+      var cback, eback, loc, membable, memberable;
+      membable = this.fqpn;
+      memberable = this.memberable;
+      loc = window.location;
+      cback = (function(_this) {
+        return function(data) {
+          return window.location = loc;
+        };
+      })(this);
+      eback = (function(_this) {
+        return function(xhr, etext) {
+          return alert('Did not succeed');
+        };
+      })(this);
+      syncs.remove_memberable_from_membable(memberable, membable, cback, eback);
+      return false;
     };
 
     return PostableView;
@@ -81,6 +110,8 @@
             rwmode: this.users[u][1],
             fqpn: this.fqpn,
             memberable: u,
+            owner: this.owner,
+            ownerfqin: this.ownerfqin,
             username: this.users[u][0]
           }));
         }
@@ -95,7 +126,11 @@
         }
         return _results;
       })();
-      $widget = w.$one_col_table("User", rendered);
+      if (!this.owner) {
+        $widget = w.$one_col_table("User", rendered);
+      } else {
+        $widget = w.$table_from_dict("User", "Remove", rendered);
+      }
       this.$el.append($widget);
       return this;
     };
@@ -125,9 +160,7 @@
 
   get_info = function(sections, config) {
     var cback, eback;
-    cback = function() {};
-    eback = function() {};
-    return $.get(config.infoURL, function(data) {
+    $.get(config.infoURL, function(data) {
       var content, ownerfqin;
       content = views.group_info(config.owner, data, templates.group_info);
       ownerfqin = data.group.owner;
@@ -137,7 +170,7 @@
       }
       sections.$infodiv.show();
       return $.get(config.membersURL, function(data) {
-        var plinv;
+        var helptext, plinv;
         plinv = new PostableListView({
           users: data.users,
           fqpn: config.fqpn,
@@ -148,6 +181,8 @@
         plinv.render();
         sections.$membersdiv.show();
         if (config.owner) {
+          helptext = "Remove user from group.";
+          w.decohelp('.Remove', helptext, 'popover', 'left');
           return $.get(config.invitedsURL, function(data) {
             content = views.postable_inviteds(config.fqpn, data, templates.postable_inviteds, true);
             sections.$invitedsdiv.append(content);
@@ -155,6 +190,16 @@
           });
         }
       });
+    });
+    cback = function() {
+      return window.location = config.postablesURL;
+    };
+    eback = function() {
+      return alert("An error occurred in deletion");
+    };
+    return $('#postabledeleter').click(function(e) {
+      e.preventDefault();
+      return syncs.delete_membable(config.fqpn, cback, eback);
     });
   };
 

@@ -18,7 +18,7 @@ parse_fqin = (fqin) ->
 enval = (tag) ->
     ename = encodeURIComponent(tag.text)
     if not tag.url
-        tag.url = "#{prefix}/postable/#{@memberable.nick}/group:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
+        tag.url = "#{prefix}/postable/#{@memberable.nick}/library:default/filter/html?query=tagname:#{ename}&query=tagtype:ads/tagtype:tag"
         title = tag.title ? ' data-toggle="tooltip" title="' + tag.title + '"' : '';
         #tag.text = '<a class="tag-link" ' + title + ' target="' + tagger.options.tag_link_target + '" href="' + tag.url + '">' + tag.text + '</a>';
         tag.id = tag.text
@@ -47,6 +47,7 @@ addwoa = (tag, cback) ->
 
 remIndiv = (pill) ->
     tag = $(pill).attr('data-tag-id')
+    fqtn = $(pill).attr('data-tag-fqtn')
     #console.log "TAGALOG", @pview, @tagajaxsubmit
     if not @tagajaxsubmit
         #console.log "OLDNEWTAGS1", @tagajaxsubmit, @newtags
@@ -56,26 +57,34 @@ remIndiv = (pill) ->
         eback = (xhr, etext) =>
             alert 'Did not succeed'
         cback = (data) =>
-        syncs.remove_tagging(@item.basic.fqin, tag, @pview, cback, eback)
+
+        syncs.remove_tagging(@item.basic.fqin, tag, fqtn, @pview, cback, eback)
 
 time_format_iv = (timestring) ->
     return timestring.split('.')[0].split('T').join(" at ")
 
-didupost = (postings, you, fqpn) ->
-    counter=0
-    youposted=false
-    for p in postings
-        if p[0]==fqpn
-            counter = counter + 1
-        if p[1]==you.adsid
-            youposted=true
-    #console.log postings, you, fqpn, counter, youposted
-    if youposted==true and counter > 1
-        return false
-    else if youposted==true and counter <= 1
+didupost = (postings, you, fqpn, areyouowner) ->
+    #console.log postings
+    #console.log you, fqpn
+    if areyouowner
+        #console.log "yes"
         return true
-    else if youposted==false
-        return false
+    # for p in postings
+    #     if p[0]==fqpn
+    #         counter = counter + 1
+    #     if p[1]==you.adsid
+    #         youposted = true
+
+    for p in postings
+        if p[0]==fqpn and p[1]==you.adsid
+            return true
+    # if youposted==true and counter > 1
+    #     return false
+    # else if youposted==true and counter <= 1
+    #     return true
+    # else if youposted==false
+    #     return false
+    return false
 
 class ItemView extends Backbone.View
 
@@ -88,9 +97,9 @@ class ItemView extends Backbone.View
     "click .removeitem" : "removeItem"
 
   initialize: (options) ->
-    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview} = options
+    {@submittable, @counter, @stags, @notes, @item, @postings, @memberable, @noteform, @tagajaxsubmit, @suggestions, @pview, @pviewowner, @pviewrw} = options
     @tagsfunc = options.tagfunc ? () ->
-    #console.log "PVIN",  @memberable, @postings
+    #console.log "PVIN",  @memberable, @pview, @pviewowner
     @hv=undefined
     @newtags = []
     @newnotes = []
@@ -132,10 +141,12 @@ class ItemView extends Backbone.View
     #console.log "NN2", @newnotes
 
   render: =>
+    #console.log "STAGS", @stags
     @$el.empty()
     adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
     url=adslocation + "#{@item.basic.name}"
-    if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview)
+    #console.log ">>", @item.basic.name, @pview#, didupost(@postings, @memberable, @pview)
+    if @pview not in ['udg', 'pub', 'none'] and didupost(@postings, @memberable, @pview, @pviewowner)
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>'
     else
         deleter = ''
@@ -148,7 +159,7 @@ class ItemView extends Backbone.View
     content = ''
     content = content + htmlstring
     #additional = format_stuff(fqin, @memberable, cdict(fqin,@stags), cdict(fqin,@postings), cdict(fqin,@notes))
-    thetags = format_tags_for_item(fqin, cdict(fqin,@stags), @memberable, @tagajaxsubmit)
+    thetags = format_tags_for_item(@pview, fqin, cdict(fqin,@stags), @memberable, @tagajaxsubmit)
     additional = "<span class='tagls'></span><br/>"
     thepostings = format_postings_for_item(fqin, cdict(fqin, (p[0] for p in @postings)), @memberable.nick)
     additionalpostings = "<strong>In Libraries</strong>: <span class='postls'>#{thepostings.join(', ')}</span><br/>"
@@ -156,8 +167,15 @@ class ItemView extends Backbone.View
     content = content + additional
     @$el.append(content)
     #console.log "THETAGS", thetags, @memberable
+    #console.log @pview, @pviewowner
+    if @pviewowner=='none'
+        can_delete = false
+    else
+        can_delete = @pviewowner
     tagdict =
         values: thetags
+        can_add: @pviewrw
+        can_delete: can_delete
         enhanceValue: _.bind(enval, this)
         addWithAjax: _.bind(addwa, this)
         addWithoutAjax: _.bind(addwoa, this)
@@ -191,7 +209,7 @@ class ItemView extends Backbone.View
         else
             @$el.append("<p class='notes'></p>")
         #console.log "NOTES", @notes
-        @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview))
+        @.$('.notes').append(format_notes_for_item(fqin, cdict(fqin,@notes), @memberable.adsid, @pview, can_delete))
     @$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>')
     return this
 
@@ -213,7 +231,7 @@ class ItemView extends Backbone.View
   update_note_ajax: (data) =>
     fqin=@item.basic.fqin
     [stags, notes]=get_taggings(data)
-    console.log "NOTES", notes, "DATA", data
+    #console.log "NOTES", notes, "DATA", data
     @stags=stags[fqin]
     @notes=notes[fqin]
     if @notes.length > 0
@@ -226,23 +244,32 @@ class ItemView extends Backbone.View
     itemname=@item.basic.name
     notetext= @.$('.txt').val()
     notemode = '1'
-    if @pview is 'udg'
-      notemode='0'
-    else
-      if @.$('.cb').is(':checked')
-          if @pview is 'pub'
-              #additionally, item must be made public. should public also mean all groups item is in
-              #as now. YES.
-              notemode = '0'
-          else if @pview is 'none'
-              notemode = '0'
-          else
-              notemode = @pview
+    # if @pview is 'udg'
+    #   notemode='0'
+    # else
+    #   if @.$('.cb').is(':checked')
+    #       if @pview is 'pub'
+    #           #additionally, item must be made public. should public also mean all groups item is in
+    #           #as now. YES.
+    #           notemode = '0'
+    #       else if @pview is 'none'
+    #           notemode = '0'
+    #       else
+    #           notemode = @pview
+    if @.$('.cb').is(':checked')
+        if @pview is 'pub'
+            #additionally, item must be made public. should public also mean all groups item is in
+            #as now. YES.
+            notemode = '0'
+        else if @pview in ['udg','none']
+            notemode = '0'
+        else
+            notemode = @pview
     ctxt = @pview
-    console.log "NOTESPEC",notetext, notemode, ctxt
+    #console.log "NOTESPEC",notetext, notemode, ctxt
     loc=window.location
     cback = (data) =>
-        console.log "return data", data, loc
+        #console.log "return data", data, loc
         #window.location=loc
         @update_note_ajax(data)
         format_item(@$('.searchresultl'),@e)
@@ -251,7 +278,7 @@ class ItemView extends Backbone.View
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
-        console.log "in ajax submit"
+        #console.log "in ajax submit"
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback)
     else
         #console.log "NO AJAX IN NOTES", @therebenotes
@@ -277,17 +304,18 @@ class ItemView extends Backbone.View
     itemname=@item.basic.name
     $target =  $(e.currentTarget)
     cback = (data) =>
-        #console.log "return data", data, loc
+        #console.log "return data", data
         #window.location=loc
         @update_note_ajax(data)
         format_item(@$('.searchresultl'),@e)
     eback = (xhr, etext) =>
-        #console.log "ERROR", etext, loc
+        #console.log "ERROR", etext
         #replace by a div alert from bootstrap
         alert 'Did not succeed'
     if @tagajaxsubmit
         tagname = $target.attr('id')
-        syncs.remove_note(item, tagname, @pview, cback, eback)
+        fqtn = $target.attr('data-fqtn')
+        syncs.remove_note(item, tagname, fqtn, @pview, cback, eback)
     else
         #console.log "NO AJAX IN NOTES", @therebenotes
         notetext = $target.parents("tr").find("td.notetext").text()
@@ -303,13 +331,19 @@ class ItemView extends Backbone.View
     cback = (data) =>
         #console.log "return data", data, loc
         #window.location=loc
-        @remove()
         #BUG:Also need to bubble it upstairs to collection dictionary
         #best reimplement this in proper backbone soon.
-        nump = $('#count').text()
-        ix = nump.search('papers')
-        nump=Number(nump[0...ix]) - 1
-        $('#count').text("#{nump} papers. ")
+        if @item.hist.length < 2 or @pviewowner==true
+            #console.log "rem", @item
+            @remove()
+            nump = $('#count').text()
+            ix = nump.search('papers')
+            nump=Number(nump[0...ix]) - 1
+            $('#count').text("#{nump} papers. ")
+        else
+            #you could remove but someone else also had it
+            #console.log "partialrem", @item
+            @.$('.removeitem').empty()
     eback = (xhr, etext) =>
         #console.log "ERROR", etext, loc
         #replace by a div alert from bootstrap
@@ -349,7 +383,7 @@ class ItemsView extends Backbone.View
     "click .libsub" : "subNewLib"
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview} = options
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @loc, @noteform, @suggestions, @pview, @pviewowner} = options
     @newposts=[]
     #console.log "PVIEW", @pview
     @tagajaxsubmit = false
@@ -410,6 +444,8 @@ class ItemsView extends Backbone.View
             tagajaxsubmit: @tagajaxsubmit
             suggestions: @suggestions
             pview: @pview
+            pviewowner: 'none'
+            pviewrw: 'none'
             counter: counter
             submittable: @submittable
         v=new ItemView(ins)
@@ -614,8 +650,8 @@ class ItemsView extends Backbone.View
 class ItemsFilterView extends Backbone.View
 
   initialize: (options) ->
-    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @tagfunc} = options
-    #console.log "PVIEW", @pview
+    {@stags, @notes, @$el, @postings, @memberable, @items, @nameable, @itemtype, @noteform, @suggestions, @pview, @pviewowner, @tagfunc, @pviewrw} = options
+    #console.log "PVIEW", @pview, @postings
     #console.log "ITEMS", @items, @suggestions
     @submittable =
         state: true
@@ -636,6 +672,8 @@ class ItemsFilterView extends Backbone.View
             tagajaxsubmit: true
             suggestions: @suggestions
             pview: @pview
+            pviewowner: @pviewowner
+            pviewrw: @pviewrw
             tagfunc: @tagfunc
             counter: counter
             submittable: @submittable

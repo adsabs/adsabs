@@ -33,7 +33,7 @@
     var ename, title, _ref;
     ename = encodeURIComponent(tag.text);
     if (!tag.url) {
-      tag.url = "" + prefix + "/postable/" + this.memberable.nick + "/group:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
+      tag.url = "" + prefix + "/postable/" + this.memberable.nick + "/library:default/filter/html?query=tagname:" + ename + "&query=tagtype:ads/tagtype:tag";
       title = (_ref = tag.title) != null ? _ref : ' data-toggle="tooltip" title="' + tag.title + {
         '"': ''
       };
@@ -61,8 +61,9 @@
   };
 
   remIndiv = function(pill) {
-    var cback, eback, tag;
+    var cback, eback, fqtn, tag;
     tag = $(pill).attr('data-tag-id');
+    fqtn = $(pill).attr('data-tag-fqtn');
     if (!this.tagajaxsubmit) {
       return this.remove_from_tags(tag);
     } else {
@@ -74,7 +75,7 @@
       cback = (function(_this) {
         return function(data) {};
       })(this);
-      return syncs.remove_tagging(this.item.basic.fqin, tag, this.pview, cback, eback);
+      return syncs.remove_tagging(this.item.basic.fqin, tag, fqtn, this.pview, cback, eback);
     }
   };
 
@@ -82,26 +83,18 @@
     return timestring.split('.')[0].split('T').join(" at ");
   };
 
-  didupost = function(postings, you, fqpn) {
-    var counter, p, youposted, _i, _len;
-    counter = 0;
-    youposted = false;
+  didupost = function(postings, you, fqpn, areyouowner) {
+    var p, _i, _len;
+    if (areyouowner) {
+      return true;
+    }
     for (_i = 0, _len = postings.length; _i < _len; _i++) {
       p = postings[_i];
-      if (p[0] === fqpn) {
-        counter = counter + 1;
-      }
-      if (p[1] === you.adsid) {
-        youposted = true;
+      if (p[0] === fqpn && p[1] === you.adsid) {
+        return true;
       }
     }
-    if (youposted === true && counter > 1) {
-      return false;
-    } else if (youposted === true && counter <= 1) {
-      return true;
-    } else if (youposted === false) {
-      return false;
-    }
+    return false;
   };
 
   ItemView = (function(_super) {
@@ -135,7 +128,7 @@
 
     ItemView.prototype.initialize = function(options) {
       var _ref;
-      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.submittable = options.submittable, this.counter = options.counter, this.stags = options.stags, this.notes = options.notes, this.item = options.item, this.postings = options.postings, this.memberable = options.memberable, this.noteform = options.noteform, this.tagajaxsubmit = options.tagajaxsubmit, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.pviewrw = options.pviewrw;
       this.tagsfunc = (_ref = options.tagfunc) != null ? _ref : function() {};
       this.hv = void 0;
       this.newtags = [];
@@ -186,11 +179,11 @@
     };
 
     ItemView.prototype.render = function() {
-      var additional, additionalpostings, adslocation, content, deleter, fqin, htmlstring, jslist, p, tagdict, thepostings, thetags, url, _ref;
+      var additional, additionalpostings, adslocation, can_delete, content, deleter, fqin, htmlstring, jslist, p, tagdict, thepostings, thetags, url, _ref;
       this.$el.empty();
       adslocation = GlobalVariables.ADS_ABSTRACT_BASE_URL;
       url = adslocation + ("" + this.item.basic.name);
-      if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview)) {
+      if (((_ref = this.pview) !== 'udg' && _ref !== 'pub' && _ref !== 'none') && didupost(this.postings, this.memberable, this.pview, this.pviewowner)) {
         deleter = '<a class="removeitem" style="cursor:pointer;"><span class="i badge badge-important">x</span></a>';
       } else {
         deleter = '';
@@ -203,7 +196,7 @@
       fqin = this.item.basic.fqin;
       content = '';
       content = content + htmlstring;
-      thetags = format_tags_for_item(fqin, cdict(fqin, this.stags), this.memberable, this.tagajaxsubmit);
+      thetags = format_tags_for_item(this.pview, fqin, cdict(fqin, this.stags), this.memberable, this.tagajaxsubmit);
       additional = "<span class='tagls'></span><br/>";
       thepostings = format_postings_for_item(fqin, cdict(fqin, (function() {
         var _i, _len, _ref1, _results;
@@ -219,8 +212,15 @@
       additional = additional + additionalpostings;
       content = content + additional;
       this.$el.append(content);
+      if (this.pviewowner === 'none') {
+        can_delete = false;
+      } else {
+        can_delete = this.pviewowner;
+      }
       tagdict = {
         values: thetags,
+        can_add: this.pviewrw,
+        can_delete: can_delete,
         enhanceValue: _.bind(enval, this),
         addWithAjax: _.bind(addwa, this),
         addWithoutAjax: _.bind(addwoa, this),
@@ -261,7 +261,7 @@
         } else {
           this.$el.append("<p class='notes'></p>");
         }
-        this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable.adsid, this.pview));
+        this.$('.notes').append(format_notes_for_item(fqin, cdict(fqin, this.notes), this.memberable.adsid, this.pview, can_delete));
       }
       this.$el.append('<hr style="margin-top: 15px; margin-bottom: 10px;"/>');
       return this;
@@ -313,7 +313,6 @@
       var fqin, notes, stags, _ref;
       fqin = this.item.basic.fqin;
       _ref = get_taggings(data), stags = _ref[0], notes = _ref[1];
-      console.log("NOTES", notes, "DATA", data);
       this.stags = stags[fqin];
       this.notes = notes[fqin];
       if (this.notes.length > 0) {
@@ -323,30 +322,24 @@
     };
 
     ItemView.prototype.submitNote = function() {
-      var cback, ctxt, d, eback, item, itemname, loc, notemode, notetext, notetime;
+      var cback, ctxt, d, eback, item, itemname, loc, notemode, notetext, notetime, _ref;
       item = this.item.basic.fqin;
       itemname = this.item.basic.name;
       notetext = this.$('.txt').val();
       notemode = '1';
-      if (this.pview === 'udg') {
-        notemode = '0';
-      } else {
-        if (this.$('.cb').is(':checked')) {
-          if (this.pview === 'pub') {
-            notemode = '0';
-          } else if (this.pview === 'none') {
-            notemode = '0';
-          } else {
-            notemode = this.pview;
-          }
+      if (this.$('.cb').is(':checked')) {
+        if (this.pview === 'pub') {
+          notemode = '0';
+        } else if ((_ref = this.pview) === 'udg' || _ref === 'none') {
+          notemode = '0';
+        } else {
+          notemode = this.pview;
         }
       }
       ctxt = this.pview;
-      console.log("NOTESPEC", notetext, notemode, ctxt);
       loc = window.location;
       cback = (function(_this) {
         return function(data) {
-          console.log("return data", data, loc);
           _this.update_note_ajax(data);
           return format_item(_this.$('.searchresultl'), _this.e);
         };
@@ -357,7 +350,6 @@
         };
       })(this);
       if (this.tagajaxsubmit) {
-        console.log("in ajax submit");
         syncs.submit_note(item, itemname, [notetext, notemode], ctxt, cback, eback);
       } else {
         this.update_notes([notetext, notemode]);
@@ -377,7 +369,7 @@
     };
 
     ItemView.prototype.removeNote = function(e) {
-      var $target, cback, eback, item, itemname, notetext, tagname;
+      var $target, cback, eback, fqtn, item, itemname, notetext, tagname;
       item = this.item.basic.fqin;
       itemname = this.item.basic.name;
       $target = $(e.currentTarget);
@@ -394,7 +386,8 @@
       })(this);
       if (this.tagajaxsubmit) {
         tagname = $target.attr('id');
-        syncs.remove_note(item, tagname, this.pview, cback, eback);
+        fqtn = $target.attr('data-fqtn');
+        syncs.remove_note(item, tagname, fqtn, this.pview, cback, eback);
       } else {
         notetext = $target.parents("tr").find("td.notetext").text();
         this.remove_notes(notetext);
@@ -410,11 +403,15 @@
       cback = (function(_this) {
         return function(data) {
           var ix, nump;
-          _this.remove();
-          nump = $('#count').text();
-          ix = nump.search('papers');
-          nump = Number(nump.slice(0, ix)) - 1;
-          return $('#count').text("" + nump + " papers. ");
+          if (_this.item.hist.length < 2 || _this.pviewowner === true) {
+            _this.remove();
+            nump = $('#count').text();
+            ix = nump.search('papers');
+            nump = Number(nump.slice(0, ix)) - 1;
+            return $('#count').text("" + nump + " papers. ");
+          } else {
+            return _this.$('.removeitem').empty();
+          }
         };
       })(this);
       eback = (function(_this) {
@@ -482,7 +479,7 @@
     };
 
     ItemsView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.loc = options.loc, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner;
       this.newposts = [];
       this.tagajaxsubmit = false;
       return this.submittable = {
@@ -587,6 +584,8 @@
           tagajaxsubmit: this.tagajaxsubmit,
           suggestions: this.suggestions,
           pview: this.pview,
+          pviewowner: 'none',
+          pviewrw: 'none',
           counter: counter,
           submittable: this.submittable
         };
@@ -864,7 +863,7 @@
     }
 
     ItemsFilterView.prototype.initialize = function(options) {
-      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.tagfunc = options.tagfunc;
+      this.stags = options.stags, this.notes = options.notes, this.$el = options.$el, this.postings = options.postings, this.memberable = options.memberable, this.items = options.items, this.nameable = options.nameable, this.itemtype = options.itemtype, this.noteform = options.noteform, this.suggestions = options.suggestions, this.pview = options.pview, this.pviewowner = options.pviewowner, this.tagfunc = options.tagfunc, this.pviewrw = options.pviewrw;
       return this.submittable = {
         state: true
       };
@@ -888,6 +887,8 @@
           tagajaxsubmit: true,
           suggestions: this.suggestions,
           pview: this.pview,
+          pviewowner: this.pviewowner,
+          pviewrw: this.pviewrw,
           tagfunc: this.tagfunc,
           counter: counter,
           submittable: this.submittable

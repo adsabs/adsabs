@@ -165,7 +165,7 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     url= prefix+"/tags/"+item
     ts={}
     ts[itemname] = [{content:notetuple[0], tagtype:tagtype, tagmode:notetuple[1]}]
-    console.log "whee", ts, notetuple
+    #console.log "whee", ts, notetuple
     data=
         tagspecs: ts
         itemtype:itemtype
@@ -178,7 +178,7 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
     url= prefix+"/tags/"+item
-    tagmode='1'
+    tagmode = '1'
     if pview is 'pub'
         #additionally, item must be made public. should public also mean all groups item is in
         #as now. YES.
@@ -195,29 +195,35 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
     if tag != ""
         send_params(url, data, cback, eback)
 
-remove_note = (item, tagname, ctxt, cback, eback) ->
+remove_note = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:note"
     url= prefix+"/tagsremove/"+item
     data=
         tagtype: tagtype
         tagname: tagname
+    if fqtn!=undefined
+        #console.log "FQTN IS", fqtn
+        data.fqtn = fqtn
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
-remove_tagging = (item, tagname, ctxt, cback, eback) ->
+remove_tagging = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     url= prefix+"/tagsremove/"+item
     data=
         tagtype: tagtype
         tagname: tagname
+    if fqtn!=undefined
+        #console.log "FQTN IS", fqtn
+        data.fqtn = fqtn
     #console.log "ctxt is", ctxt
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
 remove_items_from_postable = (items, ctxt, cback, eback) ->
@@ -227,7 +233,7 @@ remove_items_from_postable = (items, ctxt, cback, eback) ->
     if ctxt not in ['udg', 'none']
         data.fqpn = ctxt
     if ctxt=='public'
-        data.fqpn = "adsgut/group:public"
+        data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
 submit_tags = (items, tags, postables, cback, eback) ->
@@ -322,6 +328,19 @@ post_for_itemsinfo = (url, itemstring, cback) ->
         items:itemstring
     send_params(url, data, cback, eback)
 
+remove_memberable_from_membable = (memberable, membable, cback, eback) ->
+    url= prefix+"/memberremove"
+    data=
+        fqpn: membable
+        member: memberable
+    send_params(url, data, cback, eback)
+
+delete_membable = (membable, cback, eback) ->
+    url= prefix+"/membableremove"
+    data=
+        fqpn: membable
+    send_params(url, data, cback, eback)
+
 root.syncs=
     accept_invitation: accept_invitation
     invite_user: invite_user
@@ -345,3 +364,5 @@ root.syncs=
     remove_tagging: remove_tagging
     remove_note: remove_note
     remove_items_from_postable: remove_items_from_postable
+    remove_memberable_from_membable: remove_memberable_from_membable
+    delete_membable: delete_membable
