@@ -15,6 +15,15 @@
 	{% endassets %}
 
 	<script type="text/javascript" src="{{ url_for('dynamicjs.dynamic_global_variables') }}"></script>
+	
+	<script type="text/x-mathjax-config">
+	  MathJax.Hub.Config({
+	    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+	  });
+	</script>
+	<script type="text/javascript"
+	  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
 
 	<!-- apparently vega.js and jquery.flot.js can't handle the yuicompressor -->
     <script type="text/javascript" src="{{ url_for('static', filename = 'js/libs/vega.js') }}"></script>
@@ -24,7 +33,6 @@
   	{% from 'macros/misc.html' import render_messages %}
     {{ render_messages(['javascript']) }}
   	</script>
-    
 	{% block head%}{% endblock %}
 </head>
 <body>
