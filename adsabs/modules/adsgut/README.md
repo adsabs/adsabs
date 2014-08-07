@@ -31,3 +31,33 @@ tag has singletonmode=True. We havent defined other tags and note like things as
 to define tag systems. Tags have members as well, which is a quick way to keep track of who can access the tag.
 (d) the act of tagging, as defined in taggingdocument, adds a tagmode. The tagmode default is defined in the tagtype
 class, but can be overrode in the tagging. The choices are '0':promiscuous, the tagging is spread to all the libraries, an item is in , '1', private,where it goes only to the user default library, and fqpn, which adds the fully qualified name of the library the tag should be posted in.
+
+### namespaces
+
+The public group `adsgut/group:public`
+
+The library for this public group is `adsgut/library:public`
+
+Everyone belongs to this app but it has no use: `adsgut/app:adsgut`. This is the mothership app.
+
+Everyone belongsto the flagship app `ads/app:publications` and the use here is to make sure all have access to tags, notes
+pubs and searches. it may be worth having the MOTHERSHIP app own tags and notes but this works for now.
+
+The anonymouse user `adsgut/user:anonymouse` isused to represent a user who hasnt logged in. When u make a library public, access is given to this user, and the public group. From this point on you can toggle access for these entities individually.
+
+The tagtype tag is represented as: `ads/tagtype:tag`.
+
+Here is a tag: `5e412bfa-c183-4e44-bbfd-687a54f07c9c/ads/tagtype:tag:random`. Notice the user namespacing, the full
+tag namespace, and then the name `random`. A note looks thus: `501e05e4-4576-4dbe-845d-876042d2d614/ads/tagtype:note:769c1d1f-a242-49cb-82ba-fbb6761ee4a8` with `description` having the content.
+
+A user usually looks thus: `adsgut/user:501e05e4-4576-4dbe-845d-876042d2d614`
+
+An item has a different structure: `ads/2014bbmb.book..243K`. We dont have the itentype in the
+fully qualified name but the itemtype is there in the namespace. The itentype for this item is `ads/itemtype:pub`.
+
+A group looks like `5e412bfa-c183-4e44-bbfd-687a54f07c9c/group:mine` with a library looking something like this:
+`501e05e4-4576-4dbe-845d-876042d2d614/library:wolla`.
+
+### odd corners
+
+#### members in tags
