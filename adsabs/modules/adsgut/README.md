@@ -58,6 +58,41 @@ fully qualified name but the itemtype is there in the namespace. The itentype fo
 A group looks like `5e412bfa-c183-4e44-bbfd-687a54f07c9c/group:mine` with a library looking something like this:
 `501e05e4-4576-4dbe-845d-876042d2d614/library:wolla`.
 
+
+
+### files in mongogut
+
+this section describes files in the mongogut repo.
+
+The classes, that is the entire data model for the concepts given above are defined in `mongoclasses.py`. We use MongoEngine classes as our 'ORM'. We also make some common concept definitions.
+
+These are:
+	POSTABLES=[Library]#things that can be posted to
+	MEMBERABLES=[Group, App, User]#things that can be members
+	MEMBERABLES_NOT_USER=[Group, App]#things that can be members whih are not a user
+	MEMBERABLES_FOR_TAG_NOT_USER=[Group, App, Library]#things that can be members of tags
+	MEMBABLES=[Group, App, Library, Tag]#things you can be a member of
+	OWNABLES=[Group, App, Library, ItemType, TagType, Tag]#things that can be owned
+	OWNERABLES=[User]#things that can be owners.
+
+In a sense, these definitions set up interfaces which are system hews too. In the course of the development of this system, we had initially concieved groups, apps, and libraries as sharing a postable and membable interface, but each being slightly different. But it soon became clear that we wanted groups to be collections of users and libraies to be the only
+things one could post items into. Thus we see the current structure we have over here.
+
+In this file we also define `MMMAP` which says who can be a member of whom, `RWDEF` which says who can post where,
+In `utilities.py`, we have defined spec augmenting functions. A spec is the dictionary used to construct a mongoengine object.
+
+In `social.py` we define a database class whose methods deal with users, libraries, groups, and apps. These concepts then are dealt with as memberables and membables. Because of the history of the system, you may see `postablesin` and `postablesowned` attributes: substitute membables in their place mentally.
+
+In `ptassets.py` we make another database class. This database class containes methods for posting items to libraries, tagging items, a blinker based signal routing system to add tags to the appropriate libraries. It has as an instance variable the social database, and also provides multiple methods to query the items database. To get the items in a library, we query posting documents. This makes the system speedier and also gets tags and such.
+
+There is no pagination yet; this is built into the ptassets system but is not exposed in the UI.
+
+### files for the web services
+
+`webservices.py` is the main file which documents all the routes in the system. `webchrome.py` is supposed to do the chrome but we have not activated this as yet.
+
+### javascript files, coffeescript files, and templates
+
 ### odd corners
 
 #### members in tags
