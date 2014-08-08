@@ -9,13 +9,13 @@ def setup(app):
     # been already seen and dismissed by the user)        
     def new_context_processor():
         
-        # this sucks because there is not a way (that i know off) to 
+        # this sucks because there is not a way (that i know of) to 
         # dynamically register data/messages; and saving the message
         # into a text file is the same as saving it here. As far as I 
         # can tell, there is no permanent storage available to 
         # blueprints (yes, exactly, this is the argument in the discussion
         # between Django and Flask)
-        msg = None
+        msg = 'Want to change your affiliation? The ADS has a developer position open. <a href="http://www.cfa.harvard.edu/hr/postings/14-35.html" target="_blank">Apply! Spread the word!</a>'
         cat = 'html'
         if msg and not is_message_dismissed(msg, cat):
             
