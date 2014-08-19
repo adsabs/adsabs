@@ -15,7 +15,7 @@ def setup(app):
         # can tell, there is no permanent storage available to 
         # blueprints (yes, exactly, this is the argument in the discussion
         # between Django and Flask)
-        msg = 'Want to change your affiliation? The ADS has a developer position open. <a href="http://www.cfa.harvard.edu/hr/postings/14-35.html" target="_blank">Apply! Spread the word!</a>'
+        msg = 'Want to change your affiliation? The ADS has a developer position open. <a href="https://careers.stackoverflow.com/jobs/65250/it-specialist-application-software-smithsonian-astrophysical?a=5iAe6hJ9D2" target="_blank">Apply! Spread the word!</a>'
         cat = 'html'
         if msg and not is_message_dismissed(msg, cat):
             
