@@ -22,6 +22,7 @@ dbs = [
       { 'name': 'adsabs', 'passwd': config.MONGOALCHEMY_PASSWORD },
       { 'name': 'adsgut', 'passwd': re.search(':(?P<password>\w+)@', config.MONGODB_SETTINGS['HOST']).groupdict()['password'] },
       { 'name': 'adsdata', 'passwd': config.ADSDATA_MONGO_PASSWORD },
+      { 'name': 'graphics', 'passwd': config.THUMBNAIL_MONGO_PASSWORD },
     ]
 
 @manager.command
