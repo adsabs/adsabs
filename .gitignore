@@ -31,6 +31,9 @@ include
 lib
 man
 
+# Mac specific files
+.DS_Store
+
 #eclipse files
 .project
 .pydevproject

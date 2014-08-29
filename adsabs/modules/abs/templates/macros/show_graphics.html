@@ -1,0 +1,53 @@
+{# Global imports #}
+{% from "macros/record_list_macros/results.html" 
+    import render_search_result with context %}
+{% from "macros/record_list_macros/pagination.html" 
+    import render_pagination, 
+           render_result_numbers with context %}
+{% from "macros/record_list_macros/button_menu.html" 
+    import render_re_sort, 
+           render_toggle_all_paper_list, 
+           render_export_menu, 
+           render_view_menu,
+           render_analyze_menu,
+           render_record_count_dialog,
+           render_view_menu with context %}
+
+{% macro render_graphics(graphics, list_type, bibcode) %}
+
+	{# The actual results #}
+	    <style>
+		.imageSet{
+		  width:100%;
+		  background-color:#ffffff; 
+		  padding: 5px; 
+		  float:left;
+		}
+		.imageSet .imageSingle {
+		  float: left; 
+		  margin: 5px; 
+		  width:205px; 
+		  height:100%;
+		  /*text-align:center;*/
+		}
+		.imageSet .imageSingle .image {
+		  width:205px; 
+		  margin:3px;
+		}
+		.imageSet .footer {
+		  text-align:center;
+		  width: 205px; 
+		  color:#000; 
+		  padding-top: 7px; 
+		  padding-bottom:7px; 
+		  margin-top: 10px;
+		}
+		</style>
+		{{ graphics['header'] | safe }}
+	    <div class="imageSet">
+		{% for item in graphics['widgets'] %}
+		    {{ item | safe }}
+		{% endfor %}
+	    </div>
+        <div style="clear:both"></div>
+{% endmacro %}

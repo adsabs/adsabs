@@ -5,11 +5,12 @@ Created on Sep 10, 2013
 '''
 import simplejson as json
 from simplejson import JSONDecodeError
-from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify)
+from flask import (Blueprint, request, url_for, Response, current_app as app, abort, render_template, jsonify, g)
 from flask.ext.solrquery import solr, signals as solr_signals #@UnresovledImport
 from config import config
 from authorsnetwork import get_authorsnetwork
 from papersnetwork import get_papernetwork
+from paper_thumbnails import get_thumbnails
 from solrjsontowordcloudjson import wc_json
 from adsabs.extensions import statsd
 #from alladinlite import get_objects
@@ -193,3 +194,17 @@ def alladin_lite():
 
     statsd.incr("visualization.alladin_lite.viewed")
     return render_template('alladin_lite_embedded.html', bibcodes={'bibcodes':bibcodes})
+
+@visualization_blueprint.route('/thumbnails/<bibcode>', methods=['GET', 'POST'])
+def thumbnails(bibcode):
+    """
+    View that creates overview of thumbnails with article graphics
+    """
+    results = {}
+    try:
+        results = get_thumbnails(bibcode)
+    except Exception,e:
+        app.logger.error('ID %s. Unable to get thumbnails for bibcode : %s! (%s)' % (g.user_cookie_id,bibcode,e))
+        return render_template('recommendations_embedded.html', results={})
+
+    return render_template('thumbnails_embedded.html', results=results)
