@@ -1,4 +1,4 @@
-{% macro render_abstract(solrdoc, denormdoc) %}
+{% macro render_abstract(solrdoc, denormdoc, graphics) %}
 
 {% set links = solrdoc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
 {% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
@@ -145,7 +145,12 @@
 				{% endif %}
 			</div>
 			{% endif %}
-			
+			{%if 'pick' in graphics %}
+            <div id="graphics" class="linkRightMenu">
+				<dl><dt>Graphics</dt></dl>
+				{{ graphics.get('pick', '') | safe }}			
+			</div>
+            {% endif %}
 			<div id="recommendations" class="linkRightMenu"></div>
 			
 			<div id="social_buttons" class="linkRightMenu">

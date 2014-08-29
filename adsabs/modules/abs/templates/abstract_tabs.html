@@ -1,5 +1,6 @@
 {# Local import #}
 {% from "macros/list_articles.html" import render_list_articles with context %}
+{% from "macros/show_graphics.html" import render_graphics with context %}
 {% from "macros/abstract.html" import render_abstract, render_abstract_macro_tags with context %}
 {% from "macros/classic_log_request.html" import render_classic_log_request_js with context %}
 {# Global import #}
@@ -76,6 +77,15 @@
                            {% if curview != 'similar' and solrdoc.has_similar() %}
                            href="{{ url_for('abs.tab_list', list_type='similar', bibcode=denormdoc.bibcode) }}"
                            {%- endif %}> Similar Articles </a></li>
+
+					<li {% if curview == 'graphics'%}
+					   class="active"
+					   {% elif not graphics.get('figures', []) %}
+					   class="disabled"
+					   {%- endif %}><a
+					       {% if curview != 'graphics' and graphics.get('figures', []) %}
+					       href="{{ url_for('abs.tab_list', list_type='graphics', bibcode=denormdoc.bibcode) }}"
+					       {%- endif %}> Graphics {% if graphics.get('figures', []) %}({{ graphics.get('number', 'NA')}}){% endif %}</a></li>
 					
 					<li {% if curview == 'toc'%}
 					   class="active"
@@ -94,9 +104,13 @@
 
 			{% if curview == 'abstract' %}
 				{# converted to macro % include 'abstract.html' %#}
-				{{ render_abstract(solrdoc, denormdoc) }}
+				{{ render_abstract(solrdoc, denormdoc, graphics) }}
 			{% else %}
-			    {{ render_list_articles(article_list, curview, solrdoc.bibcode) }}
+			    {% if curview == 'graphics' %}
+				    {{ render_graphics(graphics, curview, solrdoc.bibcode) }}
+				{% else %}
+			        {{ render_list_articles(article_list, curview, solrdoc.bibcode) }}
+				{% endif %}
 			{% endif %}
 		</div>
 	</div>
