@@ -1,0 +1,1 @@
+from views import graphics_blueprint as blueprint

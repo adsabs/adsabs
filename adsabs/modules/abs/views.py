@@ -14,7 +14,7 @@ from signals import abstract_view_signal
 from adsabs.core.logevent import LogEvent
 from adsabs.extensions import statsd
 
-from adsabs.modules.visualization.paper_thumbnails import get_thumbnails
+from adsabs.modules.graphics.paper_thumbnails import get_thumbnails
 
 abs_blueprint = Blueprint('abs', __name__, template_folder="templates", url_prefix='/abs')
 
