@@ -11,7 +11,7 @@ from config import config
 import pymongo
 import random
 
-thumb_link = '<a href="%s" target="_new" border=0><img src="%s"></a>'
+thumb_link = '<a href="%s" target="_new" border=0><img src="%s" width="100px"></a>'
 graph_link = '<a href="graphics" border=0><img src="%s"></a>'
 ADSASS_img = '<img src="%s">'
 ADSASS_thmb_img  = '<img src="%s" width="100px">'
@@ -72,22 +72,22 @@ def get_thumbnails(bibcode):
                 image_context = '<a href="%s" target="_new">%s</a>' % (ADSlink,image)
                 results['widgets'].append('<div class="imageSingle"><div class="image">'+image_context+'</div><div class="footer">'+figure['figure_label']+'&nbsp;'+WWT_link+'</div></div>')
                 results['ADSlink'].append(ADS_image_url%(bibcode.replace('&','%26'),figure['page']-1))
-#        elif source.upper() == 'ARXIV':
-#            results['header'] = 'Images extracted from the arXiv e-print'
-#            try:
-#                display_image = random.choice(display_figure['images'])
-#                thumb_url = display_image['thumbnail']
-#                results['pick'] = graph_link % thumb_url
-#            except:
-#                pass
-#            for figure in results['figures']:
-#                images = figure.get('images',[])
-#                results['number'] += len(images)
-#                for image in images:
-#                    thumb_url = image['thumbnail']
-#                    highr_url = image['highres']
-#                    lowrs_url = image['lowres']
-#                    results['widgets'].append('<div class="imageSingle"><div class="image">'+thumb_link % (highr_url,highr_url)+'</div></div>')
+        elif source.upper() == 'ARXIV':
+            results['header'] = 'Images extracted from the arXiv e-print'
+            try:
+                display_image = random.choice(display_figure['images'])
+                thumb_url = display_image['highres']
+                results['pick'] = graph_link % thumb_url
+            except:
+                pass
+            for figure in results['figures']:
+                images = figure.get('images',[])
+                results['number'] += len(images)
+                for image in images:
+                    thumb_url = image['thumbnail']
+                    highr_url = image['highres']
+                    lowrs_url = image['lowres']
+                    results['widgets'].append('<div class="imageSingle"><div class="image">'+thumb_link % (highr_url,highr_url)+'</div></div>')
         else:
             results = {}
     if not results:
