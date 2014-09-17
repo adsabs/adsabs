@@ -1,0 +1,37 @@
+
+	    <style>
+		.imageSet{
+		  width:100%;
+		  background-color:#ffffff; 
+		  padding: 5px; 
+		  float:left;
+		}
+		.imageSet .imageSingle {
+		  float: left; 
+		  margin: 5px; 
+		  width:205px; 
+		  height:100%;
+		  /*text-align:center;*/
+		}
+		.imageSet .imageSingle .image {
+		  width:205px; 
+		  margin:3px;
+		}
+		.imageSet .footer {
+		  text-align:center;
+		  width: 205px; 
+		  color:#000; 
+		  padding-top: 7px; 
+		  padding-bottom:7px; 
+		  margin-top: 10px;
+		}
+		</style>
+	    <div class="imageSet">
+		{% for item in display['figures'] %}
+		    {% for image in item['images'] %}
+			    {% if 'highres' in image %}
+    		        <img src="{{ image['highres'] | safe }}">
+				{% endif %}
+		    {% endfor %}
+		{% endfor %}
+	    </div>
