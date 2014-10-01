@@ -244,7 +244,7 @@ def _tagspecspostget(qdict):
 
 import uuid
 
-#a before_request is flask's place of letting you run code before 
+#a before_request is flask's place of letting you run code before
 #the request is carried out. here is where we get info about the user
 #from the database and all that
 
@@ -686,7 +686,7 @@ def doPostableChanges(po, pt, pn):
 
 
 #function to add a user to a library.
-#TODO: do we want a useras here? 
+#TODO: do we want a useras here?
 def addMemberToPostable(g, request, fqpn):#fqmn/[changerw]
     jsonpost=dict(request.json)
     fqmn=_dictp('member', jsonpost)
@@ -862,7 +862,8 @@ def profileHtmlNotRouted(powner, pname, ptype, inviteform=None):
         inviteform = InviteForm()
       else:
         inviteform = InviteFormGroup()
-    return render_template(ptype+'profile.html', thepostable=p, owner=owner, rw=rw, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
+    #print p.to_json()
+    return render_template(ptype+'profile.html', thepostable=p, thepostablejson=p.to_json(), owner=owner, rw=rw, inviteform=inviteform, useras=g.currentuser, po=powner, pt=ptype, pn=pname)
 
 
 #this is the workhorse for displaying items, for any library
@@ -880,7 +881,7 @@ def postableFilterHtml(po, pt, pn):
         pflavor=p.basic.fqin
         tqtype='tagname'
     tqtype='tagname'
-    return render_template('postablefilter.html', p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner, rw=rw)
+    return render_template('postablefilter.html', thepostablejson=p.to_json(), p=p, po=po, pt=pt, pn=pn, pflavor=pflavor, querystring=querystring, tqtype=tqtype, useras=g.currentuser, owner=owner, rw=rw)
 
 #get the user defaukt library's items
 @adsgut.route('/postable/<nick>/library:default/filter/html')
@@ -1225,7 +1226,7 @@ def _setupTagspec(ti, useras):
     tagspec['tagtype'] = ti['tagtype']
     return tagspec
 
-#GET tags for an item 
+#GET tags for an item
 #or POST: tag an item
 
 @adsgut.route('/tags/<ns>/<itemname>', methods=['GET', 'POST'])
@@ -1507,7 +1508,7 @@ def postForm(itemtypens, itemtypename):
             items=["ads/"+i for i in bibcodes]
         elif itemtype=="ads/search":#not implemented yet
             itemstring=query.get('items',[''])[0]
-    
+
         theitems=[]
         if itemtype=="ads/pub":
             theitems=[{ 'basic':{'name':i.split('/')[-1],'fqin':i}} for i in items]
@@ -1597,7 +1598,7 @@ def perform_solr_bigquery(bibcodes):
         d = {}
     return d
 
-#Use GET to get the classic libraries. TODO: make this POST as its destructive 
+#Use GET to get the classic libraries. TODO: make this POST as its destructive
 #on our database BUG This is used with the import/reimport classic button. The idea
 #will be to do it as post AJAX, with the database (user.classicimported) changed by a queue process once we have the
 #queue in place. This way the user can come back. This is a long running process.
