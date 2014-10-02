@@ -226,14 +226,23 @@ do_postable_filter = (sections, config, tagfunc) ->
                 cb = (data) ->
                     #console.log "CBDATA", theitems.length, data.response.docs.length
                     thedocs = {}
+                    docaltnames={}
+                    enames = (d.basic.name for d in theitems)
                     for d in data.response.docs
                         thedocs[d.bibcode]=d
+                        abcs = d.alternate_bibcode
+                        abcs= abcs ? []
+                        #console.log "ABCS", abcs
+                        for e in abcs
+                            if e in enames
+                                docaltnames[e]=d.bibcode
                     docnames = (d.bibcode for d in data.response.docs)
                     for d in theitems
                         if d.basic.name in docnames
                             e=thedocs[d.basic.name]
                         else
-                            e={}
+                            #console.log "whoopee", d
+                            e=docaltnames[d.basic.name] ? {}
                         plinv.itemviews[d.basic.fqin].e = e
                         format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'),e)
                 #console.log "ITTYS", theitems, (e.basic.fqin for e in theitems)

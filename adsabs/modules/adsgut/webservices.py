@@ -1576,7 +1576,7 @@ def perform_solr_bigquery(bibcodes):
         'q':'text:*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
-        'fl':'bibcode,title,pubdate,author'
+        'fl':'bibcode,title,pubdate,author,alternate_bibcode'
     }
     #Perform the request
     qdict['rows']=len(bibcodes)
