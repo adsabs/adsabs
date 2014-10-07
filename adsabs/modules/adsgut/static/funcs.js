@@ -455,6 +455,7 @@
       }
     }
     libfqin = flip_type(basic.fqin, "library");
+    libfqin = encodeURIComponent(libfqin);
     url = "" + prefix + "/postable/" + libfqin + "/" + mode + "/html";
     a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.name + "</a>";
     return dl('.dl-horizontal', function() {

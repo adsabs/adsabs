@@ -65,18 +65,18 @@
 
 {% block coffeescript %}
 $=jQuery
-#console.log "In PostableFilter"
 
-#tagsPURL : "{{ url_for('adsgut.tagsForPostable', po=po, pt=pt, pn=pn) }}?#{vars_pageless}"
 
 $ ->
+  pjson={{ thepostablejson|safe }}
+  fqpn=pjson.basic.fqin
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   ptype = "{{p.classname}}"
   vars="{{ querystring | safe }}"
 
   config =
-    fqpn : "{{p.basic.fqin}}"
-    infoURL : "#{prefix}/{{p.classname}}/{{ p.basic.fqin}}"
+    fqpn : fqpn
+    infoURL : "#{prefix}/{{p.classname}}/#{fqpn}"
     itemsPURL : "{{ url_for('adsgut.itemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     jsonPURL : "{{ url_for('adsgut.jsonItemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"
     csvPURL : "{{ url_for('adsgut.csvItemsForPostable', po=po, pt=pt, pn=pn) }}?#{vars}"

@@ -339,8 +339,10 @@ postable_info_layout = renderable (isowner, {basic, owner, nick}, oname, cname, 
     else
       modetext = "Info"
   libfqin = flip_type(basic.fqin, "library")
+  libfqin = encodeURIComponent libfqin
   url= "#{prefix}/postable/#{libfqin}/#{mode}/html"
   a= "&nbsp;&nbsp;<a href=\"#{url}\">#{basic.name}</a>"
+  #console.log "a",a
   dl '.dl-horizontal', ->
     dt "Description"
     dd ->

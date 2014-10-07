@@ -1,40 +1,18 @@
 ###
-the idea behind syncs.coffee is to create a Backbone sync component for our API.
-For this we must identify the models and views across our pages.
-
-The method signature of Backbone.sync is sync(method, model, [options])
-
-method – the CRUD method ("create", "read", "update", or "delete")
-model – the model to be saved (or collection to be read)
-options – success and error callbacks, and all other jQuery request options
-
-With the default implementation, when Backbone.sync sends up a request to save a model,
-its attributes will be passed, serialized as JSON, and sent in the HTTP body with content-type application/json.
-When returning a JSON response, send down the attributes of the model that have been changed by the server,
-and need to be updated on the client. When responding to a "read" request from a collection (Collection#fetch),
-send down an array of model attribute objects.
-
-Whenever a model or collection begins a sync with the server, a "request" event is emitted.
-If the request completes successfully you'll get a "sync" event, and an "error" event if not.
-
-The sync function may be overriden globally as Backbone.sync, or at a finer-grained level,
-by adding a sync function to a Backbone collection or to an individual model.
-
-#but we shall first start slow, by building in direct jquery functions here, instead of Backbone.sync.
-This will document the api as well. We wont start with gets, but remember we want to later put gets inside
-collections.fetch
-
-error
-Type: Function( jqXHR jqXHR, String textStatus, String errorThrown )
-success
-Type: Function( PlainObject data, String textStatus, jqXHR jqXHR )
+the idea behind syncs.coffee is to create a place where all communication with the server is handled
+it might be possible to throw this into a Backbone.sync structure where we do CRUD at the level
+of the library (rather than at the level of individual items)
 ###
+
+#set up globals
 root = exports ? this
 $=jQuery
-#console.log "In Funcs"
 h = teacup
 doajax=$.ajax
+#Get the Beer prefix, append adsgut to it
 prefix = GlobalVariables.ADS_PREFIX+"/adsgut"
+
+#send params simply sends a JSON dictionary 'data' as a POST request to 'url'
 send_params = (url, data, cback, eback) ->
     stringydata = JSON.stringify(data)
     params=
@@ -47,31 +25,7 @@ send_params = (url, data, cback, eback) ->
         error:eback
     xhr=doajax(params)
 
-# import requests
-
-# rstr="bibcode\n2013MPEC....H...46."
-
-# headers = {'Content-Type': 'big-query/csv'}
-# url='http://localhost:9002/solr/collection1/select'
-# qdict = {
-#     'q':'text:*:*',
-#     'fq':'{!bitset compression=none}',
-#     'wt':'json',
-#     'fl':'title,year,author'
-# }
-# r = requests.post(url, params=qdict, data=rstr, headers=headers)
-# print r.url
-# print r.text
-
-send_bibcodes = (url, items, cback, eback) ->
-    #bibcodes = (encodeURIComponent(i.basic.name) for i in items)
-    bibcodes = (i.basic.name for i in items)
-    data =
-        bibcode : bibcodes
-    #console.log "SBDATA", data
-    send_params(url, data, cback, eback)
-
-
+#This does a GET to a 'url'
 do_get = (url, cback, eback) ->
     params=
         type:'GET'
@@ -81,6 +35,19 @@ do_get = (url, cback, eback) ->
         error:eback
     xhr=doajax(params)
 
+#This function is used to send a list of bibcodes
+#to bigquery. The standard URL for bigquery is PREFIX+'/adsgut/bigquery/bibcodes'
+send_bibcodes = (url, items, cback, eback) ->
+    #bibcodes = (encodeURIComponent(i.basic.name) for i in items)
+    bibcodes = (i.basic.name for i in items)
+    data =
+        bibcode : bibcodes
+    send_params(url, data, cback, eback)
+
+
+#This method changes ownership of a group or library. You must supply the 'adsid', or
+#the email of the user, and the fqpn (fully qualified name(fqin)) of the group or library being changed
+#currently this is only used by libraries
 change_ownership = (adsid, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
@@ -88,6 +55,9 @@ change_ownership = (adsid, fqpn, cback, eback) ->
         op:'changeowner'
     send_params(url, data, cback, eback)
 
+#for a given library with fqin 'fqpn', change whether a group or user with fqin 'fqmn'
+#can post into the library. Its a toggle: if the current status is read-only, the status will become
+#read-write
 toggle_rw = (fqmn, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
@@ -95,6 +65,8 @@ toggle_rw = (fqmn, fqpn, cback, eback) ->
         op:'togglerw'
     send_params(url, data, cback, eback)
 
+#Change description of library to text 'description'. Why is there
+#a memberable 'crap' here? TODO
 change_description = (description, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
@@ -103,6 +75,7 @@ change_description = (description, fqpn, cback, eback) ->
         description:description
     send_params(url, data, cback, eback)
 
+#A user with adsid 'adsid' (email) accepts an invitation to library `fqpn`
 accept_invitation = (adsid, fqpn, cback, eback) ->
     url= prefix+"/postable/"+fqpn+"/changes"
     data=
@@ -110,15 +83,20 @@ accept_invitation = (adsid, fqpn, cback, eback) ->
         op:'accept'
     send_params(url, data, cback, eback)
 
-invite_user = (adsid, postable, changerw, cback, eback) ->
-    url= prefix+"/postable/"+postable+"/changes"
+#Invite a user with email 'adsid' to library `fqpn` with a command to change read-only mode true
+#or false. The default mode for a user is read-only, so setting this to true changes the mode to read-write
+invite_user = (adsid, fqpn, changerw, cback, eback) ->
+    url= prefix+"/postable/"+fqpn+"/changes"
     data=
         memberable:adsid
         op:'invite'
         changerw:changerw
     send_params(url, data, cback, eback)
 
-#BUG: should we explicitly pass useras below?
+#TODO: check if we explicitly pass useras below?
+#create a library or a group with a dictionary 'postable'
+#this dictionary must have keys 'name' and description'
+#also provide 'postabletype' library or group
 create_postable = (postable, postabletype, cback, eback) ->
     url= prefix+"/#{postabletype}"
     data=
@@ -126,23 +104,24 @@ create_postable = (postable, postabletype, cback, eback) ->
         description:postable.description
     send_params(url, data, cback, eback)
 
-add_group = (selectedgrp, postable, changerw, cback, eback) ->
-    url= prefix+"/postable/"+postable+"/members"
+#add a group with fqin 'selectedgroup' as a member of a library 'fqpn'
+add_group = (selectedgrp, fqpn, changerw, cback, eback) ->
+    url= prefix+"/postable/"+fqpn+"/members"
     data=
         member: selectedgrp
         changerw: changerw
-    #console.log "DATA", data
     send_params(url, data, cback, eback)
 
-make_public = (postable, cback, eback) ->
-    url= prefix+"/postable/"+postable+"/members"
+#make a library 'fqpn' public. This involves adding the user anonymouse as a member.
+make_public = (fqpn, cback, eback) ->
+    url= prefix+"/postable/"+fqpn+"/members"
     data=
         member: 'adsgut/user:anonymouse'
         changerw: false
-    #console.log "make public"
     send_params(url, data, cback, eback)
 
 #This one is not particularly useful and dosent seem to be used
+#DONT USE IT. NOT DOCUMENTED
 get_postables = (user, cback, eback) ->
     #bug:possibly buggy split
     #ary=user.split(':')
@@ -151,6 +130,9 @@ get_postables = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesuserisin"
     do_get(url, cback, eback)
 
+#For a user, get the libraries you can access. The 'writable' is a misnomer
+#we include read-only libraries. This is the CRITICAL method, which can be used to
+#bootstrap to get all the users libraries in bumblebee.
 get_postables_writable = (user, cback, eback) ->
     #bug:possibly buggy split
     #ary=user.split(':')
@@ -159,6 +141,13 @@ get_postables_writable = (user, cback, eback) ->
     url= prefix+"/user/"+nick+"/postablesusercanwriteto"
     do_get(url, cback, eback)
 
+#Takes an 'item' fqin, and also the 'itemname'(yes this repetition is bad)
+#takes a 'notetuple':[notetext,tagmode] and a context 'ctxt' and posts the note
+#The context is usually the fqpn of the library in whose context we are posting this,
+#but it can also be 'udg', the personal library, 'public', the publuc library
+#not implemented yet, or 'none', which refers to the context of making notes on
+#search results. The tagmode reflects exactly this ctxt with '0' for promiscuous, '1' for
+#private, 'fqpn' elsewise. Here though promiscuous means go everywhere.
 submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:note"
     itemtype= "ads/itemtype:pub"
@@ -169,11 +158,17 @@ submit_note = (item, itemname, notetuple, ctxt, cback, eback) ->
     data=
         tagspecs: ts
         itemtype:itemtype
-    if ctxt not in ['udg','public','none']
+    if ctxt not in ['udg','pub','none']
         data.fqpn = ctxt
     if notetuple[0] != ""
         send_params(url, data, cback, eback)
 
+#Takes an 'item' fqin, and also the 'itemname'(yes this repetition is bad)
+#takes a tag fqin and a context 'pview' and posts the tag
+#The pview is usually the fqpn of the library in whose context we are posting this,
+#but it can also be 'udg', the personal library, 'public', the publuc library
+#not implemented yet, or 'none', which refers to the context of making notes on
+#search results. The tagmode reflects exactly this ctxt.
 submit_tag = (item, itemname, tag, pview, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
@@ -184,7 +179,7 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
         #as now. YES.
         tagmode = '0'
     else if pview is 'udg' or pview is 'none'
-        tagmode = '0'
+        tagmode = '0'#why is this '0'. Shouldnt it be '1'?is it because of where we weant tags to be seen?
     else
         tagmode = pview
     ts={}
@@ -194,6 +189,11 @@ submit_tag = (item, itemname, tag, pview, cback, eback) ->
         itemtype:itemtype
     if tag != ""
         send_params(url, data, cback, eback)
+
+#remove a note from a library. Needs both tagname and fqtn.
+#in our UI, the fqtn's uuid is stored in the tags.
+#the ctxt can be the public library or a given library
+#TODO: if its neither, there is no fqpn, and what happens?
 
 remove_note = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:note"
@@ -209,6 +209,10 @@ remove_note = (item, tagname, fqtn, ctxt, cback, eback) ->
     if ctxt=='public'
         data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
+
+#remove a tag from a library. Needs both tagname and fqtn.
+#the ctxt can be the public library or a given library
+#TODO: if its neither, there is no fqpn, and what happens?
 
 remove_tagging = (item, tagname, fqtn, ctxt, cback, eback) ->
     tagtype= "ads/tagtype:tag"
@@ -226,6 +230,8 @@ remove_tagging = (item, tagname, fqtn, ctxt, cback, eback) ->
         data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
+#remove items from a library. each item in the list is the fqin
+#ctxt is the library, or public. If its 'udg' or 'none', what happens?
 remove_items_from_postable = (items, ctxt, cback, eback) ->
     url= prefix+"/itemsremove"
     data=
@@ -236,6 +242,10 @@ remove_items_from_postable = (items, ctxt, cback, eback) ->
         data.fqpn = "adsgut/library:public"
     send_params(url, data, cback, eback)
 
+
+#the next two are similar to submit_tag and submit_note, but boxcar on
+#multiple item fqins, tag names, and library fqpns. In both these you must
+#have actual postables. And thus no other tagmodes are allowed, simplifying things.
 submit_tags = (items, tags, postables, cback, eback) ->
     tagtype= "ads/tagtype:tag"
     itemtype= "ads/itemtype:pub"
@@ -285,6 +295,7 @@ submit_notes = (items, notetuples, cback, eback) ->
     else
         cback()
 
+#similar to earlier, multiple items in multiple libraries
 submit_posts = (items, postables, cback, eback) ->
     itemtype= "ads/itemtype:pub"
     #console.log items, '|||', postables
@@ -299,6 +310,7 @@ submit_posts = (items, postables, cback, eback) ->
     else
         cback()
 
+#just save items, which basically adds to udg
 #there will always be items so no guarding required
 save_items = (items, cback, eback) ->
     itemtype= "ads/itemtype:pub"
@@ -310,6 +322,8 @@ save_items = (items, cback, eback) ->
         itemtype:itemtype
     send_params(url, data, cback, eback)
 
+#get taggings and postings for item fqins in a library using POST
+#we do POST so as to allow very long item strings.
 taggings_postings_post_get = (items, pview, cback) ->
     url= prefix+"/items/taggingsandpostings"
     eback = () ->
@@ -321,6 +335,10 @@ taggings_postings_post_get = (items, pview, cback) ->
         data.fqpn = pview
     send_params(url, data, cback, eback)
 
+#this is a very stupid POST based function which gets basic info for items, given a string of
+#colon separated item fqins. It will eventually be removed. Currently its used in the
+#exporting form to get some information to draw the page from the stuff given by the
+#export
 post_for_itemsinfo = (url, itemstring, cback) ->
     eback = () ->
         alert "Error Occurred"
@@ -328,6 +346,8 @@ post_for_itemsinfo = (url, itemstring, cback) ->
         items:itemstring
     send_params(url, data, cback, eback)
 
+#removes a user or group using fqin from a library, or a user from a group.
+#The memberable is the former fqin, the membable is the latter
 remove_memberable_from_membable = (memberable, membable, cback, eback) ->
     url= prefix+"/memberremove"
     data=
@@ -335,6 +355,7 @@ remove_memberable_from_membable = (memberable, membable, cback, eback) ->
         member: memberable
     send_params(url, data, cback, eback)
 
+#deletes a library or a group with fqin membable
 delete_membable = (membable, cback, eback) ->
     url= prefix+"/membableremove"
     data=

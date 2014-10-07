@@ -291,30 +291,48 @@
             return _results;
           };
           cb = function(data) {
-            var d, docnames, thedocs, _l, _len3, _len4, _m, _ref4, _ref5, _results;
+            var abcs, d, docaltnames, docnames, enames, thedocs, _l, _len3, _len4, _len5, _m, _n, _ref4, _ref5, _ref6, _results;
             thedocs = {};
+            docaltnames = {};
+            enames = (function() {
+              var _l, _len3, _results;
+              _results = [];
+              for (_l = 0, _len3 = theitems.length; _l < _len3; _l++) {
+                d = theitems[_l];
+                _results.push(d.basic.name);
+              }
+              return _results;
+            })();
             _ref4 = data.response.docs;
             for (_l = 0, _len3 = _ref4.length; _l < _len3; _l++) {
               d = _ref4[_l];
               thedocs[d.bibcode] = d;
+              abcs = d.alternate_bibcode;
+              abcs = abcs != null ? abcs : [];
+              for (_m = 0, _len4 = abcs.length; _m < _len4; _m++) {
+                e = abcs[_m];
+                if (__indexOf.call(enames, e) >= 0) {
+                  docaltnames[e] = d.bibcode;
+                }
+              }
             }
             docnames = (function() {
-              var _len4, _m, _ref5, _results;
+              var _len5, _n, _ref5, _results;
               _ref5 = data.response.docs;
               _results = [];
-              for (_m = 0, _len4 = _ref5.length; _m < _len4; _m++) {
-                d = _ref5[_m];
+              for (_n = 0, _len5 = _ref5.length; _n < _len5; _n++) {
+                d = _ref5[_n];
                 _results.push(d.bibcode);
               }
               return _results;
             })();
             _results = [];
-            for (_m = 0, _len4 = theitems.length; _m < _len4; _m++) {
-              d = theitems[_m];
+            for (_n = 0, _len5 = theitems.length; _n < _len5; _n++) {
+              d = theitems[_n];
               if (_ref5 = d.basic.name, __indexOf.call(docnames, _ref5) >= 0) {
                 e = thedocs[d.basic.name];
               } else {
-                e = {};
+                e = (_ref6 = docaltnames[d.basic.name]) != null ? _ref6 : {};
               }
               plinv.itemviews[d.basic.fqin].e = e;
               _results.push(format_item(plinv.itemviews[d.basic.fqin].$('.searchresultl'), e));

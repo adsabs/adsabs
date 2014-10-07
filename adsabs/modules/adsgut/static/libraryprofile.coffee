@@ -125,6 +125,7 @@ make_editable_description = ($infodiv, fqpn) ->
 get_info = (sections, config) ->
 
     $.get config.infoURL, (data) ->
+        #console.log "DATA", data
         content=views.library_info config.owner, data, templates.library_info
         ownerfqin=data.library.owner
         sections.$infodiv.append(content)

@@ -48,7 +48,7 @@
   </div>
   <div id="inviteds" style="display:none"></div>
   <div>
-      <h4> Delete this library </h4>
+      <h4> Delete this library {{ thepostable.basic.fqin}}</h4>
       <p> This is the point of no-return. You will loose everything you have saved in this library, and so will its other users. Things saved in the library are copied into your saved items, however, so the items themselves wont be lost, while the context is. </p>
       <p><a class='btn btn-danger' id="postabledeleter">DELETE</a></p>
   </div>
@@ -57,14 +57,19 @@
 {% block coffeescript %}
 $=jQuery
 $ ->
-
+  pjson={{ thepostablejson|safe }}
+  fqpn=pjson.basic.fqin
+  makesplit = (word)->
+      wspl=word.split('/')
+      wspl2=wspl[1].split(':')
+      return wspl[0]+'/'+wspl2[0]+':'+encodeURIComponent(wspl2[1])
   prefix=GlobalVariables.ADS_PREFIX+'/adsgut'
   config =
-    fqpn : '{{ thepostable.basic.fqin}}'
+    fqpn : fqpn
     postablesURL: "#{prefix}/user/{{ useras.nick }}/profile/html"
-    infoURL : "#{prefix}/library/{{ thepostable.basic.fqin}}"
-    membersURL : "#{prefix}/library/{{ thepostable.basic.fqin}}/members"
-    invitedsURL : "#{prefix}/library/{{ thepostable.basic.fqin}}/inviteds"
+    infoURL : "#{prefix}/library/#{fqpn}"
+    membersURL : "#{prefix}/library/#{fqpn}/members"
+    invitedsURL : "#{prefix}/library/#{fqpn}/inviteds"
     owner : if '{{owner}}' == 'True' then true else false
     useras_nick: '{{ useras.nick }}'
     guiURL : "#{prefix}/user/{{useras.nick}}/groupsuserisin"
@@ -76,6 +81,7 @@ $ ->
     $makepublicform: $('div#makepublicform')
     $invitedsdiv : $('div#inviteds')
 
+  #console.log "HHHHH", config
   libraryprofile.get_info(sections, config)
 
 {% endblock %}
