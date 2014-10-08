@@ -431,7 +431,7 @@
   };
 
   postable_info_layout = renderable(function(isowner, _arg, oname, cname, mode) {
-    var a, basic, description, dtext, libfqin, modetext, nick, owner, url;
+    var a, basic, description, dtext, e, libfqin, modetext, nick, owner, url;
     basic = _arg.basic, owner = _arg.owner, nick = _arg.nick;
     if (mode == null) {
       mode = "filter";
@@ -455,9 +455,18 @@
       }
     }
     libfqin = flip_type(basic.fqin, "library");
-    libfqin = encodeURIComponent(libfqin);
+    libfqin = ((function() {
+      var _i, _len, _ref, _results;
+      _ref = libfqin.split('/');
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        e = _ref[_i];
+        _results.push(encodeURIComponent(e));
+      }
+      return _results;
+    })()).join("/");
     url = "" + prefix + "/postable/" + libfqin + "/" + mode + "/html";
-    a = "&nbsp;&nbsp;<a href=\"" + url + "\">" + basic.name + "</a>";
+    a = "&nbsp;&nbsp;<a href=\"" + url + ("\">" + basic.name + "</a>");
     return dl('.dl-horizontal', function() {
       dt("Description");
       dd(function() {
