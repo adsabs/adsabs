@@ -448,8 +448,11 @@ class MakePublic extends Backbone.View
 
     if @ispublic
       #console.log "POSTABLE", @postable
-      url= "#{prefix}/postable/#{@postable}/filter/html"
-      @content="<p><a class='btn btn-info' href='#{url}'>PUBLIC LINK</a></p>"
+      libfqin=(encodeURIComponent(e) for e in @postable.split('/')).join("/")
+      #console.log "LIBFQIN", libfqin
+      url= "#{prefix}/postable/"+libfqin+"/filter/html"
+      @content="<p><a class='btn btn-info' href=\""+url+"\">PUBLIC LINK</a></p>"
+      #console.log @content
     else
       @content=widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public")
 
