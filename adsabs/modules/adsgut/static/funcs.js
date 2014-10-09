@@ -599,15 +599,25 @@
     };
 
     MakePublic.prototype.initialize = function(options) {
-      var url;
+      var e, libfqin, url;
       this.postable = options.postable, this.users = options.users;
       this.ispublic = false;
       if (this.users['adsgut/user:anonymouse'] != null) {
         this.ispublic = true;
       }
       if (this.ispublic) {
-        url = "" + prefix + "/postable/" + this.postable + "/filter/html";
-        return this.content = "<p><a class='btn btn-info' href='" + url + "'>PUBLIC LINK</a></p>";
+        libfqin = ((function() {
+          var _i, _len, _ref, _results;
+          _ref = this.postable.split('/');
+          _results = [];
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            e = _ref[_i];
+            _results.push(encodeURIComponent(e));
+          }
+          return _results;
+        }).call(this)).join("/");
+        url = ("" + prefix + "/postable/") + libfqin + "/filter/html";
+        return this.content = "<p><a class='btn btn-info' href=\"" + url + "\">PUBLIC LINK</a></p>";
       } else {
         return this.content = widgets.zero_submit("Clicking this will enable anyone to see this library (they cant write to it):", "Make Public");
       }
