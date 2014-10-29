@@ -323,6 +323,7 @@ def userInfo(nick):
             d['reason'] = ''
         else:
             reasons=[e[1] for e in names[d['fqpn']]]
+            reasons=list(set(reasons))
             #eliminate all libraries (many!) the user is in because
             #os being part of the public group
             #(TODO: might be better done cleaner in membableslibrary)
