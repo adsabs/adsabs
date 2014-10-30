@@ -396,17 +396,21 @@ def postablesUserIsIn(nick):
 #this gets the libraries the user can access (write to is a not entirely
 #accurate term because we do include read-only libraries here). the critical
 #thing is that this includes libraires we are in due to membership in a group.
+#this is used to poplate the dropdown menu, so unlike librariesuserisin and
+#librariesusercanwriteto, this does not include libraries one can write to
+#by dint of being in the public group
 @adsgut.route('/user/<nick>/postablesusercanwriteto')
 def postablesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
-    allpostables=g.db.membablesUserCanWriteTo(g.currentuser, useras)
+    allpostables=g.db.membablesUserCanWriteTo(g.currentuser, useras, public=False)
+    #print "ALLPOSTABLES", [e.to_json() for e in allpostables]
     #groups=[e['fqpn'] for e in allpostables if e['ptype']=='group']
     libraries=[e['fqpn'] for e in allpostables if e['ptype']=='library']
     #apps=[e['fqpn'] for e in allpostables if e['ptype']=='app']
     #print "GLA", groups, libraries, apps
     #groups.remove("adsgut/group:public")
-    libraries.remove("adsgut/library:public")
-    libraries.remove(useras.nick+"/library:default")
+    if "adsgut/library:public" in libraries: libraries.remove("adsgut/library:public")
+    if useras.nick+"/library:default" in libraries: libraries.remove(useras.nick+"/library:default")
     return jsonify(groups=[], libraries=libraries, apps=[])
 
 #groups user is in, minus the public grouo
@@ -454,14 +458,16 @@ def appsUserIsInvitedTo(nick):
     return jsonify(apps=apps)
 
 
-#libraries user is in directly
+#libraries user is in directly AND indirectly, read-only and readwrite.
+#Includes those coming from public grp
 @adsgut.route('/user/<nick>/librariesuserisin')
 def librariesUserIsIn(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
     libs=[e['fqpn'] for e in g.db.membablesUserCanAccess(g.currentuser, useras, "library")]
     return jsonify(libraries=libs)
 
-#all the libraries the user is in
+#all the libraries the user is in and which are writable.
+#Includes those coming from public grp
 @adsgut.route('/user/<nick>/librariesusercanwriteto')
 def librariesUserCanWriteTo(nick):
     useras=g.db.getUserInfo(g.currentuser, nick)
