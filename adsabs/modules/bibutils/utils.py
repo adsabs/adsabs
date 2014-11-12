@@ -269,7 +269,7 @@ def export_metrics(data):
                   ('Average number of reads', (totalReads, refereedReads)), ('Median number of reads', (totalReads, refereedReads)), 
                   ('Total number of downloads', (totalReads, refereedReads)), ('Average number of downloads', (totalReads, refereedReads)), 
                   ('Median number of downloads', (totalReads, refereedReads)))
-    citation_table = (('Number of citing papers', (Total, Refereed)), ('Total citations', (Total, Refereed)), ('Average citations', (Total, Refereed)), 
+    citation_table = (('Number of citing papers', (Total, Refereed)), ('Total citations', (Total, Refereed)), ('self-citations', (Total, Refereed)), ('Average citations', (Total, Refereed)), 
                       ('Median citations', (Total, Refereed)), ('Normalized citations', (Total, Refereed)), ('Refereed citations', (Total, Refereed)), 
                       ('Average refereed citations', (Total, Refereed)), ('Median refereed citations', (Total, Refereed)), ('Normalized refereed citations', (Total, Refereed)))
     indices_table = (('H-index', (Total, Refereed)), ('g-index', (Total, Refereed)), ('e-index', (Total, Refereed)), 
