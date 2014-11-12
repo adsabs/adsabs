@@ -162,7 +162,7 @@ class MetricsReport(object):
         # This dictionary says whether a quantity is an integer (0) or a float (>0)
         paper_prec = {'Number of papers':0,'Normalized paper count':1}
         reads_prec = {'Total number of reads':0,'Average number of reads':1,'Median number of reads':0,'Total number of downloads':0,'Average number of downloads':1,'Median number of downloads':0}
-        citation_prec = {'Number of citing papers':0,'Total citations':0,'Average citations':1,'Median citations':0,'Normalized citations':1,'Refereed citations':0,'Average refereed citations':1,'Median refereed citations':0,'Normalized refereed citations':1}
+        citation_prec = {'Number of citing papers':0,'Total citations':0,'self-citations':0,'Average citations':1,'Median citations':0,'Normalized citations':1,'Refereed citations':0,'Average refereed citations':1,'Median refereed citations':0,'Normalized refereed citations':1}
         indicator_prec = {'H-index':0, 'g-index':0, 'm-index':1, 'i10-index':0, 'i100-index':0, 'tori index':1, 'roq index':1, 'read10 index':0}
         # This dictionary defines the display strings for the various indicators
         indicator_names = {'H-index':'h', 'g-index':'g','i10-index':'i10','i100-index':'i100','tori index':'tori','roq index':'riq','read10 index':'READ10'}
