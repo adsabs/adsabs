@@ -45,6 +45,7 @@ six>=1.0
 statsd==2.1.2
 pexpect
 ordereddict
+importlib
 -e git+https://github.com/lbjay/flask-statsd.git#egg=flask-statsd
 -e git+https://github.com/adsabs/adsdata.git#egg=adsdata
 -e git+https://github.com/MongoEngine/mongoengine.git@0.8#egg=mongoengine
