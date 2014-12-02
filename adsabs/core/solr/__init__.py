@@ -84,34 +84,43 @@ def _extract_authors(solrdoc):
     i = 0
     affs = 'aff' in solrdoc and solrdoc['aff'] or []
     emails = 'email' in solrdoc and solrdoc['email'] or []
-    
+    afflen = 0
+
     if 'author' in solrdoc:
         for a in solrdoc['author']:
             author = {'name': a}
-            if len(affs) > i:
+            affinfo = False
+            if len(affs) > i and affs[i] != '-':
                 author['affiliation'] = affs[i]
-            if len(emails) > i:
+                affinfo = True
+            if len(emails) > i and emails[i] != '-':
                 author['email'] = emails[i]
+                affinfo = True
             i += 1
             authors.append(author)
+            if affinfo:
+                afflen += 1
         
         if affs:
             del solrdoc['aff']
         if emails:
             del solrdoc['email']
+
+    solrdoc['afflen'] = afflen
     return authors
 
 def _extract_controlled_keywords(solrdoc):
     kws = {}
-    if 'keyword_norm' in solrdoc and 'keyword_schema' in solrdoc and \
-        len(solrdoc['keyword_norm']) == len(solrdoc['keyword_schema']):
-        for schema,kw in zip(solrdoc['keyword_schema'], solrdoc['keyword_norm']):
+    if 'keyword' in solrdoc and 'keyword_schema' in solrdoc and \
+        len(solrdoc['keyword']) == len(solrdoc['keyword_schema']):
+        for schema,kw in zip(solrdoc['keyword_schema'], solrdoc['keyword']):
+            if schema == '-':
+                schema = 'Free Keywords'
             if schema not in kws:
                 kws[schema] = set()
             kws[schema].add(kw)
         for k,v in kws.items():
             kws[k] = sorted(v)
-        del solrdoc['keyword_norm']
         del solrdoc['keyword_schema']
     return kws
     
@@ -123,7 +132,6 @@ def denormalize_solr_doc(solrdoc):
     """
     new_doc = copy.deepcopy(solrdoc.data)
     new_doc['title'] = ': '.join('title' in new_doc and new_doc['title'] or [])
-    new_doc['keyword'] = sorted(set('keyword' in new_doc and new_doc['keyword'] or []))
-    new_doc['keyword_norm'] = _extract_controlled_keywords(new_doc)
+    new_doc['keyword'] = _extract_controlled_keywords(new_doc)
     new_doc['author'] = _extract_authors(new_doc)
     return SolrDocument(new_doc)
