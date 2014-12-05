@@ -4,6 +4,7 @@ from .adapter import SolrRequestAdapter
 from .solrdoc import *
 from query_builder import QueryBuilderSimple, QueryBuilderSearch
 import copy 
+import json
 
 from flask import current_app as app, request as current_request, g
 from flask.ext.solrquery import solr, signals as solrquery_signals 
@@ -124,6 +125,21 @@ def _extract_controlled_keywords(solrdoc):
         del solrdoc['keyword_schema']
     return kws
     
+def _extract_links(solrdoc):
+    links = {}
+    if not 'links_data' in solrdoc:
+        return {}
+    for l in solrdoc['links_data']:
+        try:
+            data = json.loads(l)
+        except ValueError:
+            continue
+        type = data.get('type')
+        if type:
+            links[type] = data
+    return links
+
+
 def denormalize_solr_doc(solrdoc):
     """
     Nested values are normalized in the solr document, this function
@@ -134,4 +150,5 @@ def denormalize_solr_doc(solrdoc):
     new_doc['title'] = ': '.join('title' in new_doc and new_doc['title'] or [])
     new_doc['keyword'] = _extract_controlled_keywords(new_doc)
     new_doc['author'] = _extract_authors(new_doc)
+    new_doc['links'] = _extract_links(new_doc)
     return SolrDocument(new_doc)

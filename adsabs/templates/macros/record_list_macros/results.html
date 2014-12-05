@@ -79,7 +79,7 @@
 
 	{# few variables to build the letters #}
 	{# XXX - these will disappear once we have properly populated the link_data with the 'access' attribute #}
-	{% if doc.property %}{% if 'ADS_SCAN' in doc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
+	{% if doc.property %}{% if 'ADS_OPENACCESS' in doc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
 	{% if doc.property %}{% if 'PUB_OPENACCESS' in doc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
 
 	<span class="letterLink letterLinkAround">[</span><span 
