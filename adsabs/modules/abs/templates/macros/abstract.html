@@ -1,15 +1,13 @@
 {% macro render_abstract(solrdoc, denormdoc, graphics) %}
 
-{% set links = solrdoc.getattr_func('links_data', g.formatter_funcs.field_to_json) %}
-{% set link_types = [] %}{% if links %}{% for link in links %}{% if link.get('type') %}{% do link_types.append(link.get('type')) %}{% endif %}{% endfor %}{% endif %}
+{% set links = denormdoc.links %}
 
-{% set ids = solrdoc.getattr_func('ids_data', g.formatter_funcs.field_to_json) %}
-{% set id_types = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') %}{% do id_types.append(id.get('description')) %}{% endif %}{% endfor %}{% endif %}
-{% set arxiv_id = [] %}{% if ids %}{% for id in ids %}{% if id.get('description') =='arXiv' %}{% do arxiv_id.append(id.get('identifier')) %}{% endif %}{% endfor %}{% endif %}
+{# XXX we should grab this from the solrdoc.identifiers field #}
+{% set arxiv_id = False %}
 
 {# few variables to build the letters #}
-{% if solrdoc.property %}{% if 'ADS_SCAN' in solrdoc.property %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{%endif%}{% else %}{% set ads_scan = False %}{% endif %}
-{% if solrdoc.property %}{% if 'PUB_OPENACCESS' in solrdoc.property %}{% set pub_openaccess = True %}{% else %}{% set pub_openaccess = False %}{%endif%}{% else %}{% set pub_openaccess = False %}{% endif %}
+{% if ('gif' in links) or ('article' in links) %}{% set ads_scan = True %}{% else %}{% set ads_scan = False %}{% endif %}
+
 {% if solrdoc.property %}{% if 'PRIVATE' in solrdoc.property %}{% set private_abstract = True %}{% else %}{% set private_abstract = False %}{%endif%}{% else %}{% set private_abstract = False %}{% endif %}
 
 
@@ -33,7 +31,7 @@
 							</span>
 						{% endfor %}
 						{% if denormdoc.author|length > 10 %}<a class="coauthorsToggle"> <span class="textToggle">and</span> {{ denormdoc.author|length - 10 }} coauthors </a>{% endif %}
-						{% if solrdoc.aff %}<a class="affiliationToggle blockToggle"> <span class="textToggle">show</span> affiliations </a>{% endif %}
+						{% if denormdoc.afflen > 0 %}<a class="affiliationToggle blockToggle"> <span class="textToggle">show</span> affiliations </a>{% endif %}
 					</div>
 				</div>
 				{% endif %}
@@ -70,7 +68,7 @@
 								{% if solrdoc.abstract %}{{ solrdoc.abstract|safe_html_unescape|safe }}{% else %}Abstract not available.{% endif %}
 							{% else %}
 								Abstract available on the 
-								{% if 'electr' in link_types %}
+								{% if 'electr' in links %}
 								<a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">publisher website</a>.
 								{% else %}
 								publisher website.
@@ -79,21 +77,15 @@
 						</span>
 					</div>
 				</div>
-				{% if denormdoc.keyword or denormdoc.keyword_norm %}
+				{% if denormdoc.keyword %}
 				<div class="row-fluid">
 					<div class="span12 abstractKeyword">
 						<span class="keywordTitle blockToggle">Keywords:</span>
 						{% if denormdoc.keyword %}
-							<div class="keywordGroup">
-								<span class="keywordTitle">Free Keywords:</span>
-								{% for key in denormdoc.keyword %}<span class="keywordKey">{{ key }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
-							</div>
-						{% endif %}
-						{% if denormdoc.keyword_norm %}
-							{% for schema in denormdoc.keyword_norm %}
+							{% for schema in denormdoc.keyword %}
 								<div class="keywordGroup">
 									<span class="keywordTitle">{{ schema }}:</span>
-									{% for key in denormdoc.keyword_norm[schema] %}<span class="keywordKey">{{ key }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
+									{% for key in denormdoc.keyword[schema] %}<span class="keywordKey">{{ key }}</span>{% if not loop.last %}; {% endif %}{% endfor %}
 								</div>
 							{% endfor %}
 						{% endif %}
@@ -120,27 +112,27 @@
 		</div>
 		
 		<div class="span3">
-			{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
-			(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) 
-			or ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+			{% if ('electr' in links) or ('pdf' in links) or (ads_scan) or 
+			(current_user.is_authenticated() and 'electr' in links and not pub_openaccess and not ads_scan) or ('preprint' in links) 
+			or ('data' in links) or ('simbad' in links) or ('ned' in links) %}
 			<div id="abstractRightMenu" class="linkRightMenu">
-				{% if ('electr' in link_types) or (ads_scan or 'pdf' in link_types) or (ads_scan) or 
-				(current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan) or ('arXiv' in id_types) %}
+				{% if ('electr' in links) or ('pdf' in links) or (ads_scan) or 
+				(current_user.is_authenticated() and 'electr' in links and not pub_openaccess and not ads_scan) or ('preprint' in links) %}
 				<dl>
 					<dt>Full Text Sources</dt>
-					{% if 'electr' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">Publisher article</a>{% if pub_openaccess %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
-					{% if ads_scan or 'pdf' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='article') }}">{% if ads_scan %}ADS PDF{% elif 'pdf' in link_types %}Publisher PDF{% endif %}</a>{% if ads_scan or pub_openaccess%} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+					{% if 'electr' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='electr') }}">Publisher article</a>{% if links['electr'].get('access') == 'open' %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
+					{% if ads_scan or 'pdf' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='article') }}">{% if ads_scan %}ADS PDF{% elif 'pdf' in links %}Publisher PDF{% endif %}</a>{% if ads_scan or links['pdf'].get('access') == 'open' %} <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/>{% endif %}</dd>{% endif %}
 					{% if ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='gif') }}">ADS Scanned Article</a>  <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
-					{% if current_user.is_authenticated() and 'electr' in link_types and not pub_openaccess and not ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='openurl') }}">{% if current_user.user_rec.openurl_icon %}<img class="socialButton" src="{{ current_user.user_rec.openurl_icon }}" alt="Open URL" />{% else %}Open URL{% endif %}</a></dd>{% endif %}
-					{% if 'arXiv' in id_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='preprint') }}">arXiv eprint</a> <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
+					{% if current_user.is_authenticated() and 'electr' in links and not pub_openaccess and not ads_scan %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='openurl') }}">{% if current_user.user_rec.openurl_icon %}<img class="socialButton" src="{{ current_user.user_rec.openurl_icon }}" alt="Open URL" />{% else %}Open URL{% endif %}</a></dd>{% endif %}
+					{% if 'preprint' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='preprint') }}">arXiv eprint</a> <img alt="Open Access" title="Open Access" src="{{ url_for('static', filename='images/Open_Access_logo.png') }}"/></dd>{% endif %}
 				</dl>
 				{% endif %}
-				{% if ('data' in link_types) or ('simbad' in link_types) or ('ned' in link_types) %}
+				{% if ('data' in links) or ('simbad' in links) or ('ned' in links) %}
 				<dl>
 					<dt>Data Products</dt>
-					{% if 'data' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='data') }}">Archival Data</a></dd>{% endif %}
-					{% if 'simbad' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='simbad') }}">SIMBAD objects</a></dd>{% endif %}
-					{% if 'ned' in link_types %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='ned') }}">NED objects</a></dd>{% endif %}
+					{% if 'data' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='data') }}">Archival Data</a></dd>{% endif %}
+					{% if 'simbad' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='simbad') }}">SIMBAD objects</a></dd>{% endif %}
+					{% if 'ned' in links %}<dd><a target="_blank" href="{{ solrdoc.bibcode|ads_url_redirect(id_type='ned') }}">NED objects</a></dd>{% endif %}
 				</dl>
 				{% endif %}
 			</div>
@@ -174,7 +166,7 @@
 					href="{{ url_for('redirect.socialbutton', redirect_type='mendeley', bibcode=solrdoc.bibcode) }}">
 					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/mendeley-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to Mendeley" />
 				</a>
-				{% if 'arXiv' in id_types %}
+				{% if 'preprint' in links %}
 				<a target="_blank" class="socialButton" title="Export to ScienceWise" data-rel="bootstrap_tooltip"
 					href="{{ url_for('redirect.socialbutton', redirect_type='sciencewise', bibcode=solrdoc.bibcode) }}">
 					<img class="socialButton" src="{{ url_for('static', filename='images/buttons/sciencewise-button.png') }}?app_version={{ config.APP_VERSION }}" alt="Export to ScienceWise" />
