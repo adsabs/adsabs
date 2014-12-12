@@ -53,6 +53,7 @@ def configure_before_request_funcs(app):
     
     @app.before_request
     def count_uniques():
+        return
         statsd.set('unique_users', g.user_cookie_id)
         statsd.set('unique_ips', request.remote_addr)
         
