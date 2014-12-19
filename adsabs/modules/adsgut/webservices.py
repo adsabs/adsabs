@@ -1502,10 +1502,12 @@ def postForm(itemtypens, itemtypename):
                     query_components['sort'] = create_sort_param(list_type=list_type)
 
                 req = solr.create_request(**query_components)
+                url = None
                 if 'bigquery' in request.values:
                     from adsabs.core.solr import bigquery
                     bigquery.prepare_bigquery_request(req, request.values['bigquery'])
-                req = solr.set_defaults(req)
+                    url = config.SOLRBIGQUERY_URL
+                req = solr.set_defaults(req, query_url=url)
                 resp = solr.get_response(req)
                 #return error if solr messes up
                 if resp.is_error():
@@ -1578,9 +1580,9 @@ def perform_solr_bigquery(bibcodes):
     function that performs a POST request and returns a json object
     """
     headers = {'Content-Type': 'big-query/csv'}
-    url=config.SOLRQUERY_URL
+    url=config.SOLRBIGQUERY_URL
     qdict = {
-        'q':'text:*:*',
+        'q':'*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
         'fl':'bibcode,title,pubdate,author,alternate_bibcode'
@@ -1595,6 +1597,10 @@ def perform_solr_bigquery(bibcodes):
     except Exception, e:
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
+        # XXX
+        app.logger.error("request url was: %s\n" % str(r.url))
+        app.logger.error("request headers were: %s\n" % str(r.request.headers))
+        app.logger.error("request body was: %s\n" % str(r.request.body))
 
     try:
         d = r.json()
