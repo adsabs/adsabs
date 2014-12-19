@@ -1672,7 +1672,7 @@ def perform_solr_bigquery(bibcodes):
     headers = {'Content-Type': 'big-query/csv'}
     url=config.SOLRBIGQUERY_URL
     qdict = {
-        'q':'text:*:*',
+        'q':'*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
         'fl':'bibcode,title,pubdate,author'

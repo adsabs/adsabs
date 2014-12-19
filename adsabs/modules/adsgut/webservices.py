@@ -1582,7 +1582,7 @@ def perform_solr_bigquery(bibcodes):
     headers = {'Content-Type': 'big-query/csv'}
     url=config.SOLRBIGQUERY_URL
     qdict = {
-        'q':'text:*:*',
+        'q':'*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
         'fl':'bibcode,title,pubdate,author,alternate_bibcode'
@@ -1598,11 +1598,9 @@ def perform_solr_bigquery(bibcodes):
         exc_info = sys.exc_info()
         app.logger.error("Author http request error: %s, %s\n%s" % (exc_info[0], exc_info[1], traceback.format_exc()))
         # XXX
-        #sys.stderr.write("request url: %s\n" % str(r.url))
-        #sys.stderr.write("request headers: %s\n" % str(r.request.headers))
-        #sys.stderr.write("request body: %s\n" % str(r.request.body))
-        #sys.stderr.write("response headers: %s\n" % str(r.headers))
-        #sys.stderr.write("response body: %s\n" % str(r.text))
+        app.logger.error("request url was: %s\n" % str(r.url))
+        app.logger.error("request headers were: %s\n" % str(r.request.headers))
+        app.logger.error("request body was: %s\n" % str(r.request.body))
 
     try:
         d = r.json()
