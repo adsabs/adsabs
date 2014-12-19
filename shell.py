@@ -54,9 +54,9 @@ for thing in dir(managers):
         print e
 
 @manager.command
-def run(port=5000):
+def run(port=5000, debug=True):
     """Run server that can be reached from anywhere."""
-    app.run(host='0.0.0.0', port=int(port))
+    app.run(host='0.0.0.0', port=int(port), debug=debug)
     
 @manager.command
 def create_local_config():

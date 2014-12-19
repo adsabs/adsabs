@@ -146,9 +146,12 @@ def denormalize_solr_doc(solrdoc):
     will group them again, eg. authors will get together with
     their affiliations and emails
     """
-    new_doc = copy.deepcopy(solrdoc.data)
-    new_doc['title'] = ': '.join('title' in new_doc and new_doc['title'] or [])
-    new_doc['keyword'] = _extract_controlled_keywords(new_doc)
-    new_doc['author'] = _extract_authors(new_doc)
-    new_doc['links'] = _extract_links(new_doc)
+    new_doc = {}
+    if solrdoc:
+        new_doc = copy.deepcopy(solrdoc.data)
+        new_doc['title'] = ': '.join('title' in new_doc and new_doc['title'] or [])
+        new_doc['keyword'] = _extract_controlled_keywords(new_doc)
+        new_doc['author'] = _extract_authors(new_doc)
+        new_doc['links'] = _extract_links(new_doc)
+
     return SolrDocument(new_doc)

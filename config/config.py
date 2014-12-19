@@ -68,6 +68,7 @@ class AppConfig(object):
     USER_MAX_PASSWORD_LENGTH = 100
     
     SOLRQUERY_URL = 'http://adswhy:9000/solr/collection1/select'
+    SOLRBIGQUERY_URL = 'http://adswhy:9000/solr/collection1/bigquery'
     SOLRQUERY_TIMEOUT = 300
     SOLRQUERY_KEEPALIVE = False
     SOLRQUERY_HTTP_METHOD = 'POST'

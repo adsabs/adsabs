@@ -47,10 +47,12 @@ def author_network():
         })
 
     req = solr.create_request(**query_components)
+    url = None
     if 'bigquery' in request.values:
         from adsabs.core.solr import bigquery
         bigquery.prepare_bigquery_request(req, request.values['bigquery'])
-    req = solr.set_defaults(req)
+        url = config.SOLRBIGQUERY_URL
+    req = solr.set_defaults(req, query_url=url)
     resp = solr.get_response(req)
 
     if resp.is_error():
@@ -91,10 +93,12 @@ def paper_network():
         })
 
     req = solr.create_request(**query_components)
+    url = None
     if 'bigquery' in request.values:
         from adsabs.core.solr import bigquery
         bigquery.prepare_bigquery_request(req, request.values['bigquery'])
-    req = solr.set_defaults(req)
+        url = config.SOLRBIGQUERY_URL
+    req = solr.set_defaults(req, query_url=url)
     resp = solr.get_response(req)
 
     if resp.is_error():
@@ -181,10 +185,12 @@ def alladin_lite():
             })
 
         req = solr.create_request(**query_components)
+        url = None
         if 'bigquery' in request.values:
             from adsabs.core.solr import bigquery
             bigquery.prepare_bigquery_request(req, request.values['bigquery'])
-        req = solr.set_defaults(req)
+            url = config.SOLRBIGQUERY_URL
+        req = solr.set_defaults(req, query_url=url)
         resp = solr.get_response(req)
 
         if resp.is_error():

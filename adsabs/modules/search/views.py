@@ -68,11 +68,12 @@ def search():
             try:
                 
                 req = solr.create_request(**query_components)
-
+                url = None
                 if bigquery_id:
                     prepare_bigquery_request(req, request.values['bigquery'])
+                    url = config.SOLRBIGQUERY_URL
                     
-                req = solr.set_defaults(req)
+                req = solr.set_defaults(req, query_url=url)
                 
                 with statsd.timer("search.solr.query_response_time"):
                     resp = solr.get_response(req)

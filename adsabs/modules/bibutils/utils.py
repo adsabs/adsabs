@@ -228,10 +228,12 @@ def get_publications_from_query(query_components, list_type=None, bigquery_id=No
             resp = get_document_similar(**query_components)
         else:
             req = solr.create_request(**query_components)
+            url = None
             if bigquery_id:
                 from adsabs.core.solr import bigquery
                 bigquery.prepare_bigquery_request(req, bigquery_id)
-            req = solr.set_defaults(req)
+                url = config.SOLRBIGQUERY_URL
+            req = solr.set_defaults(req, query_url=url)
             resp = solr.get_response(req)
 
     except SolrReferenceQueryError, e:

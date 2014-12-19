@@ -188,6 +188,7 @@ class TestSolrDoc(unittest.TestCase):
                       "astronomy infrared",
                       "astrophysics"],
          'title': "An Artist's View of the Next Generation ADS Digital Library System",
+         'links': {},
          'afflen': 3}
         self.maxDiff = None
         self.assertEqual(expected, newdoc.data)
