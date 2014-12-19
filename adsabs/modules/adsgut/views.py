@@ -1565,10 +1565,12 @@ def postForm(itemtypens, itemtypename):
                     query_components['sort'] = create_sort_param(list_type=list_type)
 
                 req = solr.create_request(**query_components)
+                url = None
                 if 'bigquery' in request.values:
                     from adsabs.core.solr import bigquery
                     bigquery.prepare_bigquery_request(req, request.values['bigquery'])
-                req = solr.set_defaults(req)
+                    url = config.SOLRBIGQUERY_URL
+                req = solr.set_defaults(req, query_url=url)
                 resp = solr.get_response(req)
 
                 if resp.is_error():
@@ -1670,9 +1672,9 @@ def perform_solr_bigquery(bibcodes):
     function that performs a POST request and returns a json object
     """
     headers = {'Content-Type': 'big-query/csv'}
-    url=config.SOLRQUERY_URL
+    url=config.SOLRBIGQUERY_URL
     qdict = {
-        'q':'text:*:*',
+        'q':'*:*',
         'fq':'{!bitset compression=none}',
         'wt':'json',
         'fl':'bibcode,title,pubdate,author'

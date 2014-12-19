@@ -34,7 +34,7 @@ def api_user_required(func):
             statsd.incr("api.user.authentication.unknown")
             raise api_errors.ApiNotAuthenticatedError("unknown dev_key: %s" % dev_key)
         statsd.incr("api.user.authentication.success")
-        statsd.set("api.unique_users", dev_key)
+        #statsd.set("api.unique_users", dev_key)
         g.api_user = user
         return func(*args, **kwargs)
     return decorator
