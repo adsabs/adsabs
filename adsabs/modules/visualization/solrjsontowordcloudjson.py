@@ -29,8 +29,31 @@ def list_to_dict(l):
     return d
 
 
+def idf_dict(l):
+    idf = {}
+    # first look for idf in abstract field
+    for doc in l[1::2]:
+        words = doc[3::2][0]
+        for i in range(0, len(words), 2):
+            w = words[i]
+            if idf.has_key(w):
+                continue
+            d = dict(zip(*[iter(words[i+1])]*2))
+            idf[w] = d['tf-idf'] / d['tf']
+    # add any missing words from the title field
+    for doc in l[1::2]:
+        words = doc[3::2][1]
+        for i in range(0, len(words), 2):
+            w = words[i]
+            if idf.has_key(w):
+                continue
+            d = dict(zip(*[iter(words[i+1])]*2))
+            idf[w] = d['tf-idf'] / d['tf']
+    return idf
+
+
 def wc_json(solr_json):
-    tf_idf_info = list_to_dict(solr_json['termVectors'][2:])
+    idf_info = idf_dict(solr_json['termVectors'][2:])
     docs = solr_json['response']['docs']
     num_records = len(docs)
     token_freq_dict = {}
@@ -93,12 +116,7 @@ def wc_json(solr_json):
 
     # calling process entry on each doc entry
     for d in docs:
-        try:
-            #for some reason titles come in lists but not abstracts
-            process_entry(d['abstract'], d['title'][0])
-        except KeyError:
-            #missing a field, most likely abstract, so we ignore this entry
-            continue
+        process_entry(d.get('abstract',''), d.get('title',[''])[0])
 
     # keeping only stuff in token_freq_dict that appears > MIN_PERCENT_WORD and > MIN_OCCURENCES
     # creating a new dict with the most common incarnation of the token, and the total # of times
@@ -121,43 +139,15 @@ def wc_json(solr_json):
 
     token_freq_dict = temp_dict
 
-    # now a function that attaches idf info to token_freq_dict
-    def find_idf(term, dic, acr = False):
-        if acr==True:
-            search_term = 'acr::'+term.lower()
-        elif '-' in term:
-            search_term=term.replace('-', '')
-        else:
-            search_term = term
-    # iterating through tf-idf json structure
-        for t in tf_idf_info:
-            if 'abstract' not in tf_idf_info[t]:
-                continue
-                # doesn't come with abstract info, so we ignore
-            elif 'title' not in tf_idf_info[t]:
-                # doesn't come with title info, so we ignore
-                continue
-            else:
-                #checking abstract
-                for a in tf_idf_info[t]['abstract']:
-                    if a == search_term:
-                        idf = tf_idf_info[t]['abstract'][a]['tf-idf'][0]/tf_idf_info[t]['abstract'][a]['tf'][0]
-                        dic[term]['idf'] = idf
-                        return
-                #checking title
-                for ti in tf_idf_info[t]['title']:
-                    if ti == search_term:
-                        idf = tf_idf_info[t]['title'][ti]['tf-idf'][0]/tf_idf_info[t]['title'][ti]['tf'][0]
-                        dic[term]['idf'] = idf
-                        return 
-
     # now attaching tf/idf of most common example of token to the token_freq_dict
     for t in token_freq_dict:
-        find_idf(t, token_freq_dict)
+        term = t.replace('-','')
+        token_freq_dict[t]['idf'] = idf_info.get(term,0)
 
     # now attaching tf/idf of most common example of acronym to acr_freq_dict
-    for a in acr_freq_dict:
-        find_idf(a, acr_freq_dict, acr=True)
+    for t in acr_freq_dict:
+        term = 'acr::' + t.lower()
+        acr_freq_dict[t]['idf'] = idf_info.get(term,0)
 
     #now also making sure acr_freq_dict only has words that appeared > MIN_PERCENT_WORD times
     temp_dict = {}

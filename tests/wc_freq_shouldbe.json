@@ -1,0 +1,46 @@
+{
+  "ADS": {
+    "idf": 0.00051020408163265311, 
+    "total_occurences": 3
+  }, 
+  "articles": {
+    "idf": 0.00010401497815685458, 
+    "total_occurences": 3
+  }, 
+  "astronomical": {
+    "idf": 2.1446341254182035e-05, 
+    "total_occurences": 3
+  }, 
+  "astrophysics": {
+    "idf": 3.8963569062926162e-05, 
+    "total_occurences": 3
+  }, 
+  "data": {
+    "idf": 5.7678342878137778e-07, 
+    "total_occurences": 3
+  }, 
+  "journal": {
+    "idf": 5.7061340941512125e-05, 
+    "total_occurences": 6
+  }, 
+  "library": {
+    "idf": 4.8981191222570531e-05, 
+    "total_occurences": 4
+  }, 
+  "on-line": {
+    "idf": 2.7262813522355506e-05, 
+    "total_occurences": 3
+  }, 
+  "provide": {
+    "idf": 1.8070242647218266e-06, 
+    "total_occurences": 3
+  }, 
+  "scanned": {
+    "idf": 7.628928898382667e-05, 
+    "total_occurences": 3
+  }, 
+  "volume": {
+    "idf": 3.3674115380988943e-06, 
+    "total_occurences": 3
+  }
+}
