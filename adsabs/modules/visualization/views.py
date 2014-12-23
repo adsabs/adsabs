@@ -138,6 +138,7 @@ def word_cloud():
         'fields': ['id'],
         'highlights': [],
         'defType':'aqp', 
+        'tv': 'true',
         'tv.tf_idf': 'true', 
         'tv.tf': 'true', 
         'tv.positions':'false',
