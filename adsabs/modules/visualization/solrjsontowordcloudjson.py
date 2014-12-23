@@ -3,16 +3,35 @@ from nltk import PorterStemmer
 import json
 import re
 import os
+import sys
+import time
 
 stemmer = PorterStemmer()
+stemmer_cache = {}
+def stemword(w):
+    """
+    Memoizes the stemmer for performance reasons
+    """
+    if not w in stemmer_cache:
+        stemmer_cache[w] = stemmer.stem(w)
+    return stemmer_cache[w]
+    
 
-sw = open(os.path.dirname(os.path.abspath(__file__)) +'/solr_stopwords.txt').read().split('\n')
+sw = set(open(os.path.dirname(os.path.abspath(__file__)) +'/solr_stopwords.txt').read().split('\n'))
 
 # so in 250 docs, token has to appear 3 times
 MIN_PERCENT_WORD = 0.012
 #in all wordclouds, even small ones, a  stemmed token must appear 2 or more times 
 MIN_OCCURENCES_OF_WORD = 2
 
+def timing(f):
+    def wrap(*args):
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        sys.stderr.write('%s function took %0.3f ms\n' % (f.func_name, (time2-time1)*1000.0))
+        return ret
+    return wrap
 
 def list_to_dict(l):
     """
@@ -28,12 +47,39 @@ def list_to_dict(l):
             d.setdefault(key, []).append(value)
     return d
 
+#@timing
+def idf_dict1(l):
+    """
+    create an idf dictionary by extracting values from a tvrh response;
+    more readable, but several times slower than function below
+    """
+    idf = {}
+    # first look for idf in abstract field
+    solrdict = list_to_dict(l)
+    for doc in solrdict.itervalues():
+        terms = doc.get('abstract',{})
+        for w,t in terms.iteritems():
+            if not idf.has_key(w):
+                idf[w] = t['tf-idf'][0] / t['tf'][0]
+    # next add idf values from title field
+    for doc in solrdict.itervalues():
+        terms = doc.get('title',{})
+        for w,t in terms.iteritems():
+            if not idf.has_key(w):
+                idf[w] = t['tf-idf'][0] / t['tf'][0]
+    return idf
 
+#@timing
 def idf_dict(l):
+    """
+    create an idf dictionary by extracting values from a tvrh response
+    """
     idf = {}
     # first look for idf in abstract field
     for doc in l[1::2]:
-        words = doc[3::2][0]
+        if len(doc) < 4:
+            continue
+        words = doc[3]
         for i in range(0, len(words), 2):
             w = words[i]
             if idf.has_key(w):
@@ -42,7 +88,9 @@ def idf_dict(l):
             idf[w] = d['tf-idf'] / d['tf']
     # add any missing words from the title field
     for doc in l[1::2]:
-        words = doc[3::2][1]
+        if len(doc) < 6:
+            continue
+        words = doc[5]
         for i in range(0, len(words), 2):
             w = words[i]
             if idf.has_key(w):
@@ -51,7 +99,7 @@ def idf_dict(l):
             idf[w] = d['tf-idf'] / d['tf']
     return idf
 
-
+@timing
 def wc_json(solr_json):
     idf_info = idf_dict(solr_json['termVectors'][2:])
     docs = solr_json['response']['docs']
@@ -75,7 +123,6 @@ def wc_json(solr_json):
         a = [w for w in a if not markup_regex.search(w)]
         t = [w for w in t if not markup_regex.search(w)]
 
-
         dash = list(set([w.lower() for w in a if w.count('-')==1]))
         dash.extend(list(set([w.lower() for w in t if w.count('-')==1])))
 
@@ -93,7 +140,7 @@ def wc_json(solr_json):
 
         # we stem non dashed, non acronyms
         for n in nodash:
-            s = stemmer.stem(n)
+            s = stemword(n)
             if s in token_freq_dict:
                 token_freq_dict[s][n] = token_freq_dict[s].get(n, 0) + 1
             else:
@@ -108,7 +155,7 @@ def wc_json(solr_json):
         # stemming individual components of dashed words and adding them to regular token dict
         for d in dash:
             # creating a stemmed representation
-            s = ''.join([stemmer.stem(f) for f in d.split('-')])
+            s = ''.join([stemword(f) for f in d.split('-')])
             if s in token_freq_dict:
                 token_freq_dict[s][d] = token_freq_dict[s].get(d, 0) +1
             else:
@@ -116,7 +163,7 @@ def wc_json(solr_json):
 
     # calling process entry on each doc entry
     for d in docs:
-        process_entry(d.get('abstract',''), d.get('title',[''])[0])
+        process_entry(d.get('abstract','') + ' ' + d.get('title',[''])[0], '')
 
     # keeping only stuff in token_freq_dict that appears > MIN_PERCENT_WORD and > MIN_OCCURENCES
     # creating a new dict with the most common incarnation of the token, and the total # of times
