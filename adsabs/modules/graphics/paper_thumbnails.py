@@ -12,10 +12,10 @@ import pymongo
 import random
 
 thumb_link = '<a href="%s" target="_new" border=0><img src="%s" width="100px"></a>'
-graph_link = '<a href="graphics" border=0><img src="%s"></a>'
+graph_link = '<a href="graphics/" border=0><img src="%s"></a>'
 ADSASS_img = '<img src="%s">'
 ADSASS_thmb_img  = '<img src="%s" width="100px">'
-ADSASS_thmb_link = '<a href="graphics" border=0>%s</a>'
+ADSASS_thmb_link = '<a href="graphics/" border=0>%s</a>'
 ADS_image_url = 'http://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query?bibcode=%s&db_key=AST&page_ind=%s&data_type=GIF&type=SCREEN_VIEW'
 
 def get_thumbnails(bibcode):
