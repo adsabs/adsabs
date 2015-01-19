@@ -120,6 +120,9 @@ def get_metrics_data(**args):
         except:
             pass
         num_jobs -= 1
+    # make sure all processes have completed
+    for b in harvesters:
+        b.join()
     return metrics_data_dict
 
 def remove_self_citations(biblist,datadict):
@@ -192,6 +195,9 @@ def get_citing_papers(**args):
         data = results.get()
         cit_list += data.get('citations',[])
         num_jobs -= 1
+    # make sure all processes have completed
+    for b in harvesters:
+        b.join()
     return cit_list
 
 def get_references(**args):
