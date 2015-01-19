@@ -300,6 +300,8 @@ def find_closest_cluster_papers(pcluster,vec):
         data = results.get()
         distances.append(data)
         num_jobs -= 1
+    for b in harvesters:
+        b.join()
     d = sorted(distances, key=operator.itemgetter(1),reverse=False)
 
     return map(lambda a: a[0],d[:config.RECOMMENDER_MAX_NEIGHBORS])
