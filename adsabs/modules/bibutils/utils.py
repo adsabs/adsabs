@@ -74,9 +74,9 @@ class MetricsDataHarvester(Process):
                 doc = adsdata.get_metrics_data(bibcode, manipulate=False)
                 doc['author_num'] = max(doc['author_num'],1)
                 self.result_queue.put(doc)
-            except MongoQueryError, e:
+            except Exception, e:
                 app.logger.error("Mongo metrics data query for %s blew up (%s)" % (bibcode,e))
-                raise
+                self.result_queue.put({})
         return
 
 def get_metrics_data(**args):
