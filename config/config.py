@@ -290,7 +290,8 @@ class AppConfig(object):
     ADSDATA_MONGO_SAFE = True
     ADSDATA_MONGO_USER = 'adsdata'
     ADSDATA_MONGO_PASSWORD = ''
-
+    # config for graphics service
+    GRAPHICS_EPRINTS = True
     # configuration parameters for the recommender
     RECOMMENDER_SERVER = 'http://adszee.cfa.harvard.edu:9887'
     RECOMMENDER_RECENTS_URL = 'http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?library=Recent&data_type=XML&libid=%s'

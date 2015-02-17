@@ -72,7 +72,8 @@ def get_thumbnails(bibcode):
                 image_context = '<a href="%s" target="_new">%s</a>' % (ADSlink,image)
                 results['widgets'].append('<div class="imageSingle"><div class="image">'+image_context+'</div><div class="footer">'+figure['figure_label']+'&nbsp;'+WWT_link+'</div></div>')
                 results['ADSlink'].append(ADS_image_url%(bibcode.replace('&','%26'),figure['page']-1))
-        elif source.upper() == 'ARXIV':
+        elif source.upper() == 'ARXIV' and config.GRAPHICS_EPRINTS:
+            print "EPRINT GAPHICS"
             results['header'] = 'Images extracted from the arXiv e-print'
             try:
                 display_image = random.choice(display_figure['images'])
