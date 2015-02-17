@@ -41,7 +41,6 @@ def thumbnails(bibcode,format):
     except Exception,e:
         app.logger.error('ID %s. Unable to get thumbnails for bibcode : %s! (%s)' % (g.user_cookie_id,bibcode,e))
         return render_template('recommendations_embedded.html', results={})
-    print results['figures']
     if format == 'json':
         return jsonify(paper=bibcode, graphics=results)
     else:
