@@ -7,6 +7,7 @@ import os
 import re
 import sys
 import time
+from flask import current_app as app
 from config import config
 import pymongo
 import random
@@ -32,6 +33,9 @@ def get_thumbnails(bibcode):
         eprint = True
     # Add a single randomly picked figure to show on abstract page
     if results and 'figures' in results:
+        if len(results['figures']) == 0:
+            app.logger.error('Graphics entry in database but no figures for bibcode : %s!' % bibcode)
+            return {}
         source = results.get('source','NA')
         results['widgets'] = []
         results['ADSlink'] = []
@@ -73,7 +77,6 @@ def get_thumbnails(bibcode):
                 results['widgets'].append('<div class="imageSingle"><div class="image">'+image_context+'</div><div class="footer">'+figure['figure_label']+'&nbsp;'+WWT_link+'</div></div>')
                 results['ADSlink'].append(ADS_image_url%(bibcode.replace('&','%26'),figure['page']-1))
         elif source.upper() == 'ARXIV' and config.GRAPHICS_EPRINTS:
-            print "EPRINT GAPHICS"
             results['header'] = 'Images extracted from the arXiv e-print'
             try:
                 display_image = random.choice(display_figure['images'])
