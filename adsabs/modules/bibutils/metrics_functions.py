@@ -4,8 +4,6 @@ import operator
 import sys
 import time
 import itertools
-from multiprocessing import Pool, current_process
-from multiprocessing import Manager
 # BEER specific imports
 from flask import current_app as app
 # methods to retrieve various types of data
@@ -166,9 +164,8 @@ def generate_metrics(**args):
         stats_models.append(model_class)
     # The metrics calculations are sent off in parallel
 #    rez=Pool(config.METRICS_THREADS).map(generate_data, stats_models)
-    po = Pool()
-    rez = po.map_async(generate_data, stats_models)
-    model_results = rez.get()
+#    model_results = rez.get()
+    model_results = map(generate_data, stats_models)
     # Now shape the results in the final format
     results = format_results(model_results)
     timer.stop()

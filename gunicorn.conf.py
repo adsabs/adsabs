@@ -17,6 +17,7 @@ accesslog = os.path.join(_logdir, 'access.log')
 errorlog = os.path.join(_logdir, 'error.log')
 pidfile = os.path.join(_logdir, 'gunicorn.pid')
 loglevel = 'debug'
+timeout = 60
 # somehow these don't work -- the real IP is not captured in the gunicorn logfile
-forwarded_allow_ips = '127.0.0.1'
-proxy_allow_ips = '127.0.0.1'
+forwarded_allow_ips = '127.0.0.1,131.142.185.38,131.142.185.39,131.142.185.10,131.142.184.211,131.142.198.201,131.142.198.202'
+proxy_allow_ips = '127.0.0.1,131.142.185.38,131.142.185.39,131.142.185.10,131.142.184.211,131.142.198.201,131.142.198.202'
